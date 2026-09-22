@@ -270,11 +270,21 @@ let fechaActivacion = null;
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
-  const { data: perfil } = await sb.from('personal').select('compania_id, companias(nombre, cuerpos(nombre_oficial))').eq('auth_user_id', session.user.id).single();
-  if(!perfil || !perfil.compania_id){ toast('Esta sesión no pertenece a ninguna Compañía'); return; }
-  document.getElementById('ciaLabel').textContent = `${perfil.companias.nombre} · ${perfil.companias.cuerpos.nombre_oficial}`;
 
-  const { data: pmId, error } = await sb.rpc('activar_puesto_mando', { p_compania_id: perfil.compania_id });
+  // Modo Crisis se abre exclusivamente desde el botón del PC del Cuartel
+  // (pc_compania.html) — esa es una identidad institucional (companias.auth_user_id),
+  // no una fila en "personal". Antes esto buscaba solo en "personal" y
+  // siempre fallaba con "Esta sesión no pertenece a ninguna Compañía".
+  const { data: pc } = await sb.rpc('pc_obtener_compania');
+  const pcRow = Array.isArray(pc) ? pc[0] : pc;
+  if(!pcRow){
+    toast('Esta sesión no es un PC de Cuartel identificado — entrá desde el botón "Modo Crisis" del PC del Cuartel');
+    return;
+  }
+  const companiaId = pcRow.p_compania_id;
+  document.getElementById('ciaLabel').textContent = `${pcRow.p_nombre} · ${pcRow.p_cuerpo_nombre}`;
+
+  const { data: pmId, error } = await sb.rpc('activar_puesto_mando', { p_compania_id: companiaId });
   if(error){ toast('No se pudo activar el Puesto de Mando — ' + error.message); return; }
   miPuestoMandoId = pmId;
 
