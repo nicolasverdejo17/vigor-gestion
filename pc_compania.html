@@ -1470,6 +1470,7 @@
     if(!b){
       input.style.borderColor = 'var(--burdeo)';
       setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+      alert('N° ' + val + ' no pertenece a esta Compañía. Verificá el número o pedile a un Director/Secretario que lo asigne primero.');
       return;
     }
     const yaEstaba = b.estado !== 'fuera';
