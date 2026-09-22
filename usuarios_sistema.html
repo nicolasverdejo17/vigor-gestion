@@ -13,6 +13,7 @@
     --burdeo:#7A1620; --burdeo-bright:#D8394E; --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
     --servicio:#3CF29A; --fuera:#C9A63B;
     --master:#39FF14; --master-dim:#1F9E0A;
+    --esp-r:#FF5A4E; --esp-t:#4FA3FF; --esp-h:#FFC94D; --esp-f:#3CF29A; --esp-m:#B77CFF; --esp-c:#E08A5C;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;}
@@ -49,8 +50,9 @@
   .td-reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim);}
   .estado-pill{ font-size:9.5px; font-weight:700; text-transform:uppercase; padding:3px 9px; border-radius:10px; display:inline-block;}
   .esp-chip{
-    display:inline-block; background:var(--panel-alt); border:1px solid var(--cyan-dim); color:var(--cyan);
-    font-size:9.5px; font-weight:700; padding:2px 6px; border-radius:4px; margin-right:2px;
+    display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; border-radius:6px;
+    margin-right:3px; box-shadow:0 1px 4px rgba(0,0,0,.35);
   }
   .estado-pill.activo{ background:var(--servicio); color:#fff;}
   .estado-pill.baja{ background:var(--burdeo); color:#fff;}
@@ -144,6 +146,10 @@ function numeroDeOrdenCia(nombreCia){
   return 9999; // "—" (sin Compañía) siempre al final
 }
 const NOMBRE_ESP = { R:'Rescate', T:'Trauma', H:'HAZ-MAT', F:'Forestal', M:'Maquinista', C:'Cuerda' };
+// Pedido explícito: chips de Especialidad más grandes, con color propio
+// (antes eran todas cyan, sin distinción) y buen contraste de texto.
+const ESP_COLOR = { R:'var(--esp-r)', T:'var(--esp-t)', H:'var(--esp-h)', F:'var(--esp-f)', M:'var(--esp-m)', C:'var(--esp-c)' };
+const ESP_TEXTO = { R:'#fff', T:'#fff', H:'#241505', F:'#0B2B1C', M:'#fff', C:'#241505' };
 
 let USUARIOS = [];
 let CIAS = ['Todas'];
@@ -221,7 +227,7 @@ function renderTabla(){
       <td>${u.cargo}</td>
       <td>${u.cia}</td>
       <td class="mono">${u.ingreso}</td>
-      <td>${u.esp.length ? u.esp.map(e=>`<span class="esp-chip">${e}</span>`).join(' ') : '<span style="color:var(--text-dim);">—</span>'}</td>
+      <td>${u.esp.length ? u.esp.map(e=>`<span class="esp-chip" style="background:${ESP_COLOR[e]||'var(--panel-alt)'}; color:${ESP_TEXTO[e]||'#fff'};" title="${NOMBRE_ESP[e]||e}">${e}</span>`).join('') : '<span style="color:var(--text-dim);">—</span>'}</td>
       <td><span class="estado-pill ${u.estado}">${u.estado==='activo'?'Activo':'Dado de Baja'}</span></td>
       <td><button class="btn-mini" onclick="window.location.href='ficha_bombero.html?bombero=${u.id}'">Ver Ficha</button></td>
     </tr>

@@ -67,8 +67,8 @@
   .estado-pill-center{ display:flex; justify-content:center; margin-bottom:18px;}
   .estado-pill{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:5px 12px; border-radius:4px; background:var(--servicio); color:#fff;}
 
-  .insignias-row{ display:flex; justify-content:center; gap:5px; margin-bottom:18px; flex-wrap:wrap;}
-  .insignia{ width:22px; height:22px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#fff;}
+  .insignias-row{ display:flex; justify-content:center; gap:7px; margin-bottom:18px; flex-wrap:wrap;}
+  .insignia{ width:32px; height:32px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; box-shadow:0 1px 5px rgba(0,0,0,.35);}
 
   .datos-row{ display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); font-size:12.5px;}
   .datos-row:last-of-type{ border-bottom:none;}
@@ -387,6 +387,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const ESP_COLOR = { R:'var(--esp-r)', T:'var(--esp-t)', H:'var(--esp-h)', F:'var(--esp-f)', M:'var(--esp-m)', C:'var(--esp-c)' };
+// Pedido explícito: letras de Especialidad más grandes y legibles — texto
+// oscuro en los fondos claros (amarillo/verde), blanco en el resto.
+const ESP_TEXTO = { R:'#fff', T:'#fff', H:'#241505', F:'#0B2B1C', M:'#fff', C:'#241505' };
+const ESP_NOMBRE = { R:'Rescate', T:'Trauma', H:'HAZ-MAT', F:'Forestal', M:'Maquinista', C:'Cuerda' };
 const ROLES_CON_ACCESO_BAJA = ['Director','Secretario/a'];
 // Cambiar el Cargo de alguien es más sensible que dar de baja — además de
 // Director/Secretario/a de la Compañía, lo puede hacer la conducción del
@@ -442,7 +446,7 @@ async function cargarDatos(){
   document.getElementById('fEstadoPill').style.background = b.estado === 'activo' ? 'var(--servicio)' : b.estado === 'suspendido' ? 'var(--alerta)' : 'var(--nodisp)';
   document.getElementById('fInsignias').innerHTML = (b.personal_especialidades || []).map(pe => {
     const c = pe.especialidades.codigo;
-    return `<div class="insignia" style="background:${ESP_COLOR[c] || 'var(--text-dim)'}">${c}</div>`;
+    return `<div class="insignia" style="background:${ESP_COLOR[c] || 'var(--text-dim)'}; color:${ESP_TEXTO[c]||'#fff'};" title="${ESP_NOMBRE[c]||c}">${c}</div>`;
   }).join('');
   document.getElementById('fRut').textContent = b.rut || '—';
   document.getElementById('fFechaNac').textContent = b.fecha_nacimiento ? new Date(b.fecha_nacimiento+'T00:00:00').toLocaleDateString('es-CL') : '—';

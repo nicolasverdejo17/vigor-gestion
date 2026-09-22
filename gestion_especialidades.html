@@ -41,7 +41,7 @@
   .leyenda-row{ flex-shrink:0; padding:10px 26px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
   .leyenda{ display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
   .leyenda-item{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-muted);}
-  .leyenda-dot{ width:18px; height:18px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:#fff; flex-shrink:0;}
+  .leyenda-dot{ width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,.35);}
   .btn-nueva-esp{
     background:transparent; border:1.5px dashed var(--brass-bright); color:var(--brass-bright);
     font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
@@ -58,10 +58,10 @@
   .td-nombre{ font-weight:600;}
   .td-reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:11.5px;}
 
-  .insignias-cell{ display:flex; gap:5px; flex-wrap:wrap;}
+  .insignias-cell{ display:flex; gap:6px; flex-wrap:wrap;}
   .insignia-badge{
-    width:24px; height:24px; border-radius:5px; display:flex; align-items:center; justify-content:center;
-    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#fff;
+    width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; box-shadow:0 1px 4px rgba(0,0,0,.35);
   }
   .insignia-vacio{ font-size:11.5px; color:var(--text-dim); font-style:italic;}
 
@@ -81,7 +81,7 @@
   .modal-esp-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer;}
   .modal-esp-row:last-of-type{ border-bottom:none;}
   .modal-checkbox{ width:18px; height:18px; border-radius:4px; border:1.5px solid var(--line-strong); background:var(--panel-alt); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff;}
-  .modal-esp-badge{ width:24px; height:24px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#fff; flex-shrink:0;}
+  .modal-esp-badge{ width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,.35);}
   .modal-esp-label{ font-size:13px; flex:1;}
   .modal-actions{ display:flex; gap:10px; margin-top:16px;}
 
@@ -387,16 +387,27 @@ async function crearEspecialidad(){
   toast(`Especialidad "${nombre}" creada — ya está disponible para asignar`);
 }
 
+// Pedido explícito: letras más grandes y legibles. El color de cada
+// Especialidad es configurable a mano (cualquier hex), así que el texto
+// se elige por contraste real (luminancia) en vez de un mapa fijo — así
+// sigue siendo legible sin importar qué color elija el admin.
+function contraste(hex){
+  const h = (hex || '#000000').replace('#','');
+  const r = parseInt(h.substr(0,2),16), g = parseInt(h.substr(2,2),16), b = parseInt(h.substr(4,2),16);
+  const luminancia = (0.299*r + 0.587*g + 0.114*b) / 255;
+  return luminancia > 0.6 ? '#181008' : '#fff';
+}
+
 function renderLeyenda(){
   document.getElementById('leyenda').innerHTML = Object.entries(ESPECIALIDADES).map(([k,e])=>
-    `<div class="leyenda-item"><div class="leyenda-dot" style="background:${e.hex}">${k}</div>${e.nombre}</div>`
+    `<div class="leyenda-item"><div class="leyenda-dot" style="background:${e.hex}; color:${contraste(e.hex)};">${k}</div>${e.nombre}</div>`
   ).join('');
 }
 
 function renderTabla(){
   document.getElementById('tablaBody').innerHTML = BOMBEROS.map((b,i)=>{
     const badges = b.esp.length
-      ? b.esp.map(k=>`<div class="insignia-badge" style="background:${ESPECIALIDADES[k].hex}">${k}</div>`).join('')
+      ? b.esp.map(k=>`<div class="insignia-badge" style="background:${ESPECIALIDADES[k].hex}; color:${contraste(ESPECIALIDADES[k].hex)};" title="${ESPECIALIDADES[k].nombre}">${k}</div>`).join('')
       : `<span class="insignia-vacio">Sin especialidades</span>`;
     return `
       <tr>
@@ -427,7 +438,7 @@ function renderModalList(){
     const on = seleccionTemp.includes(k);
     return `<div class="modal-esp-row" onclick="toggleEsp('${k}')">
       <div class="modal-checkbox" style="${on?`background:${e.hex};border-color:${e.hex};`:''}">${on?'✓':''}</div>
-      <div class="modal-esp-badge" style="background:${e.hex}">${k}</div>
+      <div class="modal-esp-badge" style="background:${e.hex}; color:${contraste(e.hex)};">${k}</div>
       <div class="modal-esp-label">${e.nombre}</div>
     </div>`;
   }).join('');
