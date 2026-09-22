@@ -362,12 +362,11 @@
   /* Pedido explícito: las insignias quedaban apiladas en una columna
      angosta ENCIMA de la foto (tapaban el nombre) — por más que se
      agrandara la letra, el contenedor las apretaba. Dejan de ser overlay
-     y pasan a ser su propia fila arriba de la foto, con espacio real
-     (la foto se achica lo que haga falta para dejarles lugar). Si no
-     tiene especialidades, la fila queda en 0 — no roba espacio. */
+     y pasan a ir en su propia fila entre el N° de Registro y el botón de
+     Estado — espacio real, sin taparle nada a nadie. Si no tiene
+     especialidades, la fila queda en 0 — no roba espacio. */
   .bomb-card__badges{
-    display:flex; flex-wrap:wrap; gap:4px; justify-content:center;
-    flex-shrink:0; width:100%; margin-bottom:4%;
+    display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:5%;
   }
   .bomb-card__foto{
     width:100%; flex:1 1 auto; min-height:0; border-radius:10%;
@@ -400,11 +399,11 @@
      ilegibles en las tarjetas chicas (hasta 4.5px de fuente) — se les pone
      un piso propio de tamaño, no escalan tan agresivo como el resto de la
      tarjeta porque tienen que seguir siendo reconocibles de un vistazo. */
-  .bomb-grid[data-tier="xl"] .bomb-card__nombre{ font-size:13px;} .bomb-grid[data-tier="xl"] .bomb-card__cargo{ font-size:9.5px;} .bomb-grid[data-tier="xl"] .bomb-card__reg{ font-size:8.5px;} .bomb-grid[data-tier="xl"] .bomb-card__estado-pill{ font-size:11px; padding:6px 4px;} .bomb-grid[data-tier="xl"] .bomb-card__insignia{ width:22px; height:22px; font-size:11px;} .bomb-grid[data-tier="xl"] .bomb-card__foto{ font-size:26px;}
-  .bomb-grid[data-tier="lg"] .bomb-card__nombre{ font-size:11.5px;} .bomb-grid[data-tier="lg"] .bomb-card__cargo{ font-size:8.5px;} .bomb-grid[data-tier="lg"] .bomb-card__reg{ font-size:8px;} .bomb-grid[data-tier="lg"] .bomb-card__estado-pill{ font-size:10px; padding:5px 4px;} .bomb-grid[data-tier="lg"] .bomb-card__insignia{ width:20px; height:20px; font-size:10px;} .bomb-grid[data-tier="lg"] .bomb-card__foto{ font-size:21px;}
-  .bomb-grid[data-tier="md"] .bomb-card__nombre{ font-size:10px;} .bomb-grid[data-tier="md"] .bomb-card__cargo{ font-size:7.5px;} .bomb-grid[data-tier="md"] .bomb-card__reg{ font-size:7px;} .bomb-grid[data-tier="md"] .bomb-card__estado-pill{ font-size:8.5px; padding:4px;} .bomb-grid[data-tier="md"] .bomb-card__insignia{ width:18px; height:18px; font-size:9.5px;} .bomb-grid[data-tier="md"] .bomb-card__foto{ font-size:17px;}
-  .bomb-grid[data-tier="sm"] .bomb-card__nombre{ font-size:9px;} .bomb-grid[data-tier="sm"] .bomb-card__cargo{ font-size:7px;} .bomb-grid[data-tier="sm"] .bomb-card__reg{ font-size:6.5px;} .bomb-grid[data-tier="sm"] .bomb-card__estado-pill{ font-size:7.5px; padding:3px;} .bomb-grid[data-tier="sm"] .bomb-card__insignia{ width:17px; height:17px; font-size:9px;} .bomb-grid[data-tier="sm"] .bomb-card__foto{ font-size:14px;}
-  .bomb-grid[data-tier="xs"] .bomb-card__nombre{ font-size:8px;} .bomb-grid[data-tier="xs"] .bomb-card__cargo{ font-size:6.5px;} .bomb-grid[data-tier="xs"] .bomb-card__reg{ display:none;} .bomb-grid[data-tier="xs"] .bomb-card__estado-pill{ font-size:6.5px; padding:2px;} .bomb-grid[data-tier="xs"] .bomb-card__insignia{ width:16px; height:16px; font-size:8.5px;} .bomb-grid[data-tier="xs"] .bomb-card__foto{ font-size:11px;}
+  .bomb-grid[data-tier="xl"] .bomb-card__nombre{ font-size:13px;} .bomb-grid[data-tier="xl"] .bomb-card__cargo{ font-size:11.5px;} .bomb-grid[data-tier="xl"] .bomb-card__reg{ font-size:8.5px;} .bomb-grid[data-tier="xl"] .bomb-card__estado-pill{ font-size:11px; padding:6px 4px;} .bomb-grid[data-tier="xl"] .bomb-card__insignia{ width:22px; height:22px; font-size:11px;} .bomb-grid[data-tier="xl"] .bomb-card__foto{ font-size:26px;}
+  .bomb-grid[data-tier="lg"] .bomb-card__nombre{ font-size:11.5px;} .bomb-grid[data-tier="lg"] .bomb-card__cargo{ font-size:10.5px;} .bomb-grid[data-tier="lg"] .bomb-card__reg{ font-size:8px;} .bomb-grid[data-tier="lg"] .bomb-card__estado-pill{ font-size:10px; padding:5px 4px;} .bomb-grid[data-tier="lg"] .bomb-card__insignia{ width:20px; height:20px; font-size:10px;} .bomb-grid[data-tier="lg"] .bomb-card__foto{ font-size:21px;}
+  .bomb-grid[data-tier="md"] .bomb-card__nombre{ font-size:10px;} .bomb-grid[data-tier="md"] .bomb-card__cargo{ font-size:9.5px;} .bomb-grid[data-tier="md"] .bomb-card__reg{ font-size:7px;} .bomb-grid[data-tier="md"] .bomb-card__estado-pill{ font-size:8.5px; padding:4px;} .bomb-grid[data-tier="md"] .bomb-card__insignia{ width:18px; height:18px; font-size:9.5px;} .bomb-grid[data-tier="md"] .bomb-card__foto{ font-size:17px;}
+  .bomb-grid[data-tier="sm"] .bomb-card__nombre{ font-size:9px;} .bomb-grid[data-tier="sm"] .bomb-card__cargo{ font-size:8.5px;} .bomb-grid[data-tier="sm"] .bomb-card__reg{ font-size:6.5px;} .bomb-grid[data-tier="sm"] .bomb-card__estado-pill{ font-size:7.5px; padding:3px;} .bomb-grid[data-tier="sm"] .bomb-card__insignia{ width:17px; height:17px; font-size:9px;} .bomb-grid[data-tier="sm"] .bomb-card__foto{ font-size:14px;}
+  .bomb-grid[data-tier="xs"] .bomb-card__nombre{ font-size:8px;} .bomb-grid[data-tier="xs"] .bomb-card__cargo{ font-size:8px;} .bomb-grid[data-tier="xs"] .bomb-card__reg{ display:none;} .bomb-grid[data-tier="xs"] .bomb-card__estado-pill{ font-size:6.5px; padding:2px;} .bomb-grid[data-tier="xs"] .bomb-card__insignia{ width:16px; height:16px; font-size:8.5px;} .bomb-grid[data-tier="xs"] .bomb-card__foto{ font-size:11px;}
 
   .bomb-card--empty{
     border-style:dashed; border-color:var(--line); cursor:default; opacity:.55;
@@ -1181,12 +1180,12 @@
       bombGrid.insertAdjacentHTML('beforeend', `
         <div class="bomb-card" data-reg="${b.reg}" style="--b-color:${color}">
           ${refuerzoTag}
-          <div class="bomb-card__badges">${insignias}</div>
           <div class="bomb-card__foto"${fotoEstilo}>${b.foto ? '' : initials}</div>
           <div class="bomb-card__meta">
             <div class="bomb-card__nombre" style="cursor:pointer;" onclick="window.location.href='ficha_bombero.html?bombero=${b.id}'">${b.n}</div>
             <div class="bomb-card__cargo">${b.cargo}</div>
             <div class="bomb-card__reg">N° ${b.reg}</div>
+            <div class="bomb-card__badges">${insignias}</div>
             <div class="bomb-card__estado-pill ${oscuro}" onclick="abrirSelectorEstadoBombero(event, ${i})">${PILL_LABEL[b.estado] || b.estado}</div>
           </div>
           <div class="estado-selector" id="selBombero-${i}">
