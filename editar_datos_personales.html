@@ -95,6 +95,17 @@
     transition:all .25s; z-index:50;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* Bug reportado: "descompaginado" en Celular — dos columnas fijas (RUT +
+     Teléfono, etc.) no entraban en un teléfono angosto. Se apila en una
+     sola columna y se reduce el padding lateral. */
+  @media (max-width:640px){
+    .form-wrap{ padding:14px 10px 18px;}
+    .form-body{ padding:18px 16px;}
+    .form-row{ grid-template-columns:1fr; gap:14px;}
+    .form-head h2{ font-size:16px;}
+    .back-btn{ font-size:11px; padding:8px 11px;}
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">

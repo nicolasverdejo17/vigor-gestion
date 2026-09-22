@@ -144,6 +144,24 @@
   .modal-generar{ flex:2; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer;}
   .modal-generar:hover{ background:var(--cyan); color:#0D2226;}
 
+  /* Bug reportado: pantalla "descompaginada" en Celular — el layout de 2
+     columnas fijas (320px + resto) no tenía ningún breakpoint para mobile,
+     así que en un teléfono quedaba apretado e ilegible. Se apila en una
+     sola columna con scroll normal de página. */
+  @media (max-width:760px){
+    html,body{ overflow:auto; height:auto; min-height:100%;}
+    body{ height:auto;}
+    /* !important porque cargarDatos() pone display:grid inline al mostrar
+       el layout — una regla normal de hoja de estilos no le gana a eso. */
+    .layout{ display:block !important; padding:14px 14px 24px;}
+    .datos-panel{ margin-bottom:16px; max-height:none; overflow-y:visible;}
+    .hv-panel{ max-height:none; overflow-y:visible;}
+    .nameplate-inner{ padding:12px 14px; gap:8px;}
+    .nameplate h1{ font-size:15px;}
+    .back-btn{ font-size:11px; padding:8px 11px;}
+    .role-switch-row{ padding:8px 14px;}
+  }
+
   @media print{
     body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
     .nameplate, .role-switch-row, .datos-panel .admin-section, .hv-head .btn-agregar-hv, .hv-head .btn-exportar-hv, .modal-overlay, .toast{ display:none !important;}
@@ -202,7 +220,7 @@
 
   <div class="nameplate">
     <div class="nameplate-inner">
-      <button class="back-btn" onclick="window.location.href='pc_compania.html'">← Volver</button>
+      <button class="back-btn" id="btnVolverFicha" onclick="volverDesdeFicha()">← Volver</button>
       <div style="flex:1;">
         <h1>Ficha de Bombero</h1>
         <span id="ciaLabel">Vigor</span>
@@ -376,6 +394,16 @@ const params = new URLSearchParams(window.location.search);
 let bomberoId = params.get('bombero');
 let miPersonalId = null, miCargo = null, esViendoAMiPropiaFicha = false;
 let bomberoActual = null;
+
+// Bug reportado: "Volver" iba siempre a pc_compania.html, sin importar
+// cómo se llegó acá — un bombero viendo su PROPIA ficha desde el Celular
+// (opciones_celular.html) caía en una pantalla de PC del Cuartel que no le
+// corresponde (y le tira "sesión no identificada"). pc_compania.html sigue
+// siendo el destino correcto cuando quien mira es un PC/Director viendo la
+// ficha de OTRA persona.
+function volverDesdeFicha(){
+  window.location.href = esViendoAMiPropiaFicha ? 'opciones_celular.html' : 'pc_compania.html';
+}
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
