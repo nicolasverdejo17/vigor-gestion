@@ -229,7 +229,7 @@ function screens(){
       <div class="brand-block">
         <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
         <div class="brand-name">VIGOR</div>
-        <div class="brand-sub">Terminal de acceso</div>
+        <div class="brand-sub">Accedé a tu cuenta</div>
       </div>
 
       <div class="tabs">
@@ -239,10 +239,10 @@ function screens(){
 
       <div class="field">
         <label>Usuario</label>
-        <input type="text" class="mono" id="loginNumero" placeholder="N° de Registro, Carro (ej. B-3) o N° de Compañía">
+        <input type="text" class="mono" id="loginNumero" placeholder="N° de Registro">
       </div>
       <div class="field">
-        <label>Código de Cuerpo <span style="text-transform:none; font-weight:400; color:var(--text-dim);">(solo si entrás como Carro o PC del Cuartel)</span></label>
+        <label>Código de Cuerpo <span style="text-transform:none; font-weight:400; color:var(--text-dim);">(opcional)</span></label>
         <input type="text" class="mono" id="loginCodigoCuerpo" placeholder="Ej. BOMBEROSFLORIDA" style="text-transform:uppercase;">
       </div>
       <div class="field">
@@ -252,7 +252,6 @@ function screens(){
 
       <button class="btn-primary" onclick="intentarLogin()">Iniciar Sesión</button>
       <div class="link-row">¿Olvidaste tu contraseña? <a onclick="showRecoveryInfo()">Ver cómo recuperarla</a></div>
-      <div class="pending-note" style="margin-top:14px;">Un solo login para todo — bomberos, Carros y PC del Cuartel entran por acá. El sistema reconoce quién sos y te lleva a tu propia interfaz.</div>
     `,
 
     registro: `
