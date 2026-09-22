@@ -5,7 +5,7 @@
 // conexión a Supabase para guardar — la sincronización offline de datos
 // (partes, bitácoras, checklist) es una funcionalidad aparte, no incluida acá.
 
-const CACHE_NAME = 'vigor-shell-v1';
+const CACHE_NAME = 'vigor-shell-v2';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -28,8 +28,15 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return; // no tocar Supabase ni CDNs externos
   if (url.pathname.endsWith('.json') && url.pathname.includes('manifest')) return; // manifests siempre frescos
 
+  // Bug reportado: los cambios recien publicados no se veian en el celular
+  // real — GitHub Pages manda Cache-Control: max-age=600, y un fetch()
+  // normal puede quedar satisfecho por la cache HTTP del propio navegador
+  // sin llegar de verdad a la red, aunque la estrategia acá sea
+  // "network-first". Se fuerza cache:'no-store' para que cada visita pida
+  // la version real al servidor — la cache de este Service Worker sigue
+  // sirviendo de respaldo solo cuando no hay conexion.
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: 'no-store' })
       .then((res) => {
         if (res && res.ok) {
           const clone = res.clone();
