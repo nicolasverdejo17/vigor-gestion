@@ -359,8 +359,15 @@
     font-size:8px; padding:2px 5px; border-radius:3px; border:1px solid var(--cyan);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;
   }
+  /* Pedido explícito: las insignias quedaban apiladas en una columna
+     angosta ENCIMA de la foto (tapaban el nombre) — por más que se
+     agrandara la letra, el contenedor las apretaba. Dejan de ser overlay
+     y pasan a ser su propia fila arriba de la foto, con espacio real
+     (la foto se achica lo que haga falta para dejarles lugar). Si no
+     tiene especialidades, la fila queda en 0 — no roba espacio. */
   .bomb-card__badges{
-    position:absolute; top:calc(3% + 5px); right:calc(3% + 5px); display:flex; flex-direction:column; gap:3px; z-index:2;
+    display:flex; flex-wrap:wrap; gap:4px; justify-content:center;
+    flex-shrink:0; width:100%; margin-bottom:4%;
   }
   .bomb-card__foto{
     width:100%; flex:1 1 auto; min-height:0; border-radius:10%;
