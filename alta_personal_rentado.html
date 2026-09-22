@@ -315,7 +315,7 @@ label {
       </div>
       <div class="field">
         <label for="rut">RUT</label>
-        <input type="text" id="rut" placeholder="12.345.678-9">
+        <input type="text" id="rut" placeholder="12.345.678-9" inputmode="numeric" oninput="this.value = formatearRut(this.value)">
       </div>
       <div class="field">
         <label for="telefono">Teléfono</label>
@@ -364,6 +364,21 @@ label {
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   let COMPANIAS_DISPONIBLES = [];
+
+  // Autoformateo de RUT — pedido explícito: los puntos y el guion se
+  // ponen solos, solo hace falta escribir los números.
+  function formatearRut(valor){
+    const limpio = valor.replace(/[^0-9kK]/g, '').toUpperCase().slice(0, 9);
+    if(limpio.length <= 1) return limpio;
+    const dv = limpio.slice(-1);
+    const cuerpo = limpio.slice(0, -1);
+    let conPuntos = '';
+    for(let i = 0; i < cuerpo.length; i++){
+      if(i > 0 && (cuerpo.length - i) % 3 === 0) conPuntos += '.';
+      conPuntos += cuerpo[i];
+    }
+    return `${conPuntos}-${dv}`;
+  }
 
   // Las Compañías de este Cuerpo se definen en la Implementación (Crear
   // Compañía) — nunca una lista fija de 3. Se puebla dinámicamente acá.

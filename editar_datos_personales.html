@@ -146,7 +146,7 @@
       <div class="form-row">
         <div class="form-field">
           <label>Fecha de nacimiento</label>
-          <input type="text" id="campoFechaNac" value="" placeholder="dd/mm/aaaa">
+          <input type="text" id="campoFechaNac" value="" placeholder="dd/mm/aaaa" inputmode="numeric" oninput="this.value = formatearFecha(this.value)">
         </div>
         <div class="form-field">
           <label>Teléfono</label>
@@ -171,7 +171,7 @@
       <div class="form-row">
         <div class="form-field full">
           <label>Fecha de ingreso al Cuerpo</label>
-          <input type="text" id="campoFechaIngreso" value="" placeholder="dd/mm/aaaa">
+          <input type="text" id="campoFechaIngreso" value="" placeholder="dd/mm/aaaa" inputmode="numeric" oninput="this.value = formatearFecha(this.value)">
         </div>
       </div>
 
@@ -206,6 +206,16 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Autoformateo de fecha — pedido explícito: las barras se ponen solas,
+// solo hace falta escribir los números.
+function formatearFecha(valor){
+  const limpio = valor.replace(/\D/g, '').slice(0, 8);
+  let out = limpio.slice(0, 2);
+  if(limpio.length > 2) out += '/' + limpio.slice(2, 4);
+  if(limpio.length > 4) out += '/' + limpio.slice(4, 8);
+  return out;
+}
 
 let miPersonalId = null, miEmail = null;
 

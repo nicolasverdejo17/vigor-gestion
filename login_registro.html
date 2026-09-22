@@ -296,13 +296,13 @@ function screens(){
         </div>
         <div class="field">
           <label>RUT</label>
-          <input type="text" class="mono" id="regRut" placeholder="19.802.xxx-x">
+          <input type="text" class="mono" id="regRut" placeholder="19.802.xxx-x" inputmode="numeric" oninput="this.value = formatearRut(this.value)">
         </div>
       </div>
       <div class="field-row">
         <div class="field">
           <label>Fecha nac.</label>
-          <input type="text" id="regFechaNac" placeholder="dd/mm/aaaa">
+          <input type="text" id="regFechaNac" placeholder="dd/mm/aaaa" inputmode="numeric" oninput="this.value = formatearFecha(this.value)">
         </div>
         <div class="field">
           <label>Teléfono</label>
@@ -313,15 +313,11 @@ function screens(){
         <label>Compañía a la que postulas</label>
         <select id="regCompania">${companiasActivas.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}</select>
       </div>
-      <div class="field">
-        <label>Contraseña</label>
-        <input type="password" id="regPassword" placeholder="Mínimo 8 caracteres">
-      </div>
 
       <button class="btn-primary" onclick="enviarSolicitud()">Enviar Solicitud</button>
 
       <div class="pending-note">
-        <b>Qué sigue:</b> tu solicitud queda pendiente hasta que el Secretario/a o Director de la Compañía la revise y apruebe. No vas a poder iniciar sesión hasta entonces.
+        <b>Qué sigue:</b> tu solicitud queda pendiente hasta que el Secretario/a o Director de la Compañía la revise y apruebe. Te van a entregar una contraseña temporal para tu primer ingreso.
       </div>
       ` : ''}
     `,
@@ -481,8 +477,30 @@ function previsualizarFoto(input){
 // Bug corregido: "Enviar Solicitud" no leía ni validaba ningún campo —
 // se podía enviar una postulación completamente vacía. N° de Bombero queda
 // opcional (un postulante nuevo todavía no tiene uno asignado).
+// Autoformateo de RUT y fecha de nacimiento — pedido explícito: que se
+// escriban solo los números y los puntos/guion/barras se pongan solos.
+function formatearRut(valor){
+  const limpio = valor.replace(/[^0-9kK]/g, '').toUpperCase().slice(0, 9);
+  if(limpio.length <= 1) return limpio;
+  const dv = limpio.slice(-1);
+  const cuerpo = limpio.slice(0, -1);
+  let conPuntos = '';
+  for(let i = 0; i < cuerpo.length; i++){
+    if(i > 0 && (cuerpo.length - i) % 3 === 0) conPuntos += '.';
+    conPuntos += cuerpo[i];
+  }
+  return `${conPuntos}-${dv}`;
+}
+function formatearFecha(valor){
+  const limpio = valor.replace(/\D/g, '').slice(0, 8);
+  let out = limpio.slice(0, 2);
+  if(limpio.length > 2) out += '/' + limpio.slice(2, 4);
+  if(limpio.length > 4) out += '/' + limpio.slice(4, 8);
+  return out;
+}
+
 async function enviarSolicitud(){
-  const campos = ['regNombre', 'regRut', 'regFechaNac', 'regTelefono', 'regPassword'];
+  const campos = ['regNombre', 'regRut', 'regFechaNac', 'regTelefono'];
   let faltantes = false;
   campos.forEach(id => {
     const el = document.getElementById(id);
@@ -492,12 +510,6 @@ async function enviarSolicitud(){
   });
   if(faltantes){
     toast('Completá todos los campos antes de enviar');
-    return;
-  }
-  const pass = document.getElementById('regPassword').value;
-  if(pass.length < 8){
-    document.getElementById('regPassword').style.borderColor = 'var(--burdeo-bright)';
-    toast('La contraseña debe tener al menos 8 caracteres');
     return;
   }
   if(!cuerpoActivo){
