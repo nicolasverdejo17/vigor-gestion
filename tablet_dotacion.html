@@ -285,7 +285,16 @@ async function cargarCarro(){
       </div>
     `).join('');
   }
+
+  if(!suscritoTabletDotacion){
+    suscritoTabletDotacion = true;
+    sb.channel('tablet-dotacion-' + carro.t_id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion', filter: `carro_id=eq.${carro.t_id}` }, () => cargarCarro())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion_tripulantes' }, () => cargarCarro())
+      .subscribe();
+  }
 }
+let suscritoTabletDotacion = false;
 
 function tick(){
   const n = new Date();

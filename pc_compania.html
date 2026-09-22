@@ -953,6 +953,32 @@
         renderCarrosGrid();
         renderMiniResumen();
       })
+      // Asistencia de bomberos (llegada/salida, marcada desde acá, desde el
+      // Celular de la persona, o desde otro PC) — sin esto había que
+      // recargar a mano para ver que alguien más llegó o salió. La tabla no
+      // tiene cuerpo_id propio (solo compania_id + personal_id), así que se
+      // escucha sin filtro y se confía en la RLS (mismo Cuerpo) para acotar.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, async () => {
+        await cargarBomberos();
+        renderBombGrid();
+        renderCarrosGrid();
+        renderMiniResumen();
+      })
+      // Dotación asignada a un Carro (conductor/oficial/tripulantes) —
+      // puede cambiarla otro PC del mismo Cuartel.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion' }, async () => {
+        await cargarCarros();
+        renderCarrosGrid();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion_tripulantes' }, async () => {
+        await cargarCarros();
+        renderCarrosGrid();
+      })
+      // Observaciones/emergencias de la Pizarra publicadas directo (no solo
+      // las que llegan junto con un despacho nuevo).
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_emergencias', filter: `cuerpo_id=eq.${miCuerpoId}` }, async () => {
+        await cargarPizarra();
+      })
       .subscribe();
   }
 

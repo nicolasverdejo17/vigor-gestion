@@ -302,6 +302,20 @@ async function cargarDatos(){
   elapsedRefPerf = performance.now();
 
   await cargarBatallones();
+  suscribirRealtime();
+}
+
+// Modo Crisis es un tablero colaborativo — más de un Comandante puede
+// estar viendo/editando el mismo Puesto de Mando activo a la vez.
+let suscritoModoCrisis = false;
+function suscribirRealtime(){
+  if(suscritoModoCrisis || !miPuestoMandoId) return;
+  suscritoModoCrisis = true;
+  sb.channel('modo-crisis-' + miPuestoMandoId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'batallones', filter: `puesto_mando_id=eq.${miPuestoMandoId}` }, () => cargarBatallones())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'batallon_carros' }, () => cargarBatallones())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'batallon_bomberos' }, () => cargarBatallones())
+    .subscribe();
 }
 
 async function cargarBatallones(){

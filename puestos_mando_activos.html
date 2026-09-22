@@ -180,6 +180,21 @@ async function cargarDatos(){
     batallones: (pm.batallones || []).map(b => ({ nombre: b.nombre, estado: b.estado }))
   }));
   render();
+  suscribirRealtime();
+}
+
+// Modo Crisis es colaborativo — Central y varias Compañías pueden tener
+// esta pantalla abierta mientras el tablero cambia. Sin cuerpo_id directo
+// en estas tablas, se escucha sin filtro y se confía en la RLS.
+let suscritoPuestosMando = false;
+function suscribirRealtime(){
+  if(suscritoPuestosMando) return;
+  suscritoPuestosMando = true;
+  sb.channel('puestos-mando-activos-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'puestos_mando' }, () => cargarDatos())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'batallones' }, () => cargarDatos())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'batallon_carros' }, () => cargarDatos())
+    .subscribe();
 }
 
 function render(){

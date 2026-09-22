@@ -394,7 +394,17 @@ async function cargarDatos(){
 
   render();
   renderHistorialResueltas();
+
+  // Dos administradores pueden estar revisando la cola de solicitudes a la
+  // vez — que uno apruebe/rechace tiene que sacarla de la lista del otro.
+  if(!suscritoSolicitudesAlta){
+    suscritoSolicitudesAlta = true;
+    sb.channel('solicitudes-alta-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes_alta' }, () => cargarDatos())
+      .subscribe();
+  }
 }
+let suscritoSolicitudesAlta = false;
 
 cargarDatos();
 </script>

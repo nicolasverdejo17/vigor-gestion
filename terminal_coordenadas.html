@@ -195,6 +195,18 @@ async function cargarDatos(){
     document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
   }
   await refrescarFeed();
+  suscribirRealtime();
+}
+
+let suscritoCoordenadas = false;
+function suscribirRealtime(){
+  if(suscritoCoordenadas) return;
+  suscritoCoordenadas = true;
+  sb.channel('terminal-coordenadas-feed')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'reportes_coordenadas', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      refrescarFeed();
+    })
+    .subscribe();
 }
 
 async function refrescarFeed(){

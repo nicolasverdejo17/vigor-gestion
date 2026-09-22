@@ -485,6 +485,35 @@ function suscribirRealtime(){
       reproducirTono(null);
       cargarEmergenciasEnCurso().then(renderEmergenciasEnCurso);
     })
+    // Un despacho se puede terminar desde OTRA Consola (dos Operadores
+    // pueden estar atendiendo a la vez) — antes solo el INSERT actualizaba.
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      cargarEmergenciasEnCurso().then(renderEmergenciasEnCurso);
+    })
+    // Estado de Carros — esta pantalla nunca escuchaba esto (bug original
+    // reportado), y acá importa doble: para el selector de Carros al armar
+    // un despacho, y para la franja de estado por Compañía.
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'carros', filter: `cuerpo_id=eq.${miCuerpoId}` }, async () => {
+      await cargarCiasYCarros();
+      renderCiaStrip();
+      renderCarroSelect();
+    })
+    // Asistencia de bomberos — afecta la franja de estado por Compañía
+    // (dotación mínima cumplida o no).
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, async () => {
+      await cargarCiasYCarros();
+      renderCiaStrip();
+    })
+    // Varios Operadores de Central pueden marcarse en turno al mismo
+    // tiempo desde consolas distintas.
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'operadores_central_turno', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      cargarOperadorTurno();
+    })
+    // Reportes de coordenadas nuevos desde el Celular — el badge de la
+    // pestaña "Terminal de Coordenadas" quedaba fijo hasta recargar.
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'reportes_coordenadas', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      actualizarBadgeCoordenadas();
+    })
     .subscribe();
 }
 

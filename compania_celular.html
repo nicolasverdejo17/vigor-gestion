@@ -225,6 +225,23 @@ async function cargarDatos(){
   renderMiEstadoOpciones();
   renderGuardia();
   renderCarros();
+  suscribirRealtime();
+}
+
+let suscritoCompaniaCelular = false;
+function suscribirRealtime(){
+  if(suscritoCompaniaCelular) return;
+  suscritoCompaniaCelular = true;
+  sb.channel('compania-celular-' + miCompaniaId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, async () => {
+      await cargarGuardia();
+      renderGuardia();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `compania_id=eq.${miCompaniaId}` }, async () => {
+      await cargarCarros();
+      renderCarros();
+    })
+    .subscribe();
 }
 
 async function cargarGuardia(){

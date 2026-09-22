@@ -220,7 +220,17 @@ async function cargarDatos(){
   document.getElementById('phoneWrap').style.display = 'flex';
   renderMiEstadoChip();
   renderNotificaciones(perfil);
+
+  if(!suscritoInicioCelular){
+    suscritoInicioCelular = true;
+    sb.channel('inicio-celular-' + perfil.compania_id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
+      .subscribe();
+  }
 }
+let suscritoInicioCelular = false;
 
 function tiempoRelativo(fechaIso){
   const ms = Date.now() - new Date(fechaIso).getTime();

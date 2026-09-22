@@ -223,7 +223,16 @@ async function cargarFlota(){
   }));
 
   renderFlota();
+
+  if(!suscritoFlotaComandancia){
+    suscritoFlotaComandancia = true;
+    sb.channel('flota-comandancia-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'carros' }, () => cargarFlota())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mantenciones' }, () => cargarFlota())
+      .subscribe();
+  }
 }
+let suscritoFlotaComandancia = false;
 
 function renderFlota(){
   const grid = document.getElementById('flotaGrid');

@@ -180,7 +180,16 @@ async function cargarDatos(){
 
   document.getElementById('phoneWrap').style.display = 'flex';
   render();
+
+  if(!suscritoPizarraCelular){
+    suscritoPizarraCelular = true;
+    sb.channel('pizarra-celular-' + perfil.compania_id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_observaciones', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_emergencias', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, () => cargarDatos())
+      .subscribe();
+  }
 }
+let suscritoPizarraCelular = false;
 
 cargarDatos();
 

@@ -330,6 +330,17 @@ async function cargarDatos(){
 
   renderCiaFiltro();
   renderTabla();
+  suscribirRealtime();
+}
+
+let suscritoHistorial = false;
+function suscribirRealtime(){
+  if(suscritoHistorial) return;
+  suscritoHistorial = true;
+  sb.channel('historial-despacho-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => cargarDatos())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'alertas_especiales', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => cargarDatos())
+    .subscribe();
 }
 
 let COMPANIAS_ID_NOMBRE = {};

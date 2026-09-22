@@ -235,6 +235,24 @@ async function cargarSesion(){
   if(!tieneAcceso) return;
 
   await Promise.all([renderDashStats(), cargarFlotaMini(), renderPersonalOperativo()]);
+  suscribirRealtime();
+}
+
+let suscritoComandancia = false;
+function suscribirRealtime(){
+  if(suscritoComandancia || !miCuerpoId) return;
+  suscritoComandancia = true;
+  sb.channel('comandancia-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, () => {
+      renderDashStats(); renderPersonalOperativo();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      renderDashStats(); cargarFlotaMini();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      renderDashStats();
+    })
+    .subscribe();
 }
 
 async function renderDashStats(){

@@ -309,6 +309,16 @@ function suscribirEstadoCarro(){
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'carros', filter: `id=eq.${miCarroId}` }, (payload) => {
       aplicarEstadoPill(payload.new.estado);
     })
+    // Dotación (conductor/oficial/tripulantes) asignada desde el PC del
+    // Cuartel — no tiene carro_id directo en la tabla de tripulantes, así
+    // que se escucha sin filtro y se recarga con el RPC (ya resuelve el
+    // Carro desde la propia sesión).
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion', filter: `carro_id=eq.${miCarroId}` }, () => {
+      cargarDotacion();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion_tripulantes' }, () => {
+      cargarDotacion();
+    })
     .subscribe();
 }
 

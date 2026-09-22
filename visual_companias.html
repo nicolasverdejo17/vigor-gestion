@@ -203,6 +203,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let COMPANIAS = [];
+let suscritoVisualCompanias = false;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
@@ -256,6 +257,15 @@ async function cargarDatos(){
 
   document.getElementById('grid').style.display = 'grid';
   render();
+
+  if(!suscritoVisualCompanias){
+    suscritoVisualCompanias = true;
+    sb.channel('visual-companias-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'carros' }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando' }, () => cargarDatos())
+      .subscribe();
+  }
 }
 
 // Misma paleta de 4 estados que el PC del Cuartel — coherencia en todo el sistema.
