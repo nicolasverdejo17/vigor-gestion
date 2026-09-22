@@ -353,6 +353,11 @@
     overflow:visible;
   }
   .bomb-card:hover{ border-color:var(--brass-bright);}
+  .bomb-card__refuerzo{
+    position:absolute; top:6%; left:6%; z-index:2; background:var(--cyan-dim); color:#fff;
+    font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:8px; padding:2px 5px; border-radius:3px; border:1px solid var(--cyan);
+  }
   .bomb-card__badges{
     position:absolute; top:calc(3% + 5px); right:calc(3% + 5px); display:flex; flex-direction:column; gap:3px; z-index:2;
   }
@@ -941,12 +946,16 @@
   }
 
   async function cargarBomberos(){
+    // Se consulta por Cuerpo entero (no solo esta Compañía) para poder
+    // mostrar también a quienes son de OTRA Compañía pero están reforzando
+    // acá ahora mismo — el filtro real queda más abajo.
     const { data } = await sb.from('personal')
-      .select('id, numero_registro, nombre_completo, cargo, foto_url, personal_especialidades(especialidades(codigo)), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
-      .eq('compania_id', miCompaniaId);
+      .select('id, numero_registro, nombre_completo, cargo, compania_id, foto_url, personal_especialidades(especialidades(codigo)), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin, compania_id)')
+      .eq('cuerpo_id', miCuerpoId);
 
     bomberos = (data || []).map(p => {
       const filaVigente = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
+      const presenteEn = filaVigente ? filaVigente.compania_id : null;
       return {
         id: p.id,
         n: p.nombre_completo,
@@ -955,9 +964,17 @@
         foto: p.foto_url,
         esp: (p.personal_especialidades || []).map(pe => pe.especialidades.codigo),
         estado: filaVigente ? filaVigente.estado : 'fuera',
+        home: p.compania_id,
+        presenteEn: presenteEn,
+        refuerzo: !!(presenteEn && presenteEn !== p.compania_id),
         oficial: PRIORIDAD_CARGO.includes(p.cargo),
       };
-    }).sort((a,b) => a.reg - b.reg);
+    })
+    // En esta Compañía se muestran los de casa (aunque estén "fuera") y,
+    // además, cualquiera de otra Compañía que esté reforzando activamente
+    // acá ahora mismo.
+    .filter(b => b.home === miCompaniaId || b.presenteEn === miCompaniaId)
+    .sort((a,b) => a.reg - b.reg);
   }
 
   async function cargarCarros(){
@@ -1085,8 +1102,10 @@
       const insignias = b.esp.map(e=>`<div class="bomb-card__insignia" style="background:${ESP[e]}">${e}</div>`).join('');
       const oscuro = (b.estado === 'no_disponible') ? 'oscuro' : '';
       const fotoEstilo = b.foto ? ` style="background-image:url('${b.foto}')"` : '';
+      const refuerzoTag = b.refuerzo ? `<div class="bomb-card__refuerzo" title="De refuerzo — pertenece a otra Compañía">↳ REFUERZO</div>` : '';
       bombGrid.insertAdjacentHTML('beforeend', `
         <div class="bomb-card" data-reg="${b.reg}" style="--b-color:${color}">
+          ${refuerzoTag}
           <div class="bomb-card__badges">${insignias}</div>
           <div class="bomb-card__foto"${fotoEstilo}>${b.foto ? '' : initials}</div>
           <div class="bomb-card__meta">
@@ -1190,7 +1209,7 @@
     if(!yaAbierto) abrirPopoverSincrono(el, triggerEl, document.getElementById('bombGrid').getBoundingClientRect().top);
   }
   async function setEstadoBombero(i, estado){
-    const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: bomberos[i].id, p_estado: estado });
+    const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: bomberos[i].id, p_estado: estado, p_compania_id: miCompaniaId });
     if(error){ alert('No se pudo cambiar el estado: ' + error.message); return; }
     const eraFuera = bomberos[i].estado === 'fuera';
     const seraFuera = estado === 'fuera';
@@ -1466,16 +1485,35 @@
     const input = document.getElementById('regInput');
     const val = input.value.trim();
     if(!val) return;
-    const b = bomberos.find(x => String(x.reg) === val);
+    let b = bomberos.find(x => String(x.reg) === val);
     if(!b){
-      input.style.borderColor = 'var(--burdeo)';
+      // No está entre los que ya se muestran acá (de casa, o ya reforzando)
+      // — puede ser un bombero de OTRA Compañía llegando de refuerzo. Se
+      // busca en todo el Cuerpo antes de descartarlo.
+      const numeroInt = parseInt(val, 10);
+      const { data: otro } = await sb.from('personal')
+        .select('id, numero_registro, nombre_completo, cargo, compania_id, estado')
+        .eq('cuerpo_id', miCuerpoId).eq('numero_registro', numeroInt).maybeSingle();
+      if(!otro || otro.estado !== 'activo'){
+        input.style.borderColor = 'var(--burdeo)';
+        setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+        alert('N° ' + val + ' no existe en este Cuerpo o su cuenta no está activa.');
+        return;
+      }
+      const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: otro.id, p_estado: 'disponible', p_compania_id: miCompaniaId });
+      if(error){ alert('No se pudo registrar: ' + error.message); return; }
+      await cargarBomberos();
+      renderBombGrid();
+      renderCarrosGrid();
+      renderMiniResumen();
+      input.value = '';
+      input.style.borderColor = 'var(--estado-disponible)';
       setTimeout(()=>{ input.style.borderColor = ''; }, 900);
-      alert('N° ' + val + ' no pertenece a esta Compañía. Verificá el número o pedile a un Director/Secretario que lo asigne primero.');
       return;
     }
     const yaEstaba = b.estado !== 'fuera';
     const nuevoEstado = yaEstaba ? 'fuera' : 'disponible';
-    const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: nuevoEstado });
+    const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: nuevoEstado, p_compania_id: miCompaniaId });
     if(error){ alert('No se pudo registrar: ' + error.message); return; }
     b.estado = nuevoEstado;
     renderBombGrid();
