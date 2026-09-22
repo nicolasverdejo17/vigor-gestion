@@ -229,15 +229,24 @@ async function cargarDatos(){
 }
 
 let suscritoCompaniaCelular = false;
+// Mismo cuidado que en pc_compania.html: ignorar el eco de los cambios que
+// uno mismo acaba de hacer (cambiar mi estado, marcar a alguien de
+// Guardia) para no pisar la UI en pleno medio de la acción.
+let ultimaAccionLocalMs = 0;
+function marcarAccionLocal(){ ultimaAccionLocalMs = Date.now(); }
+function esEcoPropio(){ return Date.now() - ultimaAccionLocalMs < 2500; }
+
 function suscribirRealtime(){
   if(suscritoCompaniaCelular) return;
   suscritoCompaniaCelular = true;
   sb.channel('compania-celular-' + miCompaniaId)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, async () => {
+      if(esEcoPropio()) return;
       await cargarGuardia();
       renderGuardia();
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `compania_id=eq.${miCompaniaId}` }, async () => {
+      if(esEcoPropio()) return;
       await cargarCarros();
       renderCarros();
     })
@@ -284,6 +293,7 @@ function abrirSelectorEstadoCarro(ev, i){
   sel.classList.add('open');
 }
 async function setEstadoCarroCel(i, estado){
+  marcarAccionLocal();
   const { error } = await sb.from('carros').update({ estado }).eq('id', CARROS_CEL[i].id);
   document.getElementById('selCarroCel').classList.remove('open');
   if(error){ toast('No se pudo actualizar — ' + error.message); return; }
@@ -299,6 +309,7 @@ document.addEventListener('click', () => {
 // Agregar a Guardia Activa por N° de Registro — mismo toggle que el PC
 // del Cuartel (pedido explícito, solo disponible en Vista Oficial).
 async function agregarPorRegistro(){
+  marcarAccionLocal();
   const input = document.getElementById('regAddInput');
   const val = input.value.trim();
   if(!val) return;
@@ -330,6 +341,7 @@ function renderMiEstadoOpciones(){
 }
 
 async function setMiEstado(e){
+  marcarAccionLocal();
   const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: miPersonalId, p_estado: e });
   if(error){ toast('No se pudo cambiar tu estado: ' + error.message); return; }
   miEstado = e;
@@ -357,6 +369,7 @@ function renderGuardia(){
 }
 
 async function ciclarEstado(reg){
+  marcarAccionLocal();
   const b = GUARDIA.find(x => String(x.reg) === String(reg));
   const idx = ESTADOS.indexOf(b.estado);
   const nuevo = ESTADOS[(idx + 1) % ESTADOS.length];

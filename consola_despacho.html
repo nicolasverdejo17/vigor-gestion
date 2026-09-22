@@ -403,6 +403,13 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let miCuerpoId = null, miPersonalId = null;
 
+// Mismo cuidado que en pc_compania.html: ignorar el eco de los propios
+// cambios (confirmar despacho, marcar operador en turno) por una ventana
+// corta, para no reconstruir la UI en pleno medio de la acción.
+let ultimaAccionLocalMs = 0;
+function marcarAccionLocal(){ ultimaAccionLocalMs = Date.now(); }
+function esEcoPropio(){ return Date.now() - ultimaAccionLocalMs < 2500; }
+
 // Tono de despacho — sintetizado con Web Audio API (dos tonos alternados,
 // típico "warble" de aviso), así funciona 100% local/offline: no depende
 // de ningún archivo ni de conexión a internet para sonar. El audio sale
@@ -494,6 +501,7 @@ function suscribirRealtime(){
     // reportado), y acá importa doble: para el selector de Carros al armar
     // un despacho, y para la franja de estado por Compañía.
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'carros', filter: `cuerpo_id=eq.${miCuerpoId}` }, async () => {
+      if(esEcoPropio()) return;
       await cargarCiasYCarros();
       renderCiaStrip();
       renderCarroSelect();
@@ -507,6 +515,7 @@ function suscribirRealtime(){
     // Varios Operadores de Central pueden marcarse en turno al mismo
     // tiempo desde consolas distintas.
     .on('postgres_changes', { event: '*', schema: 'public', table: 'operadores_central_turno', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      if(esEcoPropio()) return;
       cargarOperadorTurno();
     })
     // Reportes de coordenadas nuevos desde el Celular — el badge de la
@@ -540,6 +549,7 @@ function renderOperadoresTurno(){
 }
 
 async function marcarOperador(){
+  marcarAccionLocal();
   const input = document.getElementById('operadorInput');
   const val = input.value.trim();
   if(!val) return;
@@ -851,6 +861,7 @@ function mensajeErrorOperador(error){
 }
 
 async function confirmarDespacho(){
+  marcarAccionLocal();
   const dir = document.getElementById('direccion').value.trim();
   if(!dir || despachoActual.length===0 || !tipoSel){
     toast('Completá dirección, al menos una Compañía/carro y el tipo de emergencia');
