@@ -77,6 +77,18 @@
     padding:11px 13px; font-size:14px; color:var(--text); font-family:'Inter';
   }
   .form-field input:focus, .form-field select:focus{ outline:none; border-color:var(--cyan);}
+
+  /* Bug reportado: "completamente descompaginado" en Celular — el form de
+     2 columnas fijas no entraba en un teléfono. */
+  @media (max-width:760px){
+    html,body{ overflow:auto; height:auto; min-height:100%;}
+    body{ height:auto;}
+    .form-wrap{ padding:14px 12px 20px; overflow:visible;}
+    .form-body{ padding:16px 16px; max-width:none;}
+    .form-row{ grid-template-columns:1fr; gap:12px;}
+    .form-head h2{ font-size:17px;}
+    .nameplate-inner{ padding:12px 14px;}
+  }
   .form-field input.mono{ font-family:'JetBrains Mono',monospace;}
 
   .cat-select-row{ display:flex; gap:8px; flex-wrap:wrap;}
@@ -165,7 +177,7 @@
 
   <div class="form-wrap">
     <div class="form-head">
-      <button class="back-btn" onclick="window.location.href='administracion_general.html'">← Volver a Administración General</button>
+      <button class="back-btn" onclick="volverCrearCarro()">← Volver</button>
       <h2>Crear Carro</h2>
     </div>
 
@@ -237,6 +249,13 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
+// Opciones — en PC se mantiene exactamente el destino de siempre
+// (Administración General).
+function volverCrearCarro(){
+  window.location.href = window.innerWidth <= 760 ? 'opciones_celular.html' : 'administracion_general.html';
+}
 
 // La Compañía queda fija a la de la sesión real — ya no es un selector de
 // rol demo. Si la persona tiene compania_id, crea carros ahí; si es

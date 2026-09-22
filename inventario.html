@@ -39,6 +39,12 @@
     font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
     padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
   }
+  .back-cuartel{
+    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11.5px; padding:7px 13px; border-radius:5px; cursor:pointer; margin-right:12px;
+  }
+  .back-cuartel:hover{ border-color:var(--brass-bright); color:var(--text);}
   .role-switch{ display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
   .role-switch-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-right:2px;}
   .role-switch-btn{
@@ -133,6 +139,21 @@
     tr.print-hidden{ display:none !important;}
   }
 
+  /* Bug reportado: "completamente descompaginado" en Celular — toolbar y
+     tabla no tenían ningún ajuste para pantalla angosta. */
+  @media (max-width:760px){
+    html,body{ overflow:auto; height:auto; min-height:100%;}
+    body{ height:auto;}
+    .nameplate-inner{ padding:12px 14px;}
+    .brand-text h1{ font-size:15px;}
+    .toolbar{ padding:12px 14px;}
+    .search-box{ margin-left:0; width:100%; order:10;}
+    .subcat-row{ padding:8px 14px;}
+    .table-wrap{ padding:0 14px 20px; overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    table{ min-width:640px;}
+    .modal-box{ width:calc(100vw - 32px); max-width:360px;}
+  }
+
   .sync-note{
     flex-shrink:0; padding:8px 26px; font-size:11px; color:var(--text-dim);
     background:var(--bg); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:6px;
@@ -193,6 +214,7 @@
   <div class="nameplate">
     <div class="nameplate-inner">
       <div class="brand">
+        <button class="back-cuartel" onclick="volverCuartel()">← Volver</button>
         <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
         <div class="brand-text"><h1 id="tituloInv">Inventario</h1><span>Vigor</span></div>
       </div>
@@ -253,6 +275,14 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
+// Opciones — en PC vuelve al historial normal del navegador (esta pantalla
+// no tenía ningún botón de Volver antes).
+function volverCuartel(){
+  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
+  history.back();
+}
 
 // CATS/SUBCATS/ITEMS ahora se cargan reales desde Supabase (cargarDatos).
 // Las claves ya no son slugs fijos — son los uuid reales de

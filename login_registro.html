@@ -313,6 +313,11 @@ function screens(){
         <label>Compañía a la que postulas</label>
         <select id="regCompania">${companiasActivas.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}</select>
       </div>
+      <div class="field">
+        <label>Fecha de ingreso a la Compañía</label>
+        <input type="text" id="regFechaIngreso" placeholder="dd/mm/aaaa" inputmode="numeric" oninput="this.value = formatearFecha(this.value)">
+        <div class="hint" style="font-size:11px; margin-top:5px; color:#7B99A3;">La fecha real en que entraste — de ahí se calcula tu antigüedad, no de cuándo se aprueba esta solicitud.</div>
+      </div>
 
       <button class="btn-primary" onclick="enviarSolicitud()">Enviar Solicitud</button>
 
@@ -500,7 +505,7 @@ function formatearFecha(valor){
 }
 
 async function enviarSolicitud(){
-  const campos = ['regNombre', 'regRut', 'regFechaNac', 'regTelefono'];
+  const campos = ['regNombre', 'regRut', 'regFechaNac', 'regTelefono', 'regFechaIngreso'];
   let faltantes = false;
   campos.forEach(id => {
     const el = document.getElementById(id);
@@ -520,9 +525,12 @@ async function enviarSolicitud(){
   const numeroTxt = document.getElementById('regNumero').value.trim();
 
   // dd/mm/aaaa -> yyyy-mm-dd para la columna date
-  const fnac = document.getElementById('regFechaNac').value.trim();
-  const partes = fnac.split('/');
-  const fechaIso = partes.length === 3 ? `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}` : null;
+  const aIso = (txt) => {
+    const partes = txt.trim().split('/');
+    return partes.length === 3 ? `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}` : null;
+  };
+  const fechaIso = aIso(document.getElementById('regFechaNac').value);
+  const fechaIngresoIso = aIso(document.getElementById('regFechaIngreso').value);
 
   const { error } = await sb.rpc('crear_solicitud_alta', {
     p_cuerpo_id: cuerpoActivo,
@@ -531,7 +539,8 @@ async function enviarSolicitud(){
     p_rut: document.getElementById('regRut').value.trim(),
     p_fecha_nacimiento: fechaIso,
     p_telefono: document.getElementById('regTelefono').value.trim(),
-    p_numero_bombero: numeroTxt ? parseInt(numeroTxt, 10) : null
+    p_numero_bombero: numeroTxt ? parseInt(numeroTxt, 10) : null,
+    p_fecha_ingreso: fechaIngresoIso
   });
 
   if(error){

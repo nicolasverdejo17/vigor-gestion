@@ -160,6 +160,11 @@
     .nameplate h1{ font-size:15px;}
     .back-btn{ font-size:11px; padding:8px 11px;}
     .role-switch-row{ padding:8px 14px;}
+    /* Bug reportado: "Exportar PDF" y "Agregar Entrada" quedaban apretados
+       junto al título "Hoja de Vida" en una sola fila sin wrap. */
+    .hv-head{ flex-direction:column; align-items:stretch; gap:10px;}
+    .hv-head > div{ display:flex; gap:8px;}
+    .btn-exportar-hv, .btn-agregar-hv{ flex:1; text-align:center;}
   }
 
   @media print{
@@ -402,7 +407,13 @@ let bomberoActual = null;
 // siendo el destino correcto cuando quien mira es un PC/Director viendo la
 // ficha de OTRA persona.
 function volverDesdeFicha(){
-  window.location.href = esViendoAMiPropiaFicha ? 'opciones_celular.html' : 'pc_compania.html';
+  // En PC (ancho de escritorio) se mantiene el comportamiento de siempre:
+  // siempre vuelve a pc_compania.html, sin importar de quién es la ficha.
+  // Solo en Celular (mobile) cambia el destino: la propia ficha vuelve a
+  // Opciones, la ficha de otra persona vuelve al listado de Usuarios del
+  // Sistema (de donde "Hojas de Vida (de otros)" la abrió).
+  if(window.innerWidth > 760){ window.location.href = 'pc_compania.html'; return; }
+  window.location.href = esViendoAMiPropiaFicha ? 'opciones_celular.html' : 'usuarios_sistema.html';
 }
 
 async function cargarDatos(){

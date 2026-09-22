@@ -118,12 +118,8 @@
         <div class="row-l"><div class="row-ico">📋</div><div><b>Mi Hoja de Vida</b><span>Ascensos, reconocimientos, cursos — solo lectura</span></div></div>
         <span class="row-arrow">›</span>
       </div>
-      <div class="row" onclick="window.location.href='gestion_capacitacion.html'">
+      <div class="row" onclick="window.location.href='gestion_capacitacion.html?mios=1'">
         <div class="row-l"><div class="row-ico">🎓</div><div><b>Mis Cursos</b><span>Historial completo de Capacitación</span></div></div>
-        <span class="row-arrow">›</span>
-      </div>
-      <div class="row" onclick="window.location.href='tablet_dotacion.html'">
-        <div class="row-l"><div class="row-ico">🚒</div><div><b>Dotación de mi Compañía</b><span>Solo lectura</span></div></div>
         <span class="row-arrow">›</span>
       </div>
 
@@ -180,11 +176,11 @@ async function cargarSesion(){
 // dispositivo, no hace falta duplicarla.
 const FILAS_ADMIN = [
   { ico:'📋', nombre:'Asignación de Dotación', desc:'Asignar bomberos a carros',
-    cargos:['Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Capitán','Director'], roles:[], href:'pc_compania.html' },
+    cargos:['Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Capitán','Director'], roles:[], href:'asignacion_dotacion_celular.html' },
   { ico:'📝', nombre:'Solicitudes de Alta', desc:'Aprobar/rechazar postulantes',
     cargos:['Secretario/a','Director'], roles:[], href:'solicitudes_alta.html' },
   { ico:'📖', nombre:'Hojas de Vida (de otros) / Dar de Baja', desc:'Editar historial, dar de baja o reactivar',
-    cargos:['Secretario/a','Director'], roles:[], href:'ficha_bombero.html' },
+    cargos:['Secretario/a','Director'], roles:[], href:'usuarios_sistema.html' },
   { ico:'📦', nombre:'Inventario', desc:'Ingreso, baja, historial de ítems',
     cargos:['Tesorero/a','Director'], roles:['Depto. Material Menor','Depto. Material Mayor'], href:'inventario.html' },
   { ico:'🚒', nombre:'Crear Carro', desc:'Alta de un carro nuevo en la Compañía',

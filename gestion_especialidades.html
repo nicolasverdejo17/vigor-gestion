@@ -121,6 +121,22 @@
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
 
+  /* Bug reportado: "compaginar bien" en Celular — la tabla no tenía ningún
+     ajuste, quedaba cortada en un teléfono. Se envuelve en scroll
+     horizontal en vez de forzar el reflow de una tabla completa. */
+  @media (max-width:760px){
+    html,body{ overflow:auto; height:auto; min-height:100%;}
+    body{ height:auto;}
+    .content-wrap{ padding:14px 14px 20px; overflow:visible;}
+    .nameplate-inner{ padding:12px 14px;}
+    .brand-text h1{ font-size:15px;}
+    .leyenda-row{ padding:10px 14px; flex-direction:column; align-items:stretch;}
+    .btn-nueva-esp{ width:100%;}
+    .tabla-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px;}
+    table{ min-width:560px;}
+    .modal-box{ width:calc(100vw - 32px); max-width:380px;}
+  }
+
   .back-cuartel{
     background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
     font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
@@ -144,7 +160,7 @@
   <div class="nameplate">
     <div class="nameplate-inner">
       <div class="brand">
-        <button class="back-cuartel" onclick="history.back()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <button class="back-cuartel" onclick="volverCuartel()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
         <div class="brand-text"><h1>Gestión de Especialidades</h1><span id="subtitulo">Cuerpo de Bomberos · Vigor</span></div>
       </div>
       <div class="role-tag" id="roleTag">Sin sesión</div>
@@ -164,12 +180,14 @@
     </div>
 
     <div class="content-wrap">
-      <table>
-        <thead>
-          <tr><th>Bombero</th><th>N° Registro</th><th>Especialidades</th><th></th></tr>
-        </thead>
-        <tbody id="tablaBody"></tbody>
-      </table>
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr><th>Bombero</th><th>N° Registro</th><th>Especialidades</th><th></th></tr>
+          </thead>
+          <tbody id="tablaBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -220,6 +238,13 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
+// Opciones — en PC se mantiene el historial normal del navegador.
+function volverCuartel(){
+  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
+  history.back();
+}
 
 // ESPECIALIDADES y BOMBEROS ahora se cargan reales desde Supabase
 // (cargarDatos()), scopeados por RLS a mi_cuerpo_id() — nada de esto

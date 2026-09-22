@@ -988,6 +988,12 @@
         await cargarCarros();
         renderCarrosGrid();
       })
+      // Bug reportado: asignar una Especialidad (gestion_especialidades.html)
+      // no se reflejaba acá sin recargar a mano.
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_especialidades' }, async () => {
+        await cargarBomberos();
+        renderBombGrid();
+      })
       // Observaciones/emergencias de la Pizarra publicadas directo (no solo
       // las que llegan junto con un despacho nuevo).
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_emergencias', filter: `cuerpo_id=eq.${miCuerpoId}` }, async () => {

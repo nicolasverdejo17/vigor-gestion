@@ -59,6 +59,21 @@
 
   .toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--panel-alt); border:1px solid var(--master); color:#fff; padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none; transition:all .25s; z-index:50; text-align:center;}
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* Bug reportado: pedido de que el listado de bomberos (roster para
+     "Hojas de Vida de otros") funcione bien en Celular. Tabla ancha se
+     envuelve en scroll horizontal en vez de reflow forzado. */
+  @media (max-width:760px){
+    html,body{ overflow:auto; height:auto; min-height:100%; border-width:0;}
+    body{ height:auto;}
+    .nameplate-inner{ padding:12px 14px; flex-wrap:wrap; gap:8px;}
+    .brand-text h1{ font-size:15px;}
+    .toolbar{ padding:12px 14px; flex-wrap:wrap;}
+    .search-input{ min-width:0;}
+    .content-wrap{ padding:0 14px 20px;}
+    .tabla-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px;}
+    table{ min-width:720px;}
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
@@ -78,7 +93,7 @@
   <div class="nameplate">
     <div class="nameplate-inner">
       <div style="display:flex; align-items:center;">
-        <button class="back-btn" onclick="history.back()">← Volver</button>
+        <button class="back-btn" onclick="volverCuartel()">← Volver</button>
         <div class="brand-text"><h1>Usuarios del Sistema</h1><span id="nombreCuerpoHead">Todas las Compañías, sin filtro · Vigor</span></div>
       </div>
       <div class="role-tag" id="roleTag">Sesión: —</div>
@@ -96,10 +111,12 @@
   </div>
 
   <div class="content-wrap">
-    <table>
-      <thead><tr><th>N° Reg.</th><th>Nombre</th><th>Cargo</th><th>Compañía</th><th>Ingreso</th><th>Especialidades</th><th>Estado</th><th></th></tr></thead>
-      <tbody id="tablaBody"></tbody>
-    </table>
+    <div class="tabla-scroll">
+      <table>
+        <thead><tr><th>N° Reg.</th><th>Nombre</th><th>Cargo</th><th>Compañía</th><th>Ingreso</th><th>Especialidades</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -109,6 +126,13 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
+// Opciones — en PC se mantiene el historial normal del navegador.
+function volverCuartel(){
+  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
+  history.back();
+}
 
 // Vigor es un producto comercial configurable — la cantidad de Compañías la
 // define cada Cuerpo cliente, nunca un número fijo. El orden se genera

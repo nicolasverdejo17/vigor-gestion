@@ -76,6 +76,21 @@
   .hist-sol-badge.aprobado{ background:var(--servicio);}
   .hist-sol-badge.rechazado{ background:var(--burdeo);}
 
+  /* Bug reportado: "todo muy apretado" en Celular — el grid de tarjetas
+     forzaba un mínimo de 360px por tarjeta (no entra en un teléfono), y los
+     datos internos quedaban en 2 columnas comprimidas. */
+  @media (max-width:760px){
+    html,body{ overflow:auto; height:auto; min-height:100%;}
+    body{ height:auto;}
+    .content-wrap{ padding:14px 14px 24px; overflow:visible;}
+    .nameplate-inner{ padding:12px 14px;}
+    .brand-text h1{ font-size:15px;}
+    .grid{ grid-template-columns:1fr; gap:12px;}
+    .sol-datos{ grid-template-columns:1fr 1fr; gap:10px 12px;}
+    .head-row{ flex-wrap:wrap;}
+    .btn-exportar-sol{ margin-left:0; width:100%;}
+  }
+
   @media print{
     body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
     .nameplate, .grid, .btn-exportar-sol, .toast, .count-badge, #headPendientes{ display:none !important;}
@@ -166,7 +181,7 @@
   <div class="nameplate">
     <div class="nameplate-inner">
       <div class="brand">
-        <button class="back-cuartel" onclick="history.back()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <button class="back-cuartel" onclick="volverCuartel()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
         <div class="brand-text"><h1>Solicitudes de Alta</h1><span id="subtitulo">Vigor</span></div>
       </div>
       <div class="role-tag" id="roleTag">Sin sesión</div>
@@ -232,6 +247,13 @@ const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
+// Opciones — en PC se mantiene el historial normal del navegador.
+function volverCuartel(){
+  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
+  history.back();
+}
+
 let SOLICITUDES = [];
 let RESUELTAS = [];
 
@@ -281,6 +303,7 @@ function render(){
         <div><div class="sol-dato-label">Fecha nac.</div><div class="sol-dato-val">${s.fecha_nacimiento}</div></div>
         <div><div class="sol-dato-label">Teléfono</div><div class="sol-dato-val mono">${s.telefono}</div></div>
         <div><div class="sol-dato-label">Compañía solicitada</div><div class="sol-dato-val">${s.companias ? s.companias.nombre : '—'}</div></div>
+        <div><div class="sol-dato-label">Fecha de ingreso</div><div class="sol-dato-val">${s.fecha_ingreso || '—'}</div></div>
       </div>
       <div class="sol-actions">
         <button class="btn-aprobar" onclick="aprobar('${s.id}')">✓ Aprobar</button>

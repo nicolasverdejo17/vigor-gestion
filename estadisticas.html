@@ -128,6 +128,25 @@
   .charts-row{ display:grid; grid-template-columns:1.4fr 1fr; gap:14px; margin-bottom:14px;}
   @media (max-width:900px){ .charts-row{ grid-template-columns:1fr;} }
 
+  /* Bug reportado: "descompaginado" en Celular — KPIs en 4 columnas fijas
+     y otros grids no tenían ningún ajuste para pantalla angosta. */
+  @media (max-width:760px){
+    html,body{ overflow:auto; height:auto; min-height:100%;}
+    body{ height:auto;}
+    .content-wrap{ padding:14px 14px 20px; overflow:visible;}
+    .nameplate-inner{ padding:12px 14px;}
+    .brand-text h1{ font-size:15px;}
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); gap:10px;}
+    .nivel-tabs{ padding:0 14px; overflow-x:auto;}
+    .stat-mini-grid{ grid-template-columns:repeat(2,1fr);}
+    .charts-row{ min-width:0;}
+    .chart-panel{ min-width:0; padding:16px 14px;}
+    .bars{ gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; min-width:0;}
+    .bar-col{ flex:0 0 auto; width:36px;}
+    .view-toggle{ margin-left:0;}
+    .btn-exportar{ margin-left:0;}
+  }
+
   .line-chart-svg{ width:100%; height:auto; display:block;}
   .donut-wrap{ display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap;}
   .donut-legend{ display:flex; flex-direction:column; gap:8px;}
@@ -192,7 +211,7 @@
   <div class="nameplate">
     <div class="nameplate-inner">
       <div class="brand">
-        <button class="back-cuartel" onclick="history.back()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <button class="back-cuartel" onclick="volverCuartel()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
         <div class="brand-text"><h1 id="tituloEstadisticas">Estadísticas</h1><span id="cuerpoLabel">Vigor</span></div>
       </div>
       <div class="role-tag" id="roleTag" style="font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);">Sin sesión</div>
@@ -289,6 +308,13 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
+// Opciones — en PC se mantiene el historial normal del navegador.
+function volverCuartel(){
+  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
+  history.back();
+}
 
 const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
 const ROLES_CUERPO_GENERAL = ['Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante','Superintendente','Vicesuperintendente'];
