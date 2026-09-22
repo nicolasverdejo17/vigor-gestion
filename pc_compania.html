@@ -943,6 +943,16 @@
         }
         await cargarPizarra();
       })
+      // Bug reportado: el estado de un Carro no se actualizaba en vivo entre
+      // dispositivos — la Tablet lo cambia (tablet_actualizar_estado_carro),
+      // u otro PC lo cambia, y este PC se quedaba con la foto vieja hasta
+      // recargar la página a mano. Se escucha cuerpo entero (no solo esta
+      // Compañía) porque acá también se muestran carros de refuerzo.
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'carros', filter: `cuerpo_id=eq.${miCuerpoId}` }, async () => {
+        await cargarCarros();
+        renderCarrosGrid();
+        renderMiniResumen();
+      })
       .subscribe();
   }
 

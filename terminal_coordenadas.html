@@ -134,7 +134,6 @@
   </div>
 
   <div class="central-tabs">
-    <a href="comandancia.html" class="central-tab" style="border-color:var(--brass); color:var(--brass-bright);">← Comandancia</a>
     <a href="consola_despacho.html" class="central-tab">Consola de Despacho</a>
     <a href="visual_companias.html" class="central-tab">Visual de Compañías</a>
     <a href="puestos_mando_activos.html" class="central-tab">Modo Crisis Compañías</a>
@@ -180,10 +179,21 @@ let miCuerpoId = null;
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
-  const { data: perfil } = await sb.from('personal').select('cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
-  if(!perfil) return;
-  miCuerpoId = perfil.cuerpo_id;
-  document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+
+  // La Central de Alarmas (sesión institucional, sin fila en "personal")
+  // también usa esta pestaña — se prueba primero, igual que en
+  // consola_despacho.html.
+  const { data: cuerpoCentral } = await sb.rpc('central_obtener_cuerpo');
+  const filaCentral = cuerpoCentral && cuerpoCentral[0];
+  if(filaCentral){
+    miCuerpoId = filaCentral.c_cuerpo_id;
+    document.getElementById('cuerpoLabel').textContent = filaCentral.c_nombre_oficial + ' · Vigor';
+  } else {
+    const { data: perfil } = await sb.from('personal').select('cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
+    if(!perfil) return;
+    miCuerpoId = perfil.cuerpo_id;
+    document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+  }
   await refrescarFeed();
 }
 

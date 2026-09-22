@@ -244,6 +244,8 @@ const ESTADO_COLOR_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C'
 // pasar sin autenticarse. Se identifica una sola vez desde login_registro.html
 // desde el mismo login que todos) y la sesión queda persistida en este dispositivo.
 let identificado = false;
+let miCarroId = null;
+let suscritoEstadoCarro = false;
 
 async function cargarCarro(){
   const { data: { session } } = await sb.auth.getSession();
@@ -264,10 +266,50 @@ async function cargarCarro(){
   }
 
   identificado = true;
+  miCarroId = row.t_id;
   document.getElementById('badgeNom').textContent = row.t_nomenclatura;
   document.getElementById('tituloCarro').textContent = `Carro ${row.t_nomenclatura} — ${row.t_tipo_descripcion}`;
   document.getElementById('subCarro').textContent = (row.t_compania_nombre ? row.t_compania_nombre + ' · ' : 'Comandancia · ') + row.t_cuerpo_nombre;
   aplicarEstadoPill(row.t_estado);
+  suscribirEstadoCarro();
+  await cargarDotacion();
+}
+
+// Bug reportado: Conductor/Oficial a Cargo/Tripulantes se quedaban con el
+// texto fijo "— pendiente de conectar —" para siempre — el RPC que trae la
+// dotación real (asignada desde el PC del Cuartel) existía en la base pero
+// nunca se llamaba desde acá.
+function aplicarDotVal(id, texto){
+  const el = document.getElementById(id);
+  el.textContent = texto || '— Sin asignar —';
+  el.classList.toggle('empty', !texto);
+}
+async function cargarDotacion(){
+  const { data, error } = await sb.rpc('tablet_obtener_dotacion');
+  if(error){ return; }
+  const filas = data || [];
+  const conductor = filas.find(f => f.rol === 'conductor');
+  const oficial = filas.find(f => f.rol === 'oficial');
+  const tripulantes = filas.filter(f => f.rol === 'tripulante');
+
+  aplicarDotVal('dotConductor', conductor ? `${conductor.nombre_completo} (N° ${conductor.numero_registro})` : '');
+  aplicarDotVal('dotOficial', oficial ? `${oficial.nombre_completo} (N° ${oficial.numero_registro})` : '');
+  aplicarDotVal('dotTripulantes', tripulantes.length ? tripulantes.map(t => t.nombre_completo).join(', ') : '');
+}
+
+// Bug reportado: el estado no se actualizaba en vivo entre dispositivos —
+// si el PC del Cuartel (u otro origen, como un despacho confirmado desde la
+// Central) cambia el estado de este Carro, la Tablet se quedaba con el pill
+// viejo hasta recargar a mano. Se suscribe una sola vez, filtrado a este
+// Carro puntual (no todo el Cuerpo — la Tablet es de un solo Carro).
+function suscribirEstadoCarro(){
+  if(suscritoEstadoCarro || !miCarroId) return;
+  suscritoEstadoCarro = true;
+  sb.channel('tablet-estado-carro-' + miCarroId)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'carros', filter: `id=eq.${miCarroId}` }, (payload) => {
+      aplicarEstadoPill(payload.new.estado);
+    })
+    .subscribe();
 }
 
 function aplicarEstadoPill(estado){

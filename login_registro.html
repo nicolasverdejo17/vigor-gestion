@@ -355,12 +355,13 @@ function destinoPropio(perfil){
   return 'consola_despacho.html';
 }
 
-// Un solo login para todo — persona, Carro o PC del Cuartel. Se prueban en
-// orden (persona primero, es el caso más común y no necesita Código de
-// Cuerpo porque el N° de Registro ya es único en todo Vigor) y el que
-// resuelva gana. Carro y PC del Cuartel necesitan el Código de Cuerpo
-// porque su identificador (Nomenclatura / N° de Compañía) solo es único
-// DENTRO de un Cuerpo, no en todo Vigor.
+// Un solo login para todo — persona, Carro, PC del Cuartel o Central de
+// Alarmas. Se prueban en orden (persona primero, es el caso más común y no
+// necesita Código de Cuerpo porque el N° de Registro ya es único en todo
+// Vigor) y el que resuelva gana. Carro, PC del Cuartel y Central necesitan
+// el Código de Cuerpo porque su identificador (Nomenclatura / N° de
+// Compañía / la palabra "CENTRAL") solo es único DENTRO de un Cuerpo, no
+// en todo Vigor.
 async function intentarLogin(){
   const usuario = document.getElementById('loginNumero').value.trim();
   const codigoCuerpo = document.getElementById('loginCodigoCuerpo').value.trim();
@@ -407,8 +408,23 @@ async function intentarLogin(){
     }
   }
 
-  // 2) y 3) PC del Cuartel / Carro — ambos necesitan Código de Cuerpo.
+  // 2), 3) y 4) Central de Alarmas / PC del Cuartel / Carro — los tres
+  // necesitan Código de Cuerpo. La Central es la única cuenta institucional
+  // que no tiene un número — hay una sola por Cuerpo — así que se identifica
+  // escribiendo la palabra "CENTRAL" en Usuario.
   if(codigoCuerpo){
+    if(usuario.toUpperCase() === 'CENTRAL'){
+      const { data: emailCentral } = await sb.rpc('resolver_central_login', { p_codigo_cuerpo: codigoCuerpo });
+      if(emailCentral){
+        const { error: authError } = await sb.auth.signInWithPassword({ email: emailCentral, password });
+        if(authError){ toast('Contraseña incorrecta'); return; }
+        toast('Central de Alarmas identificada — abriendo Consola de Despacho…');
+        setTimeout(() => { window.location.href = 'consola_despacho.html'; }, 500);
+        return;
+      }
+      toast('No se encontró una Central configurada para ese Código de Cuerpo');
+      return;
+    }
     if(!isNaN(numeroInt)){
       const { data: emailPc } = await sb.rpc('resolver_pc_login', { p_codigo_cuerpo: codigoCuerpo, p_numero_compania: numeroInt });
       if(emailPc){

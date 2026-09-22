@@ -44,7 +44,12 @@
   .operador-actual{ text-align:right;}
   .operador-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:4px;}
   .operador-row{ display:flex; align-items:center; gap:8px;}
-  .operador-nombre{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; color:var(--cyan);}
+  .operadores-lista{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end; max-width:280px;}
+  .operador-chip{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11.5px; color:#0D2226;
+    background:var(--cyan); padding:3px 9px; border-radius:11px; white-space:nowrap;
+  }
+  .operador-chip.vacio{ background:none; border:1px dashed var(--line-strong); color:var(--text-dim); font-weight:600;}
   .operador-input{
     background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:5px;
     padding:5px 9px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text); width:64px;
@@ -291,9 +296,9 @@
           <span id="conexionTexto">En línea</span>
         </div>
         <div class="operador-actual">
-          <span class="operador-label">Operador en turno</span>
+          <span class="operador-label">Operadores en turno</span>
           <div class="operador-row">
-            <span class="operador-nombre" id="operadorNombre">— Sin registrar —</span>
+            <div class="operadores-lista" id="operadoresLista"></div>
             <input type="text" class="operador-input" id="operadorInput" placeholder="N° reg." inputmode="numeric" onkeydown="if(event.key==='Enter') marcarOperador();">
           </div>
         </div>
@@ -303,7 +308,6 @@
   </div>
 
   <div class="central-tabs">
-    <a href="comandancia.html" class="central-tab" style="border-color:var(--brass); color:var(--brass-bright);">← Comandancia</a>
     <a href="consola_despacho.html" class="central-tab on">Consola de Despacho</a>
     <a href="visual_companias.html" class="central-tab">Visual de Compañías</a>
     <a href="puestos_mando_activos.html" class="central-tab">Modo Crisis Compañías</a>
@@ -431,14 +435,28 @@ function reproducirTono(url){
   } catch(e){ /* Web Audio no disponible — sigue el resto de la Consola funcionando igual */ }
 }
 
+// La Central de Alarmas tiene su propia cuenta institucional por Cuerpo
+// (cuerpos.auth_user_id), igual que el PC del Cuartel la tiene por
+// Compañía — se prueba primero porque es la puerta de entrada real de
+// esta pantalla. Si no es una sesión de Central, cae al viejo camino de
+// "persona" (compatibilidad con roles que llegaban acá por default).
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
-  const { data: perfil } = await sb.from('personal').select('id, cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
-  if(!perfil) return;
-  miPersonalId = perfil.id;
-  miCuerpoId = perfil.cuerpo_id;
-  document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+
+  const { data: cuerpoCentral } = await sb.rpc('central_obtener_cuerpo');
+  const filaCentral = cuerpoCentral && cuerpoCentral[0];
+  if(filaCentral){
+    miPersonalId = null;
+    miCuerpoId = filaCentral.c_cuerpo_id;
+    document.getElementById('cuerpoLabel').textContent = filaCentral.c_nombre_oficial + ' · Vigor';
+  } else {
+    const { data: perfil } = await sb.from('personal').select('id, cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
+    if(!perfil) return;
+    miPersonalId = perfil.id;
+    miCuerpoId = perfil.cuerpo_id;
+    document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+  }
 
   await Promise.all([cargarClaves(), cargarCiasYCarros(), cargarEmergenciasEnCurso(), cargarOperadorTurno(), actualizarBadgeCoordenadas()]);
   renderCiaStrip(); renderCiaSelect(); renderEmergencias(); renderSeleccionados(); renderAlertas(); renderEmergenciasEnCurso();
@@ -470,11 +488,26 @@ function suscribirRealtime(){
     .subscribe();
 }
 
+// Pueden estar varios Operadores de Central en turno al mismo tiempo — se
+// listan todas las filas activas, no solo una. marcarOperador() abajo es
+// un toggle real (mismo patrón que marcarPorRegistro() en pc_compania.html):
+// escribir un N° que no está en turno lo agrega, escribir el mismo N° de
+// nuevo lo saca.
+let OPERADORES_TURNO = [];
+
 async function cargarOperadorTurno(){
   const { data } = await sb.from('operadores_central_turno')
     .select('personal(nombre_completo, numero_registro)')
-    .eq('cuerpo_id', miCuerpoId).eq('activo', true).maybeSingle();
-  document.getElementById('operadorNombre').textContent = data ? `${data.personal.nombre_completo} — N° ${data.personal.numero_registro}` : '— Sin registrar —';
+    .eq('cuerpo_id', miCuerpoId).eq('activo', true).order('marcado_en');
+  OPERADORES_TURNO = data || [];
+  renderOperadoresTurno();
+}
+
+function renderOperadoresTurno(){
+  const el = document.getElementById('operadoresLista');
+  el.innerHTML = OPERADORES_TURNO.length
+    ? OPERADORES_TURNO.map(o => `<span class="operador-chip">${o.personal.nombre_completo.split(' ')[0]} · N° ${o.personal.numero_registro}</span>`).join('')
+    : '<span class="operador-chip vacio">— Sin operadores —</span>';
 }
 
 async function marcarOperador(){
@@ -488,12 +521,13 @@ async function marcarOperador(){
     toast('N° de operador no reconocido');
     return;
   }
-  const nombre = data && data[0] ? data[0].r_nombre : '';
-  document.getElementById('operadorNombre').textContent = `${nombre} — N° ${val}`;
+  const fila = data && data[0];
+  await cargarOperadorTurno();
   input.value = '';
-  input.style.borderColor = 'var(--servicio)';
+  const salio = fila && fila.r_accion === 'retirado';
+  input.style.borderColor = salio ? 'var(--burdeo-bright)' : 'var(--servicio)';
   setTimeout(()=>{ input.style.borderColor = ''; }, 900);
-  toast(`${nombre} registrado como operador en turno`);
+  if(fila) toast(salio ? `${fila.r_nombre} salió de turno` : `${fila.r_nombre} entró a turno`);
 }
 
 // Indicador real de conexión — usa los eventos nativos del navegador
@@ -776,6 +810,17 @@ function guardarConfigClaves(){
   toast('Configuración de claves guardada');
 }
 
+// La Central necesita al menos un Operador marcado en turno (ver
+// marcarOperador() arriba) para poder confirmar despachos o alertas — a él
+// (o al último marcado) queda atribuida la acción en la base. Persona
+// (bombero/oficial) no se ve afectada, siempre tiene su propio personal_id.
+function mensajeErrorOperador(error){
+  if(error && error.message && error.message.includes('SIN_OPERADOR_EN_TURNO')){
+    return 'Marcá al menos un Operador en turno (arriba, N° de Registro) antes de confirmar';
+  }
+  return null;
+}
+
 async function confirmarDespacho(){
   const dir = document.getElementById('direccion').value.trim();
   if(!dir || despachoActual.length===0 || !tipoSel){
@@ -786,7 +831,7 @@ async function confirmarDespacho(){
   const { error } = await sb.rpc('confirmar_despacho', {
     p_direccion: dir, p_tipo_emergencia_id: tipoSel, p_unidades: unidades
   });
-  if(error){ toast('No se pudo confirmar el despacho — ' + error.message); return; }
+  if(error){ toast(mensajeErrorOperador(error) || 'No se pudo confirmar el despacho — ' + error.message); return; }
 
   reproducirTono(null);
   toast(`Despacho confirmado — ${despachoActual.map(d=>d.ciaNombre+': '+d.carros.map(c=>c.nom).join(',')).join(' | ')}`);
@@ -850,10 +895,10 @@ async function confirmarAlerta(id){
   const sel = alertaCiasSel[id];
   if(sel.length===0){ toast('Elegí al menos una Compañía destino'); return; }
   const todas = sel.length === CIAS_DATA.length;
-  const { error } = await sb.from('alertas_especiales').insert({
-    cuerpo_id: miCuerpoId, tipo: id, companias_destino: todas ? null : sel, operador_id: miPersonalId
+  const { error } = await sb.rpc('confirmar_alerta_especial', {
+    p_tipo: id, p_companias_destino: todas ? null : sel
   });
-  if(error){ toast('No se pudo lanzar la alerta — ' + error.message); return; }
+  if(error){ toast(mensajeErrorOperador(error) || 'No se pudo lanzar la alerta — ' + error.message); return; }
   reproducirTono(null);
   const nombresCias = sel.map(ciaId => CIAS_DATA.find(c=>c.id===ciaId).nombre).join(', ');
   toast(`${a.code} lanzado a: ${nombresCias}`);
