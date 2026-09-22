@@ -266,6 +266,8 @@ let batallones = [];
 let abiertos = new Set();
 let miPuestoMandoId = null;
 let fechaActivacion = null;
+let elapsedBaseMs = 0;
+let elapsedRefPerf = 0;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
@@ -290,6 +292,14 @@ async function cargarDatos(){
 
   const { data: pm } = await sb.from('puestos_mando').select('fecha_activacion').eq('id', miPuestoMandoId).single();
   fechaActivacion = new Date(pm.fecha_activacion);
+  // El cronómetro no vuelve a comparar contra el reloj del sistema en cada
+  // tick (si el reloj del dispositivo está aunque sea unos segundos atrasado
+  // respecto al servidor, esa resta da negativa y queda clavado en 00:00:00
+  // para siempre). Se calcula el desfasaje UNA sola vez acá y de ahí en
+  // adelante se suma tiempo real transcurrido con performance.now(), que
+  // nunca retrocede ni depende de la hora del sistema.
+  elapsedBaseMs = Math.max(0, Date.now() - fechaActivacion.getTime());
+  elapsedRefPerf = performance.now();
 
   await cargarBatallones();
 }
@@ -448,7 +458,7 @@ document.getElementById('btnConfirmarDesactivar').addEventListener('click', asyn
 // puestos_mando), no desde que se abrió esta pestaña.
 function tickTimer(){
   if(!fechaActivacion) return;
-  const s = Math.max(0, Math.floor((Date.now()-fechaActivacion.getTime())/1000));
+  const s = Math.floor((elapsedBaseMs + (performance.now() - elapsedRefPerf)) / 1000);
   const hh = String(Math.floor(s/3600)).padStart(2,'0');
   const mm = String(Math.floor((s%3600)/60)).padStart(2,'0');
   const ss = String(s%60).padStart(2,'0');
