@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Acceso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; min-height:100vh;
+    background:
+      radial-gradient(900px 500px at 50% -10%, rgba(73,233,255,0.08), transparent 60%),
+      #060A0F;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',sans-serif; color:var(--text); padding:40px 16px;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  /* Formulario real, responsive — se adapta a cualquier dispositivo desde
+     el que se abra (Celular, PC personal, Tablet), sin marco decorativo. */
+  .card{
+    width:100%; max-width:400px; background:var(--panel); border:1.5px solid var(--brass-dim);
+    border-radius:16px; padding:28px 26px; position:relative;
+  }
+  .card::before{ content:""; position:absolute; inset:7px; border:1px solid var(--brass-dim); border-radius:11px; opacity:.35; pointer-events:none;}
+
+  .content{ position:relative; z-index:1;}
+
+  /* ---- Brand block ---- */
+  .brand-block{ display:flex; flex-direction:column; align-items:center; padding:0 0 18px;}
+  .brand-mark{
+    width:56px; height:56px; border:2px solid var(--brass); border-radius:10px;
+    display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel-alt);
+    margin-bottom:14px;
+  }
+  .brand-mark::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:5px;}
+  .brand-mark svg{ width:26px; height:26px;}
+  .brand-name{ font-size:24px; letter-spacing:.08em; color:var(--text);}
+  .brand-sub{ font-size:11px; color:var(--text-dim); letter-spacing:.08em; text-transform:uppercase; margin-top:4px; text-align:center;}
+
+  /* ---- Tabs ---- */
+  .tabs{ display:flex; background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:8px; padding:3px; margin-bottom:22px;}
+  .tab-btn{
+    flex:1; padding:10px; border-radius:6px; border:none; background:transparent; color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12.5px; cursor:pointer;
+  }
+  .tab-btn.on{ background:var(--cyan-dim); color:#fff; border:1px solid var(--cyan);}
+
+  /* ---- Form ---- */
+  .field{ margin-bottom:14px;}
+  .field label{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:600;}
+  .field input, .field select{
+    width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:7px;
+    padding:11px 13px; font-size:14px; color:var(--text); font-family:'Inter';
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--cyan);}
+  .field-row{ display:flex; gap:12px;}
+  .field-row .field{ flex:1;}
+
+  .photo-upload{
+    display:flex; align-items:center; gap:14px; background:var(--panel-alt); border:1.5px dashed var(--line-strong);
+    border-radius:8px; padding:10px 14px; margin-bottom:16px; cursor:pointer;
+  }
+  .photo-upload:hover{ border-color:var(--brass-bright);}
+  .photo-upload .circle{
+    width:38px; height:38px; border-radius:50%; background:var(--panel); border:2px solid var(--line-strong);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; color:var(--text-dim);
+  }
+  .photo-upload span{ font-size:12.5px; color:var(--text-muted);}
+
+  .btn-primary{
+    width:100%; background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    font-size:14px; padding:13px; border-radius:8px; cursor:pointer; margin-top:6px;
+  }
+  .btn-primary:hover{ background:var(--cyan); color:#0D2226;}
+
+  .link-row{ text-align:center; margin-top:18px; font-size:12.5px; color:var(--text-dim);}
+  .link-row a{ color:var(--cyan); text-decoration:none; font-weight:600; cursor:pointer;}
+
+  .pending-note{
+    background:var(--panel-alt); border:1px solid var(--brass-dim); border-left:3px solid var(--brass-bright);
+    border-radius:6px; padding:11px 14px; margin-top:14px; font-size:11px; color:var(--text-muted); line-height:1.5;
+  }
+  .pending-note b{ color:var(--brass-bright);}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(5,10,15,0.75); z-index:60;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  .modal-overlay.show{ display:flex;}
+  .modal-box{
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px;
+    padding:24px 22px; width:100%; max-width:320px; position:relative;
+  }
+  .modal-box::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; opacity:.4; pointer-events:none;}
+  .modal-icon{
+    width:48px; height:48px; border-radius:50%; background:var(--panel-alt); border:2px solid var(--brass-bright);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:22px;
+  }
+  .modal-box h3{ font-size:16px; text-align:center; margin-bottom:10px;}
+  .modal-box p{ font-size:12.5px; color:var(--text-muted); line-height:1.55; text-align:center; margin:0 0 16px;}
+  .modal-box p b{ color:var(--brass-bright);}
+  .modal-close{
+    width:100%; background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:12.5px; padding:11px; border-radius:7px; cursor:pointer;
+  }
+  .modal-close:hover{ background:var(--cyan); color:#0D2226;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:70; max-width:90vw; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="card">
+    <div class="content" id="content"></div>
+  </div>
+
+  <div class="modal-overlay" id="recoveryModal">
+    <div class="modal-box">
+      <div class="modal-icon">🔑</div>
+      <h3>Recuperación manual</h3>
+      <p>Vigor no envía correos ni SMS de recuperación. El restablecimiento de contraseñas es exclusivo del <b>soporte técnico de Vigor</b> — contactalos directamente para que te generen una nueva contraseña temporal.</p>
+      <button class="modal-close" onclick="hideRecoveryInfo()">Entendido</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// --- Conexión real a Supabase ---
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Un mismo Supabase sirve a MUCHOS Cuerpos clientes a la vez (aislados por
+// RLS) — así que el celular no puede simplemente "adivinar" a qué Cuerpo
+// pertenece. Cada Cuerpo tiene un Código propio (asignado al terminar el
+// Wizard de instalación) que el Director/Secretario entrega a cada bombero
+// nuevo para que lo escriba una sola vez, acá, al crear su cuenta.
+let cuerpoActivo = null;
+let nombreCuerpoActivo = '';
+let codigoCuerpoTexto = '';
+let companiasActivas = [];
+
+// Un solo login para TODO el sistema — Celular, PC del Cuartel, Comandancia
+// y Administración General usan esta misma pantalla (un solo ícono, una
+// sola app instalada). El destino post-login se decide por dos cosas: el
+// Cargo de la persona (viene de la base) y el ancho de pantalla del
+// dispositivo desde el que entra (angosto = celular, ancho = PC/kiosco) —
+// así el mismo bombero puede entrar desde su celular Y desde la PC del
+// Cuartel con la MISMA cuenta y llegar a la vista que corresponde a cada uno.
+// Demo — números fijos de la instalación de ejemplo (no vienen de la base
+// real todavía, esos cargos no se crean desde ningún Wizard/formulario).
+const NUMEROS_ADMIN_GENERAL = { '1':'Superintendente', '2':'Vicesuperintendente', '4':'Secretario General', '5':'Tesorero General' };
+const NUMEROS_COMANDANCIA = { '3':'Comandante', '6':'Segundo Comandante', '7':'Tercer Comandante', '8':'Cuarto Comandante' };
+const ROLES_COMANDANCIA_REAL = ['Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
+const ROLES_ADMIN_GENERAL_REAL = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
+
+async function resolverCuerpoActivo(){
+  // Conveniencia de dispositivo: si este celular ya verificó un código
+  // antes (p.ej. otro bombero de la misma Compañía se registró acá), lo
+  // recuerda — pero siempre puede escribirse uno distinto y re-verificar.
+  const guardado = localStorage.getItem('vigor_codigo_cuerpo');
+  if(guardado){
+    codigoCuerpoTexto = guardado;
+    await verificarCodigoCuerpo(true);
+  }
+}
+
+async function verificarCodigoCuerpo(silencioso){
+  const input = document.getElementById('regCodigoCuerpo');
+  const codigo = (input ? input.value : codigoCuerpoTexto).trim();
+  if(!codigo){
+    if(!silencioso) toast('Escribí el Código de Cuerpo');
+    return;
+  }
+  const { data } = await sb.rpc('resolver_cuerpo_por_codigo', { p_codigo: codigo });
+  const match = data && data[0];
+  if(!match){
+    cuerpoActivo = null; nombreCuerpoActivo = ''; companiasActivas = [];
+    if(!silencioso) toast('No se encontró ningún Cuerpo con ese código');
+    render();
+    return;
+  }
+  cuerpoActivo = match.r_cuerpo_id;
+  nombreCuerpoActivo = match.r_nombre_oficial;
+  codigoCuerpoTexto = codigo.toUpperCase();
+  localStorage.setItem('vigor_codigo_cuerpo', codigoCuerpoTexto);
+  const { data: comps } = await sb.rpc('listar_companias_publico', { p_cuerpo_id: cuerpoActivo });
+  companiasActivas = (comps || []).map(c => ({ id: c.c_id, nombre: c.c_nombre, numero: c.c_numero }));
+  render();
+}
+
+let active = 'login';
+
+function screens(){
+  return {
+    login: `
+      <div class="brand-block">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-name">VIGOR</div>
+        <div class="brand-sub">Terminal de acceso</div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn on" onclick="setTab('login')">Iniciar Sesión</button>
+        <button class="tab-btn" onclick="setTab('registro')">Registrarse</button>
+      </div>
+
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" class="mono" id="loginNumero" placeholder="N° de Registro, Carro (ej. B-3) o N° de Compañía">
+      </div>
+      <div class="field">
+        <label>Código de Cuerpo <span style="text-transform:none; font-weight:400; color:var(--text-dim);">(solo si entrás como Carro o PC del Cuartel)</span></label>
+        <input type="text" class="mono" id="loginCodigoCuerpo" placeholder="Ej. BOMBEROSFLORIDA" style="text-transform:uppercase;">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" placeholder="••••••••">
+      </div>
+
+      <button class="btn-primary" onclick="intentarLogin()">Iniciar Sesión</button>
+      <div class="link-row">¿Olvidaste tu contraseña? <a onclick="showRecoveryInfo()">Ver cómo recuperarla</a></div>
+      <div class="pending-note" style="margin-top:14px;">Un solo login para todo — bomberos, Carros y PC del Cuartel entran por acá. El sistema reconoce quién sos y te lleva a tu propia interfaz.</div>
+    `,
+
+    registro: `
+      <div class="brand-block" style="padding-bottom:14px;">
+        <div class="brand-name" style="font-size:19px;">Crear cuenta</div>
+        <div class="brand-sub">${cuerpoActivo ? nombreCuerpoActivo : 'Registro de nuevo bombero'}</div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn" onclick="setTab('login')">Iniciar Sesión</button>
+        <button class="tab-btn on" onclick="setTab('registro')">Registrarse</button>
+      </div>
+
+      <div class="field">
+        <label>Código de Cuerpo</label>
+        <div class="field-row" style="align-items:flex-start;">
+          <div class="field" style="margin-bottom:0;">
+            <input type="text" class="mono" id="regCodigoCuerpo" placeholder="Ej. BOMBEROSFLORIDA" style="text-transform:uppercase;" value="${cuerpoActivo ? codigoCuerpoTexto : ''}">
+          </div>
+          <button type="button" class="btn-primary" style="flex:0 0 auto; width:auto; padding:12px 16px;" onclick="verificarCodigoCuerpo()">Verificar</button>
+        </div>
+        <div class="hint" id="codigoCuerpoHint" style="font-size:11.5px; margin-top:6px; color:${cuerpoActivo ? '#3CF29A' : '#7B99A3'};">
+          ${cuerpoActivo ? '✓ ' + nombreCuerpoActivo : 'Te lo entrega tu Director o Secretario/a al ingresar al Cuerpo.'}
+        </div>
+      </div>
+
+      ${cuerpoActivo ? `
+      <div class="photo-upload" onclick="document.getElementById('fotoInput').click()">
+        <div class="circle" id="fotoCircle">📷</div>
+        <span id="fotoLabel">Subir foto de perfil</span>
+      </div>
+      <input type="file" id="fotoInput" accept="image/*" style="display:none;" onchange="previsualizarFoto(this)">
+
+      <div class="field">
+        <label>Nombre completo</label>
+        <input type="text" id="regNombre" placeholder="Ej. Ignacio Bastías Contreras">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>N° de Bombero</label>
+          <input type="text" class="mono" id="regNumero" placeholder="Ej. 118">
+        </div>
+        <div class="field">
+          <label>RUT</label>
+          <input type="text" class="mono" id="regRut" placeholder="19.802.xxx-x">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Fecha nac.</label>
+          <input type="text" id="regFechaNac" placeholder="dd/mm/aaaa">
+        </div>
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="text" class="mono" id="regTelefono" placeholder="+56 9 1234 5678">
+        </div>
+      </div>
+      <div class="field">
+        <label>Compañía a la que postulas</label>
+        <select id="regCompania">${companiasActivas.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}</select>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="regPassword" placeholder="Mínimo 8 caracteres">
+      </div>
+
+      <button class="btn-primary" onclick="enviarSolicitud()">Enviar Solicitud</button>
+
+      <div class="pending-note">
+        <b>Qué sigue:</b> tu solicitud queda pendiente hasta que el Secretario/a o Director de la Compañía la revise y apruebe. No vas a poder iniciar sesión hasta entonces.
+      </div>
+      ` : ''}
+    `,
+
+  };
+}
+
+function render(){
+  document.getElementById('content').innerHTML = screens()[active];
+}
+function setTab(id){ active = id; render(); }
+
+function showRecoveryInfo(){
+  document.getElementById('recoveryModal').classList.add('show');
+}
+function hideRecoveryInfo(){
+  document.getElementById('recoveryModal').classList.remove('show');
+}
+
+// Bug corregido: "Iniciar Sesión" solo mostraba un toast y nunca navegaba a
+// ningún lado — era la puerta de entrada de TODO el sistema y no llevaba a
+// ninguna parte. Ahora valida los campos y navega de verdad al Inicio.
+// Cada persona entra siempre a SU PROPIA interfaz — no depende del
+// dispositivo ni del ancho de pantalla desde el que abra la app. El PC del
+// Cuartel NO es un destino de un login personal — es su propia cuenta
+// institucional (pestaña "PC Cuartel"), igual que el Carro con la Tablet.
+function destinoPropio(perfil){
+  if(perfil.compania_id) return 'inicio_celular.html';
+  if(ROLES_COMANDANCIA_REAL.includes(perfil.cargo)) return 'comandancia.html';
+  if(ROLES_ADMIN_GENERAL_REAL.includes(perfil.cargo)) return 'administracion_general.html';
+  return 'consola_despacho.html';
+}
+
+// Un solo login para todo — persona, Carro o PC del Cuartel. Se prueban en
+// orden (persona primero, es el caso más común y no necesita Código de
+// Cuerpo porque el N° de Registro ya es único en todo Vigor) y el que
+// resuelva gana. Carro y PC del Cuartel necesitan el Código de Cuerpo
+// porque su identificador (Nomenclatura / N° de Compañía) solo es único
+// DENTRO de un Cuerpo, no en todo Vigor.
+async function intentarLogin(){
+  const usuario = document.getElementById('loginNumero').value.trim();
+  const codigoCuerpo = document.getElementById('loginCodigoCuerpo').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  if(!usuario || !password){
+    toast('Ingresá tu usuario y contraseña');
+    return;
+  }
+  const esTemporal = /^[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(password);
+  const numeroInt = parseInt(usuario, 10);
+
+  // 1) Persona (bombero, oficial, Comandancia, Administración General...)
+  if(!isNaN(numeroInt)){
+    const { data: existe } = await sb.rpc('personal_existe', { p_numero_registro: numeroInt });
+    if(existe){
+      const email = 'p' + numeroInt + '@vigor.local';
+      const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password });
+      if(authError){
+        toast('Usuario o contraseña incorrectos');
+        return;
+      }
+      const { data: perfil } = await sb.from('personal')
+        .select('estado, debe_cambiar_password, numero_registro, cargo, compania_id, cuerpos(estado)')
+        .eq('auth_user_id', authData.user.id).single();
+      if(!perfil || (perfil.cuerpos && perfil.cuerpos.estado !== 'activo')){
+        await sb.auth.signOut();
+        toast('Este Cuerpo tiene el servicio suspendido — contactá a soporte de Vigor');
+        return;
+      }
+      if(perfil.estado !== 'activo'){
+        await sb.auth.signOut();
+        toast('Esta cuenta no está activa');
+        return;
+      }
+      toast('Iniciando sesión…');
+      setTimeout(() => {
+        if(perfil.debe_cambiar_password && esTemporal){
+          window.location.href = 'definir_nueva_password.html?numero=' + encodeURIComponent(perfil.numero_registro);
+          return;
+        }
+        window.location.href = destinoPropio(perfil);
+      }, 500);
+      return;
+    }
+  }
+
+  // 2) y 3) PC del Cuartel / Carro — ambos necesitan Código de Cuerpo.
+  if(codigoCuerpo){
+    if(!isNaN(numeroInt)){
+      const { data: emailPc } = await sb.rpc('resolver_pc_login', { p_codigo_cuerpo: codigoCuerpo, p_numero_compania: numeroInt });
+      if(emailPc){
+        const { error: authError } = await sb.auth.signInWithPassword({ email: emailPc, password });
+        if(authError){ toast('Contraseña incorrecta'); return; }
+        toast('PC del Cuartel identificado — abriendo Terminal…');
+        setTimeout(() => { window.location.href = 'pc_compania.html'; }, 500);
+        return;
+      }
+    }
+    const { data: emailCarro } = await sb.rpc('resolver_carro_login', { p_codigo_cuerpo: codigoCuerpo, p_nomenclatura: usuario });
+    if(emailCarro){
+      const { error: authError } = await sb.auth.signInWithPassword({ email: emailCarro, password });
+      if(authError){ toast('Contraseña incorrecta'); return; }
+      toast('Carro identificado — abriendo Tablet…');
+      setTimeout(() => { window.location.href = 'tablet_carro.html'; }, 500);
+      return;
+    }
+  }
+
+  // Sin fila real — cae al comportamiento de demo (número no existe todavía,
+  // o es uno de los N° fijos de Comandancia/Administración General de la
+  // instalación de ejemplo, que todavía no vive en ninguna tabla real).
+  const esAdminGeneral = NUMEROS_ADMIN_GENERAL.hasOwnProperty(usuario);
+  const esComandancia = NUMEROS_COMANDANCIA.hasOwnProperty(usuario);
+  if(!esAdminGeneral && !esComandancia){
+    toast(codigoCuerpo ? 'No se encontró ese usuario, Carro ni PC del Cuartel' : 'Usuario o contraseña incorrectos');
+    return;
+  }
+  let mensaje = esAdminGeneral ? `Reconocido como ${NUMEROS_ADMIN_GENERAL[usuario]} — abriendo Administración General…` : `Reconocido como ${NUMEROS_COMANDANCIA[usuario]} — abriendo Comandancia…`;
+  toast(mensaje);
+  setTimeout(() => {
+    if(esTemporal){ window.location.href = 'definir_nueva_password.html'; return; }
+    if(esAdminGeneral){ window.location.href = 'administracion_general.html'; return; }
+    window.location.href = 'comandancia.html';
+  }, 500);
+}
+
+function previsualizarFoto(input){
+  if(!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const circle = document.getElementById('fotoCircle');
+    circle.style.backgroundImage = `url(${e.target.result})`;
+    circle.style.backgroundSize = 'cover';
+    circle.style.backgroundPosition = 'center';
+    circle.textContent = '';
+    document.getElementById('fotoLabel').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Bug corregido: "Enviar Solicitud" no leía ni validaba ningún campo —
+// se podía enviar una postulación completamente vacía. N° de Bombero queda
+// opcional (un postulante nuevo todavía no tiene uno asignado).
+async function enviarSolicitud(){
+  const campos = ['regNombre', 'regRut', 'regFechaNac', 'regTelefono', 'regPassword'];
+  let faltantes = false;
+  campos.forEach(id => {
+    const el = document.getElementById(id);
+    const vacio = !el.value.trim();
+    el.style.borderColor = vacio ? 'var(--burdeo-bright)' : '';
+    if(vacio) faltantes = true;
+  });
+  if(faltantes){
+    toast('Completá todos los campos antes de enviar');
+    return;
+  }
+  const pass = document.getElementById('regPassword').value;
+  if(pass.length < 8){
+    document.getElementById('regPassword').style.borderColor = 'var(--burdeo-bright)';
+    toast('La contraseña debe tener al menos 8 caracteres');
+    return;
+  }
+  if(!cuerpoActivo){
+    toast('No se pudo determinar el Cuerpo de esta instalación');
+    return;
+  }
+  const companiaId = document.getElementById('regCompania').value;
+  const numeroTxt = document.getElementById('regNumero').value.trim();
+
+  // dd/mm/aaaa -> yyyy-mm-dd para la columna date
+  const fnac = document.getElementById('regFechaNac').value.trim();
+  const partes = fnac.split('/');
+  const fechaIso = partes.length === 3 ? `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}` : null;
+
+  const { error } = await sb.rpc('crear_solicitud_alta', {
+    p_cuerpo_id: cuerpoActivo,
+    p_compania_solicitada_id: companiaId,
+    p_nombre_completo: document.getElementById('regNombre').value.trim(),
+    p_rut: document.getElementById('regRut').value.trim(),
+    p_fecha_nacimiento: fechaIso,
+    p_telefono: document.getElementById('regTelefono').value.trim(),
+    p_numero_bombero: numeroTxt ? parseInt(numeroTxt, 10) : null
+  });
+
+  if(error){
+    toast('No se pudo enviar la solicitud — ' + error.message);
+    return;
+  }
+  toast('Solicitud enviada — queda pendiente de aprobación');
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+resolverCuerpoActivo().then(render);
+render();
+</script>
+</body>
+</html>

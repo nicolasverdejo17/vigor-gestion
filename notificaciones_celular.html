@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Notificaciones (Celular)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(900px 500px at 50% -10%, rgba(73,233,255,0.08), transparent 60%), #060A0F;
+    font-family:'Inter',sans-serif; color:var(--text);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .phone{ height:100%; display:flex; flex-direction:column; position:relative;}
+
+  .app-head{ padding:12px 18px 10px; flex-shrink:0;}
+  .app-head .eyebrow{ font-size:10px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+  .app-head h1{ font-size:20px; margin-top:2px;}
+
+  .content{ flex:1; overflow-y:auto; padding:8px 18px 18px;}
+  .content::-webkit-scrollbar{ display:none;}
+
+  .perfil-card{
+    display:flex; align-items:center; gap:14px; background:var(--panel); border:1.5px solid var(--line-strong);
+    border-radius:12px; padding:16px; margin-bottom:16px; position:relative; overflow:hidden;
+  }
+  .perfil-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.35;}
+  .perfil-foto{ width:54px; height:54px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--servicio); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:19px; color:var(--text-muted); flex-shrink:0; position:relative; z-index:1;}
+  .perfil-nombre{ font-size:15px; font-weight:700; position:relative; z-index:1;}
+  .perfil-cargo{ font-size:11.5px; color:var(--text-muted); position:relative; z-index:1;}
+  .perfil-nivel{ margin-top:5px; position:relative; z-index:1;}
+  .nivel-pill{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:3px 9px; border-radius:10px; background:var(--nodisp); color:#fff;}
+
+  .section-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:14px 4px 8px;}
+  .section-label:first-child{ margin-top:0;}
+
+  .row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:10px;
+    padding:12px 14px; margin-bottom:8px; cursor:pointer;
+  }
+  .row-l{ display:flex; align-items:center; gap:12px;}
+  .row-ico{ width:34px; height:34px; border-radius:9px; background:var(--panel-alt); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+  .row b{ font-size:13.5px; display:block;}
+  .row span{ font-size:11px; color:var(--text-muted);}
+  .row-arrow{ color:var(--text-dim); font-size:14px;}
+
+  .toast{
+    position:absolute; bottom:20px; left:16px; right:16px;
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:11px 16px; border-radius:8px; font-size:12.5px; opacity:0; transform:translateY(8px);
+    transition:all .25s; pointer-events:none; text-align:center; z-index:30;
+  }
+  .toast.show{ opacity:1; transform:translateY(0);}
+
+  .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:8.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ font-size:16px; line-height:1;}
+  .tabbar-real a.active{ color:var(--cyan);}
+  .estado-aviso{
+    display:flex; align-items:flex-start; gap:9px; background:rgba(66,85,92,0.18); border:1px solid var(--nodisp);
+    color:var(--text); font-size:11.5px; line-height:1.5; padding:12px 14px; border-radius:10px; margin-bottom:16px;
+  }
+  .estado-aviso-ico{ flex-shrink:0; font-size:14px;}
+  .estado-aviso-texto{ flex:1;}
+  .pref-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:10px;
+    padding:12px 14px; margin-bottom:8px;
+  }
+  .pref-row.locked{ opacity:.85;}
+  .pref-info b{ font-size:12.5px; display:block;}
+  .pref-info span{ font-size:10.5px; color:var(--text-muted); display:block; margin-top:2px;}
+  .toggle{ width:40px; height:23px; background:var(--line-strong); border-radius:12px; position:relative; cursor:pointer; flex-shrink:0;}
+  .toggle::before{ content:""; position:absolute; width:17px; height:17px; border-radius:50%; background:var(--text); top:3px; left:3px; transition:all .2s;}
+  .toggle.on{ background:var(--cyan-dim);}
+  .toggle.on::before{ left:20px; background:#fff;}
+  .toggle.locked-on{ cursor:default; background:var(--nodisp); display:flex; align-items:center; justify-content:center;}
+  .toggle.locked-on::before{ display:none;}
+  .candado{ font-size:11px;}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="app-head">
+      <a href="opciones_celular.html" style="display:inline-block; color:var(--text-muted); font-size:11px; text-decoration:none; margin-bottom:6px;">← Opciones</a>
+      <div class="eyebrow" id="nombreCompaniaCel">—</div>
+      <h1>Notificaciones</h1>
+    </div>
+
+    <div class="content">
+      <div class="estado-aviso" id="estadoAviso" style="display:none;">
+        <span class="estado-aviso-ico">🔕</span>
+        <div class="estado-aviso-texto"><b>Alertas de despacho silenciadas</b> — estás marcado como <span id="estadoAvisoTexto">Fuera de Servicio</span>, así que no vas a recibir tonos ni vibración de despachos mientras estés así.</div>
+      </div>
+
+      <div class="section-label">Despacho</div>
+      <div class="pref-row">
+        <div class="pref-info"><b>Alertas de despacho</b><span>Tono + vibración cuando Central despacha a tu Compañía</span></div>
+        <div class="toggle on" id="tgDespacho" onclick="toggleAjuste('tgDespacho')"></div>
+      </div>
+      <div class="pref-row locked">
+        <div class="pref-info"><b>Silenciar automático si estoy Fuera de Servicio</b><span>Regla fija del sistema — no se puede desactivar</span></div>
+        <div class="toggle on locked-on"><span class="candado">🔒</span></div>
+      </div>
+
+      <div class="section-label">Otros avisos</div>
+      <div class="pref-row">
+        <div class="pref-info"><b>Pizarra</b><span>Avisos y citaciones nuevas</span></div>
+        <div class="toggle on" id="tgPizarra" onclick="toggleAjuste('tgPizarra')"></div>
+      </div>
+      <div class="pref-row">
+        <div class="pref-info"><b>Actividades</b><span>Nuevas actividades de la Compañía</span></div>
+        <div class="toggle on" id="tgActividades" onclick="toggleAjuste('tgActividades')"></div>
+      </div>
+      <div class="pref-row">
+        <div class="pref-info"><b>Hoja de Vida</b><span>Cuando se agrega una entrada a tu historial</span></div>
+        <div class="toggle" id="tgHojaVida" onclick="toggleAjuste('tgHojaVida')"></div>
+      </div>
+    </div>
+    <div class="tabbar-real" id="tabbarReal"></div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const PILL_LABEL = { disponible:'Disponible', no_disponible:'No Disponible', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
+const TOGGLE_COL = { tgDespacho:'alertas_despacho', tgPizarra:'pizarra', tgActividades:'actividades', tgHojaVida:'hoja_vida' };
+let miPersonalId = null;
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, nombre_completo, cargo, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  miPersonalId = perfil.id;
+  document.getElementById('nombreCompaniaCel').textContent = perfil.companias ? perfil.companias.nombre : 'Cuerpo General';
+
+  const filaVigente = (perfil.personal_estado_historial || []).find(h => h.hora_fin === null);
+  const miEstado = filaVigente ? filaVigente.estado : 'fuera';
+  const aviso = document.getElementById('estadoAviso');
+  if(miEstado === 'fuera'){
+    document.getElementById('estadoAvisoTexto').textContent = PILL_LABEL[miEstado];
+    aviso.style.display = 'flex';
+  } else {
+    aviso.style.display = 'none';
+  }
+
+  let { data: prefs } = await sb.from('notificaciones_preferencias').select('*').eq('personal_id', miPersonalId).maybeSingle();
+  if(!prefs){
+    const { data: creada } = await sb.from('notificaciones_preferencias').insert({ personal_id: miPersonalId }).select().single();
+    prefs = creada;
+  }
+  Object.entries(TOGGLE_COL).forEach(([elId, col]) => {
+    document.getElementById(elId).classList.toggle('on', !!prefs[col]);
+  });
+}
+
+async function toggleAjuste(id){
+  const el = document.getElementById(id);
+  const nuevoValor = !el.classList.contains('on');
+  const col = TOGGLE_COL[id];
+  const { error } = await sb.from('notificaciones_preferencias').update({ [col]: nuevoValor, actualizado_en: new Date().toISOString() }).eq('personal_id', miPersonalId);
+  if(error){ toast('No se pudo guardar — ' + error.message); return; }
+  el.classList.toggle('on', nuevoValor);
+  toast(nuevoValor ? 'Activado' : 'Desactivado');
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+const TABS_NAV = [
+  {href:'inicio_celular.html', ic:'🏠', label:'Inicio'},
+  {href:'compania_celular.html', ic:'🚒', label:'Compañía'},
+  {href:'pizarra_celular.html', ic:'📌', label:'Pizarra'},
+  {href:'actividades_celular.html', ic:'📋', label:'Activid.'},
+  {href:'coordenadas_celular.html', ic:'📍', label:'GPS'},
+  {href:'opciones_celular.html', ic:'⚙️', label:'Opciones'},
+];
+(function renderTabbarReal(){
+  const cont = document.getElementById('tabbarReal');
+  if(!cont) return;
+  const actual = location.pathname.split('/').pop();
+  cont.innerHTML = TABS_NAV.map(t => `<a href="${t.href}" class="${t.href===actual?'active':''}"><span class="ic">${t.ic}</span><span>${t.label}</span></a>`).join('');
+})();
+
+cargarDatos();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Vigor",
+  "short_name": "Vigor",
+  "description": "Vigor — Sistema de Gestión Bomberil",
+  "start_url": "login_registro.html",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#141F2B",
+  "theme_color": "#141F2B",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

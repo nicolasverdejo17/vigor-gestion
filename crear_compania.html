@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Crear Compañía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif;
+    height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+
+  .form-wrap{ flex:1; min-height:0; padding:20px 32px 24px; display:flex; flex-direction:column; overflow:hidden;}
+  .form-head{ display:flex; align-items:center; gap:14px; margin:0 auto 16px; flex-shrink:0; max-width:820px; width:100%;}
+  .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12.5px; padding:9px 16px; border-radius:5px; cursor:pointer;
+  }
+  .back-btn:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .form-head h2{ font-size:22px;}
+
+  .form-body{
+    flex:1; min-height:0; background:var(--panel); border:1px solid var(--line-strong);
+    border-radius:10px; padding:22px 28px; overflow-y:auto; position:relative; max-width:820px; width:100%; margin:0 auto;
+  }
+  .form-body::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4;}
+
+  .section-title{
+    font-size:11.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.1em;
+    font-weight:700; margin:0 0 14px; padding-bottom:8px; border-bottom:1px solid var(--line);
+  }
+  .section-title:not(:first-child){ margin-top:22px;}
+
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:16px;}
+  .form-field{ display:flex; flex-direction:column; gap:6px;}
+  .form-field.full{ grid-column:1 / -1;}
+  .form-field label{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; font-weight:600;}
+  .form-field input, .form-field select{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:11px 13px; font-size:14px; color:var(--text); font-family:'Inter';
+  }
+  .form-field input:focus, .form-field select:focus{ outline:none; border-color:var(--cyan);}
+  .form-field input.mono{ font-family:'JetBrains Mono',monospace;}
+
+  .cat-select-row{ display:flex; gap:8px; flex-wrap:wrap;}
+  .cat-opt{
+    flex:1; min-width:120px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:10px; text-align:center; font-size:12.5px; font-weight:600; color:var(--text-muted); cursor:pointer;
+  }
+  .cat-opt.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+
+  .subcat-select-row{ display:none; gap:8px; flex-wrap:wrap; margin-top:-8px; margin-bottom:16px;}
+  .subcat-select-row.show{ display:flex;}
+  .subcat-opt{
+    background:var(--panel-alt); border:1.5px solid var(--brass-dim); border-radius:16px;
+    padding:6px 13px; font-size:11.5px; font-weight:600; color:var(--text-muted); cursor:pointer;
+  }
+  .subcat-opt.on{ background:var(--brass-dim); border-color:var(--brass-bright); color:#fff;}
+
+  .foto-upload{
+    display:flex; align-items:center; gap:14px; background:var(--panel-alt); border:1.5px dashed var(--line-strong);
+    border-radius:8px; padding:14px 16px; cursor:pointer;
+  }
+  .foto-upload .circle{
+    width:44px; height:44px; border-radius:8px; background:var(--panel); border:2px solid var(--line-strong);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:18px; color:var(--text-dim);
+  }
+  .foto-upload span{ font-size:13px; color:var(--text-muted);}
+
+  .btn-guardar{
+    width:100%; margin-top:20px; background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    font-size:15px; padding:14px; border-radius:8px; cursor:pointer;
+  }
+  .btn-guardar:hover{ background:var(--cyan); color:#0D2226;}
+
+  .color-preview-row{ margin-bottom:14px;}
+  .color-preview-card{
+    display:flex; align-items:center; gap:14px; background:var(--panel-alt); border:1.5px solid var(--line-strong);
+    border-radius:8px; padding:14px 16px;
+  }
+  .color-preview-badge{
+    width:44px; height:44px; border-radius:8px; border:2px solid var(--brass); background:var(--panel);
+    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px;
+    flex-shrink:0; transition:all .15s;
+  }
+  .color-preview-nombre{ font-size:14px; font-weight:600;}
+  .color-preview-sub{ font-size:11px; color:var(--text-muted); margin-top:2px;}
+
+  .color-swatch-row{ display:flex; gap:8px; flex-wrap:wrap;}
+  .color-swatch{
+    width:34px; height:34px; border-radius:8px; border:2px solid transparent; cursor:pointer; padding:0;
+  }
+  .color-swatch.on{ border-color:#fff; box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--cyan);}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Administración — Crear Compañía</h1><span id="nombreCuerpoHead">— · Vigor</span></div>
+      </div>
+      <div class="role-tag" id="roleTag">Sesión: —</div>
+    </div>
+  </div>
+
+  <div id="sinPermiso" style="display:none; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">
+    🔒 Esta pantalla es exclusiva de Superintendente, Vicesuperintendente, Secretario General o Tesorero General.
+  </div>
+
+  <div class="form-wrap" id="formWrap">
+    <div class="form-head">
+      <button class="back-btn" onclick="history.back()">← Volver</button>
+      <h2>Crear Compañía</h2>
+    </div>
+
+    <div class="form-body">
+      <div class="section-title">Identidad de la Compañía</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>N° de Compañía</label>
+          <input type="text" class="mono" id="numeroField" placeholder="Ej. 6°" oninput="actualizarPreview()">
+        </div>
+        <div class="form-field">
+          <label>Nombre (opcional)</label>
+          <input type="text" id="nombreField" placeholder="Ej. Bomba Chile" oninput="actualizarPreview()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field full">
+          <label>Dirección del Cuartel</label>
+          <input type="text" id="direccionField" placeholder="Ej. Av. Principal 450">
+        </div>
+      </div>
+
+      <div class="section-title">Color institucional</div>
+      <div class="color-preview-row">
+        <div class="color-preview-card" id="colorPreview">
+          <div class="color-preview-badge" id="colorBadge">6°</div>
+          <div>
+            <div class="color-preview-nombre" id="colorPreviewNombre">6° Compañía</div>
+            <div class="color-preview-sub">Así se verá en el nameplate de esta Compañía</div>
+          </div>
+        </div>
+      </div>
+      <div class="color-swatch-row" id="colorSwatchRow"></div>
+      <div class="form-row" style="margin-top:14px;">
+        <div class="form-field">
+          <label>Color personalizado (HEX)</label>
+          <input type="text" class="mono" id="colorHexField" value="#4FA3FF" oninput="setColorHex(this.value)">
+        </div>
+      </div>
+
+      <div class="section-title">Escudo / Insignia (opcional)</div>
+      <div class="foto-upload" onclick="document.getElementById('fotoInput').click()">
+        <div class="circle" id="fotoCircle">🛡️</div>
+        <span id="fotoLabel">Subir escudo de la Compañía</span>
+      </div>
+      <input type="file" id="fotoInput" accept="image/*" style="display:none;" onchange="previsualizarFoto(this)">
+
+      <div class="section-title">Director de esta Compañía</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Nombre completo</label>
+          <input type="text" id="directorNombreField" placeholder="Ej. Ignacio Bastías Contreras">
+        </div>
+        <div class="form-field">
+          <label>N° de Registro</label>
+          <input type="text" class="mono" id="directorNumeroField" placeholder="Ej. 210">
+        </div>
+      </div>
+      <div class="hint" style="font-size:11px; color:var(--text-dim); margin:-4px 0 14px; line-height:1.5;">Se crea junto con la Compañía y el PC del Cuartel, en el mismo paso — sin Director no queda nadie con acceso a administrarla.</div>
+
+      <button class="btn-guardar" onclick="crearCompania()">Crear Compañía</button>
+
+      <div class="section-title" style="margin-top:28px;">Compañías existentes</div>
+      <div id="listaCompanias" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let cuerpoActivo = null;
+
+const ROLES_CON_ACCESO = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
+async function cargarSesion(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
+  if(perfil && perfil.cuerpo_id){
+    if(!ROLES_CON_ACCESO.includes(perfil.cargo)){
+      document.getElementById('formWrap').style.display = 'none';
+      document.getElementById('sinPermiso').style.display = 'block';
+      return;
+    }
+    cuerpoActivo = perfil.cuerpo_id;
+    document.getElementById('roleTag').textContent = 'Sesión: ' + perfil.cargo;
+  } else {
+    const { data: soyAdmin } = await sb.rpc('soy_super_admin');
+    if(!soyAdmin){ toast('No se pudo determinar tu Cuerpo'); return; }
+    // Mismo criterio que perfil_maestro.html: el Cuerpo "activo" para un
+    // Super Admin sin fila propia en personal se sigue por localStorage
+    // (seteado al entrar a Perfil Maestro), no por un selector aparte acá.
+    cuerpoActivo = localStorage.getItem('vigor_cuerpo_id');
+    document.getElementById('roleTag').textContent = 'Sesión: Super Admin';
+  }
+  if(cuerpoActivo){
+    const { data: cuerpoRow } = await sb.from('cuerpos').select('nombre_oficial').eq('id', cuerpoActivo).single();
+    document.getElementById('nombreCuerpoHead').textContent = (cuerpoRow ? cuerpoRow.nombre_oficial : '—') + ' · Vigor';
+    await cargarCompanias();
+  }
+}
+
+async function cargarCompanias(){
+  const { data } = await sb.from('companias')
+    .select('id, numero, nombre, personal(id), carros(id)')
+    .eq('cuerpo_id', cuerpoActivo).order('numero');
+  const lista = document.getElementById('listaCompanias');
+  if(!data || !data.length){
+    lista.innerHTML = `<div style="color:var(--text-dim); font-size:12.5px;">Todavía no hay Compañías creadas.</div>`;
+    return;
+  }
+  lista.innerHTML = data.map(c => {
+    const bomberos = (c.personal || []).length;
+    const carros = (c.carros || []).length;
+    const vacia = bomberos === 0 && carros === 0;
+    return `
+      <div style="display:flex; align-items:center; justify-content:space-between; background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:6px; padding:10px 14px; gap:10px;">
+        <div>
+          <div style="font-size:13.5px; font-weight:600;">${c.nombre}</div>
+          <div style="font-size:11px; color:var(--text-dim);">${bomberos} bombero${bomberos!==1?'s':''} · ${carros} carro${carros!==1?'s':''}</div>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+          <button onclick="regenerarCredencialPc('${c.id}','${c.nombre.replace(/'/g,"\\'")}',${c.numero})"
+            style="background:var(--panel); border:1.5px solid var(--cyan); color:var(--cyan); font-family:'Rajdhani'; font-weight:700; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:7px 12px; border-radius:5px; cursor:pointer;">🔑 Credencial PC</button>
+          <button ${vacia ? '' : 'disabled title="Tiene personal o carros asignados — trasladalos antes de eliminar"'}
+            onclick="eliminarCompania('${c.id}','${c.nombre.replace(/'/g,"\\'")}')"
+            style="background:${vacia ? 'var(--burdeo)' : 'var(--line)'}; border:1.5px solid ${vacia ? 'var(--burdeo-bright)' : 'var(--line-strong)'}; color:${vacia ? '#fff' : 'var(--text-dim)'}; font-family:'Rajdhani'; font-weight:700; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:7px 12px; border-radius:5px; cursor:${vacia ? 'pointer' : 'not-allowed'};">🗑 Eliminar</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function regenerarCredencialPc(compania_id, nombre, numero){
+  if(!confirm(`¿Generar una contraseña nueva para el PC del Cuartel de ${nombre}? Si ya había una, deja de funcionar.`)) return;
+  const { data, error } = await sb.rpc('crear_login_pc_cuartel', { p_compania_id: compania_id });
+  if(error){ toast('No se pudo generar — ' + error.message); return; }
+  mostrarCredencialPc(nombre, numero, data[0].r_password_temporal);
+}
+
+async function eliminarCompania(id, nombre){
+  if(!confirm(`¿Eliminar ${nombre}? Esta acción no se puede deshacer.`)) return;
+  const { error } = await sb.rpc('eliminar_compania_vacia', { p_compania_id: id });
+  if(error){
+    const mensajes = { COMPANIA_NO_ESTA_VACIA: 'Esta Compañía ya no está vacía — trasladá su personal y carros antes de eliminarla.' };
+    toast(mensajes[error.message] || ('No se pudo eliminar — ' + error.message));
+    return;
+  }
+  toast(`${nombre} eliminada`);
+  await cargarCompanias();
+}
+cargarSesion();
+
+const COLORES_SUGERIDOS = ['#4FA3FF','#FF4B5C','#3CF29A','#FFC94D','#B77CFF','#E08A5C','#49E9FF','#FF9A44'];
+let colorActivo = '#4FA3FF';
+
+function renderColorSwatches(){
+  document.getElementById('colorSwatchRow').innerHTML = COLORES_SUGERIDOS.map(c =>
+    `<button class="color-swatch ${colorActivo===c?'on':''}" style="background:${c}" onclick="setColorHex('${c}')"></button>`
+  ).join('');
+}
+function setColorHex(hex){
+  colorActivo = hex;
+  document.getElementById('colorHexField').value = hex;
+  renderColorSwatches();
+  actualizarPreview();
+}
+function actualizarPreview(){
+  const num = document.getElementById('numeroField').value.trim() || '6°';
+  const nombre = document.getElementById('nombreField').value.trim();
+  document.getElementById('colorBadge').textContent = num;
+  document.getElementById('colorBadge').style.borderColor = colorActivo;
+  document.getElementById('colorBadge').style.color = colorActivo;
+  document.getElementById('colorPreviewNombre').textContent = nombre ? `${num} Compañía — ${nombre}` : `${num} Compañía`;
+}
+
+async function crearCompania(){
+  const numTxt = document.getElementById('numeroField').value.trim();
+  if(!numTxt){ toast('Ingresá el N° de la Compañía'); return; }
+  const num = parseInt(numTxt.replace(/\D/g, ''), 10);
+  if(!num){ toast('El N° de Compañía debe incluir un número'); return; }
+  if(!cuerpoActivo){ toast('No se pudo determinar el Cuerpo de esta instalación'); return; }
+
+  const directorNombre = document.getElementById('directorNombreField').value.trim();
+  const directorNumTxt = document.getElementById('directorNumeroField').value.trim();
+  const directorNumero = parseInt(directorNumTxt.replace(/\D/g, ''), 10);
+  if(!directorNombre || !directorNumTxt || !directorNumero){
+    toast('Completá el nombre y N° de Registro del Director — se crea junto con la Compañía');
+    return;
+  }
+
+  const nombreField = document.getElementById('nombreField').value.trim();
+  const direccion = document.getElementById('direccionField').value.trim() || null;
+  const nombreFinal = nombreField ? `${num}° Compañía — ${nombreField}` : `${num}° Compañía`;
+
+  // Compañía + Director + PC del Cuartel se crean juntos, en un solo paso
+  // atómico — mismo criterio que usa el Wizard para las Compañías iniciales.
+  const { data, error } = await sb.rpc('crear_compania_completa', {
+    p_cuerpo_id: cuerpoActivo, p_numero: num, p_nombre: nombreFinal, p_color_hex: colorActivo, p_direccion: direccion,
+    p_director_nombre: directorNombre, p_director_numero_registro: directorNumero
+  });
+
+  if(error){
+    const mensajes = { DIRECTOR_REQUERIDO: 'Falta el nombre del Director', NUMERO_REGISTRO_REQUERIDO: 'Falta el N° de Registro del Director' };
+    toast(error.code === '23505' ? `Ya existe una Compañía N° ${num}, o el N° de Registro del Director ya está en uso` : (mensajes[error.message] || 'No se pudo crear — ' + error.message));
+    return;
+  }
+  const resultado = Array.isArray(data) ? data[0] : data;
+
+  toast(`${nombreFinal} creada — ya disponible para configurar carros y personal`);
+  mostrarCredencialesNuevaCompania(nombreFinal, num, directorNombre, directorNumero, resultado.r_director_password, resultado.r_pc_password);
+  document.getElementById('directorNombreField').value = '';
+  document.getElementById('directorNumeroField').value = '';
+  await cargarCompanias();
+}
+
+// Las dos contraseñas (Director + PC del Cuartel) se muestran juntas, una
+// sola vez — hay que anotarlas ahora, no se vuelven a mostrar.
+function mostrarCredencialesNuevaCompania(nombreCompania, numeroCompania, directorNombre, directorNumero, passwordDirector, passwordPc){
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,15,.75);z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:var(--panel);border:1.5px solid var(--brass-dim);border-radius:12px;padding:26px 24px;max-width:420px;width:100%;">
+      <h3 style="font-size:16px;margin-bottom:12px;">✅ ${nombreCompania} creada</h3>
+      <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Guardá estas dos contraseñas ahora — no se vuelven a mostrar.</p>
+
+      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">👤 Director — ${directorNombre} (N° ${directorNumero})</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:18px;text-align:center;color:var(--cyan);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin-bottom:14px;">${passwordDirector}</div>
+      <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Entra en login_registro.html con Usuario N° ${directorNumero} — no hace falta el Código de Cuerpo. Se la cambia él mismo al entrar.</p>
+
+      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">🖥️ PC del Cuartel — N° de Compañía ${numeroCompania}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:18px;text-align:center;color:var(--brass-bright);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin-bottom:16px;">${passwordPc}</div>
+      <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Entra en login_registro.html con Usuario ${numeroCompania} (el N° de Compañía) + el Código de Cuerpo.</p>
+
+      <button onclick="this.closest('div[style*=fixed]').remove();" style="width:100%;background:var(--cyan-dim);border:2px solid var(--cyan);color:#fff;font-family:'Rajdhani';font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px;padding:11px;border-radius:7px;cursor:pointer;">Entendido</button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+// La contraseña del PC del Cuartel se muestra una sola vez, igual que la
+// del Carro en crear_carro.html — hay que anotarla ahora.
+function mostrarCredencialPc(nombreCompania, numeroCompania, passwordTemporal){
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,15,.75);z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:var(--panel);border:1.5px solid var(--brass-dim);border-radius:12px;padding:26px 24px;max-width:380px;width:100%;">
+      <h3 style="font-size:16px;margin-bottom:12px;">🖥️ PC del Cuartel — ${nombreCompania}</h3>
+      <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">
+        Para dejar lista la PC compartida de esta Compañía (o cualquier otra PC del cuartel), andá a <b>login_registro.html</b> → en Usuario poné el N° de Compañía (<b>${numeroCompania}</b>), completá el Código de Cuerpo y esta contraseña. Se guarda una sola sesión por dispositivo — no hace falta repetirlo cada vez. Guardala ahora, no se vuelve a mostrar.
+      </p>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center;color:var(--brass-bright);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:12px;margin-bottom:16px;">${passwordTemporal}</div>
+      <button onclick="this.closest('div[style*=fixed]').remove();" style="width:100%;background:var(--cyan-dim);border:2px solid var(--cyan);color:#fff;font-family:'Rajdhani';font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px;padding:11px;border-radius:7px;cursor:pointer;">Entendido</button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function previsualizarFoto(input){
+  if(!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const circle = document.getElementById('fotoCircle');
+    circle.style.backgroundImage = `url(${e.target.result})`;
+    circle.style.backgroundSize = 'cover';
+    circle.style.backgroundPosition = 'center';
+    circle.textContent = '';
+    document.getElementById('fotoLabel').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+renderColorSwatches();
+actualizarPreview();
+</script>
+</body>
+</html>
+

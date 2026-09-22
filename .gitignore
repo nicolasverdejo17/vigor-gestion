@@ -1,0 +1,6 @@
+.netlify/
+.claude/
+*.md
+*.pdf
+*.zip
+scheduled_tasks.lock

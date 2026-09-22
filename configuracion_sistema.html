@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIGOR — Configuración del Sistema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --master:#39FF14; --master-dim:#1F9E0A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1200px 550px at 15% -10%, rgba(57,255,20,0.08), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+    border:3px solid var(--master);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+  .wordmark{ text-align:center; font-family:'Rajdhani'; font-weight:600; letter-spacing:.35em; font-size:12px; color:var(--master); padding:9px 0 7px; text-transform:uppercase; flex-shrink:0; background:var(--bg);}
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--master); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px;}
+  .back-btn{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:600; font-size:12px; padding:8px 14px; border-radius:5px; cursor:pointer;}
+  .back-btn:hover{ border-color:var(--master); color:var(--master);}
+  .brand-text{ margin-left:16px;}
+  .brand-text h1{ font-size:19px; color:var(--master);}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{ font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; border-radius:4px; background:var(--master-dim); border:1.5px solid var(--master); color:#fff;}
+
+  .content-wrap{ flex:1; min-height:0; padding:22px 30px; overflow-y:auto; max-width:760px;}
+  .panel{ background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:18px 22px; margin-bottom:16px;}
+  .panel h3{ font-size:11.5px; color:var(--master); letter-spacing:.08em; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--line);}
+
+  .setting-row{ display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--line);}
+  .setting-row:last-child{ border-bottom:none;}
+  .setting-info b{ font-size:13px; display:block;}
+  .setting-info span{ font-size:11px; color:var(--text-muted); display:block; margin-top:2px;}
+
+  .toggle{ width:42px; height:24px; background:var(--line-strong); border-radius:12px; position:relative; cursor:pointer; flex-shrink:0; margin-left:16px;}
+  .toggle::before{ content:""; position:absolute; width:18px; height:18px; border-radius:50%; background:var(--text); top:3px; left:3px; transition:all .2s;}
+  .toggle.on{ background:var(--master-dim);}
+  .toggle.on::before{ left:21px; background:#fff;}
+
+  .field-inline{ display:flex; align-items:center; gap:10px;}
+  .field-inline input{ width:90px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:7px 10px; font-size:12.5px; color:var(--text); text-align:center;}
+  .field-inline input:focus{ outline:none; border-color:var(--master);}
+
+  .toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--panel-alt); border:1px solid var(--master); color:#fff; padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none; transition:all .25s; z-index:50; text-align:center;}
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="wordmark">VIGOR</div>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div style="display:flex; align-items:center;">
+        <button class="back-btn" onclick="history.back()">← Volver</button>
+        <div class="brand-text"><h1>Configuración del Sistema</h1><span>Variables técnicas, no institucionales · Vigor</span></div>
+      </div>
+      <div class="role-tag">Sesión: Super Admin</div>
+    </div>
+  </div>
+
+  <div id="sinPermiso" style="display:none; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">
+    🔒 Esta pantalla es exclusiva de Superintendente, Vicesuperintendente, Secretario General o Tesorero General.
+  </div>
+
+  <div class="content-wrap" id="contentWrap">
+    <div class="panel">
+      <h3>Notificaciones Push</h3>
+      <div class="setting-row">
+        <div class="setting-info"><b>Notificaciones de despacho</b><span>Tono + vibración incluso con la app en segundo plano</span></div>
+        <div class="toggle on" id="tgDespacho" onclick="toggleSetting('tgDespacho')"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><b>Notificaciones de Pizarra</b><span>Avisos y citaciones nuevas</span></div>
+        <div class="toggle on" id="tgPizarra" onclick="toggleSetting('tgPizarra')"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Sesiones y Seguridad</h3>
+      <div class="setting-row">
+        <div class="setting-info"><b>Expiración de contraseña temporal</b><span>Días hasta que expira si no se usa</span></div>
+        <div class="field-inline"><input type="text" class="mono" value="7" id="expDias"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><b>Cerrar sesiones al restablecer contraseña</b><span>Recomendado — evita accesos con la clave anterior</span></div>
+        <div class="toggle on" id="tgCerrarSesion" onclick="toggleSetting('tgCerrarSesion')"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panelSelectorCuerpo" style="display:none;">
+      <h3>Cuerpo a configurar</h3>
+      <div class="setting-row">
+        <div class="setting-info"><b>Cuerpo de Bomberos</b><span>La configuración es por Cuerpo, no global — elegí cuál editar</span></div>
+        <select id="selectCuerpo" class="mono" style="background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:8px 10px; color:var(--text); min-width:220px;"></select>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Datos Técnicos de la Instancia</h3>
+      <div class="setting-row"><div class="setting-info"><b>Versión de Vigor</b></div><span class="mono" style="color:var(--text-dim);">2026.08.3</span></div>
+      <div class="setting-row"><div class="setting-info"><b>Base de datos</b></div><span class="mono" style="color:var(--text-dim);">instancia-aislada · cifrada</span></div>
+      <div class="setting-row"><div class="setting-info"><b>Última sincronización</b></div><span class="mono" style="color:var(--text-dim);">hace 2 minutos</span></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const TOGGLE_COL = { tgDespacho:'notif_despacho_push', tgPizarra:'notif_pizarra_push', tgCerrarSesion:'cerrar_sesiones_al_resetear' };
+const ROLES_CON_ACCESO = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
+let cuerpoActivo = null;
+let esSuperAdmin = false;
+
+async function cargarSesion(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
+  if(perfil && perfil.cuerpo_id){
+    if(!ROLES_CON_ACCESO.includes(perfil.cargo)){
+      document.getElementById('contentWrap').style.display = 'none';
+      document.getElementById('sinPermiso').style.display = 'block';
+      return;
+    }
+    cuerpoActivo = perfil.cuerpo_id;
+    await cargarConfig();
+    return;
+  }
+  const { data: soyAdmin } = await sb.rpc('soy_super_admin');
+  if(!soyAdmin){ toast('No se pudo determinar tu Cuerpo'); return; }
+  esSuperAdmin = true;
+  document.getElementById('panelSelectorCuerpo').style.display = 'block';
+  const { data: cuerpos } = await sb.from('cuerpos').select('id, nombre_oficial').order('nombre_oficial');
+  const sel = document.getElementById('selectCuerpo');
+  sel.innerHTML = (cuerpos || []).map(c => `<option value="${c.id}">${c.nombre_oficial}</option>`).join('');
+  sel.addEventListener('change', () => { cuerpoActivo = sel.value; cargarConfig(); });
+  if(cuerpos && cuerpos.length){ cuerpoActivo = cuerpos[0].id; await cargarConfig(); }
+}
+
+async function cargarConfig(){
+  let { data: cfg } = await sb.from('configuracion_cuerpo').select('*').eq('cuerpo_id', cuerpoActivo).maybeSingle();
+  if(!cfg){
+    const { data: creada } = await sb.from('configuracion_cuerpo').insert({ cuerpo_id: cuerpoActivo }).select().single();
+    cfg = creada;
+  }
+  Object.entries(TOGGLE_COL).forEach(([elId, col]) => {
+    document.getElementById(elId).classList.toggle('on', !!cfg[col]);
+  });
+  document.getElementById('expDias').value = cfg.password_temporal_dias;
+}
+
+async function toggleSetting(id){
+  const el = document.getElementById(id);
+  const nuevoValor = !el.classList.contains('on');
+  const col = TOGGLE_COL[id];
+  const { error } = await sb.from('configuracion_cuerpo').update({ [col]: nuevoValor, actualizado_en: new Date().toISOString() }).eq('cuerpo_id', cuerpoActivo);
+  if(error){ toast('No se pudo guardar — ' + error.message); return; }
+  el.classList.toggle('on', nuevoValor);
+  toast(nuevoValor ? 'Activado' : 'Desactivado');
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+document.getElementById('expDias').addEventListener('change', async function(){
+  const dias = parseInt(this.value, 10);
+  if(!dias || dias <= 0){ toast('Ingresá un número de días válido'); return; }
+  const { error } = await sb.from('configuracion_cuerpo').update({ password_temporal_dias: dias, actualizado_en: new Date().toISOString() }).eq('cuerpo_id', cuerpoActivo);
+  if(error){ toast('No se pudo guardar — ' + error.message); return; }
+  toast('Expiración de contraseña temporal actualizada a ' + dias + ' días');
+});
+
+cargarSesion();
+</script>
+</body>
+</html>

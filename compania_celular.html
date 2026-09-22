@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Compañía (Celular)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(900px 500px at 50% -10%, rgba(73,233,255,0.08), transparent 60%), #060A0F;
+    font-family:'Inter',sans-serif; color:var(--text);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  #phoneWrap{ height:100%; flex-direction:column; position:relative;}
+
+  .app-head{ padding:10px 18px 8px; flex-shrink:0;}
+  .app-head .eyebrow{ font-size:10px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+  .app-head h1{ font-size:19px; margin-top:2px;}
+  .role-strip{ display:flex; align-items:center; gap:7px; padding:5px 0 0;}
+  .role-strip .dot{ width:6px;height:6px;border-radius:50%; background:var(--cyan);}
+  .role-strip span{ font-size:10.5px; color:var(--text-muted);}
+  .role-strip b{ font-size:10.5px; color:var(--cyan); font-weight:700;}
+
+  .content{ flex:1; overflow-y:auto; padding:6px 18px 18px;}
+  .content::-webkit-scrollbar{ display:none;}
+
+  .mi-estado-card{
+    background:var(--panel); border:2px solid var(--e-color, var(--line-strong)); border-radius:12px;
+    padding:16px; margin-bottom:16px; position:relative; overflow:hidden;
+  }
+  .mi-estado-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.35;}
+  .mi-estado-top{ display:flex; align-items:center; gap:12px; margin-bottom:12px; position:relative; z-index:1;}
+  .mi-foto{ width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--line-strong); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:17px; color:var(--text-muted); flex-shrink:0;}
+  .mi-nombre{ font-size:15px; font-weight:700;}
+  .mi-cargo{ font-size:11.5px; color:var(--text-muted);}
+  .mi-estado-label{ font-size:11px; color:var(--text-muted); margin-bottom:9px; position:relative; z-index:1;}
+  .mi-estado-label b{ color:var(--e-color, var(--text)); text-transform:uppercase; letter-spacing:.03em;}
+  .mi-estado-opciones{ display:grid; grid-template-columns:1fr 1fr; gap:6px; position:relative; z-index:1;}
+  .estado-btn{
+    padding:11px 6px; border-radius:7px; border:1.5px solid var(--line-strong); background:var(--panel-alt);
+    color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; font-size:10.5px; letter-spacing:.02em;
+    text-transform:uppercase; cursor:pointer;
+  }
+  .estado-btn.on.disponible{ background:#3CF29A; border-color:#3CF29A; color:#fff;}
+  .estado-btn.on.no_disponible{ background:#FFC94D; border-color:#FFC94D; color:#241505;}
+  .estado-btn.on.emergencia{ background:#FF4B5C; border-color:#FF4B5C; color:#fff;}
+  .estado-btn.on.fuera{ background:#42555C; border-color:#42555C; color:#fff;}
+
+  .section-label{ display:flex; justify-content:space-between; align-items:baseline; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:16px 4px 8px;}
+  .section-label .count{ font-family:'JetBrains Mono',monospace; color:var(--cyan);}
+
+  .bombero-row{
+    display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--line-strong);
+    border-radius:10px; padding:10px 12px; margin-bottom:7px;
+  }
+  .bombero-row.editable{ cursor:pointer;}
+  .bombero-row .foto{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--servicio); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:13px; color:var(--text-muted); flex-shrink:0;}
+  .bombero-row .info{ flex:1; min-width:0;}
+  .bombero-row .nom{ font-size:13px; font-weight:600;}
+  .bombero-row .cargo{ font-size:10.5px; color:var(--text-muted);}
+  .bombero-row .mini-btn{ font-size:9.5px; font-weight:700; text-transform:uppercase; padding:4px 8px; border-radius:9px; border:none; cursor:pointer; color:#fff;}
+  .bombero-row .estado-pill{ font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; padding:4px 8px; border-radius:9px; color:#fff; flex-shrink:0;}
+
+  .carros-row{ display:flex; gap:7px; flex-wrap:wrap; margin-bottom:6px;}
+  .carro-chip{ display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px; background:var(--panel); border:1.5px solid var(--servicio); padding:6px 11px; border-radius:6px; color:var(--text);}
+  .carro-chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--servicio); flex-shrink:0;}
+  .carro-chip.mant{ border-color:var(--alerta);}
+  .reg-add-row{ display:flex; gap:8px; margin-bottom:10px;}
+  .reg-add-input{
+    flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:8px;
+    padding:9px 12px; font-size:13px; color:var(--text); font-family:'JetBrains Mono',monospace;
+  }
+  .reg-add-input:focus{ outline:none; border-color:var(--cyan);}
+  .reg-add-btn{
+    background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; width:38px; border-radius:8px;
+    font-size:18px; font-weight:700; cursor:pointer; flex-shrink:0;
+  }
+  .carro-chip{ cursor:pointer;}
+  .estado-selector{
+    display:none; position:fixed; z-index:130;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:8px;
+    padding:6px; box-shadow:0 10px 30px rgba(0,0,0,.5); width:165px;
+  }
+  .estado-selector.open{ display:block;}
+  .estado-opt-carro{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:5px;
+    cursor:pointer; font-size:12.5px; font-weight:600; color:var(--text);
+  }
+  .estado-opt-carro:hover{ background:var(--panel-alt);}
+  .estado-opt-carro .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .carro-chip.mant::before{ background:var(--alerta);}
+
+  .toast{
+    position:absolute; bottom:20px; left:16px; right:16px;
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:11px 16px; border-radius:8px; font-size:12.5px; opacity:0; transform:translateY(8px);
+    transition:all .25s; pointer-events:none; text-align:center; z-index:30;
+  }
+  .toast.show{ opacity:1; transform:translateY(0);}
+
+  .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:8.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ font-size:16px; line-height:1;}
+  .tabbar-real a.active{ color:var(--cyan);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div id="sinSesion" style="display:none; padding:40vh 16px 40px; color:var(--text-muted); text-align:center;">
+    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+  </div>
+
+  <div id="phoneWrap" style="display:none;">
+    <div class="app-head">
+      <div class="eyebrow" id="nombreCompaniaCel">—</div>
+      <h1>Compañía</h1>
+      <div class="role-strip"><span class="dot"></span><span>Sesión:</span> <b id="roleLabel">—</b></div>
+    </div>
+
+    <div class="content">
+      <div class="mi-estado-card" id="miEstadoCard">
+        <div class="mi-estado-top">
+          <div class="mi-foto" id="miIniciales">—</div>
+          <div>
+            <div class="mi-nombre" id="miNombre">—</div>
+            <div class="mi-cargo" id="miCargoReg">—</div>
+          </div>
+        </div>
+        <div class="mi-estado-label">Mi estado: <b id="miEstadoTexto">Disponible</b></div>
+        <div class="mi-estado-opciones" id="miEstadoOpciones"></div>
+      </div>
+
+      <div class="section-label">Guardia Activa <span class="count" id="guardiaCount">7</span></div>
+      <div class="reg-add-row" id="regAddRow" style="display:none;">
+        <input type="text" class="reg-add-input" id="regAddInput" placeholder="N° para agregar a Guardia" inputmode="numeric" onkeydown="if(event.key==='Enter') agregarPorRegistro();">
+        <button class="reg-add-btn" onclick="agregarPorRegistro()">+</button>
+      </div>
+      <div id="guardiaList"></div>
+
+      <div class="section-label">Carros</div>
+      <div class="carros-row" id="carrosRow"></div>
+      <div class="estado-selector" id="selCarroCel"></div>
+    </div>
+    <div class="tabbar-real" id="tabbarReal"></div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// --- Conexión real a Supabase ---
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
+
+// Mismo modelo de 4 estados que el PC del Cuartel — coherencia en TODO
+// el sistema (Disponible/No Disponible/Fuera de Servicio/En Emergencia).
+const COLOR_ESTADO = { disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const PILL_LABEL = { disponible:'Disponible', no_disponible:'No Disponible', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
+const ESTADOS = ['disponible','no_disponible','emergencia','fuera'];
+
+let GUARDIA = [];
+let miEstado = 'fuera';
+let rolActivo = 'raso';
+let miPersonalId = null, miCompaniaId = null;
+
+let CARROS_CEL = [];
+const ESTADO_LABEL_CARRO = { servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
+const COLOR_ESTADO_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    document.getElementById('sinSesion').style.display = 'block';
+    return;
+  }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, numero_registro, nombre_completo, cargo, compania_id, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .eq('auth_user_id', session.user.id).single();
+  if(!perfil || !perfil.compania_id){
+    document.getElementById('sinSesion').style.display = 'block';
+    document.getElementById('sinSesion').textContent = 'Esta sesión no pertenece a ninguna Compañía.';
+    return;
+  }
+  miPersonalId = perfil.id;
+  miCompaniaId = perfil.compania_id;
+  rolActivo = PRIORIDAD_CARGO_MANDO.includes(perfil.cargo) ? 'oficial' : 'raso';
+  const filaVigente = (perfil.personal_estado_historial || []).find(h => h.hora_fin === null);
+  miEstado = filaVigente ? filaVigente.estado : 'fuera';
+
+  document.getElementById('nombreCompaniaCel').textContent = perfil.companias.nombre;
+  document.getElementById('roleLabel').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
+  document.getElementById('miIniciales').textContent = iniciales(perfil.nombre_completo);
+  document.getElementById('miNombre').textContent = perfil.nombre_completo;
+  document.getElementById('miCargoReg').textContent = `${perfil.cargo} · N° ${perfil.numero_registro}`;
+  document.getElementById('regAddRow').style.display = rolActivo === 'oficial' ? 'flex' : 'none';
+
+  await Promise.all([cargarGuardia(), cargarCarros()]);
+
+  document.getElementById('phoneWrap').style.display = 'flex';
+  renderMiEstadoOpciones();
+  renderGuardia();
+  renderCarros();
+}
+
+async function cargarGuardia(){
+  const { data } = await sb.from('personal')
+    .select('id, numero_registro, nombre_completo, cargo, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .eq('compania_id', miCompaniaId)
+    .neq('id', miPersonalId);
+  GUARDIA = (data || []).map(p => {
+    const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
+    return { id: p.id, n: p.nombre_completo, c: p.cargo, reg: p.numero_registro, estado: fv ? fv.estado : 'fuera' };
+  }).sort((a,b) => a.reg - b.reg);
+}
+
+async function cargarCarros(){
+  const { data } = await sb.from('carros').select('id, nomenclatura, estado').eq('compania_id', miCompaniaId);
+  CARROS_CEL = (data || []).map(c => ({ id: c.id, nom: c.nomenclatura, estado: c.estado }));
+}
+
+function renderCarros(){
+  const editable = rolActivo === 'oficial';
+  document.getElementById('carrosRow').innerHTML = CARROS_CEL.map((c,i) => `
+    <span class="carro-chip ${c.estado!=='servicio'?'mant':''}" style="border-color:${COLOR_ESTADO_CARRO[c.estado]}"
+      ${editable ? `onclick="abrirSelectorEstadoCarro(event, ${i})"` : ''}>${c.nom} — ${ESTADO_LABEL_CARRO[c.estado]}</span>
+  `).join('');
+}
+function abrirSelectorEstadoCarro(ev, i){
+  ev.stopPropagation();
+  const sel = document.getElementById('selCarroCel');
+  const rect = ev.currentTarget.getBoundingClientRect();
+  const anchoPopover = 165;
+  const altoPopoverEstimado = 4 * 38 + 12; // 4 opciones + padding
+  const left = Math.min(Math.max(8, rect.left), window.innerWidth - anchoPopover - 8);
+  const cabeAbajo = (rect.bottom + 6 + altoPopoverEstimado) <= window.innerHeight;
+  const top = cabeAbajo ? (rect.bottom + 6) : Math.max(8, rect.top - 6 - altoPopoverEstimado);
+  sel.style.left = left + 'px';
+  sel.style.top = top + 'px';
+  sel.innerHTML = Object.keys(ESTADO_LABEL_CARRO).map(e =>
+    `<div class="estado-opt-carro" onclick="setEstadoCarroCel(${i}, '${e}')"><span class="dot" style="background:${COLOR_ESTADO_CARRO[e]}"></span>${ESTADO_LABEL_CARRO[e]}</div>`
+  ).join('');
+  sel.classList.add('open');
+}
+async function setEstadoCarroCel(i, estado){
+  const { error } = await sb.from('carros').update({ estado }).eq('id', CARROS_CEL[i].id);
+  document.getElementById('selCarroCel').classList.remove('open');
+  if(error){ toast('No se pudo actualizar — ' + error.message); return; }
+  CARROS_CEL[i].estado = estado;
+  renderCarros();
+  toast(`${CARROS_CEL[i].nom} — estado actualizado a ${ESTADO_LABEL_CARRO[estado]}`);
+}
+document.addEventListener('click', () => {
+  const sel = document.getElementById('selCarroCel');
+  if(sel) sel.classList.remove('open');
+});
+
+// Agregar a Guardia Activa por N° de Registro — mismo toggle que el PC
+// del Cuartel (pedido explícito, solo disponible en Vista Oficial).
+async function agregarPorRegistro(){
+  const input = document.getElementById('regAddInput');
+  const val = input.value.trim();
+  if(!val) return;
+  const b = GUARDIA.find(x => String(x.reg) === val);
+  if(!b){
+    input.style.borderColor = 'var(--emergencia)';
+    setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+    toast('N° de Registro no encontrado');
+    return;
+  }
+  const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: 'disponible' });
+  if(error){ toast('No se pudo registrar: ' + error.message); return; }
+  b.estado = 'disponible';
+  input.value = '';
+  input.style.borderColor = 'var(--servicio)';
+  setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+  renderGuardia();
+  toast(`${b.n} agregado a Guardia Activa`);
+}
+
+function iniciales(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase(); }
+
+function renderMiEstadoOpciones(){
+  document.getElementById('miEstadoOpciones').innerHTML = ESTADOS.map(e =>
+    `<button class="estado-btn ${e} ${miEstado===e?'on':''}" onclick="setMiEstado('${e}')">${PILL_LABEL[e]}</button>`
+  ).join('');
+  document.getElementById('miEstadoTexto').textContent = PILL_LABEL[miEstado];
+  document.getElementById('miEstadoCard').style.setProperty('--e-color', COLOR_ESTADO[miEstado]);
+}
+
+async function setMiEstado(e){
+  const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: miPersonalId, p_estado: e });
+  if(error){ toast('No se pudo cambiar tu estado: ' + error.message); return; }
+  miEstado = e;
+  renderMiEstadoOpciones();
+  renderGuardia();
+  toast('Tu estado ahora es: ' + PILL_LABEL[e]);
+}
+
+function renderGuardia(){
+  const editable = rolActivo === 'oficial';
+  // "Fuera de Servicio" no aparece en el sistema — mismo criterio del PC del Cuartel.
+  const visibles = GUARDIA.filter(b => b.estado !== 'fuera');
+  document.getElementById('guardiaList').innerHTML = visibles.map(b => `
+    <div class="bombero-row">
+      <div class="foto">${iniciales(b.n)}</div>
+      <div class="info"><div class="nom">${b.n}</div><div class="cargo">${b.c} · N° ${b.reg}</div></div>
+      ${editable
+        ? `<button class="mini-btn" style="background:${COLOR_ESTADO[b.estado]}" onclick="ciclarEstado('${b.reg}')">${PILL_LABEL[b.estado]}</button>`
+        : `<span class="estado-pill" style="background:${COLOR_ESTADO[b.estado]}">${PILL_LABEL[b.estado]}</span>`
+      }
+    </div>
+  `).join('');
+  const totalVisible = visibles.length + (miEstado !== 'fuera' ? 1 : 0);
+  document.getElementById('guardiaCount').textContent = totalVisible;
+}
+
+async function ciclarEstado(reg){
+  const b = GUARDIA.find(x => String(x.reg) === String(reg));
+  const idx = ESTADOS.indexOf(b.estado);
+  const nuevo = ESTADOS[(idx + 1) % ESTADOS.length];
+  const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: nuevo });
+  if(error){ toast('No se pudo cambiar: ' + error.message); return; }
+  b.estado = nuevo;
+  renderGuardia();
+  toast(b.n + ' -> ' + PILL_LABEL[b.estado]);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+cargarDatos();
+
+const TABS_NAV = [
+  {href:'inicio_celular.html', ic:'🏠', label:'Inicio'},
+  {href:'compania_celular.html', ic:'🚒', label:'Compañía'},
+  {href:'pizarra_celular.html', ic:'📌', label:'Pizarra'},
+  {href:'actividades_celular.html', ic:'📋', label:'Activid.'},
+  {href:'coordenadas_celular.html', ic:'📍', label:'GPS'},
+  {href:'opciones_celular.html', ic:'⚙️', label:'Opciones'},
+];
+(function renderTabbarReal(){
+  const cont = document.getElementById('tabbarReal');
+  if(!cont) return;
+  const actual = location.pathname.split('/').pop();
+  cont.innerHTML = TABS_NAV.map(t => `<a href="${t.href}" class="${t.href===actual?'active':''}"><span class="ic">${t.ic}</span><span>${t.label}</span></a>`).join('');
+})();
+</script>
+</body>
+</html>

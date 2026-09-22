@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Dar de Baja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1100px 500px at 15% -10%, rgba(216,57,78,0.07), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--burdeo-bright); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--burdeo-bright); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--burdeo); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .warn-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--burdeo); color:#fff; display:flex; align-items:center; gap:7px;
+  }
+  .warn-tag::before{ content:""; width:7px;height:7px;border-radius:50%; background:#fff;}
+
+  .form-wrap{ flex:1; min-height:0; padding:20px 32px 24px; display:flex; flex-direction:column; align-items:center; overflow:hidden;}
+  .form-head{ display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-shrink:0; width:100%; max-width:640px;}
+  .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12.5px; padding:9px 16px; border-radius:5px; cursor:pointer;
+  }
+  .back-btn:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .form-head h2{ font-size:22px;}
+
+  .form-body{
+    flex:1; min-height:0; width:100%; max-width:640px; background:var(--panel); border:1.5px solid var(--burdeo-bright);
+    border-radius:10px; padding:22px 28px; overflow-y:auto; position:relative;
+  }
+  .form-body::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.3;}
+
+  .item-ref{
+    background:var(--bg); border:1px solid var(--line-strong); border-radius:8px; padding:14px 16px; margin-bottom:20px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .item-ref .cod{ font-family:'JetBrains Mono',monospace; color:var(--brass-bright); font-size:12px; font-weight:700;}
+  .item-ref .nom{ font-size:15px; font-weight:600; margin-top:2px;}
+  .item-ref .lugar{ font-size:11.5px; color:var(--text-muted); margin-top:2px;}
+
+  .field{ margin-bottom:18px;}
+  .field label{ display:block; font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; font-weight:600; margin-bottom:7px;}
+  .field label .req{ color:var(--burdeo-bright); margin-left:3px;}
+  .field textarea{
+    width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:12px 14px; font-size:14px; color:var(--text); font-family:'Inter'; resize:none; min-height:90px; line-height:1.4;
+  }
+  .field textarea:focus{ outline:none; border-color:var(--burdeo-bright);}
+
+  .foto-upload{
+    display:flex; align-items:center; gap:14px; background:var(--panel-alt); border:1.5px dashed var(--burdeo-bright);
+    border-radius:8px; padding:16px 18px; cursor:pointer;
+  }
+  .foto-upload .circle{
+    width:48px; height:48px; border-radius:8px; background:var(--panel); border:2px solid var(--burdeo-bright);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;
+  }
+  .foto-upload .txt b{ display:block; font-size:13.5px; color:var(--text);}
+  .foto-upload .txt span{ font-size:11.5px; color:var(--text-muted);}
+  .fotos-grid{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;}
+  .foto-thumb{ position:relative; width:80px; height:80px; border-radius:8px; overflow:hidden; border:1.5px solid var(--servicio);}
+  .foto-thumb img{ width:100%; height:100%; object-fit:cover; display:block;}
+  .foto-thumb-quitar{
+    position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%;
+    background:rgba(6,10,15,0.85); border:1px solid var(--burdeo-bright); color:#fff;
+    font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .foto-thumb-quitar:hover{ background:var(--burdeo);}
+
+  .warn-box{
+    background:rgba(122,22,32,0.12); border:1px solid var(--burdeo-bright); border-radius:8px;
+    padding:12px 14px; margin-bottom:20px; font-size:12px; color:var(--text-muted); line-height:1.5;
+  }
+  .warn-box b{ color:var(--burdeo-bright);}
+
+  .btn-confirmar{
+    width:100%; margin-top:6px; background:var(--burdeo); border:2px solid var(--burdeo-bright); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    font-size:15px; padding:14px; border-radius:8px; cursor:pointer;
+  }
+  .btn-confirmar:hover{ filter:brightness(1.1);}
+  .btn-confirmar:disabled{ opacity:.4; cursor:not-allowed;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#D8394E" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1 id="tituloInv">Dar de Baja</h1><span>Vigor</span></div>
+      </div>
+      <div class="warn-tag">Acción irreversible</div>
+    </div>
+  </div>
+
+  <div class="form-wrap">
+    <div class="form-head">
+      <button class="back-btn" onclick="window.location.href='inventario.html'">← Volver</button>
+      <h2>Dar de Baja</h2>
+    </div>
+
+    <div class="form-body">
+      <div class="item-ref">
+        <div>
+          <div class="cod" id="itemCod">—</div>
+          <div class="nom" id="itemNombre">—</div>
+          <div class="lugar" id="itemLugar">Ubicación actual: —</div>
+        </div>
+      </div>
+
+      <div class="warn-box">
+        <b>Importante:</b> dar de baja un ítem lo saca definitivamente del inventario activo. Queda registrado en su historial de movimientos, pero deja de contarse como bien disponible de la Compañía.
+      </div>
+
+      <div class="field">
+        <label>Motivo de la baja<span class="req">*</span></label>
+        <textarea id="motivoField" placeholder="Ej. Elemento con desgaste irreversible, no cumple estándar de seguridad para uso operativo." oninput="checkForm()"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Fotos del ítem<span class="req">*</span></label>
+        <div class="foto-upload" onclick="document.getElementById('fotoInput').click()">
+          <div class="circle">📷</div>
+          <div class="txt"><b>Adjuntar fotos — podés elegir varias a la vez</b><span>Evidencia del estado que justifica la baja</span></div>
+        </div>
+        <input type="file" id="fotoInput" accept="image/*" multiple style="display:none;" onchange="agregarFotos(this)">
+        <div class="fotos-grid" id="fotosGrid"></div>
+      </div>
+
+      <button class="btn-confirmar" id="btnConfirmar" disabled onclick="confirmarBaja()">Confirmar Baja Definitiva</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const itemId = new URLSearchParams(window.location.search).get('item');
+let miPersonalId = null, miCuerpoId = null, itemActual = null;
+let fotosAdjuntas = [];
+
+const MODIFY_CARGOS = ['Director','Tesorero/a'];
+const MODIFY_ROLES_FUNCIONALES = ['Depto. Material Menor','Depto. Material Mayor'];
+
+async function cargarDatos(){
+  if(!itemId){ toast('Falta el ítem a dar de baja'); return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, cuerpo_id, cargo, personal_roles_funcionales(rol_funcional)').eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  miPersonalId = perfil.id;
+  miCuerpoId = perfil.cuerpo_id;
+  const rolesFuncionalesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
+  const puedeModificar = MODIFY_CARGOS.includes(perfil.cargo) || MODIFY_ROLES_FUNCIONALES.some(r => rolesFuncionalesActivos.has(r));
+  if(!puedeModificar){
+    document.querySelector('.form-body').innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--text-dim); font-size:13px;">🔒 Dar de baja un ítem es exclusivo de Director, Tesorero/a, o del Depto. de Material Menor/Mayor.</div>`;
+    return;
+  }
+
+  const { data: item, error } = await sb.from('inventario_items').select('*').eq('id', itemId).single();
+  if(error || !item){ toast('No se encontró el ítem'); return; }
+  itemActual = item;
+  document.getElementById('tituloInv').textContent = 'Dar de Baja — ' + item.codigo;
+  document.getElementById('itemCod').textContent = item.codigo;
+  document.getElementById('itemNombre').textContent = item.nombre;
+  document.getElementById('itemLugar').textContent = 'Ubicación actual: ' + (item.lugar_actual || '—');
+  if(item.estado === 'baja'){
+    document.getElementById('btnConfirmar').disabled = true;
+    document.getElementById('btnConfirmar').textContent = 'Este ítem ya está de baja';
+  }
+}
+
+function agregarFotos(input){
+  if(!input.files || !input.files.length) return;
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      fotosAdjuntas.push({ nombre: file.name, src: e.target.result, file });
+      renderFotos();
+      checkForm();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = ''; // permite volver a elegir el mismo archivo si se saca y se quiere reagregar
+}
+function quitarFoto(i){
+  fotosAdjuntas.splice(i, 1);
+  renderFotos();
+  checkForm();
+}
+function renderFotos(){
+  const grid = document.getElementById('fotosGrid');
+  grid.innerHTML = fotosAdjuntas.map((f,i) => `
+    <div class="foto-thumb">
+      <img src="${f.src}" alt="${f.nombre}">
+      <button class="foto-thumb-quitar" onclick="quitarFoto(${i})" title="Quitar">✕</button>
+    </div>
+  `).join('');
+}
+
+function checkForm(){
+  if(itemActual && itemActual.estado === 'baja') return;
+  const motivo = document.getElementById('motivoField').value.trim();
+  document.getElementById('btnConfirmar').disabled = !(motivo.length > 0 && fotosAdjuntas.length > 0);
+}
+
+async function confirmarBaja(){
+  const motivo = document.getElementById('motivoField').value.trim();
+  if(!motivo || fotosAdjuntas.length===0) return;
+  document.getElementById('btnConfirmar').disabled = true;
+  document.getElementById('btnConfirmar').textContent = 'Guardando…';
+
+  const { data: mov, error } = await sb.from('inventario_movimientos').insert({
+    item_id: itemId, tipo: 'baja', detalle: motivo, realizado_por: miPersonalId, estado_nuevo: 'baja'
+  }).select().single();
+  if(error){ toast('No se pudo registrar la baja — ' + error.message); document.getElementById('btnConfirmar').disabled=false; document.getElementById('btnConfirmar').textContent='Confirmar Baja Definitiva'; return; }
+
+  for(const f of fotosAdjuntas){
+    const ext = (f.file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${miCuerpoId}/inventario/baja/${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('vigor-fotos').upload(path, f.file);
+    if(upErr) continue;
+    const fotoUrl = sb.storage.from('vigor-fotos').getPublicUrl(path).data.publicUrl;
+    await sb.from('inventario_movimiento_fotos').insert({ movimiento_id: mov.id, foto_url: fotoUrl });
+  }
+
+  await sb.from('inventario_items').update({ estado: 'baja' }).eq('id', itemId);
+
+  toast(`Ítem dado de baja con ${fotosAdjuntas.length} foto(s) — queda registrado en su historial`);
+  setTimeout(()=>window.location.href = 'inventario.html', 1000);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+cargarDatos();
+</script>
+</body>
+</html>

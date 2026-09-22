@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Editar Datos Personales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+
+  .form-wrap{ flex:1; min-height:0; padding:18px 32px 22px; display:flex; flex-direction:column; align-items:center; overflow:hidden;}
+  .form-head{ display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-shrink:0; width:100%; max-width:680px;}
+  .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12.5px; padding:9px 16px; border-radius:5px; cursor:pointer;
+  }
+  .back-btn:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .form-head h2{ font-size:20px;}
+
+  .form-body{
+    flex:1; min-height:0; width:100%; max-width:680px; background:var(--panel); border:1px solid var(--line-strong);
+    border-radius:10px; padding:22px 28px; overflow-y:auto; position:relative;
+  }
+  .form-body::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4;}
+
+  .foto-edit-row{ display:flex; align-items:center; gap:16px; margin-bottom:20px; position:relative; z-index:1;}
+  .foto-edit{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--servicio); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:22px; color:var(--text-muted); flex-shrink:0;}
+  .btn-cambiar-foto{ background:transparent; border:1.5px solid var(--cyan); color:var(--cyan); font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase; font-size:11px; padding:8px 14px; border-radius:5px; cursor:pointer;}
+
+  .section-title{
+    font-size:11.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.1em;
+    font-weight:700; margin:0 0 14px; padding-bottom:8px; border-bottom:1px solid var(--line); position:relative; z-index:1;
+  }
+  .section-title:not(:first-of-type){ margin-top:22px;}
+  .pw-hint{ font-size:11px; color:var(--text-dim); line-height:1.5; margin-bottom:14px; position:relative; z-index:1;}
+
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:16px; position:relative; z-index:1;}
+  .form-field{ display:flex; flex-direction:column; gap:7px;}
+  .form-field.full{ grid-column:1 / -1;}
+  .form-field label{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; font-weight:600;}
+  .form-field input, .form-field select{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:11px 13px; font-size:14px; color:var(--text); font-family:'Inter';
+  }
+  .form-field input:focus, .form-field select:focus{ outline:none; border-color:var(--cyan);}
+  .form-field input.mono{ font-family:'JetBrains Mono',monospace;}
+  .form-field input:disabled{ opacity:.5; cursor:not-allowed;}
+
+  .locked-note{
+    display:flex; align-items:center; gap:8px; background:var(--panel-alt); border:1px dashed var(--line-strong);
+    border-radius:6px; padding:10px 13px; font-size:11.5px; color:var(--text-dim); margin-bottom:16px; position:relative; z-index:1;
+  }
+
+  .btn-guardar{
+    width:100%; margin-top:8px; background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    font-size:15px; padding:14px; border-radius:8px; cursor:pointer; position:relative; z-index:1;
+  }
+  .btn-guardar:hover{ background:var(--cyan); color:#0D2226;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Editar Datos Personales</h1><span id="nombreCompaniaHead">— · Vigor</span></div>
+      </div>
+      <div class="role-tag">Sesión: <span id="cargoHead">—</span></div>
+    </div>
+  </div>
+
+  <div class="form-wrap">
+    <div class="form-head">
+      <button class="back-btn" onclick="window.location.href='ficha_bombero.html'">← Volver</button>
+      <h2 id="tituloBombero">Cargando…</h2>
+    </div>
+
+    <div class="form-body">
+      <div class="foto-edit-row">
+        <div class="foto-edit" id="fotoCircle">RS</div>
+        <button class="btn-cambiar-foto" onclick="document.getElementById('fotoInput').click()">Cambiar foto</button>
+        <input type="file" id="fotoInput" accept="image/*" style="display:none;" onchange="previsualizarFoto(this)">
+      </div>
+
+      <div class="section-title">Datos personales</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Nombre completo</label>
+          <input type="text" id="campoNombre" value="">
+        </div>
+        <div class="form-field">
+          <label>RUT</label>
+          <input type="text" class="mono" id="campoRut" value="" disabled>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Fecha de nacimiento</label>
+          <input type="text" id="campoFechaNac" value="" placeholder="dd/mm/aaaa">
+        </div>
+        <div class="form-field">
+          <label>Teléfono</label>
+          <input type="text" class="mono" id="campoTelefono" value="">
+        </div>
+      </div>
+
+      <div class="locked-note">🔒 El RUT no es editable desde acá — solo el Perfil Maestro puede corregirlo, por ser un identificador único del sistema.</div>
+
+      <div class="section-title">Datos institucionales</div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Cargo</label>
+          <input type="text" id="campoCargoSoloLectura" value="" disabled>
+        </div>
+        <div class="form-field">
+          <label>N° de Registro</label>
+          <input type="text" class="mono" id="campoNumeroRegistro" value="" disabled>
+        </div>
+      </div>
+      <div class="locked-note">🔒 El Cargo no es editable desde acá — solo Director, Secretario/a, Superintendente o Secretario General pueden cambiarlo, desde la Ficha del Bombero.</div>
+      <div class="form-row">
+        <div class="form-field full">
+          <label>Fecha de ingreso al Cuerpo</label>
+          <input type="text" id="campoFechaIngreso" value="" placeholder="dd/mm/aaaa">
+        </div>
+      </div>
+
+      <div class="section-title">Seguridad — Cambiar mi Contraseña</div>
+      <div class="pw-hint">Escribí tu contraseña actual y la nueva que quieras usar. Si no sabés tu contraseña actual, esto no te sirve — contactá al soporte técnico de Vigor para que te generen una temporal.</div>
+      <div class="form-row">
+        <div class="form-field full">
+          <label>Contraseña actual</label>
+          <input type="password" id="pwActual" placeholder="Tu contraseña de hoy">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Contraseña nueva</label>
+          <input type="password" id="pwNueva" placeholder="Mínimo 8 caracteres">
+        </div>
+        <div class="form-field">
+          <label>Repetir contraseña nueva</label>
+          <input type="password" id="pwNuevaRepetir" placeholder="Repetila igual">
+        </div>
+      </div>
+      <button class="btn-guardar" style="background:var(--panel-alt); border:1.5px solid var(--brass-bright); color:var(--brass-bright); margin-bottom:14px;" onclick="cambiarPassword()">Cambiar Contraseña</button>
+
+      <button class="btn-guardar" onclick="guardarCambios()">Guardar Cambios</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let miPersonalId = null, miEmail = null;
+
+function isoADdmmyyyy(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function ddmmyyyyAIso(txt){
+  const p = txt.split('/');
+  return p.length === 3 ? `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}` : null;
+}
+function iniciales(n){ return n.split(' ').filter(Boolean).map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
+
+async function cargarSesion(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  miEmail = session.user.email;
+  const { data: p } = await sb.from('personal')
+    .select('id, numero_registro, nombre_completo, rut, fecha_nacimiento, telefono, cargo, fecha_ingreso, foto_url, companias(nombre)')
+    .eq('auth_user_id', session.user.id).single();
+  if(!p){ toast('No se pudo cargar tu perfil'); return; }
+  miPersonalId = p.id;
+
+  document.getElementById('nombreCompaniaHead').textContent = (p.companias ? p.companias.nombre : 'Cuerpo General') + ' · Vigor';
+  document.getElementById('cargoHead').textContent = p.cargo;
+  document.getElementById('tituloBombero').textContent = `${p.nombre_completo} — N° ${p.numero_registro}`;
+  document.getElementById('fotoCircle').textContent = iniciales(p.nombre_completo);
+  if(p.foto_url){
+    const c = document.getElementById('fotoCircle');
+    c.style.backgroundImage = `url(${p.foto_url})`; c.style.backgroundSize = 'cover'; c.style.backgroundPosition = 'center'; c.textContent = '';
+  }
+
+  document.getElementById('campoNombre').value = p.nombre_completo || '';
+  document.getElementById('campoRut').value = p.rut || '—';
+  document.getElementById('campoFechaNac').value = isoADdmmyyyy(p.fecha_nacimiento);
+  document.getElementById('campoTelefono').value = p.telefono || '';
+  document.getElementById('campoNumeroRegistro').value = p.numero_registro;
+  document.getElementById('campoFechaIngreso').value = isoADdmmyyyy(p.fecha_ingreso);
+  document.getElementById('campoCargoSoloLectura').value = p.cargo || '';
+}
+cargarSesion();
+
+function previsualizarFoto(input){
+  if(!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const circle = document.getElementById('fotoCircle');
+    circle.style.backgroundImage = `url(${e.target.result})`;
+    circle.style.backgroundSize = 'cover';
+    circle.style.backgroundPosition = 'center';
+    circle.textContent = '';
+  };
+  reader.readAsDataURL(file);
+  toast('Foto actualizada — se guarda al confirmar los cambios');
+}
+
+// Bug corregido: "Guardar Cambios" no leía ningún campo del formulario —
+// era un toast fijo con el nombre "R. Salinas" hardcodeado, sin importar
+// qué se hubiera escrito. Ahora sí valida y refleja lo que el usuario editó.
+// El Cargo NO se edita acá — autoservicio nunca puede cambiar el propio
+// Cargo (evita autoascenso); eso queda exclusivo de Director, Secretario/a,
+// Superintendente o Secretario General, desde la Ficha del Bombero.
+async function guardarCambios(){
+  const nombre = document.getElementById('campoNombre').value.trim();
+  const fechaNacTxt = document.getElementById('campoFechaNac').value.trim();
+  const telefono = document.getElementById('campoTelefono').value.trim();
+  const fechaIngresoTxt = document.getElementById('campoFechaIngreso').value.trim();
+
+  const campos = [
+    {id:'campoNombre', val:nombre}, {id:'campoFechaNac', val:fechaNacTxt},
+    {id:'campoTelefono', val:telefono}, {id:'campoFechaIngreso', val:fechaIngresoTxt},
+  ];
+  let faltantes = false;
+  campos.forEach(c => {
+    const el = document.getElementById(c.id);
+    const vacio = !c.val;
+    el.style.borderColor = vacio ? 'var(--burdeo-bright)' : '';
+    if(vacio) faltantes = true;
+  });
+  if(faltantes){
+    toast('Completá todos los campos antes de guardar');
+    return;
+  }
+  const fechaNac = ddmmyyyyAIso(fechaNacTxt);
+  const fechaIngreso = ddmmyyyyAIso(fechaIngresoTxt);
+  if(!fechaNac || !fechaIngreso){
+    toast('Las fechas deben tener formato dd/mm/aaaa');
+    return;
+  }
+
+  const { error } = await sb.rpc('actualizar_mis_datos_personales', {
+    p_nombre_completo: nombre, p_fecha_nacimiento: fechaNac, p_telefono: telefono,
+    p_fecha_ingreso: fechaIngreso
+  });
+
+  if(error){ toast('No se pudo guardar — ' + error.message); return; }
+  document.getElementById('tituloBombero').textContent = `${nombre} — N° ${document.getElementById('campoNumeroRegistro').value}`;
+  toast(`Datos personales de ${nombre} actualizados`);
+}
+
+// Cambiar mi Contraseña — autoservicio real, distinto de "restablecer"
+// (que ahora es exclusivo de soporte técnico). Acá la persona ya sabe su
+// contraseña actual y solo quiere definir una nueva, sin depender de nadie.
+async function cambiarPassword(){
+  const actual = document.getElementById('pwActual');
+  const nueva = document.getElementById('pwNueva');
+  const repetir = document.getElementById('pwNuevaRepetir');
+  [actual, nueva, repetir].forEach(el => el.style.borderColor = '');
+
+  if(nueva.value.length < 8){
+    nueva.style.borderColor = 'var(--burdeo-bright)';
+    toast('La contraseña nueva debe tener al menos 8 caracteres');
+    return;
+  }
+  if(nueva.value !== repetir.value){
+    repetir.style.borderColor = 'var(--burdeo-bright)';
+    toast('Las 2 contraseñas nuevas no coinciden');
+    return;
+  }
+  if(nueva.value === actual.value){
+    nueva.style.borderColor = 'var(--burdeo-bright)';
+    toast('La contraseña nueva debe ser distinta a la actual');
+    return;
+  }
+
+  // La única forma real de verificar "tu contraseña actual" sin guardar
+  // contraseñas en texto plano en ningún lado es re-autenticar con ella.
+  const { error: authError } = await sb.auth.signInWithPassword({ email: miEmail, password: actual.value });
+  if(authError){
+    actual.style.borderColor = 'var(--burdeo-bright)';
+    toast('La contraseña actual no es correcta');
+    return;
+  }
+
+  const { error } = await sb.rpc('completar_cambio_password', { p_password_nuevo: nueva.value });
+  if(error){
+    toast('No se pudo actualizar la contraseña — ' + error.message);
+    return;
+  }
+  await sb.auth.signOut({ scope: 'others' });
+
+  actual.value = ''; nueva.value = ''; repetir.value = '';
+  toast('Contraseña actualizada correctamente — se cerraron las demás sesiones');
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+</script>
+</body>
+</html>

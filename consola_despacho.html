@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Consola de Despacho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; padding-bottom:60px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  /* ---- Nameplate ---- */
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:1px solid var(--line-strong); padding:0; position:sticky; top:0; z-index:30;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:18px 28px; flex-wrap:wrap; gap:12px; max-width:1180px; margin:0 auto;}
+  .brand{ display:flex; align-items:center; gap:14px;}
+  .brand-mark{ width:38px;height:38px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:16px; height:16px;}
+  .brand-text h1{ font-size:18px; letter-spacing:.05em;}
+  .brand-text span{ font-size:10px; color:var(--text-dim); letter-spacing:.12em; text-transform:uppercase; display:block; margin-top:2px;}
+  .clock{ text-align:right; color:var(--text-muted); font-size:12px; line-height:1.3;}
+  .conexion-indicador{
+    display:flex; align-items:center; gap:7px; font-family:'Rajdhani'; font-weight:700; font-size:11px;
+    letter-spacing:.04em; text-transform:uppercase; padding:6px 13px; border-radius:12px;
+    background:var(--panel); border:1.5px solid var(--servicio); color:var(--servicio);
+  }
+  .conexion-indicador.offline{ border-color:var(--burdeo-bright); color:var(--burdeo-bright); animation:parpadeoConexion 1.1s infinite;}
+  .conexion-dot{ width:8px; height:8px; border-radius:50%; background:currentColor; flex-shrink:0;}
+  @keyframes parpadeoConexion{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
+  .operador-actual{ text-align:right;}
+  .operador-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:4px;}
+  .operador-row{ display:flex; align-items:center; gap:8px;}
+  .operador-nombre{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; color:var(--cyan);}
+  .operador-input{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:5px;
+    padding:5px 9px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text); width:64px;
+  }
+  .operador-input:focus{ outline:none; border-color:var(--cyan);}
+
+  .central-tabs{ display:flex; gap:6px; padding:0 28px 10px; flex-wrap:wrap;}
+  .central-tab{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:.03em; text-transform:uppercase;
+    padding:8px 14px; border-radius:6px; cursor:pointer; text-decoration:none;
+  }
+  .central-tab.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+  .central-tab:hover{ border-color:var(--brass-bright);}
+  .tab-badge{ display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px; background:var(--emergencia); color:#fff; font-size:9.5px; font-weight:800; border-radius:8px; padding:0 4px; margin-left:6px; vertical-align:middle;}
+  .clock strong{ display:block; color:var(--cyan); text-shadow:0 0 12px var(--cyan-glow); font-size:28px; font-weight:700; letter-spacing:.02em; font-family:'JetBrains Mono',monospace;}
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 24px 0;}
+  .demo-tag{ color:var(--text-dim); font-size:12px; margin-bottom:20px;}
+
+  /* ---- Company status strip ---- */
+  .cia-strip{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:24px;}
+  @media (max-width:900px){ .cia-strip{grid-template-columns:repeat(2,1fr);} }
+  .cia-chip{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--c, var(--nodisp)); border-radius:4px; padding:10px 12px;}
+  .cia-chip b{ font-size:13px; display:block;}
+  .cia-chip span{ font-size:10.5px; color:var(--text-muted);}
+
+  /* ---- Section frame (plaque) ---- */
+  .frame{ background:var(--panel); border:1px solid var(--line-strong); border-radius:6px; margin-bottom:22px; position:relative; overflow:hidden;}
+  .frame::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px; pointer-events:none; opacity:.5;}
+  .frame-head{ padding:16px 22px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
+  .frame-head h2{ font-size:19px;}
+  .frame-head .tag{ font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; text-transform:uppercase;}
+  .frame-body{ padding:22px;}
+  .offline-nota{ font-size:11px; color:var(--text-dim); font-style:italic; margin-bottom:14px; line-height:1.5;}
+
+  /* ---- Despacho form ---- */
+  .field{ margin-bottom:18px;}
+  .field label{ display:block; font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;}
+  .field input[type=text]{
+    width:100%; background:var(--panel-alt); border:1px solid var(--line); border-radius:4px;
+    padding:12px 14px; color:var(--text); font-family:'Inter'; font-size:14.5px;
+  }
+  .field input:focus{ outline:none; border-color:var(--cyan);}
+
+  .cia-select{ display:flex; gap:8px; flex-wrap:wrap;}
+  .cia-btn{
+    background:var(--panel-alt); border:2px solid var(--alerta); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; font-size:18px; letter-spacing:.03em;
+    padding:11px 22px; border-radius:4px; cursor:pointer;
+  }
+  .cia-btn.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+
+  .carro-select{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px; margin-top:12px;}
+  .carro-btn{
+    background:var(--panel-alt); border:1.5px solid var(--line); color:var(--text);
+    text-align:left; padding:12px 14px; border-radius:4px; cursor:pointer;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .carro-btn .code{ font-family:'JetBrains Mono',monospace; color:var(--brass-bright); font-weight:700; font-size:20px; line-height:1.1;}
+  .carro-btn .desc{ font-size:12px; color:var(--text-muted); line-height:1.3;}
+  .carro-btn.on{ background:var(--brass-dim); border-color:var(--brass-bright);}
+  .carro-btn.ya-agregado{ opacity:.4; cursor:not-allowed; border-style:dashed;}
+  .carro-btn.on .code{ color:#F3EAD3;}
+  .carro-btn.on .desc{ color:#E8DCC0;}
+
+  .selected-block{
+    margin-top:14px; padding:12px 14px; background:var(--bg); border:1px dashed var(--line-strong);
+    border-radius:4px; font-size:12.5px; color:var(--text-muted); min-height:20px;
+  }
+  .selected-block b{ color:var(--text); }
+  .selected-chip{
+    display:inline-flex; align-items:center; gap:6px; background:var(--panel-alt); border:1px solid var(--cyan);
+    color:var(--cyan); font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:4px 10px; border-radius:3px;
+    margin:3px 4px 0 0;
+  }
+  .selected-chip button{ background:none; border:none; color:var(--cyan); cursor:pointer; font-size:13px; line-height:1; padding:0;}
+
+  .emergencia-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; margin-top:6px;}
+  .emergencia-btn{
+    background:var(--panel-alt); border:1.5px solid var(--line); color:var(--text);
+    text-align:left; padding:12px 14px; border-radius:4px; cursor:pointer;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .emergencia-btn .code{ font-family:'JetBrains Mono',monospace; color:var(--brass-bright); font-weight:700; font-size:20px; line-height:1.1;}
+  .emergencia-btn .desc{ font-size:12px; color:var(--text-muted); line-height:1.3;}
+  .emergencia-btn.on{ background:var(--burdeo); border-color:var(--burdeo-bright); color:#F6DCE0;}
+  .emergencia-btn.on .code{ color:#F6DCE0;}
+  .emergencia-btn.on .desc{ color:#EBC4CA;}
+
+  .btn-add-evento{
+    background:var(--alerta); border:none; color:#241505;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:13px; padding:11px 18px; border-radius:4px; cursor:pointer; margin-top:14px;
+  }
+  .btn-add-evento:hover{ filter:brightness(1.08);}
+
+  .btn-confirmar{
+    width:100%; margin-top:20px; background:var(--burdeo); border:1.5px solid var(--burdeo-bright);
+    color:#F6DCE0; font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    font-size:15px; padding:15px; border-radius:4px; cursor:pointer;
+  }
+  .btn-confirmar:hover{ filter:brightness(1.1);}
+
+  /* ---- Special alerts ---- */
+  .alertas-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media (max-width:760px){ .alertas-grid{grid-template-columns:1fr;} }
+  .alerta-btn{
+    background:var(--panel-alt); border:2px solid var(--alerta); border-radius:6px; padding:18px 18px 16px;
+    text-align:left; position:relative;
+  }
+  .alerta-btn .code{ font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--alerta); font-size:13px; letter-spacing:.04em;}
+  .alerta-btn h3{ font-size:17px; margin:6px 0 4px; color:var(--text);}
+  .alerta-btn p{ margin:0; font-size:12px; color:var(--text-muted); line-height:1.4;}
+  .alerta-btn .toggle-row{ cursor:pointer; }
+  .alerta-cias{ display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line-strong);}
+  .alerta-cias.open{ display:block;}
+  .alerta-cias .lbl{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;}
+  .alerta-cia-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+  .alerta-cia-chip{
+    background:var(--bg); border:1.5px solid var(--line); color:var(--text-muted);
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    padding:6px 11px; border-radius:4px; cursor:pointer;
+  }
+  .alerta-cia-chip.on{ background:var(--alerta); border-color:var(--alerta); color:#241505;}
+  .alerta-cia-chip.todas{ font-family:'Inter'; font-weight:600;}
+  .alerta-confirm{
+    width:100%; background:var(--alerta); border:none; color:#241505;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:12.5px; padding:10px; border-radius:4px; cursor:pointer;
+  }
+  .alerta-confirm:hover{ filter:brightness(1.08);}
+
+  /* ---- Active dispatches ---- */
+  .evento-row{ display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:10px;}
+  .evento-row:last-child{ border:none;}
+  .evento-l b{ font-family:'JetBrains Mono',monospace; color:var(--burdeo-bright); font-size:13px;}
+  .evento-l .dir{ font-size:13.5px; color:var(--text); margin-top:2px;}
+  .evento-l .meta{ font-size:11.5px; color:var(--text-muted); margin-top:2px;}
+  .evento-carros{ display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .evento-carros span{ font-family:'JetBrains Mono',monospace; font-size:11px; background:var(--panel-alt); border:1px solid var(--line-strong); padding:3px 8px; border-radius:3px; color:var(--text-muted);}
+
+  .btn-terminar{
+    background:var(--burdeo); border:1px solid var(--burdeo-bright); color:#fff;
+    font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:8px 13px; border-radius:5px; cursor:pointer; margin-left:8px;
+  }
+  .btn-terminar:hover{ background:var(--burdeo-bright);}
+
+  .empty-eventos{ text-align:center; padding:24px; color:var(--text-dim); font-size:13px;}
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.75); z-index:60; display:none; align-items:center; justify-content:center;}
+  .modal-overlay.show{ display:flex;}
+  .modal-box{ background:var(--panel); border:1.5px solid var(--burdeo-bright); border-radius:10px; padding:22px 24px; width:380px;}
+  .modal-box h3{ font-family:'Rajdhani',sans-serif; font-size:15px; margin:0 0 8px; color:var(--text);}
+  .modal-box p{ font-size:13px; color:var(--text-muted); margin:0 0 18px; line-height:1.5;}
+  .modal-actions{ display:flex; gap:10px;}
+  .modal-actions button{ flex:1; font-family:'Inter',sans-serif; font-weight:600; font-size:13px; padding:11px; border-radius:5px; cursor:pointer;}
+  .modal-cancel{ background:transparent; border:1px solid var(--line-strong); color:var(--text-muted);}
+  .modal-confirm{ background:var(--burdeo); border:1px solid var(--burdeo-bright); color:#fff;}
+  .modal-confirm:hover{ background:var(--burdeo-bright);}
+  .modal-guardar{ background:var(--cyan-dim); border:1px solid var(--cyan); color:#fff;}
+  .modal-guardar:hover{ background:var(--cyan); color:#0D2226;}
+
+  .btn-config-claves{
+    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em;
+    padding:5px 11px; border-radius:12px; cursor:pointer;
+  }
+  .btn-config-claves:hover{ border-color:var(--cyan); color:var(--cyan);}
+
+  .subclave-row{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); gap:7px; flex-wrap:wrap; align-items:center;}
+  .subclave-label{ font-size:11px; color:var(--brass-bright); font-weight:700; margin-right:2px;}
+  .subclave-btn{
+    background:var(--panel-alt); border:1.5px solid var(--brass-dim); border-radius:14px;
+    padding:6px 12px; font-size:11.5px; color:var(--text-muted); cursor:pointer;
+  }
+  .subclave-btn.on{ background:var(--brass-dim); border-color:var(--brass-bright); color:#fff;}
+
+  .modal-box-claves{
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px;
+    padding:24px 26px; width:100%; max-width:560px; max-height:82vh; overflow-y:auto; position:relative;
+  }
+  .modal-box-claves h3{ font-family:'Rajdhani',sans-serif; font-size:16px; margin:0 0 4px;}
+  .modal-box-claves .modal-sub{ font-size:12px; color:var(--text-muted); margin-bottom:16px; line-height:1.5;}
+  .config-clave-row{ display:flex; gap:7px; align-items:center; margin-bottom:7px;}
+  .config-subclave-row{ margin-left:24px;}
+  .config-clave-code{
+    width:76px; flex-shrink:0; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:5px;
+    padding:7px 9px; font-size:12px; color:var(--text);
+  }
+  .config-clave-name{
+    flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:5px;
+    padding:7px 9px; font-size:12px; color:var(--text);
+  }
+  .config-clave-code:focus, .config-clave-name:focus{ outline:none; border-color:var(--cyan);}
+  .btn-mini-sub{
+    background:transparent; border:1.5px dashed var(--line-strong); color:var(--text-dim);
+    font-size:10.5px; padding:6px 8px; border-radius:5px; cursor:pointer; flex-shrink:0; white-space:nowrap;
+  }
+  .btn-mini-sub:hover{ border-color:var(--brass-bright); color:var(--brass-bright);}
+  .btn-mini-del{
+    background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright);
+    width:28px; height:28px; border-radius:5px; cursor:pointer; flex-shrink:0; font-size:11px;
+  }
+  .btn-mini-del:hover{ background:rgba(255,75,92,0.1);}
+  .btn-nueva-clave{
+    width:100%; background:transparent; border:1.5px dashed var(--cyan); color:var(--cyan);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12px; padding:10px; border-radius:6px; cursor:pointer; margin:8px 0 18px;
+  }
+  .btn-nueva-clave:hover{ background:rgba(73,233,255,0.08);}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:5px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50; max-width:90vw;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Central de Alarmas</h1><span id="cuerpoLabel">Vigor</span></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:22px;">
+        <div class="conexion-indicador" id="conexionIndicador">
+          <span class="conexion-dot"></span>
+          <span id="conexionTexto">En línea</span>
+        </div>
+        <div class="operador-actual">
+          <span class="operador-label">Operador en turno</span>
+          <div class="operador-row">
+            <span class="operador-nombre" id="operadorNombre">— Sin registrar —</span>
+            <input type="text" class="operador-input" id="operadorInput" placeholder="N° reg." inputmode="numeric" onkeydown="if(event.key==='Enter') marcarOperador();">
+          </div>
+        </div>
+        <div class="clock"><strong id="clk">—</strong><span id="fechaHoy">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="central-tabs">
+    <a href="comandancia.html" class="central-tab" style="border-color:var(--brass); color:var(--brass-bright);">← Comandancia</a>
+    <a href="consola_despacho.html" class="central-tab on">Consola de Despacho</a>
+    <a href="visual_companias.html" class="central-tab">Visual de Compañías</a>
+    <a href="puestos_mando_activos.html" class="central-tab">Modo Crisis Compañías</a>
+    <a href="historial_despacho.html" class="central-tab">Historial de Despacho</a>
+    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge">3</span></a>
+  </div>
+
+  <div class="wrap">
+
+
+    <!-- Company quick status -->
+    <div class="cia-strip" id="ciaStrip"></div>
+
+    <!-- Consola de Despacho -->
+    <div class="frame">
+      <div class="frame-head"><h2>Consola de Despacho</h2><span class="tag">nuevo evento</span></div>
+      <div class="frame-body">
+
+        <div class="field">
+          <label>Dirección / ubicación</label>
+          <input type="text" id="direccion" placeholder="Ej. Camino Los Aromos, km 4, sector rural">
+        </div>
+
+        <div class="field">
+          <label>1. Seleccionar Compañía</label>
+          <div class="cia-select" id="ciaSelect"></div>
+          <div class="carro-select" id="carroSelect"></div>
+          <button class="btn-add-evento" onclick="addSeleccion()">+ Agregar a Este Despacho</button>
+          <div class="selected-block" id="seleccionados"><span style="color:var(--text-dim)">Sin Compañías/carros agregados a este despacho todavía.</span></div>
+        </div>
+
+        <div class="field">
+          <label style="display:flex; align-items:center; justify-content:space-between;">
+            2. Tipo de emergencia
+            <button class="btn-config-claves" onclick="abrirConfigClaves()">⚙ Configurar Claves</button>
+          </label>
+          <div class="emergencia-grid" id="emergenciaGrid"></div>
+          <div class="subclave-row" id="subclaveRow" style="display:none;"></div>
+        </div>
+
+        <button class="btn-confirmar" onclick="confirmarDespacho()">Confirmar despacho</button>
+      </div>
+    </div>
+
+    <!-- Alertas especiales -->
+    <div class="frame">
+      <div class="frame-head"><h2>Alertas Especiales</h2></div>
+      <div class="frame-body">
+        <div class="offline-nota">📡 La Consola funciona sin conexión a internet — lanza los tonos por la base de radio Motorola conectada al PC. Solo se pierden las notificaciones automáticas a Celulares y PC de Compañía mientras no haya conexión.</div>
+        <div class="alertas-grid" id="alertasGrid"></div>
+      </div>
+    </div>
+
+    <!-- Emergencias en curso -->
+    <div class="frame">
+      <div class="frame-head"><h2>Emergencias en Curso</h2><span class="tag" id="emergenciasCount">2 activas</span></div>
+      <div class="frame-body" id="emergenciasBody"></div>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="terminarModal">
+    <div class="modal-box">
+      <h3>Terminar Emergencia</h3>
+      <p id="terminarModalTexto">¿Confirmar que la emergencia fue controlada?</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="terminarCancel">Cancelar</button>
+        <button class="modal-confirm" id="terminarConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="configClavesModal">
+    <div class="modal-box-claves">
+      <h3>Configurar Claves</h3>
+      <div class="modal-sub">Ajustá el código y el nombre de cada clave a la nomenclatura real de tu Cuerpo. Algunas pueden tener subcategorías propias (ej. 10-0-1, 10-0-2…).</div>
+      <div id="listaConfigClaves"></div>
+      <button class="btn-nueva-clave" onclick="agregarNuevaClave()">+ Nueva Clave</button>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="cerrarConfigClaves()">Cerrar</button>
+        <button class="modal-guardar" onclick="guardarConfigClaves()">Guardar Configuración</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let miCuerpoId = null, miPersonalId = null;
+
+// Tono de despacho — sintetizado con Web Audio API (dos tonos alternados,
+// típico "warble" de aviso), así funciona 100% local/offline: no depende
+// de ningún archivo ni de conexión a internet para sonar. El audio sale
+// por la salida de sonido del PC — de ahí se cablea físicamente a la
+// entrada de la base de radio (Motorola u otra marca) para que la Central
+// pueda lanzar el tono aunque se caiga el internet (ver nota de la UI).
+// Cuando haya archivos de tono reales por tipo de emergencia
+// (claves_emergencia.tono_url), reproducirTono() los usa en su lugar.
+let audioCtx = null;
+function reproducirTono(url){
+  if(url){
+    new Audio(url).play().catch(()=>{});
+    return;
+  }
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ahora = audioCtx.currentTime;
+    [0, 0.42, 0.84, 1.26].forEach((offset, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = i % 2 === 0 ? 900 : 1300;
+      gain.gain.setValueAtTime(0.0001, ahora + offset);
+      gain.gain.exponentialRampToValueAtTime(0.25, ahora + offset + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ahora + offset + 0.38);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(ahora + offset);
+      osc.stop(ahora + offset + 0.4);
+    });
+  } catch(e){ /* Web Audio no disponible — sigue el resto de la Consola funcionando igual */ }
+}
+
+async function cargarSesion(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal').select('id, cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  miPersonalId = perfil.id;
+  miCuerpoId = perfil.cuerpo_id;
+  document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+
+  await Promise.all([cargarClaves(), cargarCiasYCarros(), cargarEmergenciasEnCurso(), cargarOperadorTurno()]);
+  renderCiaStrip(); renderCiaSelect(); renderEmergencias(); renderSeleccionados(); renderAlertas(); renderEmergenciasEnCurso();
+  suscribirRealtime();
+}
+
+function suscribirRealtime(){
+  sb.channel('despachos-tono')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
+      reproducirTono(null);
+      cargarEmergenciasEnCurso().then(renderEmergenciasEnCurso);
+    })
+    .subscribe();
+}
+
+async function cargarOperadorTurno(){
+  const { data } = await sb.from('operadores_central_turno')
+    .select('personal(nombre_completo, numero_registro)')
+    .eq('cuerpo_id', miCuerpoId).eq('activo', true).maybeSingle();
+  document.getElementById('operadorNombre').textContent = data ? `${data.personal.nombre_completo} — N° ${data.personal.numero_registro}` : '— Sin registrar —';
+}
+
+async function marcarOperador(){
+  const input = document.getElementById('operadorInput');
+  const val = input.value.trim();
+  if(!val) return;
+  const { data, error } = await sb.rpc('marcar_operador_turno', { p_numero_registro: parseInt(val, 10) });
+  if(error){
+    input.style.borderColor = 'var(--burdeo-bright)';
+    setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+    toast('N° de operador no reconocido');
+    return;
+  }
+  const nombre = data && data[0] ? data[0].r_nombre : '';
+  document.getElementById('operadorNombre').textContent = `${nombre} — N° ${val}`;
+  input.value = '';
+  input.style.borderColor = 'var(--servicio)';
+  setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+  toast(`${nombre} registrado como operador en turno`);
+}
+
+// Indicador real de conexión — usa los eventos nativos del navegador
+// (navigator.onLine, 'online'/'offline'), no un texto fijo. Pedido
+// explícito: un indicador EN VIVO, no solo la nota explicativa que ya
+// existía sobre cómo funciona la Consola sin internet.
+function actualizarIndicadorConexion(){
+  const ind = document.getElementById('conexionIndicador');
+  const txt = document.getElementById('conexionTexto');
+  const enLinea = navigator.onLine;
+  ind.classList.toggle('offline', !enLinea);
+  txt.textContent = enLinea ? 'En línea' : 'Sin conexión';
+  if(!enLinea) toast('⚠ Se perdió la conexión a internet — los tonos por radio siguen funcionando, las notificaciones a Celulares y PC de Compañía no');
+}
+window.addEventListener('online', actualizarIndicadorConexion);
+window.addEventListener('offline', actualizarIndicadorConexion);
+actualizarIndicadorConexion();
+
+// ---- Emergencias en Curso + Terminar Emergencia ----
+// Nota de modelo: Terminar Emergencia solo toca Despacho.estado (→ Finalizado,
+// con fecha_hora_termino) y la Pizarra de Emergencias (vuelve a "Disponible").
+// NUNCA fuerza Carro.estado — eso sigue gobernado únicamente por la
+// automatización de dotación mínima (bug de origen corregido: la spec vieja
+// mezclaba ambos datos como si fueran el mismo).
+let EMERGENCIAS_EN_CURSO = [];
+
+async function cargarEmergenciasEnCurso(){
+  const { data } = await sb.from('despachos')
+    .select('id, direccion, fecha_hora_despacho, claves_emergencia(codigo, nombre), despacho_unidades(companias(nombre), carros(nomenclatura))')
+    .eq('cuerpo_id', miCuerpoId).eq('estado', 'activo')
+    .order('fecha_hora_despacho', { ascending:false });
+
+  EMERGENCIAS_EN_CURSO = (data || []).map(d => ({
+    id: d.id,
+    cod: d.claves_emergencia.codigo,
+    tipo: d.claves_emergencia.nombre.toUpperCase(),
+    dir: d.direccion,
+    hora: new Date(d.fecha_hora_despacho).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', hour12:false}),
+    cias: [...new Set(d.despacho_unidades.map(u => u.companias.nombre))].join(' y '),
+    carros: d.despacho_unidades.map(u => u.carros.nomenclatura)
+  }));
+}
+
+function renderEmergenciasEnCurso(){
+  const body = document.getElementById('emergenciasBody');
+  document.getElementById('emergenciasCount').textContent = EMERGENCIAS_EN_CURSO.length + (EMERGENCIAS_EN_CURSO.length===1?' activa':' activas');
+  if(EMERGENCIAS_EN_CURSO.length===0){
+    body.innerHTML = `<div class="empty-eventos">Sin emergencias en curso en este momento.</div>`;
+    return;
+  }
+  body.innerHTML = EMERGENCIAS_EN_CURSO.map(e => `
+    <div class="evento-row">
+      <div class="evento-l">
+        <b>${e.cod} · ${e.tipo}</b>
+        <div class="dir">${e.dir}</div>
+        <div class="meta">Despachado ${e.hora} · ${e.cias}</div>
+      </div>
+      <div class="evento-carros">
+        ${e.carros.map(c=>`<span>${c}</span>`).join('')}
+        <button class="btn-terminar" onclick="abrirTerminarModal('${e.id}')">Terminar Emergencia</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+let idAtterminar = null;
+function abrirTerminarModal(id){
+  const ev = EMERGENCIAS_EN_CURSO.find(e=>e.id===id);
+  if(!ev) return;
+  idAtterminar = id;
+  document.getElementById('terminarModalTexto').textContent =
+    `¿Confirmar que la emergencia "${ev.cod} · ${ev.tipo}" (${ev.dir}) fue controlada? Un solo click cierra el evento completo para todas las Compañías involucradas.`;
+  document.getElementById('terminarModal').classList.add('show');
+}
+function cerrarTerminarModal(){
+  document.getElementById('terminarModal').classList.remove('show');
+  idAtterminar = null;
+}
+document.getElementById('terminarCancel').addEventListener('click', cerrarTerminarModal);
+document.getElementById('terminarConfirm').addEventListener('click', async () => {
+  if(!idAtterminar) return;
+  const ev = EMERGENCIAS_EN_CURSO.find(e=>e.id===idAtterminar);
+  if(!ev) return;
+  const { error } = await sb.rpc('finalizar_despacho', { p_despacho_id: idAtterminar });
+  cerrarTerminarModal();
+  if(error){ toast('No se pudo finalizar — ' + error.message); return; }
+  await cargarEmergenciasEnCurso();
+  renderEmergenciasEnCurso();
+  const ahora = new Date().toLocaleTimeString('es-CL',{hour12:false});
+  toast(`Emergencia "${ev.cod}" finalizada a las ${ahora} — pasa al Historial de Despacho, la Pizarra vuelve a Disponible`);
+});
+
+function tick(){
+  const n = new Date();
+  document.getElementById('clk').textContent = n.toLocaleTimeString('es-CL',{hour12:false});
+  document.getElementById('fechaHoy').textContent = n.toLocaleDateString('es-CL', {weekday:'long', day:'numeric', month:'long'});
+}
+tick(); setInterval(tick,1000);
+
+let CIAS_DATA = []; // [{id, nombre, dotacion_minima, disponibles, carros:[{id,nomenclatura,tipo_descripcion,estado}]}]
+
+async function cargarCiasYCarros(){
+  const { data: cias } = await sb.from('companias')
+    .select('id, nombre, dotacion_minima, personal(personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin))')
+    .eq('cuerpo_id', miCuerpoId).order('numero');
+  const { data: carros } = await sb.from('carros').select('id, nomenclatura, tipo_descripcion, estado, compania_id').eq('cuerpo_id', miCuerpoId);
+
+  CIAS_DATA = (cias || []).map(c => {
+    const disponibles = (c.personal || []).filter(p => {
+      const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
+      return fv && fv.estado === 'disponible';
+    }).length;
+    return {
+      id: c.id, nombre: c.nombre, dotacion_minima: c.dotacion_minima, disponibles,
+      carros: (carros || []).filter(car => car.compania_id === c.id)
+    };
+  });
+}
+
+function renderCiaStrip(){
+  const el = document.getElementById('ciaStrip');
+  el.innerHTML = CIAS_DATA.map(c => {
+    const cumpleDotMin = c.disponibles >= c.dotacion_minima;
+    const carrosOk = c.carros.filter(x => x.estado === 'servicio').length;
+    const color = cumpleDotMin ? '#3CF29A' : '#42555C';
+    return `<div class="cia-chip" style="--c:${color}"><b>${c.nombre}</b><span>${c.disponibles} en serv. · ${carrosOk}/${c.carros.length} carros</span></div>`;
+  }).join('');
+}
+let ciaActiva = null;
+let carrosSel = [];
+let despachoActual = []; // [{compania_id, ciaNombre, carros:[{id,nom}]}]
+
+function renderCiaSelect(){
+  const el = document.getElementById('ciaSelect');
+  el.innerHTML = CIAS_DATA.map(c =>
+    `<button class="cia-btn ${ciaActiva===c.id?'on':''}" onclick="selectCia('${c.id}')">${c.nombre}</button>`
+  ).join('');
+}
+function selectCia(id){
+  ciaActiva = id;
+  carrosSel = [];
+  renderCiaSelect();
+  renderCarroSelect();
+}
+function renderCarroSelect(){
+  const el = document.getElementById('carroSelect');
+  if(!ciaActiva){ el.innerHTML=''; return; }
+  const cia = CIAS_DATA.find(c => c.id === ciaActiva);
+  // Un carro ya agregado a este despacho (en cualquier Compañía ya
+  // confirmada) no se puede volver a seleccionar — pedido explícito.
+  const carrosYaEnDespacho = despachoActual.flatMap(d => d.carros.map(x=>x.id));
+  el.innerHTML = cia.carros.map(car => {
+    const yaAgregado = carrosYaEnDespacho.includes(car.id);
+    const clase = `carro-btn ${carrosSel.includes(car.id)?'on':''} ${yaAgregado?'ya-agregado':''}`;
+    const onclick = yaAgregado ? '' : `onclick="toggleCarro('${car.id}')"`;
+    return `<button class="${clase}" ${onclick} ${yaAgregado?'disabled title="Ya agregado a este despacho"':''}><span class="code">${car.nomenclatura}</span><span class="desc">${yaAgregado ? 'Ya agregado' : car.tipo_descripcion}</span></button>`;
+  }).join('');
+}
+function toggleCarro(id){
+  carrosSel = carrosSel.includes(id) ? carrosSel.filter(x=>x!==id) : [...carrosSel, id];
+  renderCarroSelect();
+}
+function addSeleccion(){
+  if(!ciaActiva || carrosSel.length===0){ toast('Elegí una Compañía y al menos un carro'); return; }
+  const cia = CIAS_DATA.find(c => c.id === ciaActiva);
+  const carros = carrosSel.map(id => ({ id, nom: cia.carros.find(c=>c.id===id).nomenclatura }));
+  despachoActual.push({ compania_id: ciaActiva, ciaNombre: cia.nombre, carros });
+  ciaActiva = null; carrosSel = [];
+  renderCiaSelect(); renderCarroSelect(); renderSeleccionados();
+}
+function quitarSeleccion(i){
+  despachoActual.splice(i,1);
+  renderSeleccionados();
+  renderCarroSelect();
+}
+function renderSeleccionados(){
+  const el = document.getElementById('seleccionados');
+  if(despachoActual.length===0){
+    el.innerHTML = '<span style="color:var(--text-dim)">Sin Compañías/carros agregados a este despacho todavía.</span>';
+    return;
+  }
+  el.innerHTML = despachoActual.map((d,i) =>
+    `<span class="selected-chip">${d.ciaNombre} — ${d.carros.map(c=>c.nom).join(', ')} <button onclick="quitarSeleccion(${i})">✕</button></span>`
+  ).join('');
+}
+
+// Claves configurables — cada Cuerpo de Bomberos puede usar una
+// nomenclatura distinta, y algunas claves tienen subcategorías propias
+// (ej. 10-0 → 10-0-1, 10-0-2…). Editable desde "⚙ Configurar Claves".
+let TIPOS = [];
+let tipoSel = null;
+let claveExpandida = null;
+
+async function cargarClaves(){
+  const { data } = await sb.from('claves_emergencia').select('*').eq('cuerpo_id', miCuerpoId).eq('activo', true).order('orden', { ascending:true, nullsFirst:false }).order('codigo');
+  const principales = (data || []).filter(k => !k.parent_clave_id);
+  const subs = (data || []).filter(k => k.parent_clave_id);
+  TIPOS = principales.map(k => ({
+    id: k.id, code: k.codigo, name: k.nombre,
+    subs: subs.filter(s => s.parent_clave_id === k.id).map(s => ({ id: s.id, code: s.codigo, name: s.nombre }))
+  }));
+}
+
+function renderEmergencias(){
+  const el = document.getElementById('emergenciaGrid');
+  el.innerHTML = TIPOS.map(t => {
+    const esSel = tipoSel === t.id || (t.subs.some(s => s.id === tipoSel));
+    const tieneSubs = t.subs.length > 0;
+    return `<button class="emergencia-btn ${esSel?'on':''}" onclick="${tieneSubs ? `toggleExpandirClave('${t.id}')` : `selectTipo('${t.id}')`}">
+      <span class="code">${t.code}${tieneSubs ? ' ▾' : ''}</span><span class="desc">${t.name}</span>
+    </button>`;
+  }).join('');
+
+  const subRow = document.getElementById('subclaveRow');
+  const claveConSubs = TIPOS.find(t => t.id === claveExpandida);
+  if(claveConSubs && claveConSubs.subs.length > 0){
+    subRow.style.display = 'flex';
+    subRow.innerHTML = `<span class="subclave-label">${claveConSubs.code} —</span>` + claveConSubs.subs.map(s =>
+      `<button class="subclave-btn ${tipoSel===s.id?'on':''}" onclick="selectTipo('${s.id}')">${s.code} · ${s.name}</button>`
+    ).join('');
+  } else {
+    subRow.style.display = 'none';
+    subRow.innerHTML = '';
+  }
+}
+function toggleExpandirClave(id){
+  claveExpandida = claveExpandida === id ? null : id;
+  renderEmergencias();
+}
+function selectTipo(id){ tipoSel = id; renderEmergencias(); }
+
+// ---- Configuración de Claves (persiste en vivo contra claves_emergencia) ----
+function abrirConfigClaves(){
+  renderConfigClaves();
+  document.getElementById('configClavesModal').classList.add('show');
+}
+function cerrarConfigClaves(){
+  document.getElementById('configClavesModal').classList.remove('show');
+  renderEmergencias();
+}
+function renderConfigClaves(){
+  document.getElementById('listaConfigClaves').innerHTML = TIPOS.map((t, i) => `
+    <div class="config-clave-row">
+      <input class="mono config-clave-code" value="${t.code}" onchange="editarClave('${t.id}', 'codigo', this.value)">
+      <input class="config-clave-name" value="${t.name}" onchange="editarClave('${t.id}', 'nombre', this.value)">
+      <button class="btn-mini-sub" onclick="agregarSubclave('${t.id}', ${i})" title="Agregar subcategoría">+ Sub</button>
+      <button class="btn-mini-del" onclick="eliminarClave('${t.id}')" title="Eliminar clave">✕</button>
+    </div>
+    ${t.subs.map((s) => `
+      <div class="config-clave-row config-subclave-row">
+        <input class="mono config-clave-code" value="${s.code}" onchange="editarClave('${s.id}', 'codigo', this.value)">
+        <input class="config-clave-name" value="${s.name}" onchange="editarClave('${s.id}', 'nombre', this.value)">
+        <button class="btn-mini-del" onclick="eliminarClave('${s.id}')" title="Eliminar subcategoría">✕</button>
+      </div>
+    `).join('')}
+  `).join('');
+}
+async function editarClave(id, campo, val){
+  await sb.from('claves_emergencia').update({ [campo]: val }).eq('id', id);
+  await cargarClaves();
+}
+async function agregarSubclave(parentId, i){
+  const n = TIPOS[i].subs.length + 1;
+  await sb.from('claves_emergencia').insert({ cuerpo_id: miCuerpoId, parent_clave_id: parentId, codigo: `${TIPOS[i].code}-${n}`, nombre: 'Nueva subcategoría' });
+  await cargarClaves();
+  renderConfigClaves();
+}
+async function eliminarClave(id){
+  await sb.from('claves_emergencia').delete().eq('id', id);
+  await cargarClaves();
+  renderConfigClaves();
+}
+async function agregarNuevaClave(){
+  await sb.from('claves_emergencia').insert({ cuerpo_id: miCuerpoId, codigo: `10-${TIPOS.length}`, nombre: 'Nueva clave' });
+  await cargarClaves();
+  renderConfigClaves();
+}
+function guardarConfigClaves(){
+  cerrarConfigClaves();
+  toast('Configuración de claves guardada');
+}
+
+async function confirmarDespacho(){
+  const dir = document.getElementById('direccion').value.trim();
+  if(!dir || despachoActual.length===0 || !tipoSel){
+    toast('Completá dirección, al menos una Compañía/carro y el tipo de emergencia');
+    return;
+  }
+  const unidades = despachoActual.flatMap(d => d.carros.map(c => ({ compania_id: d.compania_id, carro_id: c.id })));
+  const { error } = await sb.rpc('confirmar_despacho', {
+    p_direccion: dir, p_tipo_emergencia_id: tipoSel, p_unidades: unidades
+  });
+  if(error){ toast('No se pudo confirmar el despacho — ' + error.message); return; }
+
+  reproducirTono(null);
+  toast(`Despacho confirmado — ${despachoActual.map(d=>d.ciaNombre+': '+d.carros.map(c=>c.nom).join(',')).join(' | ')}`);
+  document.getElementById('direccion').value='';
+  despachoActual=[]; tipoSel=null;
+  renderSeleccionados(); renderEmergencias();
+  await cargarEmergenciasEnCurso();
+  renderEmergenciasEnCurso();
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+/* ---- Alertas especiales con selección de Compañía(s) ---- */
+const ALERTAS = [
+  { id:'acuartelamiento', code:'ACUARTELAMIENTO', title:'Llamado general', desc:'Convoca a todo el personal de la(s) Compañía(s) elegida(s) a presentarse al cuartel.' },
+  { id:'12_10', code:'12.10', title:'Llamado a Maquinistas', desc:'Falta chofer para un carro o cuartel específico.' },
+  { id:'6_6', code:'6.6', title:'Llamado a Voluntarios', desc:'Refuerzo para una unidad, cuartel o especialidad puntual.' },
+];
+const alertaCiasSel = { acuartelamiento: [], '12_10': [], '6_6': [] };
+const alertaOpen = { acuartelamiento: false, '12_10': false, '6_6': false };
+
+function renderAlertas(){
+  const el = document.getElementById('alertasGrid');
+  el.innerHTML = ALERTAS.map(a => {
+    const sel = alertaCiasSel[a.id];
+    const todasOn = sel.length === CIAS_DATA.length;
+    const chips = CIAS_DATA.map(c =>
+      `<button class="alerta-cia-chip ${sel.includes(c.id)?'on':''}" onclick="toggleAlertaCia('${a.id}','${c.id}')">${c.nombre}</button>`
+    ).join('') + `<button class="alerta-cia-chip todas ${todasOn?'on':''}" onclick="toggleAlertaTodas('${a.id}')">Todas</button>`;
+    return `
+      <div class="alerta-btn">
+        <div class="toggle-row" onclick="toggleAlertaOpen('${a.id}')">
+          <div class="code">${a.code}</div>
+          <h3>${a.title}</h3>
+          <p>${a.desc}</p>
+        </div>
+        <div class="alerta-cias ${alertaOpen[a.id]?'open':''}">
+          <div class="lbl">Seleccionar Compañía(s) destino</div>
+          <div class="alerta-cia-chips">${chips}</div>
+          <button class="alerta-confirm" onclick="confirmarAlerta('${a.id}')">Lanzar ${a.code}</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+function toggleAlertaOpen(id){ alertaOpen[id] = !alertaOpen[id]; renderAlertas(); }
+function toggleAlertaCia(id, ciaId){
+  const sel = alertaCiasSel[id];
+  alertaCiasSel[id] = sel.includes(ciaId) ? sel.filter(x=>x!==ciaId) : [...sel, ciaId];
+  renderAlertas();
+}
+function toggleAlertaTodas(id){
+  alertaCiasSel[id] = alertaCiasSel[id].length === CIAS_DATA.length ? [] : CIAS_DATA.map(c=>c.id);
+  renderAlertas();
+}
+async function confirmarAlerta(id){
+  const a = ALERTAS.find(x=>x.id===id);
+  const sel = alertaCiasSel[id];
+  if(sel.length===0){ toast('Elegí al menos una Compañía destino'); return; }
+  const todas = sel.length === CIAS_DATA.length;
+  const { error } = await sb.from('alertas_especiales').insert({
+    cuerpo_id: miCuerpoId, tipo: id, companias_destino: todas ? null : sel, operador_id: miPersonalId
+  });
+  if(error){ toast('No se pudo lanzar la alerta — ' + error.message); return; }
+  reproducirTono(null);
+  const nombresCias = sel.map(ciaId => CIAS_DATA.find(c=>c.id===ciaId).nombre).join(', ');
+  toast(`${a.code} lanzado a: ${nombresCias}`);
+  alertaCiasSel[id] = []; alertaOpen[id] = false;
+  renderAlertas();
+}
+
+cargarSesion();
+</script>
+</body>
+</html>

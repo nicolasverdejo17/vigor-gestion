@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Comandancia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --nodisp:#FFC94D; --fuera:#42555C; --emergencia:#FF4B5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+    height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--burdeo-bright); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:34px; height:34px; border-radius:8px; background:var(--panel); border:1.5px solid var(--burdeo-bright); display:flex; align-items:center; justify-content:center;}
+  .brand-text h1{ font-size:19px;}
+  .brand-text span{ font-size:11px; color:var(--text-dim); letter-spacing:.06em; text-transform:uppercase;}
+  .role-switch{ display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .role-switch-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-right:2px;}
+  .role-switch-btn{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; font-size:10.5px; padding:6px 11px; border-radius:12px; cursor:pointer;
+  }
+  .role-switch-btn.on{ background:var(--burdeo); border-color:var(--burdeo-bright); color:#fff;}
+
+  .content-wrap{ flex:1; min-height:0; padding:22px 30px; overflow-y:auto;}
+  .content-inner{ max-width:1000px; margin:0 auto;}
+
+  .intro{ font-size:12.5px; color:var(--text-muted); margin-bottom:20px; line-height:1.6; max-width:640px;}
+  .intro b{ color:var(--burdeo-bright);}
+
+  .section-title{ font-size:11px; color:var(--burdeo-bright); letter-spacing:.1em; text-transform:uppercase; margin:24px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line);}
+  .section-title:first-child{ margin-top:0;}
+
+  .dash-stats{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px;}
+  .dash-stat{ display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--line-strong); border-radius:8px; padding:14px 20px; min-width:130px;}
+  .dash-stat b{ font-family:'JetBrains Mono',monospace; font-size:24px;}
+  .dash-stat b.ok{ color:var(--servicio);}
+  .dash-stat b.warn{ color:var(--nodisp);}
+  .dash-stat b.crit{ color:var(--emergencia);}
+  .dash-stat b.neutral{ color:var(--cyan);}
+
+  .mant-resumen{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px;}
+  .mant-lista{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:10px; padding:6px 18px;}
+  .mant-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line); font-size:12px;}
+  .mant-row:last-child{ border-bottom:none;}
+  .mant-fecha{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); width:80px; flex-shrink:0;}
+  .mant-carro{ font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--brass-bright); width:36px; flex-shrink:0;}
+  .mant-tag{ font-size:9px; font-weight:700; text-transform:uppercase; padding:3px 8px; border-radius:8px; color:#fff; flex-shrink:0;}
+  .mant-desc{ color:var(--text-muted); flex:1;}
+
+  .flota-mini-lista{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:10px; padding:6px 18px; margin-top:10px;}
+  .flota-mini-row{ display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .flota-mini-row:last-child{ border-bottom:none;}
+  .flota-mini-nom{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; width:44px; flex-shrink:0;}
+  .flota-mini-tipo{ font-size:11.5px; color:var(--text-muted); flex:1;}
+  .flota-mini-pill{
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    padding:5px 12px; border-radius:10px; color:#fff; cursor:pointer; flex-shrink:0;
+  }
+  .estado-selector{
+    display:none; position:fixed; z-index:130;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:8px;
+    padding:6px; box-shadow:0 10px 30px rgba(0,0,0,.5); width:170px;
+  }
+  .estado-selector.open{ display:block;}
+  .estado-opt{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:5px;
+    cursor:pointer; font-size:12.5px; font-weight:600; color:var(--text);
+  }
+  .estado-opt:hover{ background:var(--panel-alt);}
+  .estado-opt .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .dash-stat span{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em;}
+
+  .tools-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:14px;}
+  .tool-card{
+    background:var(--panel); border:1.5px solid var(--line-strong); border-radius:10px; padding:16px 18px;
+    cursor:pointer; display:flex; flex-direction:column; gap:7px; position:relative; overflow:hidden;
+  }
+  .tool-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:6px; opacity:.3; pointer-events:none;}
+  .tool-card:hover{ border-color:var(--burdeo-bright);}
+  .tool-card .ico{ font-size:20px;}
+  .tool-card b{ font-size:13.5px;}
+  .tool-card span{ font-size:11px; color:var(--text-muted); line-height:1.4;}
+
+  .locked-note{
+    background:var(--panel-alt); border:1px solid var(--burdeo-bright); border-left:3px solid var(--burdeo-bright);
+    border-radius:6px; padding:16px 20px; font-size:12.5px; color:var(--text-muted); line-height:1.6; text-align:center; max-width:520px; margin:40px auto;
+  }
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(10px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:12px 20px; border-radius:8px; font-size:13px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:600;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#D8394E" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Comandancia</h1><span id="cuerpoLabel">Vigor</span></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="role-tag" id="roleTag" style="font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright);">Sin sesión</div>
+        <button onclick="vigorCerrarSesion()" style="background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:600; font-size:11px; letter-spacing:.03em; text-transform:uppercase; padding:7px 13px; border-radius:5px; cursor:pointer;">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+    <div class="content-inner">
+      <div class="intro">
+        Panel operativo del <b>Cuerpo General</b> — visión y control de la flota, despachos y personal de todas las Compañías. Perfil distinto a Administración General: acá se ve lo operativo, allá lo institucional.
+      </div>
+
+      <div id="accesoOk">
+        <div class="section-title">Dashboard Operativo</div>
+        <div class="dash-stats" id="dashStats"></div>
+
+        <div class="section-title">Emergencias y Despachos</div>
+        <div class="tools-grid">
+          <div class="tool-card" onclick="window.location.href='historial_despacho.html'">
+            <div class="ico">📋</div>
+            <b>Historial de Despacho</b>
+            <span>Emergencias y despachos de todas las Compañías, filtrable.</span>
+          </div>
+          <div class="tool-card" onclick="window.location.href='puestos_mando_activos.html'">
+            <div class="ico">🚨</div>
+            <b>Modo Crisis — todas las Compañías</b>
+            <span>Qué Compañías tienen Modo Crisis activo, y sus Batallones.</span>
+          </div>
+          <div class="tool-card" onclick="window.location.href='terminal_coordenadas.html'">
+            <div class="ico">📍</div>
+            <b>Terminal de Coordenadas</b>
+            <span>Ubicaciones reportadas en tiempo real por cualquier bombero.</span>
+          </div>
+        </div>
+
+        <div class="section-title">Flota</div>
+        <div class="tools-grid">
+          <div class="tool-card" onclick="window.location.href='visual_companias.html'">
+            <div class="ico">🗺️</div>
+            <b>Visual de Compañías</b>
+            <span>Estado en vivo de Guardia Activa y Carros de todas las Compañías.</span>
+          </div>
+          <div class="tool-card" onclick="window.location.href='flota_comandancia.html'">
+            <div class="ico">🚒</div>
+            <b>Carros de Comandancia</b>
+            <span>Flota propia (N°0) — ficha técnica completa y mantenciones por carro.</span>
+          </div>
+        </div>
+        <div class="flota-mini-lista" id="flotaMiniLista"></div>
+        <div class="estado-selector" id="selEstadoFlotaMini"></div>
+
+        <div class="section-title">Mantenciones — Flota de Comandancia</div>
+        <div class="mant-resumen" id="mantResumen"></div>
+        <div class="mant-lista" id="mantLista"></div>
+
+        <div class="section-title">Personal Operativo</div>
+        <div class="dash-stats" id="personalOperativoStats"></div>
+        <div class="tools-grid">
+          <div class="tool-card" onclick="window.location.href='usuarios_sistema.html'">
+            <div class="ico">👥</div>
+            <b>Usuarios del Sistema</b>
+            <span>Personal de todas las Compañías, con su Cargo y disponibilidad.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="accesoDenegado" style="display:none;">
+        <div class="locked-note">🔒 Tu sesión actual no tiene acceso a Comandancia. Este panel es exclusivo del Comandante y sus Segundo/Tercer/Cuarto Comandante.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ROLES_CON_ACCESO = ['Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
+const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
+let miCuerpoId = null;
+
+async function vigorCerrarSesion(){
+  await sb.auth.signOut();
+  window.location.href = 'login_registro.html';
+}
+
+async function cargarSesion(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ document.getElementById('accesoOk').style.display='none'; document.getElementById('accesoDenegado').style.display='block'; return; }
+  const { data: perfil } = await sb.from('personal').select('cargo, cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
+  if(!perfil){ document.getElementById('accesoOk').style.display='none'; document.getElementById('accesoDenegado').style.display='block'; return; }
+
+  document.getElementById('roleTag').textContent = perfil.cargo;
+  document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+  miCuerpoId = perfil.cuerpo_id;
+
+  const tieneAcceso = ROLES_CON_ACCESO.includes(perfil.cargo);
+  document.getElementById('accesoOk').style.display = tieneAcceso ? 'block' : 'none';
+  document.getElementById('accesoDenegado').style.display = tieneAcceso ? 'none' : 'block';
+  if(!tieneAcceso) return;
+
+  await Promise.all([renderDashStats(), cargarFlotaMini(), renderPersonalOperativo()]);
+}
+
+async function renderDashStats(){
+  const [{ count: emergAct }, { count: carrosOk }, { count: carrosFuera }, { data: personalEstados }] = await Promise.all([
+    sb.from('despachos').select('id', { count:'exact', head:true }).eq('cuerpo_id', miCuerpoId).eq('estado','activo'),
+    sb.from('carros').select('id', { count:'exact', head:true }).eq('cuerpo_id', miCuerpoId).eq('estado','servicio'),
+    sb.from('carros').select('id', { count:'exact', head:true }).eq('cuerpo_id', miCuerpoId).eq('estado','fuera'),
+    sb.from('personal_estado_historial').select('estado, personal!inner(cuerpo_id)').is('hora_fin', null).eq('personal.cuerpo_id', miCuerpoId).eq('estado','disponible'),
+  ]);
+  document.getElementById('dashStats').innerHTML = `
+    <div class="dash-stat"><b class="crit">${emergAct||0}</b><span>Emergencias Activas</span></div>
+    <div class="dash-stat"><b class="ok">${carrosOk||0}</b><span>Carros Disponibles</span></div>
+    <div class="dash-stat"><b class="warn">${carrosFuera||0}</b><span>Carros Fuera de Servicio</span></div>
+    <div class="dash-stat"><b class="neutral">${(personalEstados||[]).length}</b><span>Personal Disponible</span></div>
+  `;
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+// Mantenciones de la Flota de Comandancia — mismos carros reales que
+// flota_comandancia.html (compania_id null), consolidados acá.
+let FLOTA_COMANDANCIA_IDS = [];
+async function renderMantenciones(){
+  if(FLOTA_COMANDANCIA_IDS.length === 0){
+    document.getElementById('mantResumen').innerHTML = '';
+    document.getElementById('mantLista').innerHTML = '<div class="mant-row">Sin carros de Comandancia registrados.</div>';
+    return;
+  }
+  const { data } = await sb.from('mantenciones').select('*, carros(nomenclatura)').in('carro_id', FLOTA_COMANDANCIA_IDS).order('fecha', { ascending:false });
+  const lista = data || [];
+  const pendientes = lista.filter(m=>m.estado==='pendiente').length;
+  const programadas = lista.filter(m=>m.estado==='programada').length;
+  const realizadas = lista.filter(m=>m.estado==='realizada').length;
+  const MANT_COLOR_C = { realizada:'#3CF29A', programada:'#49E9FF', pendiente:'#FFC94D' };
+  const MANT_LABEL_C = { realizada:'Realizada', programada:'Programada', pendiente:'Pendiente' };
+  document.getElementById('mantResumen').innerHTML = `
+    <div class="dash-stat"><b class="crit">${pendientes}</b><span>Pendientes</span></div>
+    <div class="dash-stat"><b class="neutral">${programadas}</b><span>Programadas</span></div>
+    <div class="dash-stat"><b class="ok">${realizadas}</b><span>Realizadas</span></div>
+  `;
+  document.getElementById('mantLista').innerHTML = lista.length ? lista.map(m => `
+    <div class="mant-row">
+      <span class="mant-fecha">${new Date(m.fecha+'T00:00:00').toLocaleDateString('es-CL')}</span>
+      <span class="mant-carro">${m.carros.nomenclatura}</span>
+      <span class="mant-tag" style="background:${MANT_COLOR_C[m.estado]}">${MANT_LABEL_C[m.estado]}</span>
+      <span class="mant-desc">${m.tipo} — ${m.descripcion}</span>
+    </div>
+  `).join('') : '<div class="mant-row">Sin mantenciones registradas.</div>';
+}
+
+const COLOR_ESTADO_MINI = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const LABEL_ESTADO_MINI = { servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
+let FLOTA_MINI = [];
+
+async function cargarFlotaMini(){
+  const { data } = await sb.from('carros').select('id, nomenclatura, tipo_descripcion, estado').eq('cuerpo_id', miCuerpoId).is('compania_id', null);
+  FLOTA_MINI = data || [];
+  FLOTA_COMANDANCIA_IDS = FLOTA_MINI.map(c=>c.id);
+  renderFlotaMini();
+  await renderMantenciones();
+}
+function renderFlotaMini(){
+  document.getElementById('flotaMiniLista').innerHTML = FLOTA_MINI.length ? FLOTA_MINI.map((c,i) => `
+    <div class="flota-mini-row">
+      <span class="flota-mini-nom">${c.nomenclatura}</span>
+      <span class="flota-mini-tipo">${c.tipo_descripcion}</span>
+      <span class="flota-mini-pill" style="background:${COLOR_ESTADO_MINI[c.estado]}" onclick="abrirSelectorEstadoMini(event, ${i})">${LABEL_ESTADO_MINI[c.estado]}</span>
+    </div>
+  `).join('') : '<div class="flota-mini-row">Comandancia todavía no tiene carros propios registrados.</div>';
+}
+function abrirSelectorEstadoMini(ev, i){
+  ev.stopPropagation();
+  const sel = document.getElementById('selEstadoFlotaMini');
+  const rect = ev.currentTarget.getBoundingClientRect();
+  const anchoPopover = 170;
+  const altoPopoverEstimado = 4 * 36 + 12;
+  const left = Math.min(Math.max(8, rect.left), window.innerWidth - anchoPopover - 8);
+  const cabeAbajo = (rect.bottom + 6 + altoPopoverEstimado) <= window.innerHeight;
+  const top = cabeAbajo ? (rect.bottom + 6) : Math.max(8, rect.top - 6 - altoPopoverEstimado);
+  sel.style.left = left + 'px';
+  sel.style.top = top + 'px';
+  sel.innerHTML = Object.keys(LABEL_ESTADO_MINI).map(e =>
+    `<div class="estado-opt" onclick="setEstadoCarroMini(${i}, '${e}')"><span class="dot" style="background:${COLOR_ESTADO_MINI[e]}"></span>${LABEL_ESTADO_MINI[e]}</div>`
+  ).join('');
+  sel.classList.add('open');
+}
+async function setEstadoCarroMini(i, estado){
+  const c = FLOTA_MINI[i];
+  const { error } = await sb.from('carros').update({ estado }).eq('id', c.id);
+  document.getElementById('selEstadoFlotaMini').classList.remove('open');
+  if(error){ toast('No se pudo actualizar — ' + error.message); return; }
+  c.estado = estado;
+  renderFlotaMini();
+  toast(`${c.nomenclatura} — estado actualizado a ${LABEL_ESTADO_MINI[estado]}`);
+}
+document.addEventListener('click', () => {
+  const sel = document.getElementById('selEstadoFlotaMini');
+  if(sel) sel.classList.remove('open');
+});
+
+// Personal Operativo — desglose por rol, no solo el total agregado que ya
+// muestra el Dashboard de arriba.
+async function renderPersonalOperativo(){
+  const treintaDias = new Date(); treintaDias.setDate(treintaDias.getDate()+30);
+  const [{ data: disponibles }, { data: maquinistas }, { count: operadores }, { count: passExpira }] = await Promise.all([
+    sb.from('personal_estado_historial').select('personal!inner(cargo, cuerpo_id)').is('hora_fin', null).eq('personal.cuerpo_id', miCuerpoId).eq('estado','disponible'),
+    sb.from('personal_especialidades').select('personal!inner(cuerpo_id, estado), especialidades!inner(codigo)').eq('especialidades.codigo','M').eq('personal.cuerpo_id', miCuerpoId).neq('personal.estado','dado_de_baja'),
+    sb.from('personal').select('id', { count:'exact', head:true }).eq('cuerpo_id', miCuerpoId).eq('cargo','Operador de Central').neq('estado','dado_de_baja'),
+    sb.from('personal').select('id', { count:'exact', head:true }).eq('cuerpo_id', miCuerpoId).eq('debe_cambiar_password', true).lte('password_temporal_expira_en', treintaDias.toISOString()),
+  ]);
+  const oficialesDisp = (disponibles||[]).filter(d => PRIORIDAD_CARGO_MANDO.includes(d.personal.cargo)).length;
+  document.getElementById('personalOperativoStats').innerHTML = `
+    <div class="dash-stat"><b class="neutral">${oficialesDisp}</b><span>Oficiales Disponibles</span></div>
+    <div class="dash-stat"><b class="neutral">${(maquinistas||[]).length}</b><span>Conductores Habilitados</span></div>
+    <div class="dash-stat"><b class="neutral">${operadores||0}</b><span>Operadores de Central</span></div>
+    <div class="dash-stat"><b class="warn">${passExpira||0}</b><span>Contraseñas Temp. por Vencer (30 días)</span></div>
+  `;
+}
+
+cargarSesion();
+</script>
+</body>
+</html>

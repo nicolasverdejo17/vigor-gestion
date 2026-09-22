@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — PC de Compañía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg:#060A0F;
+    --panel:#0A131C;
+    --panel-alt:#0E1D28;
+    --line:#132734;
+    --text:#E7F5FA;
+    --text-muted:#7B99A3;
+    --text-dim:#516E78;
+    --compania:#FF9A44;
+    --line-strong:#1C3B49;
+    --brass:#C97A2E;
+    --brass-bright:#FF9A44;
+    --brass-dim:#8A4E1E;
+    --cyan:#49E9FF;
+    --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620;
+    --burdeo-bright:#D8394E;
+
+    --estado-disponible:#3CF29A;
+    --estado-nodisponible:#FFC94D;
+    --estado-fueraservicio:#42555C;
+    --estado-emergencia:#FF4B5C;
+
+    --esp-r:#FF5A4E;
+    --esp-t:#4FA3FF;
+    --esp-h:#FFC94D;
+    --esp-f:#3CF29A;
+    --esp-m:#B77CFF;
+    --esp-c:#E08A5C;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0; height:100%; overflow:hidden;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(216,57,78,0.08), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3,.display{
+    font-family:'Rajdhani',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    font-weight:800;
+    margin:0;
+  }
+
+  /* ---------- Nameplate header ---------- */
+  .nameplate{
+    display:flex;
+    align-items:stretch;
+    background:linear-gradient(180deg,var(--panel-alt),var(--panel));
+    border-bottom:1px solid var(--line-strong);
+    position:sticky;
+    top:0;
+    z-index:20;
+  }
+  .nameplate__stripe{
+    width:10px;
+    background:linear-gradient(180deg,var(--brass-bright),var(--brass-dim));
+    flex-shrink:0;
+  }
+  .nameplate__body{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 24px;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .nameplate__id{ display:flex; align-items:baseline; gap:14px; }
+  .nameplate__id .rivet{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--brass-bright);
+    box-shadow:0 0 0 3px rgba(255,154,68,0.18);
+    display:inline-block;
+    margin-right:10px;
+  }
+  .nameplate h1{ font-size:28px; color:var(--text); }
+  .nameplate .subtitle{
+    color:var(--text-muted);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    margin-top:2px;
+  }
+  .nameplate__right{ display:flex; align-items:center; gap:22px; }
+  .nameplate__clock{
+    text-align:right;
+    color:var(--text-muted);
+    font-size:13px;
+    line-height:1.3;
+  }
+  .nameplate__clock strong{ color:var(--text); font-size:16px; display:block; }
+
+  .crisis-btn{
+    background:var(--burdeo);
+    border:1.5px solid var(--burdeo-bright);
+    color:#F6DCE0;
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-size:13px;
+    padding:10px 18px;
+    border-radius:3px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:filter .15s;
+  }
+  .crisis-btn::before{
+    content:"";
+    width:8px;height:8px;border-radius:50%;
+    background:#F6DCE0;
+    box-shadow:0 0 0 0 rgba(216,57,78,0.6);
+    animation:pulse 1.8s infinite;
+  }
+  .crisis-btn:hover{ filter:brightness(1.15); }
+
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(216,57,78,0.55);}
+    70%{box-shadow:0 0 0 9px rgba(216,57,78,0);}
+    100%{box-shadow:0 0 0 0 rgba(216,57,78,0);}
+  }
+
+  .demo-tag{
+    max-width:1180px; margin:14px auto 0; padding:0 28px;
+    color:var(--text-dim); font-size:12px; letter-spacing:.03em;
+  }
+
+  /* ---------- Layout ---------- */
+  #viewPC{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;}
+  .wrap{
+    flex:1; min-height:0; width:100%;
+    padding:6px 10px 8px; display:flex; flex-direction:column; gap:8px; overflow:hidden;
+  }
+  .demo-tag{ flex-shrink:0; font-size:11px; }
+  .mini-resumen{ flex-shrink:0; }
+
+  .dash-grid{
+    flex:1; min-height:0; display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 190px;
+    grid-template-areas:
+      "guardia guardia"
+      "carros pizarra";
+    gap:10px;
+  }
+  .section-guardia{ grid-area:guardia; }
+  .section-carros{ grid-area:carros;}
+  .section-pizarra{ grid-area:pizarra; }
+
+  .section-frame{ display:flex; flex-direction:column; min-height:0; overflow:hidden;}
+  .section-body-scroll{ flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column;}
+
+  .grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+  }
+  @media (max-width:880px){ .grid3{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:22px 22px 20px;
+    cursor:pointer;
+    transition:border-color .15s, transform .15s;
+    position:relative;
+    overflow:hidden;
+  }
+  .card:hover{ border-color:var(--line-strong); }
+  .card::after{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px; pointer-events:none; opacity:.55; }
+  .card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--card-accent, var(--compania));
+  }
+  .card__eyebrow{
+    font-size:11px; letter-spacing:.14em; color:var(--text-dim);
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .card__title{ font-size:26px; margin-bottom:14px; }
+  .card__stat-row{ display:flex; gap:22px; margin-bottom:6px; flex-wrap:wrap; }
+  .card__stat{ display:flex; flex-direction:column; margin-right:22px; }
+  .card__stat b{ font-size:22px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--cyan); }
+  .card__stat span{ font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; }
+  .card__expand{
+    margin-top:16px; font-size:12px; color:var(--text-muted);
+    display:flex; align-items:center; gap:6px;
+    letter-spacing:.05em; text-transform:uppercase; font-weight:600;
+  }
+  .card__expand svg{ width:12px; height:12px; }
+
+  /* card-specific accents */
+  .card--guardia, .card--carros, .card--pizarra{ --card-accent: var(--brass); }
+
+  /* ---------- Expanded panel ---------- */
+  .panel{
+    display:none;
+    background:var(--panel);
+    border:1px solid var(--line-strong);
+    border-radius:6px;
+    margin-top:18px;
+    animation:rise .18s ease-out;
+    position:relative;
+  }
+  .panel::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px; pointer-events:none; opacity:.5; }
+  .panel.open{ display:block; }
+  @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .panel__head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 24px; border-bottom:1px solid var(--line);
+  }
+  .panel__head h2{ font-size:22px; }
+  .close-btn{
+    background:none; border:1px solid var(--line); color:var(--text-muted);
+    border-radius:4px; padding:7px 14px; cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:12px; letter-spacing:.04em;
+  }
+  .close-btn:hover{ color:var(--text); border-color:var(--text-dim); }
+
+  /* ---- Resumen (gauge strip) ---- */
+  /* ---- Mini resumen (chico, arriba de todo) ---- */
+  .mini-resumen{
+    display:flex; align-items:center; gap:0; flex-wrap:wrap;
+    background:var(--panel); border:1px solid var(--line); border-radius:5px;
+    padding:6px 16px;
+  }
+  .mini-item{ display:flex; align-items:baseline; gap:8px; padding:4px 18px;}
+  .mini-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em;}
+  .mini-val{ font-size:13px; color:var(--text); font-weight:600;}
+  .mini-val.cyan{ color:var(--cyan); font-family:'JetBrains Mono',monospace; font-weight:700;}
+  .mini-sep{ width:1px; height:18px; background:var(--line);}
+  .mini-reg-entry{ display:flex; align-items:center; gap:8px; margin-left:auto; padding:4px 4px;}
+  .mini-reg-entry label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;}
+  .mini-reg-entry input{
+    width:90px; background:var(--bg); border:1px solid var(--line-strong); border-radius:4px;
+    padding:6px 9px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12.5px;
+  }
+  .mini-reg-entry input:focus{ outline:none; border-color:var(--cyan);}
+  .mini-reg-entry input::placeholder{ color:var(--text-dim);}
+
+  /* ---- Section frame (siempre visible, sin click-to-expand) ---- */
+  .section-frame{
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:6px;
+    margin-bottom:0; position:relative; overflow:hidden;
+  }
+  .section-frame::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px; pointer-events:none; opacity:.5;}
+  /* Excepción: Carros y Guardia necesitan overflow visible para que los
+     popovers (Asignar Dotación / selector de estado) puedan salirse del
+     marco sin recortarse. */
+  .section-carros{ overflow:visible; position:relative; z-index:50;}
+  .section-guardia{ overflow:visible; position:relative; z-index:10;}
+  .section-head{ padding:6px 16px; border-bottom:1px solid var(--line); flex-shrink:0;}
+  .section-head h2{ font-size:14px;}
+  .section-guardia .section-head h2{ font-size:18px;}
+
+  .resumen{
+    display:flex; flex-wrap:wrap;
+    padding:5px 18px;
+    background:var(--panel-alt);
+    border-bottom:1px solid var(--line);
+    gap:0; flex-shrink:0;
+  }
+  .resumen__item{
+    flex:1; min-width:190px;
+    padding:0 18px;
+    border-right:1px dashed var(--line);
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .resumen__item:last-child{ border-right:none; }
+  .resumen__label{
+    font-size:9px; letter-spacing:.1em; color:var(--text-dim);
+    text-transform:uppercase; margin-bottom:0; white-space:nowrap;
+  }
+  .resumen__value{
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text);
+  }
+  .resumen__value.big{ font-size:15px; font-weight:700; color:var(--cyan); }
+  .resumen__nums{
+    display:none;
+  }
+  .resumen__nums span{
+    font-family:'JetBrains Mono',monospace; font-size:11px;
+    background:#0F1418; border:1px solid var(--line);
+    padding:2px 6px; border-radius:3px; color:var(--text-muted);
+  }
+  .resumen__carros{ display:flex; flex-wrap:wrap; gap:6px; margin-top:0; }
+  .resumen__item--reg{ flex:0 0 auto; min-width:150px; border-right:none; flex-direction:column; align-items:flex-start; gap:2px;}
+  .resumen__item--reg input{
+    background:var(--bg); border:1px solid var(--line-strong); border-radius:4px;
+    padding:5px 9px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px;
+    width:110px; margin-top:2px;
+  }
+  .resumen__item--reg input:focus{ outline:none; border-color:var(--cyan); }
+  .chip{
+    font-family:'JetBrains Mono',monospace; font-size:11px;
+    padding:3px 8px; border-radius:3px; font-weight:700;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:#fff; }
+  .chip--servicio{ background:var(--estado-servicio); color:#fff; }
+  .chip--servicio::before{ background:#fff; }
+  .chip--fuera{ background:var(--burdeo); color:#fff; }
+  .chip--fuera::before{ background:#fff; }
+  .chip--mant{ background:var(--estado-fuera); color:#241505; }
+  .chip--mant::before{ background:#fff; }
+
+  /* ---- Bomberos grid ---- */
+  /* El tamaño de columnas/filas se calcula en JS según cuántas tarjetas hay
+     y el espacio real disponible — NUNCA hace scroll, todo debe caber. */
+  .bomb-grid{
+    display:grid;
+    gap:8px;
+    padding:10px 12px;
+    flex:1;
+    min-height:0;
+    overflow:visible;
+  }
+  .bomb-card{
+    background:var(--panel-alt);
+    border:2px solid var(--line-strong);
+    border-radius:10px;
+    cursor:default;
+    padding:3%;
+    text-align:center;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:0;
+    overflow:visible;
+  }
+  .bomb-card:hover{ border-color:var(--brass-bright);}
+  .bomb-card__badges{
+    position:absolute; top:calc(3% + 5px); right:calc(3% + 5px); display:flex; flex-direction:column; gap:3px; z-index:2;
+  }
+  .bomb-card__foto{
+    width:100%; flex:1 1 auto; min-height:0; border-radius:10%;
+    margin:0 0 5%;
+    background:linear-gradient(135deg,#3A4750,#232D35);
+    background-size:cover; background-position:center;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani',sans-serif; font-weight:700;
+    color:var(--text-muted);
+    border:2px solid var(--line-strong);
+  }
+  .bomb-card__meta{ flex:0 0 auto; width:100%;}
+  .bomb-card__nombre{ font-weight:700; line-height:1.15; margin-bottom:2%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  .bomb-card__cargo{ color:var(--text-muted); margin-bottom:4%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  .bomb-card__reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:5%;}
+  .bomb-card__estado-pill{
+    width:100%; border-radius:5px; font-weight:700; cursor:pointer;
+    text-transform:uppercase; letter-spacing:.03em; color:#fff; background:var(--b-color, var(--estado-fueraservicio));
+  }
+  .bomb-card__estado-pill:hover{ filter:brightness(1.1);}
+  .bomb-card__estado-pill.oscuro{ color:#241505;}
+  .bomb-card__insignia{
+    border-radius:5px; font-family:'JetBrains Mono',monospace; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4);
+  }
+
+  /* Tiers de tamaño de fuente — se aplican vía JS según el alto de fila calculado */
+  .bomb-grid[data-tier="xl"] .bomb-card__nombre{ font-size:13px;} .bomb-grid[data-tier="xl"] .bomb-card__cargo{ font-size:9.5px;} .bomb-grid[data-tier="xl"] .bomb-card__reg{ font-size:8.5px;} .bomb-grid[data-tier="xl"] .bomb-card__estado-pill{ font-size:11px; padding:6px 4px;} .bomb-grid[data-tier="xl"] .bomb-card__insignia{ width:16px; height:16px; font-size:8px;} .bomb-grid[data-tier="xl"] .bomb-card__foto{ font-size:26px;}
+  .bomb-grid[data-tier="lg"] .bomb-card__nombre{ font-size:11.5px;} .bomb-grid[data-tier="lg"] .bomb-card__cargo{ font-size:8.5px;} .bomb-grid[data-tier="lg"] .bomb-card__reg{ font-size:8px;} .bomb-grid[data-tier="lg"] .bomb-card__estado-pill{ font-size:10px; padding:5px 4px;} .bomb-grid[data-tier="lg"] .bomb-card__insignia{ width:14px; height:14px; font-size:7px;} .bomb-grid[data-tier="lg"] .bomb-card__foto{ font-size:21px;}
+  .bomb-grid[data-tier="md"] .bomb-card__nombre{ font-size:10px;} .bomb-grid[data-tier="md"] .bomb-card__cargo{ font-size:7.5px;} .bomb-grid[data-tier="md"] .bomb-card__reg{ font-size:7px;} .bomb-grid[data-tier="md"] .bomb-card__estado-pill{ font-size:8.5px; padding:4px;} .bomb-grid[data-tier="md"] .bomb-card__insignia{ width:12px; height:12px; font-size:6px;} .bomb-grid[data-tier="md"] .bomb-card__foto{ font-size:17px;}
+  .bomb-grid[data-tier="sm"] .bomb-card__nombre{ font-size:9px;} .bomb-grid[data-tier="sm"] .bomb-card__cargo{ font-size:7px;} .bomb-grid[data-tier="sm"] .bomb-card__reg{ font-size:6.5px;} .bomb-grid[data-tier="sm"] .bomb-card__estado-pill{ font-size:7.5px; padding:3px;} .bomb-grid[data-tier="sm"] .bomb-card__insignia{ width:10px; height:10px; font-size:5.5px;} .bomb-grid[data-tier="sm"] .bomb-card__foto{ font-size:14px;}
+  .bomb-grid[data-tier="xs"] .bomb-card__nombre{ font-size:8px;} .bomb-grid[data-tier="xs"] .bomb-card__cargo{ font-size:6.5px;} .bomb-grid[data-tier="xs"] .bomb-card__reg{ display:none;} .bomb-grid[data-tier="xs"] .bomb-card__estado-pill{ font-size:6.5px; padding:2px;} .bomb-grid[data-tier="xs"] .bomb-card__insignia{ width:9px; height:9px; font-size:4.5px;} .bomb-grid[data-tier="xs"] .bomb-card__foto{ font-size:11px;}
+
+  .bomb-card--empty{
+    border-style:dashed; border-color:var(--line); cursor:default; opacity:.55;
+  }
+  .bomb-card--empty:hover{ border-color:var(--line);}
+  .bomb-card--empty .empty-ico{ font-size:1.6em; color:var(--text-dim);}
+
+  /* ---- Carros panel — SOLO botones, uno por carro, hasta 3 por fila ---- */
+  .carros-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(105px, 1fr));
+    grid-auto-rows:min-content;
+    gap:6px;
+    padding:8px;
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    align-content:start;
+  }
+  @media (min-width:1px){ .carros-grid{ grid-template-columns:repeat(3, 1fr);} }
+
+  /* Botón compacto de color SÓLIDO según el estado del carro — la etiqueta
+     de estado adentro tiene un fondo oscuro translúcido para marcar que es
+     la zona clickeable, sin perder el color sólido de fondo del botón. */
+  .carro-btn{
+    position:relative;
+    background:var(--c-color, var(--estado-fueraservicio));
+    border:none;
+    border-radius:6px;
+    padding:6px 28px 6px 8px;
+    cursor:default;
+    min-height:34px;
+    display:flex; flex-direction:column; justify-content:center; gap:3px;
+  }
+  .carro-btn__nom{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.2); line-height:1.1;
+  }
+  .carro-btn__estado-pill{
+    font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
+    padding:2px 5px; border-radius:3px; cursor:pointer; display:inline-block;
+    background:rgba(0,0,0,0.28); color:#fff; width:fit-content; line-height:1.3;
+  }
+  .carro-btn__estado-pill:hover{ background:rgba(0,0,0,0.4);}
+  .carro-btn__dot-zone{
+    position:absolute; right:0; top:0; bottom:0; width:26px;
+    display:flex; align-items:center; justify-content:center;
+    border-left:1px solid rgba(255,255,255,0.25);
+    border-radius:0 6px 6px 0;
+    color:#fff; font-size:11px;
+  }
+  .carro-btn__dot-zone:hover{ background:rgba(0,0,0,0.15);}
+
+  /* Selector de estado — popover pequeño, 4 opciones de color sólido.
+     position:fixed (no absolute): así nunca lo recorta el scroll de la
+     sección de Carros cuando hay muchas unidades — se posiciona en
+     píxeles exactos vía JS, relativo a la pantalla completa. */
+  .estado-selector{
+    display:none; position:fixed; z-index:130;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:8px;
+    padding:6px; box-shadow:0 10px 30px rgba(0,0,0,.5); width:170px;
+  }
+  .estado-selector.open{ display:block;}
+  .estado-opt{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:5px;
+    cursor:pointer; font-size:12.5px; font-weight:600; color:var(--text);
+  }
+  .estado-opt:hover{ background:var(--panel-alt);}
+  .estado-opt .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+
+  /* Popover de Asignar Dotación — mismo patrón, ancho mayor, también fixed. */
+  .dot-panel{
+    display:none; position:fixed; z-index:125;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:8px;
+    padding:14px; box-shadow:0 10px 30px rgba(0,0,0,.5); width:260px;
+    max-height:75vh; overflow-y:auto;
+  }
+  .dot-panel.open{ display:block;}
+  .dot-field{ margin-bottom:10px;}
+  .dot-field label{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px;}
+  .dot-field select{
+    width:100%; background:var(--bg); border:1px solid var(--line-strong); border-radius:4px;
+    padding:7px 9px; color:var(--text); font-size:12px;
+  }
+  .dot-field select:focus{ outline:none; border-color:var(--cyan);}
+  .dot-trip-chips{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px;}
+  .dot-trip-chip{
+    display:inline-flex; align-items:center; gap:5px; background:var(--panel);
+    border:1px solid var(--line-strong); border-radius:3px; padding:4px 8px; font-size:11px;
+  }
+  .dot-trip-chip button{ background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:11px; padding:0;}
+  .dot-trip-add{ display:flex; gap:6px;}
+  .dot-trip-add select{ flex:1;}
+  .dot-trip-add button{
+    background:var(--cyan-dim); border:1px solid var(--cyan); color:#DFF7F9;
+    font-size:11px; font-weight:600; padding:7px 10px; border-radius:4px; cursor:pointer; white-space:nowrap;
+  }
+  .btn-marcar-emergencia{
+    width:100%; background:var(--estado-emergencia); border:none; color:#fff;
+    font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:9px; border-radius:5px; cursor:pointer;
+  }
+  .btn-marcar-emergencia:hover{ filter:brightness(1.1);}
+  .carro-card__dot b{ color:var(--text-muted); font-weight:600; }
+
+  /* ---- Pizarra ---- */
+  .pizarra-body{ padding:8px 14px 10px; display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1; min-height:0;}
+  @media (max-width:760px){ .pizarra-body{grid-template-columns:1fr;} }
+  .pizarra-col{ min-height:0; overflow:hidden; display:flex; flex-direction:column;}
+  .pizarra-col--scroll{ overflow-y:auto;}
+  .pizarra-col h3{ font-size:12.5px; color:var(--text-muted); margin-bottom:6px; letter-spacing:.06em; flex-shrink:0;}
+  .obs-item{
+    border-left:3px solid var(--line);
+    padding:4px 0 4px 10px; margin-bottom:5px;
+  }
+  .obs-item time{ font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--text-dim); display:block; margin-bottom:1px;}
+  .obs-item p{ margin:0; font-size:11.5px; color:var(--text); line-height:1.3;}
+  .emerg-item{
+    background:var(--panel-alt);
+    border:2px solid var(--estado-emergencia);
+    border-radius:5px; padding:8px 10px; margin-bottom:6px;
+  }
+  .emerg-item .tag{
+    font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--estado-emergencia);
+    font-weight:700; letter-spacing:.05em; margin-bottom:3px; display:block;
+  }
+  .emerg-item p{ margin:0; font-size:11.5px; line-height:1.3;}
+  .emerg-item .meta{ font-size:10px; color:var(--text-muted); margin-top:3px; }
+
+/* ===== PHONE VIEW STYLES ===== */
+
+  .caption{ color:#5E6F7A; font-size:12.5px; margin-bottom:22px; text-align:center; max-width:380px; line-height:1.5;}
+  .caption b{ color:#8FA0AC; }
+
+  /* ---------- Phone frame ---------- */
+  .phone{
+    width:375px; height:770px;
+    background:#000;
+    border-radius:46px;
+    padding:12px;
+    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px #1c1c1c;
+    position:relative;
+  }
+  .screen-outer{
+    background:var(--bg);
+    width:100%; height:100%;
+    border-radius:34px;
+    overflow:hidden;
+    display:flex; flex-direction:column;
+    position:relative;
+  }
+  .notch{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:120px; height:26px; background:#000; border-radius:0 0 16px 16px; z-index:40;
+  }
+  .statusbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 22px 4px; font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--text);
+    flex-shrink:0;
+  }
+
+  .content{ flex:1; overflow-y:auto; padding:6px 16px 18px; }
+  .content::-webkit-scrollbar{ width:0; }
+
+  /* App header per screen */
+  .app-head{ padding:6px 0 14px; }
+  .app-head .eyebrow{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; }
+  .app-head h1{ font-size:23px; margin-top:2px; }
+
+  /* Estado card (Inicio) */
+  .estado-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;
+    margin-bottom:14px; border-left:4px solid var(--e-color, var(--servicio));
+  }
+  .estado-card__top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .estado-card__top span{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em;}
+  .estado-card__state{ font-family:'Rajdhani',sans-serif; font-weight:800; font-size:20px; color:var(--e-color, var(--servicio)); }
+  .seg{ display:flex; gap:6px; margin-top:12px; }
+  .seg button{
+    flex:1; padding:9px 4px; border-radius:7px; border:1px solid var(--line); background:var(--panel-alt);
+    color:var(--text-muted); font-size:11px; font-weight:600; cursor:pointer;
+  }
+  .seg button.on{ background:var(--e-color,var(--servicio)); border-color:var(--e-color,var(--servicio)); color:#fff; }
+
+  /* Notification card */
+  .notif{
+    background:var(--panel); border:1px solid var(--alerta); border-radius:12px; padding:14px;
+    margin-bottom:14px; display:flex; gap:12px; align-items:flex-start;
+  }
+  .notif__ico{ width:32px;height:32px;border-radius:8px;background:rgba(239,108,0,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .notif b{ font-size:13.5px; display:block; margin-bottom:2px;}
+  .notif span{ font-size:12px; color:var(--text-muted); }
+
+  .quick-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
+  .quick{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px;
+  }
+  .quick b{ font-size:22px; font-family:'JetBrains Mono',monospace; display:block; color:var(--cyan); }
+  .quick span{ font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em;}
+
+  /* Lists */
+  .list-item{
+    display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);
+  }
+  .list-item:last-child{ border-bottom:none; }
+  .avatar{
+    width:40px;height:40px;border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--a-color, var(--estado-fueraservicio));
+    display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; color:var(--text-muted);
+  }
+  .list-item__mid{ flex:1; min-width:0; }
+  .list-item__mid b{ font-size:13.5px; display:block; }
+  .list-item__mid span{ font-size:11.5px; color:var(--text-muted); }
+  .list-item__ins{ display:flex; gap:3px; }
+  .ins{ width:15px;height:15px;border-radius:4px;font-size:8.5px;font-family:'JetBrains Mono',monospace;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
+
+  .section-title{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin:18px 0 8px; font-weight:700;}
+
+  .mcard{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:12px;}
+
+  .pill{ font-size:10.5px; padding:3px 9px; border-radius:20px; font-weight:700; font-family:'JetBrains Mono',monospace;}
+  .pill--pend{ background:rgba(249,168,37,.15); color:var(--fuera);}
+  .pill--ok{ background:rgba(46,125,50,.15); color:#6FCB74;}
+  .pill--off{ background:rgba(117,117,117,.18); color:#B7BFC4;}
+
+  .btn-mini{ font-size:11px; padding:6px 11px; border-radius:6px; border:1px solid var(--line); background:transparent; color:var(--text); }
+  .btn-mini.accept{ border-color:var(--servicio); color:#6FCB74;}
+
+  .admin-row{
+    display:flex; align-items:center; justify-content:space-between; padding:13px 4px; border-bottom:1px solid var(--line);
+  }
+  .admin-row:last-child{ border-bottom:none; }
+  .admin-row__l{ display:flex; align-items:center; gap:12px; }
+  .admin-row__ico{ width:34px;height:34px;border-radius:9px;background:var(--panel-alt);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .admin-row b{ font-size:13.5px; display:block; }
+  .admin-row span{ font-size:11px; color:var(--text-muted); }
+  .chev{ color:var(--text-dim); font-size:16px; }
+
+  .fab-note{
+    position:absolute; bottom:78px; left:16px; right:16px;
+    background:var(--cyan-dim); border:1px solid var(--cyan); color:#DFF7F9; font-size:12px; padding:9px 14px; border-radius:10px;
+    text-align:center; font-weight:600; opacity:0; transform:translateY(8px); transition:.25s; pointer-events:none;
+    z-index:30;
+  }
+  .fab-note.show{ opacity:1; transform:translateY(0); }
+
+  /* Bottom tabs */
+  .tabbar{
+    display:flex; border-top:1px solid var(--line); background:#0C1116;
+    flex-shrink:0; padding-bottom:6px;
+  }
+  .tab{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:10px 0 6px; color:var(--text-dim); cursor:pointer; font-size:10px; font-weight:600;
+    letter-spacing:.02em;
+  }
+  .tab .ic{ font-size:19px; line-height:1; }
+  .tab.active{ color:var(--cyan); }
+
+  .role-strip{
+    display:flex; align-items:center; gap:8px; padding:2px 0 10px;
+  }
+  .role-strip .dot{ width:7px;height:7px;border-radius:50%; background:var(--cyan);}
+  .role-strip span{ font-size:11px; color:var(--text-muted);}
+  .role-strip b{ font-size:11px; color:var(--cyan); font-weight:700; }
+
+/* ===== VIEW SWITCH ===== */
+.view-switch{ display:flex; background:var(--panel-alt); border:1px solid var(--line); border-radius:6px; padding:3px; gap:3px;}
+.view-switch button{ font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:13px; padding:8px 18px; border-radius:4px; border:none; background:transparent; color:var(--text-muted); cursor:pointer;}
+.view-switch button.active{ background:var(--cyan-dim); color:#DFF7F9; border:1px solid var(--cyan); }
+#viewPhone{ display:flex; flex-direction:column; align-items:center; padding:30px 16px 10px; }
+
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate__stripe"></div>
+    <div class="nameplate__body">
+      <div class="nameplate__id">
+        <div>
+          <h1><span class="rivet"></span><span id="nombreCompania">—</span></h1>
+          <div class="subtitle"><span id="nombreCuerpo">—</span> &nbsp;·&nbsp; Terminal de Cuartel</div>
+        </div>
+      </div>
+      <div class="nameplate__right">
+        <div class="nameplate__clock mono">
+          <strong id="clock">--:--:--</strong>
+          <span id="dateline">—</span>
+        </div>
+        <button class="crisis-btn" onclick="window.location.href='modo_crisis.html'">Modo Crisis</button>
+        <button class="crisis-btn" style="background:transparent; border-color:var(--line-strong); color:var(--text-muted);" onclick="vigorCerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sinSesion" style="display:none; padding:40px; text-align:center; color:var(--text-muted);">
+    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+  </div>
+
+  <div id="viewPC">
+  <div class="wrap">
+
+    <div class="dash-grid">
+      <!-- ===================== GUARDIA ACTIVA (protagonista) ===================== -->
+      <div class="section-frame section-guardia">
+        <div class="section-head">
+          <h2>Guardia Activa</h2>
+        </div>
+
+        <div class="resumen">
+          <div class="resumen__item">
+            <div class="resumen__label">Al mando</div>
+            <div class="resumen__value big" id="resumenAlMando">—</div>
+          </div>
+          <div class="resumen__item">
+            <div class="resumen__label">Bomberos en servicio</div>
+            <div class="resumen__value big" id="resumenEnServicio">—</div>
+            <div class="resumen__nums" id="resumenNums"></div>
+          </div>
+          <div class="resumen__item">
+            <div class="resumen__label">Carros</div>
+            <div class="resumen__carros" id="resumenCarros"></div>
+          </div>
+          <div class="resumen__item resumen__item--reg">
+            <div class="resumen__label">N° Registro</div>
+            <input type="text" id="regInput" placeholder="Ej. 104" onkeydown="if(event.key==='Enter') marcarPorRegistro()">
+          </div>
+        </div>
+
+        <div class="section-body-scroll">
+          <div class="bomb-grid" id="bombGrid"></div>
+        </div>
+      </div>
+
+      <!-- ===================== CARROS / DOTACIÓN ===================== -->
+      <div class="section-frame section-carros">
+        <div class="section-head">
+          <h2>Carros / Dotación</h2>
+        </div>
+        <div class="carros-grid" id="carrosGrid"></div>
+      </div>
+
+      <!-- ===================== PIZARRA (cierre) ===================== -->
+      <div class="section-frame section-pizarra">
+        <div class="section-head">
+          <h2>Pizarra</h2>
+        </div>
+        <div class="pizarra-body">
+            <div class="pizarra-col pizarra-col--scroll">
+              <h3>Observaciones</h3>
+              <div style="display:flex; gap:6px; margin-bottom:8px; flex-shrink:0;">
+                <input type="text" id="nuevaObsInput" placeholder="Nueva observación…" style="flex:1; background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:5px; padding:6px 9px; font-size:11.5px; color:var(--text);" onkeydown="if(event.key==='Enter') agregarObservacion()">
+                <button onclick="agregarObservacion()" style="background:var(--cyan-dim); border:1px solid var(--cyan); color:#fff; border-radius:5px; padding:0 10px; font-size:11.5px; cursor:pointer;">+</button>
+              </div>
+              <div id="obsList"></div>
+            </div>
+            <div class="pizarra-col">
+              <h3>Emergencias del Cuerpo</h3>
+              <div id="emergList"></div>
+            </div>
+          </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="viewPhone" style="display:none;">
+
+
+  <div class="caption"><b>Vista simulada — Celular</b><br>Sesión de J. Iturra, Capitán de la Tercera Compañía. Navegación por pestañas inferiores (sección 20). Tocá los botones y pestañas — es interactivo.</div>
+
+  <div class="phone">
+    <div class="screen-outer">
+      <div class="notch"></div>
+      <div class="statusbar">
+        <span id="clk">21:14</span>
+        <span>●●●●&nbsp; 5G &nbsp;▮▮▮</span>
+      </div>
+      <div class="content" id="content"></div>
+      <div class="fab-note" id="fab"></div>
+      <div class="tabbar" id="tabbar"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+(function(){
+  // --- Conexión real a Supabase ---
+  const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let miCompaniaId = null, miCuerpoId = null, miPersonalId = null;
+
+  // ---- Reloj ----
+  function tick(){
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('es-CL',{hour12:false});
+    document.getElementById('dateline').textContent = now.toLocaleDateString('es-CL',{weekday:'long', day:'numeric', month:'long'});
+  }
+  tick(); setInterval(tick,1000);
+
+  // ---- Datos de demo ----
+  // Paleta única de 4 estados — compartida entre Bomberos y Carros (pedido
+  // explícito del cliente): Disponible/En Servicio=verde, No Disponible/En
+  // Mantención=ámbar, Fuera de Servicio=gris, En Emergencia=rojo.
+  const COLOR_ESTADO = {
+    disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C',
+  };
+  const ESP = { R:'#FF5A4E', T:'#4FA3FF', H:'#FFC94D', F:'#3CF29A', M:'#B77CFF', C:'#E08A5C' };
+
+  // ---- Bomberos: SOLO estos 4 estados en todo el sistema ----
+  // disponible    = puede salir a emergencias
+  // no_disponible = está en el Cuartel/actividades, pero no puede salir
+  // fuera         = no está en el Cuartel — NO aparece en el sistema (se filtra del grid)
+  // emergencia    = manual — no todos los "disponible" terminan saliendo
+  const PILL_LABEL = {
+    disponible:'Disponible', no_disponible:'No Disponible', fuera:'Fuera de Servicio', emergencia:'En Emergencia',
+  };
+  const ESTADOS_BOMBERO = ['disponible','no_disponible','emergencia','fuera'];
+
+  let bomberos = [];
+
+  // Carros: 'estado' se fija MANUALMENTE tocando el botón (pedido explícito
+  // del cliente) — salvo "emergencia", que en un sistema real la fija
+  // automáticamente Central al despachar (acá también editable a mano,
+  // porque este archivo no comparte estado en vivo con Central de Alarmas).
+  const ESTADO_LABEL_CARRO = {
+    servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia',
+  };
+  const ESTADOS_CARRO = ['servicio','mant','fuera','emergencia'];
+  const COLOR_ESTADO_CARRO = {
+    servicio:COLOR_ESTADO.disponible, mant:COLOR_ESTADO.no_disponible,
+    fuera:COLOR_ESTADO.fuera, emergencia:COLOR_ESTADO.emergencia,
+  };
+
+  let carros = [];
+
+  // ============================================================
+  // Carga real desde Supabase — reemplaza los arrays de demo. Todo lo
+  // demás del archivo (render, popovers, algoritmo de Al Mando del
+  // lado cliente para feedback instantáneo) queda igual; el estado real
+  // vive en la base y se persiste vía RPC en cada acción.
+  // ============================================================
+  async function cargarDatos(){
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){
+      document.getElementById('sinSesion').style.display = 'block';
+      document.getElementById('viewPC').style.display = 'none';
+      return;
+    }
+
+    // El PC del Cuartel es una identidad institucional propia de la
+    // Compañía (igual que el Carro con la Tablet) — se identifica una sola
+    // vez desde login_registro.html (mismo login que todos) y resuelve su
+    // propia Compañía desde la sesión, no desde quién esté sentado ahí.
+    const { data: pc } = await sb.rpc('pc_obtener_compania');
+    const pcRow = Array.isArray(pc) ? pc[0] : pc;
+
+    if(pcRow){
+      miPersonalId = null;
+      miCompaniaId = pcRow.p_compania_id;
+      miCuerpoId = pcRow.p_cuerpo_id;
+      document.getElementById('nombreCompania').textContent = pcRow.p_nombre;
+      document.getElementById('nombreCuerpo').textContent = pcRow.p_cuerpo_nombre;
+    } else {
+      // Soporte técnico: Super Admin entrando desde perfil_maestro.html con
+      // "Entrar como Admin ->", identifica la Compañía por ?compania=<id>.
+      const { data: soyAdmin } = await sb.rpc('soy_super_admin');
+      const companiaUrl = new URLSearchParams(location.search).get('compania');
+      if(!soyAdmin || !companiaUrl){
+        document.getElementById('sinSesion').style.display = 'block';
+        document.getElementById('sinSesion').textContent = 'Esta sesión no es un PC de Cuartel identificado. Identificalo desde login_registro.html con el Código de Cuerpo y el N° de Compañía.';
+        document.getElementById('viewPC').style.display = 'none';
+        return;
+      }
+      const { data: cia } = await sb.from('companias')
+        .select('id, nombre, cuerpo_id, cuerpos(nombre_oficial)')
+        .eq('id', companiaUrl).maybeSingle();
+      if(!cia){
+        document.getElementById('sinSesion').style.display = 'block';
+        document.getElementById('sinSesion').textContent = 'No se encontró esa Compañía.';
+        document.getElementById('viewPC').style.display = 'none';
+        return;
+      }
+      miPersonalId = null;
+      miCompaniaId = cia.id;
+      miCuerpoId = cia.cuerpo_id;
+      document.getElementById('nombreCompania').textContent = cia.nombre;
+      document.getElementById('nombreCuerpo').textContent = cia.cuerpos.nombre_oficial;
+    }
+
+    await Promise.all([cargarBomberos(), cargarCarros(), cargarPizarra()]);
+
+    renderBombGrid();
+    renderCarrosGrid();
+    renderMiniResumen();
+    _bombGridObserver.observe(document.getElementById('bombGrid'));
+    suscribirTonoDespacho();
+  }
+
+  // Tono de despacho — mismo sintetizador local (Web Audio, sin archivos ni
+  // internet en el momento de sonar) que la Consola de Despacho. Este PC es
+  // el que en la práctica está cableado a la base de radio del Cuartel, así
+  // que también tiene que reaccionar en vivo cuando Central confirma un
+  // despacho para esta Compañía.
+  let audioCtx = null;
+  function reproducirTono(url){
+    if(url){ new Audio(url).play().catch(()=>{}); return; }
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ahora = audioCtx.currentTime;
+      [0, 0.42, 0.84, 1.26].forEach((offset, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = i % 2 === 0 ? 900 : 1300;
+        gain.gain.setValueAtTime(0.0001, ahora + offset);
+        gain.gain.exponentialRampToValueAtTime(0.25, ahora + offset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ahora + offset + 0.38);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(ahora + offset);
+        osc.stop(ahora + offset + 0.4);
+      });
+    } catch(e){}
+  }
+  function suscribirTonoDespacho(){
+    sb.channel('despacho-tono-cuartel')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, async (payload) => {
+        const { data: unidades } = await sb.from('despacho_unidades').select('compania_id').eq('despacho_id', payload.new.id);
+        if((unidades || []).some(u => u.compania_id === miCompaniaId)){
+          reproducirTono(null);
+        }
+        await cargarPizarra();
+      })
+      .subscribe();
+  }
+
+  async function cargarBomberos(){
+    const { data } = await sb.from('personal')
+      .select('id, numero_registro, nombre_completo, cargo, foto_url, personal_especialidades(especialidades(codigo)), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+      .eq('compania_id', miCompaniaId);
+
+    bomberos = (data || []).map(p => {
+      const filaVigente = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
+      return {
+        id: p.id,
+        n: p.nombre_completo,
+        cargo: p.cargo,
+        reg: p.numero_registro,
+        foto: p.foto_url,
+        esp: (p.personal_especialidades || []).map(pe => pe.especialidades.codigo),
+        estado: filaVigente ? filaVigente.estado : 'fuera',
+        oficial: PRIORIDAD_CARGO.includes(p.cargo),
+      };
+    }).sort((a,b) => a.reg - b.reg);
+  }
+
+  async function cargarCarros(){
+    const { data } = await sb.from('carros')
+      .select('id, nomenclatura, tipo_descripcion, estado, asignacion_dotacion(conductor_id, oficial_a_cargo_id, asignacion_dotacion_tripulantes(personal_id))')
+      .eq('compania_id', miCompaniaId);
+
+    const regPorId = {};
+    bomberos.forEach(b => { regPorId[b.id] = b.reg; });
+
+    carros = (data || []).map(c => {
+      const asign = (c.asignacion_dotacion && c.asignacion_dotacion[0]) || null;
+      return {
+        id: c.id,
+        nom: c.nomenclatura,
+        tipo: c.tipo_descripcion,
+        estado: c.estado,
+        conductorReg: asign && asign.conductor_id ? (regPorId[asign.conductor_id] || null) : null,
+        mandoReg: asign && asign.oficial_a_cargo_id ? (regPorId[asign.oficial_a_cargo_id] || null) : null,
+        tripulantesReg: asign ? (asign.asignacion_dotacion_tripulantes || []).map(t => regPorId[t.personal_id]).filter(Boolean) : [],
+        dotAbierto:false, estadoAbierto:false,
+      };
+    });
+  }
+
+  async function cargarPizarra(){
+    const [{ data: obs }, { data: em }] = await Promise.all([
+      sb.from('pizarra_observaciones').select('*').eq('compania_id', miCompaniaId).order('creado_en', { ascending:false }).limit(20),
+      sb.from('pizarra_emergencias').select('*').eq('cuerpo_id', miCuerpoId).order('actualizado_en', { ascending:false }).limit(10)
+    ]);
+
+    document.getElementById('obsList').innerHTML = (obs && obs.length) ? obs.map(o => `
+      <div class="obs-item"><time>${new Date(o.creado_en).toLocaleString('es-CL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time><p>${o.contenido}</p></div>
+    `).join('') : '<div class="obs-item"><p style="color:var(--text-dim); font-style:italic;">Sin observaciones todavía.</p></div>';
+
+    document.getElementById('emergList').innerHTML = (em && em.length) ? em.map(e => `
+      <div class="emerg-item">
+        <span class="tag">${e.tipo_emergencia_texto || 'Emergencia'}</span>
+        <p>${e.compania_texto || ''} ${e.direccion_referencia ? '— ' + e.direccion_referencia : ''}</p>
+        <div class="meta">${e.estado} · ${new Date(e.actualizado_en).toLocaleString('es-CL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    `).join('') : '<div class="emerg-item"><p style="color:var(--text-dim); font-style:italic;">Sin emergencias registradas para el Cuerpo.</p></div>';
+  }
+
+  async function agregarObservacion(){
+    const input = document.getElementById('nuevaObsInput');
+    const contenido = input.value.trim();
+    if(!contenido) return;
+    const { error } = await sb.from('pizarra_observaciones').insert({ compania_id: miCompaniaId, contenido, autor_id: miPersonalId });
+    if(error){ alert('No se pudo guardar la observación: ' + error.message); return; }
+    input.value = '';
+    await cargarPizarra();
+  }
+  window.agregarObservacion = agregarObservacion;
+
+  function nombrePorReg(reg){
+    const b = bomberos.find(x=>x.reg===reg);
+    return b ? b.n : '—';
+  }
+  function dotTexto(c){
+    if(!c.conductorReg && !c.mandoReg && c.tripulantesReg.length===0) return 'Sin dotación asignada aún';
+    const cond = c.conductorReg ? nombrePorReg(c.conductorReg) : '—';
+    const mando = c.mandoReg ? nombrePorReg(c.mandoReg) : '—';
+    return `Cond. ${cond} · Mando ${mando} · ${c.tripulantesReg.length} tripulante(s)`;
+  }
+  // Solo bomberos "disponible" pueden asignarse a un carro — alguien
+  // "no_disponible" está en el Cuartel pero no puede salir a emergencias.
+  function disponibles(){
+    return bomberos.filter(b=>b.estado==='disponible');
+  }
+
+  const CAPACIDAD_MAXIMA = 20; // dotación tope de la Compañía — configurable por implementación
+
+  function ajustarGridSinScroll(gridEl, totalItems, opts){
+    const W = gridEl.clientWidth;
+    const H = gridEl.clientHeight;
+    if(W === 0 || H === 0 || totalItems === 0) return;
+
+    const gap = opts && opts.gap || 8;
+    const RATIO_OBJETIVO = opts && opts.ratio || 0.62; // ancho/alto ideal de una tarjeta (más angosta que alta: la foto ahora es más grande y necesita más alto)
+
+    let mejor = { cols:1, rows:totalItems, cardW:0, cardH:0, score:-1 };
+
+    for(let cols = 1; cols <= totalItems; cols++){
+      const rows = Math.ceil(totalItems / cols);
+      const cardW = (W - gap * (cols - 1)) / cols;
+      const cardH = (H - gap * (rows - 1)) / rows;
+      if(cardW <= 0 || cardH <= 0) continue;
+
+      const anchoEfectivo = Math.min(cardW, cardH * RATIO_OBJETIVO);
+      const score = anchoEfectivo;
+
+      if(score > mejor.score){
+        mejor = { cols, rows, cardW, cardH, score };
+      }
+    }
+
+    gridEl.style.gridTemplateColumns = `repeat(${mejor.cols}, 1fr)`;
+    gridEl.style.gridTemplateRows = `repeat(${mejor.rows}, 1fr)`;
+    return mejor;
+  }
+
+
+  function renderBombGrid(){
+    const bombGrid = document.getElementById('bombGrid');
+    bombGrid.innerHTML = '';
+    let visibles = 0;
+    // Orden por jerarquía de Cargo (misma prioridad que "Al Mando" más abajo
+    // en el archivo) — antes se mostraban en el orden en que estaban en el
+    // array, sin relación con el rango real de cada uno.
+    const ordenados = bomberos.map((b,i)=>({b,i})).sort((x,y)=>{
+      const px = PRIORIDAD_CARGO.indexOf(x.b.cargo); const py = PRIORIDAD_CARGO.indexOf(y.b.cargo);
+      const rx = px===-1?999:px; const ry = py===-1?999:py;
+      if(rx !== ry) return rx - ry;
+      return x.i - y.i; // estable: mismo rango mantiene el orden original entre sí
+    });
+    ordenados.forEach(({b,i})=>{
+      // "Fuera de Servicio" = no está en el Cuartel — no aparece en el
+      // sistema (pedido explícito del cliente). Se filtra por completo del
+      // grid, no se muestra ni siquiera atenuado.
+      if(b.estado === 'fuera') return;
+      visibles++;
+      const color = COLOR_ESTADO[b.estado];
+      const initials = b.n.split(' ').map(p=>p[0]).join('').toUpperCase();
+      const insignias = b.esp.map(e=>`<div class="bomb-card__insignia" style="background:${ESP[e]}">${e}</div>`).join('');
+      const oscuro = (b.estado === 'no_disponible') ? 'oscuro' : '';
+      const fotoEstilo = b.foto ? ` style="background-image:url('${b.foto}')"` : '';
+      bombGrid.insertAdjacentHTML('beforeend', `
+        <div class="bomb-card" data-reg="${b.reg}" style="--b-color:${color}">
+          <div class="bomb-card__badges">${insignias}</div>
+          <div class="bomb-card__foto"${fotoEstilo}>${b.foto ? '' : initials}</div>
+          <div class="bomb-card__meta">
+            <div class="bomb-card__nombre" style="cursor:pointer;" onclick="window.location.href='ficha_bombero.html?bombero=${b.id}'">${b.n}</div>
+            <div class="bomb-card__cargo">${b.cargo}</div>
+            <div class="bomb-card__reg">N° ${b.reg}</div>
+            <div class="bomb-card__estado-pill ${oscuro}" onclick="abrirSelectorEstadoBombero(event, ${i})">${PILL_LABEL[b.estado] || b.estado}</div>
+          </div>
+          <div class="estado-selector" id="selBombero-${i}">
+            ${ESTADOS_BOMBERO.map(e => `<div class="estado-opt" onclick="setEstadoBombero(${i}, '${e}')"><span class="dot" style="background:${COLOR_ESTADO[e]}"></span>${PILL_LABEL[e]}</div>`).join('')}
+          </div>
+        </div>
+      `);
+    });
+    // Slots vacíos hasta la dotación máxima — muestran capacidad disponible
+    // para nuevas altas, igual que en el sistema de referencia.
+    const vacios = Math.max(0, CAPACIDAD_MAXIMA - visibles);
+    for(let i=0; i<vacios; i++){
+      bombGrid.insertAdjacentHTML('beforeend', `<div class="bomb-card bomb-card--empty"><span class="empty-ico">＋</span></div>`);
+    }
+
+    // Recalcular tamaño de grid en el próximo frame (ya con el DOM actualizado
+    // y las dimensiones reales del contenedor disponibles).
+    _ultimoTotal = visibles + vacios;
+    requestAnimationFrame(recalcularBombGrid);
+  }
+
+  let _ultimoTotal = 0;
+
+  // Recalcula tamaño/columnas de Guardia Activa — extraído a función propia
+  // para no duplicar la lógica entre la carga inicial y cualquier cambio
+  // de tamaño real del contenedor.
+  function recalcularBombGrid(){
+    if(_ultimoTotal === 0) return;
+    const bombGrid = document.getElementById('bombGrid');
+    const res = ajustarGridSinScroll(bombGrid, _ultimoTotal);
+    if(res){
+      let tier = 'xl';
+      if(res.cardH < 95) tier = 'xs';
+      else if(res.cardH < 125) tier = 'sm';
+      else if(res.cardH < 160) tier = 'md';
+      else if(res.cardH < 210) tier = 'lg';
+      bombGrid.dataset.tier = tier;
+    }
+  }
+
+  // Bug corregido (crítico): el tamaño se medía UNA sola vez al cargar. Si
+  // en ese instante el navegador todavía no había terminado de acomodarse
+  // al monitor real (común al pasar de notebook a monitor grande, o al
+  // abrir ya maximizado), la grilla quedaba mal calculada para siempre —
+  // solo pantalla completa (que sí dispara resize) lo corregía. Con
+  // ResizeObserver, cualquier cambio real de tamaño del contenedor se
+  // detecta y recalcula solo, sin depender de un evento de ventana.
+  // Corregido: "ResizeObserver loop completed with undelivered
+  // notifications." — el callback modifica el tamaño del propio grid que
+  // está observando (cambia columnas/filas), lo que dispara otra ronda de
+  // observación casi al instante y el navegador corta el bucle con este
+  // error. Se soluciona diferiendo el cálculo real a requestAnimationFrame,
+  // afuera del callback sincrónico del observer.
+  const _bombGridObserver = new ResizeObserver(() => {
+    requestAnimationFrame(recalcularBombGrid);
+  });
+  window.addEventListener('resize', recalcularBombGrid);
+
+  // Selector pequeño de estado (4 opciones de color) — reemplaza el click
+  // directo de antes (que solo alternaba 2 estados). Ahora hay 4 posibles,
+  // así que se elige explícitamente cuál en vez de ciclar a ciegas.
+  // Evita que los popovers se corten contra el borde de la pantalla: si no
+  // hay espacio suficiente abajo, se abren hacia arriba en su lugar.
+  // Abre un popover ya decidido en el mismo instante del click (sin RAF, sin
+  // parpadeo): por defecto siempre hacia arriba; solo se voltea hacia abajo
+  // si de verdad no entra dentro de su propio contenedor (ej. bomberos de
+  // la fila superior, que chocarían contra el encabezado "Guardia Activa").
+  // Todo esto pasa ANTES de que el navegador pinte el frame, así que se
+  // siente instantáneo.
+  // Con position:fixed, el popover se posiciona en píxeles exactos de la
+  // pantalla (no relativo a su contenedor) — así nunca lo recorta el scroll
+  // de Carros cuando hay muchas unidades. Por defecto se abre hacia arriba
+  // del botón que lo disparó; si no entra, se abre hacia abajo.
+  function abrirPopoverSincrono(el, triggerEl, limiteSuperior){
+    const rect = triggerEl.getBoundingClientRect();
+    el.style.left = Math.max(8, rect.left) + 'px';
+    el.style.top = '-2000px'; // fuera de pantalla, solo para poder medir su alto real
+    el.classList.add('open');
+    const alto = el.getBoundingClientRect().height;
+    if(rect.top - alto - 6 > limiteSuperior){
+      el.style.top = (rect.top - alto - 6) + 'px';
+    } else {
+      el.style.top = (rect.bottom + 6) + 'px';
+    }
+  }
+
+  function abrirSelectorEstadoBombero(ev, i){
+    ev.stopPropagation();
+    const el = document.getElementById(`selBombero-${i}`);
+    const triggerEl = ev.currentTarget;
+    const yaAbierto = el.classList.contains('open');
+    document.querySelectorAll('.estado-selector').forEach(e => e.classList.remove('open'));
+    // Límite: el propio contenedor de tarjetas (no chocar con el encabezado
+    // "Guardia Activa" que está justo arriba de la primera fila).
+    if(!yaAbierto) abrirPopoverSincrono(el, triggerEl, document.getElementById('bombGrid').getBoundingClientRect().top);
+  }
+  async function setEstadoBombero(i, estado){
+    const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: bomberos[i].id, p_estado: estado });
+    if(error){ alert('No se pudo cambiar el estado: ' + error.message); return; }
+    const eraFuera = bomberos[i].estado === 'fuera';
+    const seraFuera = estado === 'fuera';
+    bomberos[i].estado = estado;
+    // "Fuera de Servicio" agrega/quita la tarjeta del grid entero -> hace
+    // falta recalcular todo. Cualquier otro cambio de estado no mueve nada
+    // de tamaño, así que no hace falta reconstruir la grilla completa.
+    if(eraFuera || seraFuera){
+      renderBombGrid();
+    } else {
+      const card = document.querySelector(`.bomb-card[data-reg="${bomberos[i].reg}"]`);
+      if(card){
+        card.style.setProperty('--b-color', COLOR_ESTADO[estado]);
+        const pill = card.querySelector('.bomb-card__estado-pill');
+        pill.textContent = PILL_LABEL[estado];
+        pill.classList.toggle('oscuro', estado === 'no_disponible');
+      }
+    }
+    renderMiniResumen();
+  }
+  document.addEventListener('click', (e) => {
+    if(!e.target.isConnected) return;
+    if(e.target.closest('.estado-selector') || e.target.closest('.bomb-card__estado-pill') || e.target.closest('.carro-btn')) return;
+    document.querySelectorAll('.estado-selector').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.dot-panel.open').forEach(el => el.classList.remove('open'));
+    carros.forEach(c => { c.dotAbierto = false; });
+  });
+
+  // Genera SOLO el contenido interno del popover de dotación de un carro —
+  // se usa tanto en el primer render como en cada edición puntual, sin
+  // tocar el resto de la grilla (evita el salto/descuadre de antes).
+  function dotPanelContenidoHTML(i){
+    const c = carros[i];
+    const disp = disponibles();
+    const dispOptions = disp.map(b=>`<option value="${b.reg}">${b.n} (N° ${b.reg})</option>`).join('');
+    const tripChips = c.tripulantesReg.map((reg,ti)=>
+      `<span class="dot-trip-chip">${nombrePorReg(reg)} <button onclick="quitarTripulante(${i},${ti})">✕</button></span>`
+    ).join('');
+    return `
+      <div style="font-size:11px; color:var(--text-dim); margin-bottom:10px;"><b style="color:var(--text);">${c.nom}</b> · ${c.tipo}<br>${dotTexto(c)}</div>
+      <div class="dot-field">
+        <label>Conductor (Maquinista)</label>
+        <select onchange="setConductor(${i}, this.value)">
+          <option value="">— Sin asignar —</option>
+          ${disp.map(b=>`<option value="${b.reg}" ${c.conductorReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
+        </select>
+      </div>
+      <div class="dot-field">
+        <label>Oficial a cargo (Mando)</label>
+        <select onchange="setMando(${i}, this.value)">
+          <option value="">— Sin asignar —</option>
+          ${disp.map(b=>`<option value="${b.reg}" ${c.mandoReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
+        </select>
+      </div>
+      <div class="dot-field">
+        <label>Tripulantes</label>
+        <div class="dot-trip-chips">${tripChips || ''}</div>
+        <div class="dot-trip-add">
+          <select id="tripSelect-${i}">
+            <option value="">— Elegir disponible —</option>
+            ${dispOptions}
+          </select>
+          <button onclick="agregarTripulante(${i})">+ Agregar</button>
+        </div>
+      </div>
+      <div class="dot-field" style="margin-bottom:0;">
+        <button class="btn-marcar-emergencia" onclick="marcarDotacionEnEmergencia(${i})">🚨 Marcar dotación como En Emergencia</button>
+      </div>
+    `;
+  }
+  // Actualiza SOLO ese panel puntual — no reconstruye la grilla de carros,
+  // por eso ya no salta ni se descuadra al asignar dotación.
+  function refreshDotPanel(i){
+    document.getElementById(`dotPanel-${i}`).innerHTML = dotPanelContenidoHTML(i);
+  }
+
+  function renderCarrosGrid(){
+    const carrosGrid = document.getElementById('carrosGrid');
+    carrosGrid.innerHTML = '';
+    carros.forEach((c,i)=>{
+      const color = COLOR_ESTADO_CARRO[c.estado];
+      carrosGrid.insertAdjacentHTML('beforeend', `
+        <div class="carro-btn" style="--c-color:${color}">
+          <span class="carro-btn__nom">${c.nom}</span>
+          <div class="carro-btn__estado-pill" onclick="abrirSelectorEstadoCarro(event, ${i})">${ESTADO_LABEL_CARRO[c.estado]}</div>
+          <div class="carro-btn__dot-zone" onclick="toggleDotPanel(event, ${i})" title="Asignar dotación">👥</div>
+
+          <div class="estado-selector" id="selCarro-${i}">
+            ${ESTADOS_CARRO.map(e => `<div class="estado-opt" onclick="setEstadoCarro(${i}, '${e}')"><span class="dot" style="background:${COLOR_ESTADO_CARRO[e]}"></span>${ESTADO_LABEL_CARRO[e]}</div>`).join('')}
+          </div>
+
+          <div class="dot-panel ${c.dotAbierto?'open':''}" id="dotPanel-${i}">${dotPanelContenidoHTML(i)}</div>
+        </div>
+      `);
+    });
+    // Nota: a diferencia de Guardia Activa, los botones de Carro usan su
+    // tamaño natural y compacto (fijado por CSS) — no se estiran para
+    // llenar el espacio disponible de la sección.
+  }
+
+  // Selector de estado del carro — 4 opciones de color sólido, se elige
+  // manualmente (pedido explícito del cliente). "En Emergencia" en un
+  // sistema real la fijaría Central al despachar; acá queda igual de
+  // editable a mano porque este archivo no comparte estado con Central.
+  function abrirSelectorEstadoCarro(ev, i){
+    ev.stopPropagation();
+    document.querySelectorAll('.dot-panel').forEach(el => el.classList.remove('open'));
+    const el = document.getElementById(`selCarro-${i}`);
+    const triggerEl = ev.currentTarget;
+    const yaAbierto = el.classList.contains('open');
+    document.querySelectorAll('.estado-selector').forEach(e => e.classList.remove('open'));
+    // Límite: apenas el borde de la pantalla — Carros tiene mucho espacio
+    // libre arriba (Guardia Activa), así que casi siempre entra hacia
+    // arriba sin necesidad de voltear.
+    if(!yaAbierto) abrirPopoverSincrono(el, triggerEl, 8);
+  }
+  async function setEstadoCarro(i, estado){
+    const { error } = await sb.from('carros').update({ estado }).eq('id', carros[i].id);
+    if(error){ alert('No se pudo actualizar el carro: ' + error.message); return; }
+    carros[i].estado = estado;
+    // Actualización puntual: solo el pill de ESTE botón, sin reconstruir
+    // toda la grilla de carros.
+    const btn = document.querySelectorAll('.carro-btn')[i];
+    btn.style.setProperty('--c-color', COLOR_ESTADO_CARRO[estado]);
+    btn.querySelector('.carro-btn__estado-pill').textContent = ESTADO_LABEL_CARRO[estado];
+    document.getElementById(`selCarro-${i}`).classList.remove('open');
+    renderMiniResumen();
+  }
+
+  function toggleDotPanel(ev, i){
+    ev.stopPropagation();
+    document.querySelectorAll('.estado-selector').forEach(el => el.classList.remove('open'));
+    const el = document.getElementById(`dotPanel-${i}`);
+    const triggerEl = ev.currentTarget;
+    carros.forEach((c, ci) => {
+      if(ci !== i && c.dotAbierto){
+        c.dotAbierto = false;
+        document.getElementById(`dotPanel-${ci}`).classList.remove('open');
+      }
+    });
+    carros[i].dotAbierto = !carros[i].dotAbierto;
+    if(carros[i].dotAbierto) abrirPopoverSincrono(el, triggerEl, 8);
+    else el.classList.remove('open');
+  }
+
+  // Idea para complementar "En Emergencia" (bombero) — sigue siendo 100%
+  // manual, pero da un atajo para marcar de una vez a la dotación real que
+  // efectivamente sube al carro (no necesariamente idéntica a la asignada
+  // en el papel), en vez de ir tarjeta por tarjeta en Guardia Activa.
+  async function marcarDotacionEnEmergencia(i){
+    const c = carros[i];
+    const regs = [c.conductorReg, c.mandoReg, ...c.tripulantesReg].filter(Boolean);
+    if(regs.length === 0){
+      alert('Este carro no tiene dotación asignada todavía.');
+      return;
+    }
+    for(const reg of regs){
+      const idx = bomberos.findIndex(x => x.reg === reg);
+      if(idx > -1) await setEstadoBombero(idx, 'emergencia');
+    }
+    carros[i].dotAbierto = false;
+    document.getElementById(`dotPanel-${i}`).classList.remove('open');
+  }
+
+  function idPorReg(reg){
+    const b = bomberos.find(x => x.reg === reg);
+    return b ? b.id : null;
+  }
+  async function persistirDotacion(i){
+    const c = carros[i];
+    const { error } = await sb.rpc('asignar_dotacion', {
+      p_carro_id: c.id,
+      p_conductor_id: idPorReg(c.conductorReg),
+      p_oficial_a_cargo_id: idPorReg(c.mandoReg),
+      p_tripulantes_ids: c.tripulantesReg.map(idPorReg).filter(Boolean)
+    });
+    if(error){ alert('No se pudo guardar la dotación: ' + error.message); return false; }
+    return true;
+  }
+  async function setConductor(i, val){
+    const anterior = carros[i].conductorReg;
+    carros[i].conductorReg = val ? parseInt(val) : null;
+    if(!(await persistirDotacion(i))) carros[i].conductorReg = anterior;
+    refreshDotPanel(i);
+  }
+  async function setMando(i, val){
+    const anterior = carros[i].mandoReg;
+    carros[i].mandoReg = val ? parseInt(val) : null;
+    if(!(await persistirDotacion(i))) carros[i].mandoReg = anterior;
+    refreshDotPanel(i);
+  }
+  async function agregarTripulante(i){
+    const sel = document.getElementById(`tripSelect-${i}`);
+    const val = sel.value;
+    if(!val) return;
+    const reg = parseInt(val);
+    if(!carros[i].tripulantesReg.includes(reg)) carros[i].tripulantesReg.push(reg);
+    if(!(await persistirDotacion(i))) carros[i].tripulantesReg = carros[i].tripulantesReg.filter(r => r !== reg);
+    refreshDotPanel(i);
+  }
+  async function quitarTripulante(i, ti){
+    const quitado = carros[i].tripulantesReg[ti];
+    carros[i].tripulantesReg.splice(ti,1);
+    if(!(await persistirDotacion(i))) carros[i].tripulantesReg.splice(ti,0,quitado);
+    refreshDotPanel(i);
+  }
+
+  // Jerarquía de mando (sección 4 de la spec — Comando Dinámico). El oficial
+  // de mayor rango PRESENTE queda "Al Mando" automáticamente; si no hay
+  // ningún oficial presente, pasa a Comando Situacional: el bombero más
+  // antiguo presente (menor N° de Registro = más antiguo) cuenta igual
+  // como "hay un Oficial" para efectos de dotación mínima de carros.
+  //
+  // Corregido: Comandante/Segundo Comandante son cargos del Cuerpo
+  // General, no de una Compañía — no participan del Al Mando interno de
+  // una Compañía específica aunque estén físicamente presentes. El
+  // Director sigue siendo el rango más alto dentro de su propia Compañía.
+  const PRIORIDAD_CARGO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
+  const CARGO_ABREV = {
+    'Director':'Director', 'Capitán':'Cap.',
+    'Teniente 1°':'Tte. 1°', 'Teniente 2°':'Tte. 2°', 'Teniente 3°':'Tte. 3°', 'Teniente 4°':'Tte. 4°', 'Ayudante Cía.':'Ayte. Cía.',
+  };
+
+  function calcularAlMando(){
+    // "Fuera de Servicio" no está en el Cuartel — no cuenta para nada acá.
+    const presentes = bomberos.filter(b => b.estado !== 'fuera');
+    const oficialesPresentes = presentes.filter(b => b.oficial);
+
+    if(oficialesPresentes.length > 0){
+      oficialesPresentes.sort((a,b) => {
+        const pa = PRIORIDAD_CARGO.indexOf(a.cargo);
+        const pb = PRIORIDAD_CARGO.indexOf(b.cargo);
+        return (pa===-1?999:pa) - (pb===-1?999:pb);
+      });
+      const jefe = oficialesPresentes[0];
+      return (CARGO_ABREV[jefe.cargo] || jefe.cargo) + ' ' + jefe.n;
+    }
+
+    if(presentes.length > 0){
+      // Comando Situacional: nadie con Cargo de Oficial presente — asume el
+      // mando el bombero más antiguo (menor N° de Registro) de los presentes.
+      const masAntiguo = presentes.reduce((a,b) => a.reg < b.reg ? a : b);
+      return masAntiguo.n + ' (Comando Situacional)';
+    }
+
+    return '— Sin personal en el Cuartel —';
+  }
+
+  function renderMiniResumen(){
+    // "Bomberos en Servicio" ya no existe como concepto — se cuenta a
+    // todos los VISIBLES en el sistema (Disponible + No Disponible +
+    // En Emergencia), porque "Fuera de Servicio" no aparece en absoluto.
+    const visibles = bomberos.filter(b=>b.estado!=='fuera');
+    document.getElementById('resumenEnServicio').textContent = visibles.length;
+    const primeros = visibles.slice(0, 8).map(b => `<span>${b.reg}</span>`).join('');
+    const resto = visibles.length > 8 ? `<span>+${visibles.length - 8}</span>` : '';
+    document.getElementById('resumenNums').innerHTML = primeros + resto;
+    document.getElementById('resumenAlMando').textContent = calcularAlMando();
+
+    // Bug corregido: el resumen de Carros era HTML fijo (siempre "R-3,
+    // F-3", sin importar los carros reales) — nunca reflejaba la cantidad
+    // real ni el estado real del bloque de Carros/Dotación de abajo. Ahora
+    // se genera de verdad, con el mismo color exacto de cada estado.
+    document.getElementById('resumenCarros').innerHTML = carros.map(c =>
+      `<span class="chip" style="background:${COLOR_ESTADO_CARRO[c.estado]}; color:${c.estado==='mant' ? '#241505' : '#fff'};">${c.nom}</span>`
+    ).join('');
+  }
+
+  // Ahora funciona como toggle real de llegada/salida (pedido explícito):
+  // ingresar el N° por primera vez marca "Disponible" (llegada); volver a
+  // ingresar el mismo N° lo saca del sistema — "Fuera de Servicio" (salida).
+  async function marcarPorRegistro(){
+    const input = document.getElementById('regInput');
+    const val = input.value.trim();
+    if(!val) return;
+    const b = bomberos.find(x => String(x.reg) === val);
+    if(!b){
+      input.style.borderColor = 'var(--burdeo)';
+      setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+      return;
+    }
+    const yaEstaba = b.estado !== 'fuera';
+    const nuevoEstado = yaEstaba ? 'fuera' : 'disponible';
+    const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: nuevoEstado });
+    if(error){ alert('No se pudo registrar: ' + error.message); return; }
+    b.estado = nuevoEstado;
+    renderBombGrid();
+    renderCarrosGrid();
+    renderMiniResumen();
+    input.value = '';
+    input.style.borderColor = yaEstaba ? 'var(--estado-fueraservicio)' : 'var(--estado-disponible)';
+    setTimeout(()=>{ input.style.borderColor = ''; }, 900);
+  }
+
+  window.abrirSelectorEstadoBombero = abrirSelectorEstadoBombero;
+  window.setEstadoBombero = setEstadoBombero;
+  window.abrirSelectorEstadoCarro = abrirSelectorEstadoCarro;
+  window.setEstadoCarro = setEstadoCarro;
+  window.toggleDotPanel = toggleDotPanel;
+  window.marcarDotacionEnEmergencia = marcarDotacionEnEmergencia;
+  window.setConductor = setConductor;
+  window.setMando = setMando;
+  window.agregarTripulante = agregarTripulante;
+  window.quitarTripulante = quitarTripulante;
+  window.marcarPorRegistro = marcarPorRegistro;
+
+  window.vigorCerrarSesion = async function(){
+    await sb.auth.signOut();
+    window.location.href = 'login_registro.html';
+  };
+
+  cargarDatos();
+
+})();
+</script>
+</body>
+</html>

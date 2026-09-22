@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Coordenadas (Celular)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(900px 500px at 50% -10%, rgba(73,233,255,0.08), transparent 60%), #060A0F;
+    font-family:'Inter',sans-serif; color:var(--text);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .phone{ height:100%; display:flex; flex-direction:column; position:relative;}
+
+  .app-head{ padding:10px 18px 8px; flex-shrink:0;}
+  .app-head .eyebrow{ font-size:10px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+  .app-head h1{ font-size:19px; margin-top:2px;}
+
+  .content{ flex:1; overflow-y:auto; padding:6px 18px 18px; display:flex; flex-direction:column;}
+  .content::-webkit-scrollbar{ display:none;}
+
+  .coord-card{
+    background:var(--panel); border:2px solid var(--cyan); border-radius:14px;
+    padding:22px 18px; margin-bottom:16px; text-align:center; position:relative; overflow:hidden;
+  }
+  .coord-card.error{ border-color:var(--burdeo-bright);}
+  .coord-card.error .coord-lat, .coord-card.error .coord-lng{ color:var(--burdeo-bright); font-size:15px;}
+  .coord-card::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:9px; pointer-events:none; opacity:.35;}
+  .coord-pin{ font-size:30px; margin-bottom:8px; position:relative; z-index:1;}
+  .coord-lat, .coord-lng{ font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:var(--cyan); position:relative; z-index:1;}
+  .coord-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-top:10px; position:relative; z-index:1;}
+  .coord-label:first-of-type{ margin-top:4px;}
+  .coord-meta{ font-size:11px; color:var(--text-muted); margin-top:14px; position:relative; z-index:1;}
+  .coord-meta b{ color:var(--brass-bright);}
+
+  .btn-actualizar{
+    width:100%; background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:13px; padding:12px; border-radius:8px; cursor:pointer; margin-bottom:16px;
+  }
+  .btn-actualizar:hover{ background:var(--cyan); color:#0D2226;}
+  .btn-actualizar.loading{ opacity:.6; pointer-events:none;}
+
+  .accion-row{ display:flex; gap:8px; margin-bottom:16px;}
+  .btn-accion{
+    flex:1; background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text);
+    font-family:'Inter'; font-weight:600; font-size:12px; padding:11px 8px; border-radius:8px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .btn-accion:hover{ border-color:var(--brass-bright);}
+  .btn-accion:disabled{ opacity:.35; cursor:not-allowed; pointer-events:none;}
+  .btn-accion .ico{ font-size:16px;}
+
+  .btn-reportar{
+    width:100%; background:var(--alerta); border:none; color:#241505;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:14px; padding:14px; border-radius:8px; cursor:pointer; margin-bottom:8px;
+  }
+  .btn-reportar:hover{ filter:brightness(1.08);}
+  .btn-reportar:disabled{ opacity:.35; cursor:not-allowed; pointer-events:none;}
+  .btn-reportar.enviando{ background:var(--cyan-dim); color:#fff;}
+
+  .envio-confirmado{
+    display:none; align-items:center; gap:7px; background:rgba(60,242,154,0.12); border:1px solid var(--servicio);
+    color:var(--servicio); font-size:11.5px; font-weight:600; padding:10px 12px; border-radius:8px; margin-bottom:18px;
+  }
+  .envio-confirmado.show{ display:flex;}
+
+  .section-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:4px 4px 8px;}
+  .historial-row{
+    display:flex; align-items:center; gap:10px; background:var(--panel); border:1px solid var(--line-strong);
+    border-radius:9px; padding:10px 12px; margin-bottom:7px;
+  }
+  .historial-row.nuevo{ border-color:var(--servicio); animation:destello 1.6s ease-out;}
+  @keyframes destello{ 0%{ background:rgba(60,242,154,0.25);} 100%{ background:var(--panel);} }
+  .historial-row .ico{ font-size:14px; flex-shrink:0;}
+  .historial-row .info{ flex:1; min-width:0;}
+  .historial-row .coords{ font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:600;}
+  .historial-row .meta{ font-size:10px; color:var(--text-dim); margin-top:1px;}
+
+  .toast{
+    position:absolute; bottom:20px; left:16px; right:16px;
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:11px 16px; border-radius:8px; font-size:12.5px; opacity:0; transform:translateY(8px);
+    transition:all .25s; pointer-events:none; text-align:center; z-index:30;
+  }
+  .toast.show{ opacity:1; transform:translateY(0);}
+  .toast.error{ border-color:var(--burdeo-bright); color:#F6DCE0;}
+
+  .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:8.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ font-size:16px; line-height:1;}
+  .tabbar-real a.active{ color:var(--cyan);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="app-head">
+      <div class="eyebrow" id="eyebrowCia">Vigor</div>
+      <h1>Coordenadas</h1>
+    </div>
+
+    <div class="content">
+      <div class="coord-card error" id="coordCard">
+        <div class="coord-pin">📍</div>
+        <div class="coord-label">Latitud</div>
+        <div class="coord-lat" id="latVal">— sin datos —</div>
+        <div class="coord-label">Longitud</div>
+        <div class="coord-lng" id="lngVal">— sin datos —</div>
+        <div class="coord-meta">Precisión: <b id="accVal">—</b> · Actualizado <b id="timeVal">nunca</b></div>
+      </div>
+
+      <button class="btn-actualizar" id="btnActualizar" onclick="actualizarUbicacion()">📍 Obtener mi ubicación real</button>
+
+      <div class="accion-row">
+        <button class="btn-accion" id="btnCopiar" onclick="copiarCoordenadas()" disabled><span class="ico">📋</span>Copiar</button>
+        <button class="btn-accion" onclick="compartirUbicacion()"><span class="ico">📤</span>Compartir</button>
+        <button class="btn-accion" onclick="verEnMapa()"><span class="ico">🗺️</span>Ver Mapa</button>
+      </div>
+
+      <button class="btn-reportar" id="btnReportar" onclick="reportarUbicacion()" disabled>Reportar esta Ubicación a Central</button>
+      <div class="envio-confirmado" id="envioConfirmado">✓ Enviado — visible ahora en la Terminal de Coordenadas de Central</div>
+
+      <div class="section-label">Últimas ubicaciones reportadas</div>
+      <div id="historialList"></div>
+    </div>
+    <div class="tabbar-real" id="tabbarReal"></div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let miLat = null;
+let miLng = null;
+let miPersonalId = null, miCuerpoId = null, miCompaniaId = null;
+
+async function cargarSesion(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero', true); return; }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, cuerpo_id, compania_id, companias(nombre)')
+    .eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  miPersonalId = perfil.id;
+  miCuerpoId = perfil.cuerpo_id;
+  miCompaniaId = perfil.compania_id;
+  document.getElementById('eyebrowCia').textContent = perfil.companias ? perfil.companias.nombre : 'Cuerpo General';
+  await cargarHistorial();
+}
+
+async function cargarHistorial(){
+  const { data } = await sb.from('reportes_coordenadas')
+    .select('lat, lng, creado_en')
+    .eq('personal_id', miPersonalId)
+    .order('creado_en', { ascending:false })
+    .limit(10);
+  const cont = document.getElementById('historialList');
+  if(!data || data.length===0){ cont.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-dim); font-size:11.5px;">Sin reportes todavía.</div>`; return; }
+  const hoy = new Date().toDateString();
+  cont.innerHTML = data.map(r => {
+    const f = new Date(r.creado_en);
+    const esHoy = f.toDateString() === hoy;
+    const diaLabel = esHoy ? 'Hoy' : f.toLocaleDateString('es-CL');
+    const hora = f.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', hour12:false});
+    return `<div class="historial-row">
+      <span class="ico">📍</span>
+      <div class="info"><div class="coords">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div><div class="meta">${diaLabel} · ${hora}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function actualizarUbicacion(){
+  const btn = document.getElementById('btnActualizar');
+  btn.classList.add('loading');
+  btn.textContent = 'Obteniendo ubicación…';
+
+  const aplicarUbicacion = (lat, lng, acc) => {
+    miLat = lat; miLng = lng;
+    document.getElementById('coordCard').classList.remove('error');
+    document.getElementById('latVal').textContent = lat.toFixed(5);
+    document.getElementById('lngVal').textContent = lng.toFixed(5);
+    document.getElementById('accVal').textContent = `±${Math.round(acc)} m`;
+    document.getElementById('timeVal').textContent = 'ahora';
+    document.getElementById('btnCopiar').disabled = false;
+    document.getElementById('btnReportar').disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = '📍 Actualizar mi ubicación';
+    toast('Ubicación real obtenida');
+  };
+
+  const mostrarError = (motivo) => {
+    document.getElementById('coordCard').classList.add('error');
+    document.getElementById('latVal').textContent = '— sin datos —';
+    document.getElementById('lngVal').textContent = '— sin datos —';
+    document.getElementById('accVal').textContent = '—';
+    document.getElementById('timeVal').textContent = 'sin ubicación';
+    document.getElementById('btnCopiar').disabled = true;
+    document.getElementById('btnReportar').disabled = true;
+    btn.classList.remove('loading');
+    btn.textContent = '📍 Actualizar mi ubicación';
+    toast(motivo, true);
+  };
+
+  if(!navigator.geolocation){
+    mostrarError('Este dispositivo no soporta GPS/ubicación');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => aplicarUbicacion(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy),
+    err => {
+      const motivo = err.code === 1
+        ? 'Permiso de ubicación denegado — activalo en Ajustes'
+        : 'No se pudo obtener tu ubicación real — reintentá';
+      mostrarError(motivo);
+    },
+    { timeout: 8000, enableHighAccuracy: true }
+  );
+}
+
+function copiarCoordenadas(){
+  const lat = document.getElementById('latVal').textContent;
+  const lng = document.getElementById('lngVal').textContent;
+  const texto = `${lat}, ${lng}`;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(texto).then(()=>toast(`Copiado: ${texto}`)).catch(()=>toast(`Coordenadas: ${texto}`));
+  } else {
+    toast(`Coordenadas: ${texto}`);
+  }
+}
+
+// Abre Google Maps en pestaña/app nueva, centrado en la ubicación real
+// obtenida por GPS — no es un aviso de mentira, navega de verdad.
+function verEnMapa(){
+  if(miLat === null || miLng === null){
+    toast('Primero obtené tu ubicación', true);
+    return;
+  }
+  window.open(`https://www.google.com/maps?q=${miLat},${miLng}`, '_blank');
+}
+
+// Usa el share sheet real del sistema operativo (Web Share API); si el
+// navegador no lo soporta (típico en desktop), copia el enlace en su lugar
+// — nunca un aviso de mentira sin ninguna acción real detrás.
+function compartirUbicacion(){
+  if(miLat === null || miLng === null){
+    toast('Primero obtené tu ubicación', true);
+    return;
+  }
+  const texto = `Mi ubicación: https://www.google.com/maps?q=${miLat},${miLng}`;
+  if(navigator.share){
+    navigator.share({ title: 'Mi ubicación — Vigor', text: texto }).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(texto)
+      .then(()=>toast('Enlace copiado — pegalo donde quieras compartirlo'))
+      .catch(()=>toast('Ubicación: ' + texto));
+  } else {
+    toast('Ubicación: ' + texto);
+  }
+}
+
+// Muestra un estado real de envío (no es instantáneo) y, al confirmar,
+// agrega el reporte de verdad al historial — igual que aparecería en la
+// Terminal de Coordenadas de Central.
+async function reportarUbicacion(){
+  if(!miPersonalId){ toast('Necesitás loguearte primero', true); return; }
+  const btn = document.getElementById('btnReportar');
+  const confirmado = document.getElementById('envioConfirmado');
+  confirmado.classList.remove('show');
+  btn.disabled = true;
+  btn.classList.add('enviando');
+  btn.textContent = 'Enviando a Central…';
+
+  const { error } = await sb.from('reportes_coordenadas').insert({
+    cuerpo_id: miCuerpoId, personal_id: miPersonalId, compania_id: miCompaniaId, lat: miLat, lng: miLng
+  });
+
+  btn.classList.remove('enviando');
+  btn.textContent = 'Reportar esta Ubicación a Central';
+  btn.disabled = false;
+
+  if(error){ toast('No se pudo enviar la ubicación — ' + error.message, true); return; }
+
+  confirmado.classList.add('show');
+  toast('Coordenadas enviadas a Central de Alarmas');
+  await cargarHistorial();
+  const primera = document.querySelector('#historialList .historial-row');
+  if(primera) primera.classList.add('nuevo');
+  setTimeout(() => confirmado.classList.remove('show'), 4000);
+}
+
+function toast(msg, isError){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('error', !!isError);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+const TABS_NAV = [
+  {href:'inicio_celular.html', ic:'🏠', label:'Inicio'},
+  {href:'compania_celular.html', ic:'🚒', label:'Compañía'},
+  {href:'pizarra_celular.html', ic:'📌', label:'Pizarra'},
+  {href:'actividades_celular.html', ic:'📋', label:'Activid.'},
+  {href:'coordenadas_celular.html', ic:'📍', label:'GPS'},
+  {href:'opciones_celular.html', ic:'⚙️', label:'Opciones'},
+];
+(function renderTabbarReal(){
+  const cont = document.getElementById('tabbarReal');
+  if(!cont) return;
+  const actual = location.pathname.split('/').pop();
+  cont.innerHTML = TABS_NAV.map(t => `<a href="${t.href}" class="${t.href===actual?'active':''}"><span class="ic">${t.ic}</span><span>${t.label}</span></a>`).join('');
+})();
+
+cargarSesion();
+</script>
+</body>
+</html>

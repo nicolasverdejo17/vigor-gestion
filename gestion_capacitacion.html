@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Gestión de Capacitación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+
+  .leyenda{ flex-shrink:0; padding:10px 26px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  .leyenda-item{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-muted);}
+  .leyenda-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .leyenda-dot.inicial{ background:var(--fuera);}
+  .leyenda-dot.operativo{ background:var(--cyan);}
+  .leyenda-dot.profesional{ background:var(--brass-bright);}
+
+  .content-wrap{ flex:1; min-height:0; display:grid; grid-template-columns:320px 1fr; overflow:hidden;}
+
+  .bomberos-list{ overflow-y:auto; border-right:1px solid var(--line); padding:12px;}
+  .bombero-card{
+    background:var(--panel); border:1.5px solid var(--line-strong); border-radius:8px;
+    padding:12px 14px; margin-bottom:8px; cursor:pointer; position:relative;
+  }
+  .bombero-card.activo{ border-color:var(--cyan);}
+  .bombero-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:4px; pointer-events:none; opacity:.3;}
+  .bombero-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; position:relative; z-index:1;}
+  .bombero-nombre{ font-size:13.5px; font-weight:700;}
+  .bombero-reg{ font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; margin-bottom:7px; position:relative; z-index:1;}
+  .nivel-pill{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:3px 9px; border-radius:10px; position:relative; z-index:1; display:inline-block;}
+  .nivel-pill.inicial{ background:var(--fuera); color:#241505;}
+  .nivel-pill.operativo{ background:var(--cyan-dim); color:#fff;}
+  .nivel-pill.profesional{ background:var(--brass-bright); color:#241505;}
+  .nivel-pill.ninguno{ background:var(--nodisp); color:#fff;}
+
+  .detalle-panel{ overflow-y:auto; padding:20px 24px;}
+  .detalle-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .detalle-nombre{ font-size:20px; margin-bottom:6px;}
+  .detalle-meta{ font-size:12.5px; color:var(--text-muted);}
+  .detalle-actions{ display:flex; gap:8px;}
+  .btn-exportar{
+    background:transparent; border:1.5px solid var(--cyan); color:var(--cyan);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:9px 14px; border-radius:5px; cursor:pointer;
+  }
+  .btn-exportar:hover{ background:rgba(73,233,255,0.1);}
+  .btn-agregar{
+    background:var(--alerta); border:none; color:#241505;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:9px 14px; border-radius:5px; cursor:pointer;
+  }
+  .btn-agregar:hover{ filter:brightness(1.08);}
+
+  .cursos-title{ font-size:11.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:10px;}
+  .curso-row{ display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--line-strong); border-radius:6px; padding:11px 15px; margin-bottom:7px;}
+  .curso-fecha{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); width:82px; flex-shrink:0;}
+  .curso-nombre{ flex:1; font-size:13px; font-weight:600;}
+  .curso-tag-externo{ font-size:9px; font-weight:700; text-transform:uppercase; color:var(--text-dim); border:1px solid var(--line-strong); padding:2px 7px; border-radius:8px; margin-right:8px;}
+  .curso-empty{ text-align:center; padding:30px; color:var(--text-dim); font-size:12.5px;}
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.75); z-index:60; display:none; align-items:center; justify-content:center;}
+  .modal-overlay.show{ display:flex;}
+  .modal-box{ background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px; padding:22px 24px; width:400px;}
+  .modal-box h3{ font-size:15px; margin-bottom:4px;}
+  .modal-sub{ font-size:11.5px; color:var(--text-muted); margin-bottom:16px;}
+  .m-field{ margin-bottom:14px;}
+  .m-field label{ display:block; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;}
+  .m-field input{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:10px 12px; color:var(--text); font-size:13px;}
+  .m-field input:focus{ outline:none; border-color:var(--cyan);}
+  .nivel-select-row{ display:flex; gap:6px;}
+  .nivel-opt{ flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:9px 4px; text-align:center; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer;}
+  .nivel-opt.inicial.on{ background:var(--fuera); border-color:var(--fuera); color:#241505;}
+  .nivel-opt.operativo.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+  .nivel-opt.profesional.on{ background:var(--brass-bright); border-color:var(--brass-bright); color:#241505;}
+  .nivel-opt-externo{
+    flex:1; background:var(--panel-alt); border:1.5px dashed var(--line-strong); border-radius:6px;
+    padding:9px 4px; text-align:center; font-size:11px; font-weight:600; color:var(--text-dim); font-style:italic;
+  }
+  .externo-check{ display:flex; align-items:center; gap:9px; cursor:pointer; margin-bottom:16px;}
+  .externo-box{ width:18px; height:18px; border-radius:4px; border:1.5px solid var(--line-strong); background:var(--panel-alt); display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff;}
+  .externo-box.on{ background:var(--brass-dim); border-color:var(--brass-bright);}
+  .externo-label{ font-size:12.5px; color:var(--text-muted);}
+  .modal-actions{ display:flex; gap:10px; margin-top:6px;}
+  .modal-cancel{ flex:1; background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer;}
+  .modal-guardar{ flex:1.4; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; padding:10px; border-radius:6px; cursor:pointer;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media print{
+    body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
+    .nameplate, .leyenda, .bomberos-list, .detalle-actions, .modal-overlay, .toast{ display:none !important;}
+    .content-wrap{ display:block !important;}
+    .curso-row{ border-color:#ccc !important;}
+  }
+
+  .back-cuartel{
+    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11.5px; padding:7px 13px; border-radius:5px; cursor:pointer; margin-right:12px;
+  }
+  .back-cuartel:hover{ border-color:var(--brass-bright); color:var(--text);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <button class="back-cuartel" onclick="history.back()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Gestión de Capacitación</h1><span id="subtituloInv">Vigor</span></div>
+      </div>
+      <div class="role-tag" id="roleTag">Sin sesión</div>
+    </div>
+  </div>
+
+  <div class="leyenda">
+    <div class="leyenda-item"><span class="leyenda-dot inicial"></span>Bombero Inicial</div>
+    <div class="leyenda-item"><span class="leyenda-dot operativo"></span>Bombero Operativo</div>
+    <div class="leyenda-item"><span class="leyenda-dot profesional"></span>Bombero Profesional</div>
+  </div>
+
+  <div class="content-wrap">
+    <div class="bomberos-list" id="bomberosList"></div>
+    <div class="detalle-panel" id="detallePanel"></div>
+  </div>
+
+  <div class="modal-overlay" id="cursoModal">
+    <div class="modal-box">
+      <h3>Agregar Curso</h3>
+      <div class="modal-sub" id="modalBomberoNombre">R. Salinas</div>
+      <div class="m-field"><label>Nombre del curso</label><input type="text" id="mNombre" placeholder="Ej. Manejo de Materiales Peligrosos"></div>
+      <div class="m-field"><label>Fecha en que se ingresa</label><input type="date" class="mono" id="mFecha"></div>
+      <div class="m-field">
+        <label>Nivel</label>
+        <div class="nivel-select-row" id="nivelSelectRow"></div>
+      </div>
+      <div class="externo-check" onclick="toggleExterno()">
+        <div class="externo-box" id="externoBox"></div>
+        <div class="externo-label">Es un curso externo (no dictado por el Cuerpo)</div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+        <button class="modal-guardar" onclick="guardarCurso()">Guardar Curso</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const EDIT_ROLES = ['Director','Capitán','Ayudante Cía.'];
+const NIVELES = ['inicial','operativo','profesional'];
+const NIVEL_LABEL = { inicial:'Inicial', operativo:'Operativo', profesional:'Profesional', ninguno:'Sin nivel' };
+
+let BOMBEROS = [];
+let miCuerpoId = null, miCompaniaId = null, miPersonalId = null, puedoEditar = false;
+let bomberoActivo = 0;
+let nivelSel = 'inicial';
+let esExterno = false;
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, cargo, cuerpo_id, compania_id, companias(nombre), personal_roles_funcionales(rol_funcional)')
+    .eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  miPersonalId = perfil.id;
+  miCuerpoId = perfil.cuerpo_id;
+  miCompaniaId = perfil.compania_id;
+  const rolesFuncionalesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
+  puedoEditar = EDIT_ROLES.includes(perfil.cargo) || rolesFuncionalesActivos.has('Depto. Capacitación');
+  document.getElementById('roleTag').textContent = perfil.cargo;
+  document.getElementById('subtituloInv').textContent = (perfil.companias ? perfil.companias.nombre : 'Cuerpo General') + ' · Vigor';
+
+  let q = sb.from('personal').select('id, nombre_completo, numero_registro, nivel_capacitacion')
+    .eq('cuerpo_id', miCuerpoId).neq('estado','dado_de_baja').order('nombre_completo');
+  q = miCompaniaId ? q.eq('compania_id', miCompaniaId) : q.is('compania_id', null);
+  const { data: personal } = await q;
+
+  const { data: cursos } = await sb.from('personal_capacitaciones')
+    .select('*').eq('cuerpo_id', miCuerpoId).order('fecha', { ascending:false });
+
+  BOMBEROS = (personal || []).map(p => ({
+    id: p.id, nombre: p.nombre_completo, reg: p.numero_registro, nivelActual: p.nivel_capacitacion,
+    cursos: (cursos || []).filter(c => c.personal_id === p.id)
+  }));
+  bomberoActivo = 0;
+  renderBomberos();
+  renderDetalle();
+}
+
+function renderBomberos(){
+  document.getElementById('bomberosList').innerHTML = BOMBEROS.map((b,i)=>{
+    return `
+      <div class="bombero-card ${i===bomberoActivo?'activo':''}" onclick="setBombero(${i})">
+        <div class="bombero-top"><span class="bombero-nombre">${b.nombre}</span></div>
+        <div class="bombero-reg">N° ${b.reg}</div>
+        <span class="nivel-pill ${b.nivelActual}">${NIVEL_LABEL[b.nivelActual]}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDetalle(){
+  if(BOMBEROS.length===0){ document.getElementById('detallePanel').innerHTML = `<div class="curso-empty">Sin personal para mostrar.</div>`; return; }
+  const b = BOMBEROS[bomberoActivo];
+  const rows = b.cursos.length
+    ? b.cursos.map(c => `
+        <div class="curso-row">
+          <span class="curso-fecha">${new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-CL')}</span>
+          <span class="curso-nombre">${c.nombre_curso}</span>
+          ${c.es_externo ? '<span class="curso-tag-externo">Externo</span>' : ''}
+          ${c.nivel ? `<span class="nivel-pill ${c.nivel}">${NIVEL_LABEL[c.nivel]}</span>` : ''}
+        </div>
+      `).join('')
+    : `<div class="curso-empty">Sin cursos ingresados todavía.</div>`;
+
+  const nivelSelector = NIVELES.map(n =>
+    `<div class="nivel-opt ${n} ${b.nivelActual===n?'on':''}" ${puedoEditar ? `onclick="setNivelBombero('${n}')"` : ''}>${NIVEL_LABEL[n]}</div>`
+  ).join('');
+
+  document.getElementById('detallePanel').innerHTML = `
+    <div class="detalle-head">
+      <div>
+        <div class="detalle-nombre">${b.nombre}</div>
+        <div class="detalle-meta">N° ${b.reg}</div>
+      </div>
+      <div class="detalle-actions">
+        <button class="btn-exportar" onclick="window.print()">⬇ Exportar PDF</button>
+        ${puedoEditar ? `<button class="btn-agregar" onclick="abrirModal()">+ Agregar Curso</button>` : ''}
+      </div>
+    </div>
+
+    <div class="cursos-title">Nivel actual</div>
+    <div class="nivel-select-row" style="margin-bottom:22px; max-width:420px;">${nivelSelector}</div>
+
+    <div class="cursos-title">Historial de Cursos</div>
+    ${rows}
+  `;
+}
+
+async function setNivelBombero(n){
+  const b = BOMBEROS[bomberoActivo];
+  const { error } = await sb.rpc('actualizar_nivel_capacitacion', { p_personal_id: b.id, p_nivel: n });
+  if(error){ toast('No se pudo actualizar el nivel — ' + error.message); return; }
+  b.nivelActual = n;
+  renderBomberos();
+  renderDetalle();
+  toast(`Nivel de ${b.nombre} actualizado a ${NIVEL_LABEL[n]}`);
+}
+
+function setBombero(i){ bomberoActivo = i; renderBomberos(); renderDetalle(); }
+
+function abrirModal(){
+  document.getElementById('modalBomberoNombre').textContent = BOMBEROS[bomberoActivo].nombre;
+  document.getElementById('mNombre').value = '';
+  document.getElementById('mFecha').value = '';
+  nivelSel = 'inicial';
+  esExterno = false;
+  renderNivelSelect();
+  renderExterno();
+  document.getElementById('cursoModal').classList.add('show');
+}
+function cerrarModal(){ document.getElementById('cursoModal').classList.remove('show'); }
+
+function renderNivelSelect(){
+  const row = document.getElementById('nivelSelectRow');
+  if(esExterno){
+    row.innerHTML = `<div class="nivel-opt-externo">Externo — sin nivel interno del Cuerpo</div>`;
+    return;
+  }
+  row.innerHTML = NIVELES.map(n =>
+    `<div class="nivel-opt ${n} ${nivelSel===n?'on':''}" onclick="setNivelSel('${n}')">${NIVEL_LABEL[n]}</div>`
+  ).join('');
+}
+function setNivelSel(n){ nivelSel = n; renderNivelSelect(); }
+
+function toggleExterno(){
+  esExterno = !esExterno;
+  // Un curso externo no lo dicta el Cuerpo — no tiene sentido que además
+  // tenga un nivel interno seleccionado. Se limpia la selección y el
+  // selector pasa a mostrar "Externo" en vez de las 3 píldoras.
+  if(esExterno) nivelSel = null;
+  else nivelSel = 'inicial';
+  renderExterno();
+  renderNivelSelect();
+}
+function renderExterno(){ document.getElementById('externoBox').classList.toggle('on', esExterno); document.getElementById('externoBox').textContent = esExterno ? '✓' : ''; }
+
+async function guardarCurso(){
+  const nombre = document.getElementById('mNombre').value.trim();
+  const fecha = document.getElementById('mFecha').value;
+  if(!nombre || !fecha){ toast('Completá nombre y fecha del curso'); return; }
+  const b = BOMBEROS[bomberoActivo];
+  const { data: curso, error } = await sb.from('personal_capacitaciones').insert({
+    personal_id: b.id, cuerpo_id: miCuerpoId, compania_id: miCompaniaId,
+    nombre_curso: nombre, fecha, nivel: esExterno ? null : nivelSel, es_externo: esExterno, creado_por: miPersonalId
+  }).select().single();
+  if(error){ toast('No se pudo guardar el curso — ' + error.message); return; }
+  const idxActivo = bomberoActivo;
+  cerrarModal();
+  await cargarDatos();
+  bomberoActivo = idxActivo;
+  renderBomberos(); renderDetalle();
+  toast(`Curso "${nombre}" agregado a ${BOMBEROS[bomberoActivo].nombre}`);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+cargarDatos();
+</script>
+</body>
+</html>

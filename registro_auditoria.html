@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIGOR — Registro de Auditoría</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --burdeo-bright:#D8394E; --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --servicio:#3CF29A; --alerta:#FFC94D;
+    --master:#39FF14; --master-dim:#1F9E0A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1200px 550px at 15% -10%, rgba(57,255,20,0.08), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+    border:3px solid var(--master);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+  .wordmark{ text-align:center; font-family:'Rajdhani'; font-weight:600; letter-spacing:.35em; font-size:12px; color:var(--master); padding:9px 0 7px; text-transform:uppercase; flex-shrink:0; background:var(--bg);}
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--master); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px;}
+  .back-btn{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:600; font-size:12px; padding:8px 14px; border-radius:5px; cursor:pointer;}
+  .back-btn:hover{ border-color:var(--master); color:var(--master);}
+  .brand-text{ margin-left:16px;}
+  .brand-text h1{ font-size:19px; color:var(--master);}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{ font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; border-radius:4px; background:var(--master-dim); border:1.5px solid var(--master); color:#fff;}
+
+  .toolbar{ flex-shrink:0; padding:14px 30px; display:flex; gap:8px; flex-wrap:wrap;}
+  .intro-nota{
+    flex-shrink:0; margin:0 30px 14px; padding:12px 16px; background:var(--panel-alt);
+    border:1px solid var(--master-dim); border-left:3px solid var(--master); border-radius:6px;
+    font-size:11.5px; color:var(--text-muted); line-height:1.6;
+  }
+  .intro-nota b{ color:var(--text);}
+  .filtro-btn{ background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.03em; text-transform:uppercase; padding:8px 14px; border-radius:6px; cursor:pointer;}
+  .filtro-btn.on{ background:var(--master-dim); border-color:var(--master); color:#fff;}
+  .btn-exportar-aud{
+    background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11.5px; padding:9px 15px; border-radius:6px; cursor:pointer; flex-shrink:0;
+  }
+  .btn-exportar-aud:hover{ background:var(--cyan); color:#0D2226;}
+
+  @media print{
+    body{ background:#fff !important; color:#111 !important;}
+    .nameplate, .toolbar, .intro-nota, .toast{ display:none !important;}
+    table{ border:1px solid #ccc !important;}
+    thead th{ background:#f0f0f0 !important; color:#111 !important;}
+    .evento-tag{ -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+
+  .content-wrap{ flex:1; min-height:0; padding:0 30px 20px; overflow-y:auto;}
+  table{ width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; overflow:hidden;}
+  thead th{ text-align:left; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; padding:11px 16px; border-bottom:2px solid var(--line-strong); background:var(--panel-alt);}
+  tbody tr{ border-bottom:1px solid var(--line);}
+  tbody tr:last-child{ border-bottom:none;}
+  tbody td{ padding:11px 16px; font-size:12.5px; vertical-align:middle;}
+  .td-hora{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:11px; white-space:nowrap;}
+  .td-usuario{ font-weight:600;}
+  .evento-tag{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; padding:3px 9px; border-radius:10px; display:inline-block;}
+  .evento-tag.critico{ background:var(--burdeo-bright); color:#fff;}
+  .evento-tag.creacion{ background:var(--servicio); color:#fff;}
+  .evento-tag.modificacion{ background:var(--alerta); color:#241505;}
+  .evento-tag.acceso{ background:var(--cyan-dim); color:#fff;}
+
+  .toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--panel-alt); border:1px solid var(--master); color:#fff; padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none; transition:all .25s; z-index:50; text-align:center;}
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest-maestro.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor Maestro">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="wordmark">VIGOR</div>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div style="display:flex; align-items:center;">
+        <button class="back-btn" onclick="window.location.href='perfil_maestro.html'">← Panel Maestro</button>
+        <div class="brand-text"><h1>Registro de Auditoría</h1><span>Historial de cambios del sistema · Vigor</span></div>
+      </div>
+      <div class="role-tag">Sesión: Super Admin</div>
+    </div>
+  </div>
+
+  <div class="toolbar" style="justify-content:space-between;">
+    <div id="filtroRow" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+    <button class="btn-exportar-aud" onclick="window.print()">⬇ Exportar PDF</button>
+  </div>
+
+  <div class="intro-nota">
+    <b>Qué es esto:</b> el registro técnico de eventos de <b>cuenta y sistema</b> — quién entró, quién restableció una contraseña, quién creó o eliminó una Compañía/carro, quién dio de baja a alguien. Es exclusivo de Perfil Maestro (soporte técnico del proveedor), no algo que un Director o Secretario/a vea normalmente.
+    <br>Es distinto de los historiales operativos de cada módulo — <b>Historial de Despacho</b> (emergencias), <b>Historial de Movimientos</b> (inventario) o el <b>Historial de Checklist</b> (carros) — que sí ven las Compañías desde su propia interfaz, para su propio uso diario.
+  </div>
+
+  <div class="content-wrap" id="printArea">
+    <table>
+      <thead><tr><th>Fecha / Hora</th><th>Usuario</th><th>Evento</th><th>Detalle</th><th>Compañía</th></tr></thead>
+      <tbody id="tablaBody"></tbody>
+    </table>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let EVENTOS = [];
+let filtroActivo = 'todos';
+
+async function cargarDatos(){
+  const { data, error } = await sb.from('registro_auditoria')
+    .select('ocurrido_en, usuario_label, tipo, detalle, ambito_label, companias(nombre), cuerpos(nombre_oficial)')
+    .order('ocurrido_en', { ascending:false })
+    .limit(200);
+  if(error){ toast('No se pudo cargar — ¿tenés sesión de Super Admin?'); return; }
+  EVENTOS = (data || []).map(e => ({
+    fecha: new Date(e.ocurrido_en).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}),
+    usuario: e.usuario_label, tipo: e.tipo, detalle: e.detalle,
+    cia: e.ambito_label || (e.companias ? e.companias.nombre : (e.cuerpos ? e.cuerpos.nombre_oficial + ' · Cuerpo General' : '—'))
+  }));
+  renderTabla();
+}
+
+function renderFiltro(){
+  const opciones = [
+    {key:'todos', label:'Todos'},
+    {key:'critico', label:'Críticos'},
+    {key:'creacion', label:'Creación'},
+    {key:'modificacion', label:'Modificación'},
+    {key:'acceso', label:'Acceso'},
+  ];
+  document.getElementById('filtroRow').innerHTML = opciones.map(o =>
+    `<button class="filtro-btn ${filtroActivo===o.key?'on':''}" onclick="setFiltro('${o.key}')">${o.label}</button>`
+  ).join('');
+}
+function setFiltro(f){ filtroActivo = f; renderFiltro(); renderTabla(); }
+
+const LABELS = { critico:'Crítico', creacion:'Creación', modificacion:'Modificación', acceso:'Acceso' };
+
+function renderTabla(){
+  const filtrados = filtroActivo==='todos' ? EVENTOS : EVENTOS.filter(e=>e.tipo===filtroActivo);
+  document.getElementById('tablaBody').innerHTML = filtrados.map(e => `
+    <tr>
+      <td class="td-hora">${e.fecha}</td>
+      <td class="td-usuario">${e.usuario}</td>
+      <td><span class="evento-tag ${e.tipo}">${LABELS[e.tipo]}</span></td>
+      <td>${e.detalle}</td>
+      <td>${e.cia}</td>
+    </tr>
+  `).join('');
+}
+
+renderFiltro();
+cargarDatos();
+</script>
+</body>
+</html>

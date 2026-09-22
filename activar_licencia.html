@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>VIGOR — Activar Licencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ====== CSS base de Vigor incorporado directamente — el archivo ya no depende de vigor_base.css ====== */
+/* ============================================================
+   VIGOR — Design tokens base (placa de bronce institucional)
+   Reconstruido desde spec — usar idéntico en las 5 pantallas
+   ============================================================ */
+:root {
+  /* Fondos y estructura */
+  --bg: #060A0F;
+  --panel: #0A131C;
+  --panel-alt: #0E1D28;
+  --line: #132734;
+  --line-strong: #1C3B49;
+
+  /* Texto */
+  --text: #E7F5FA;
+  --text-muted: #7B99A3;
+  --text-dim: #516E78;
+
+  /* Bronce (marco institucional) */
+  --brass: #C97A2E;
+  --brass-bright: #FF9A44;
+  --brass-dim: #8A4E1E;
+
+  /* Cian (marca / acción primaria) */
+  --cyan: #49E9FF;
+  --cyan-dim: #1E6E7D;
+  --cyan-glow: rgba(73,233,255,0.35);
+  --amber-glow: rgba(255,154,68,0.32);
+
+  /* Burdeo (severidad / crisis / acciones críticas) */
+  --burdeo: #7A1620;
+  --burdeo-bright: #D8394E;
+
+  /* Estados operativos */
+  --servicio: #3CF29A;
+  --emergencia: #FF4B5C;
+  --alerta: #FFC94D;
+  --fuera: #C9A63B;
+  --nodisp: #42555C;
+
+  /* Perfil Maestro / Super Admin */
+  --master: #39FF14;
+  --master-dim: #1F9E0A;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+.vigor-wordmark {
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  font-size: 13px;
+  color: var(--brass-bright);
+  padding: 14px 0 10px;
+  text-transform: uppercase;
+}
+
+h1, h2, h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.panel-alt {
+  background: var(--panel-alt);
+  border: 1px solid var(--line-strong);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  padding: 13px 22px;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--cyan);
+  color: #0B1A21;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-critical {
+  background: var(--burdeo);
+  color: var(--text);
+  border: 1px solid var(--burdeo-bright);
+}
+.btn-critical:hover:not(:disabled) { background: var(--burdeo-bright); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--line-strong);
+}
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--brass-dim); }
+
+input, select {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  width: 100%;
+}
+input:focus, select:focus {
+  outline: 2px solid var(--cyan-dim);
+  outline-offset: 1px;
+  border-color: var(--cyan);
+}
+
+label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+}
+
+::selection { background: var(--cyan-dim); }
+
+/* ====== Estilos propios de esta pantalla ====== */
+  .wrap {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .step-indicator {
+    font-family: 'JetBrains Mono'; font-size: 11px; color: var(--text-dim);
+    letter-spacing: 0.08em; margin-bottom: 14px; text-align: center;
+  }
+  .card { width: 100%; max-width: 460px; padding: 32px 28px 28px; }
+  .brand-icon {
+    width: 50px; height: 50px; margin: 0 auto 18px;
+    border-radius: 50%; background: var(--panel-alt); border: 1px solid var(--brass-dim);
+    display: flex; align-items: center; justify-content: center;
+  }
+  h1.title { font-size: 19px; text-align: center; }
+  .subtitle { text-align: center; color: var(--text-muted); font-size: 13px; margin: 8px 0 28px; line-height: 1.5; }
+
+  .code-input {
+    font-family: 'JetBrains Mono'; font-size: 17px; letter-spacing: 0.12em;
+    text-align: center; text-transform: uppercase; padding: 15px 14px;
+  }
+  .field { margin-bottom: 8px; }
+
+  .status-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; min-height: 20px; margin: 10px 0 22px;
+  }
+  .status-row.checking { color: var(--text-dim); }
+  .status-row.valid { color: var(--servicio); }
+  .status-row.invalid { color: var(--emergencia); }
+
+  .spinner {
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid var(--line-strong); border-top-color: var(--cyan);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .license-detail {
+    display: none;
+    background: var(--panel-alt); border: 1px solid var(--servicio);
+    border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 22px;
+    font-size: 12.5px; color: var(--text-muted);
+  }
+  .license-detail.show { display: block; }
+  .license-detail .row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .license-detail .row span:last-child { color: var(--text); font-weight: 600; }
+  .license-detail .pkg-badge {
+    background: rgba(73,233,255,0.15); color: var(--cyan);
+    padding: 2px 8px; border-radius: 12px; font-size: 11px;
+  }
+
+  .btn-primary.full { width: 100%; padding: 14px; font-size: 14.5px; }
+  .foot-note { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 18px; line-height: 1.5; }
+</style>
+<link rel="manifest" href="manifest-maestro.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor Maestro">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+<div class="vigor-wordmark">VIGOR</div>
+<div class="wrap">
+  <div class="step-indicator">PASO 0 DE 4 — ASISTENTE DE CONFIGURACIÓN INICIAL</div>
+  <div class="panel card">
+    <div class="brand-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF9A44" stroke-width="1.8">
+        <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/>
+      </svg>
+    </div>
+    <h1 class="title">Activar licencia</h1>
+    <p class="subtitle">Ingresa el código de activación entregado para esta instalación.<br>No podrás continuar sin una licencia válida.</p>
+
+    <div class="field">
+      <label for="codigo">Código de activación</label>
+      <input type="text" id="codigo" class="mono code-input" placeholder="VGR-XXXX-XXXX-XXXX" maxlength="18">
+    </div>
+
+    <div class="status-row" id="statusRow"></div>
+
+    <div class="license-detail" id="licenseDetail">
+      <div class="row"><span>Cliente</span><span id="ldCliente">—</span></div>
+      <div class="row"><span>Paquete</span><span><span class="pkg-badge mono" id="ldPaquete">—</span></span></div>
+      <div class="row"><span>Módulos activos</span><span id="ldModulos">—</span></div>
+      <div class="row"><span>Válida hasta</span><span id="ldFecha">—</span></div>
+    </div>
+
+    <button class="btn btn-primary full" id="btnContinuar" disabled>Continuar</button>
+    <p class="foot-note">La verificación se hace en vivo contra la base de datos de licencias de Vigor.</p>
+    <p class="foot-note"><a href="perfil_maestro.html" style="color:#49E9FF; text-decoration:none;">← Volver a Panel Maestro</a></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // --- Conexión real a Supabase ---
+  const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Mismo catálogo de módulos que generador_licencias.html, para poder
+  // mostrar el nombre del paquete y el conteo de módulos a partir del
+  // array de códigos que devuelve la base (la tabla no guarda "paquete").
+  const OPCIONALES = [
+    { id:'actividades', nombre:'Actividades y Asistencia' },
+    { id:'central', nombre:'Central de Alarmas' },
+    { id:'parte', nombre:'Parte de Emergencia (Tablet)' },
+    { id:'crisis', nombre:'Modo Crisis / Puesto de Mando' },
+    { id:'inventario', nombre:'Inventario (Material Menor + Patrimonial)' },
+    { id:'estadisticas', nombre:'Estadísticas' },
+    { id:'reportes', nombre:'Reportes on-demand' },
+    { id:'capacitacion', nombre:'Capacitación' },
+    { id:'especialidades', nombre:'Especialidades' },
+  ];
+  const PAQUETES = {
+    Horizon:    [],
+    Enterprise: ['actividades','central','parte','crisis'],
+    Excelsior:  ['actividades','central','parte','crisis','inventario','estadisticas','reportes','capacitacion','especialidades'],
+  };
+  function detectarPaquete(modulosIds){
+    const set = new Set(modulosIds || []);
+    for(const [nombre, arr] of Object.entries(PAQUETES)){
+      if(arr.length === set.size && arr.every(m => set.has(m))) return nombre;
+    }
+    return 'Personalizado';
+  }
+
+  const codigo = document.getElementById('codigo');
+  const statusRow = document.getElementById('statusRow');
+  const licenseDetail = document.getElementById('licenseDetail');
+  const btnContinuar = document.getElementById('btnContinuar');
+
+  let licenciaValidada = null; // fila real devuelta por validar_licencia()
+  let validationToken = 0; // evita que una respuesta vieja pise a una más nueva
+
+  // Formateo automático tipo VGR-XXXX-XXXX-XXXX
+  codigo.addEventListener('input', () => {
+    let raw = codigo.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (raw.startsWith('VGR')) raw = raw.slice(3);
+    let chunks = raw.match(/.{1,4}/g) || [];
+    codigo.value = 'VGR-' + chunks.join('-');
+
+    statusRow.className = 'status-row';
+    licenseDetail.classList.remove('show');
+    btnContinuar.disabled = true;
+    licenciaValidada = null;
+    validationToken++;
+
+    if (codigo.value.length >= 18) {
+      const miToken = validationToken;
+      statusRow.classList.add('checking');
+      statusRow.innerHTML = '<div class="spinner"></div><span>Verificando código…</span>';
+      setTimeout(() => validar(codigo.value, miToken), 700);
+    } else {
+      statusRow.innerHTML = '';
+    }
+  });
+
+  async function validar(code, miToken) {
+    const { data, error } = await sb.rpc('validar_licencia', { p_codigo: code });
+    if (miToken !== validationToken) return; // el usuario ya siguió escribiendo, descartar
+
+    if (error) {
+      mostrarInvalido('Error de conexión — ' + error.message);
+      return;
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) {
+      mostrarInvalido('Código inválido o inexistente');
+      return;
+    }
+    if (row.v_estado === 'generada') {
+      licenciaValidada = row;
+      mostrarValido(row);
+    } else if (row.v_estado === 'activada') {
+      mostrarInvalido('Este código ya fue activado anteriormente');
+    } else if (row.v_estado === 'vencida') {
+      mostrarInvalido('Este código venció');
+    } else if (row.v_estado === 'revocada') {
+      mostrarInvalido('Este código fue revocado');
+    } else {
+      mostrarInvalido('Código inválido');
+    }
+  }
+
+  function mostrarValido(row) {
+    statusRow.className = 'status-row valid';
+    statusRow.innerHTML = '✓ &nbsp;Código válido';
+    licenseDetail.classList.add('show');
+    document.getElementById('ldCliente').textContent = row.v_nombre_cliente;
+    document.getElementById('ldPaquete').textContent = detectarPaquete(row.v_modulos).toUpperCase();
+    document.getElementById('ldModulos').textContent = `${(row.v_modulos || []).length} de ${OPCIONALES.length}`;
+    document.getElementById('ldFecha').textContent = row.v_valido_hasta
+      ? new Date(row.v_valido_hasta).toLocaleDateString('es-CL')
+      : 'Sin vencimiento';
+    btnContinuar.disabled = false;
+  }
+
+  function mostrarInvalido(mensaje) {
+    licenciaValidada = null;
+    statusRow.className = 'status-row invalid';
+    statusRow.innerHTML = '✕ &nbsp;' + mensaje;
+    licenseDetail.classList.remove('show');
+    btnContinuar.disabled = true;
+  }
+
+  btnContinuar.addEventListener('click', async () => {
+    if (btnContinuar.disabled || !licenciaValidada) return;
+    btnContinuar.disabled = true;
+    const textoOriginal = btnContinuar.textContent;
+    btnContinuar.textContent = 'Activando…';
+
+    const { data, error } = await sb.rpc('activar_licencia', { p_codigo: licenciaValidada.v_codigo });
+
+    if (error) {
+      btnContinuar.textContent = textoOriginal;
+      mostrarInvalido('No se pudo activar — ' + error.message);
+      return;
+    }
+
+    window.location.href = 'wizard_inicial.html?licencia=' + encodeURIComponent(licenciaValidada.v_codigo);
+  });
+</script>
+</body>
+</html>

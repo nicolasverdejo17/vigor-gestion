@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Opciones (Celular)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(900px 500px at 50% -10%, rgba(73,233,255,0.08), transparent 60%), #060A0F;
+    font-family:'Inter',sans-serif; color:var(--text);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .phone{ height:100%; display:flex; flex-direction:column; position:relative;}
+
+  .app-head{ padding:12px 18px 8px; flex-shrink:0;}
+  .app-head .eyebrow{ font-size:10px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+  .app-head h1{ font-size:20px; margin-top:2px;}
+  .role-strip{ display:flex; align-items:center; gap:7px; padding:6px 0 0;}
+  .role-strip .dot{ width:6px;height:6px;border-radius:50%; background:var(--cyan);}
+  .role-strip span{ font-size:10px; color:var(--text-muted);}
+  .role-strip b{ font-size:10px; color:var(--cyan); font-weight:700;}
+
+  .content{ flex:1; overflow-y:auto; padding:8px 18px 18px;}
+  .content::-webkit-scrollbar{ display:none;}
+
+  .perfil-card{
+    display:flex; align-items:center; gap:14px; background:var(--panel); border:1.5px solid var(--line-strong);
+    border-radius:12px; padding:14px; margin-bottom:14px; position:relative; overflow:hidden;
+  }
+  .perfil-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.35;}
+  .perfil-foto{ width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--servicio); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:17px; color:var(--text-muted); flex-shrink:0; position:relative; z-index:1;}
+  .perfil-nombre{ font-size:14px; font-weight:700; position:relative; z-index:1;}
+  .perfil-cargo{ font-size:11px; color:var(--text-muted); position:relative; z-index:1;}
+
+  .section-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:14px 4px 8px;}
+  .section-label:first-child{ margin-top:0;}
+
+  .row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:10px;
+    padding:12px 14px; margin-bottom:8px; cursor:pointer;
+  }
+  .row-l{ display:flex; align-items:center; gap:12px;}
+  .row-ico{ width:34px; height:34px; border-radius:9px; background:var(--panel-alt); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
+  .row b{ font-size:13.5px; display:block;}
+  .row span{ font-size:11px; color:var(--text-muted);}
+  .row-arrow{ color:var(--text-dim); font-size:14px;}
+
+  .row.locked{ opacity:.42; cursor:not-allowed;}
+  .row.locked .row-ico{ background:var(--panel);}
+
+  .logout-row{ margin-top:18px;}
+  .logout-row b{ color:var(--burdeo-bright);}
+
+  .toast{
+    position:absolute; bottom:20px; left:16px; right:16px;
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:11px 16px; border-radius:8px; font-size:12.5px; opacity:0; transform:translateY(8px);
+    transition:all .25s; pointer-events:none; text-align:center; z-index:30;
+  }
+  .toast.show{ opacity:1; transform:translateY(0);}
+  .toast.denegado{ border-color:var(--burdeo-bright); color:#F6DCE0;}
+
+  .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:8.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ font-size:16px; line-height:1;}
+  .tabbar-real a.active{ color:var(--cyan);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="app-head">
+      <div class="eyebrow" id="eyebrowCia">Vigor</div>
+      <h1>Opciones</h1>
+      <div class="role-strip"><span class="dot"></span><span>Sesión:</span> <b id="sesionLabel">—</b></div>
+    </div>
+
+    <div class="content">
+      <div class="perfil-card">
+        <div class="perfil-foto" id="perfilIniciales">B</div>
+        <div>
+          <div class="perfil-nombre" id="perfilNombre">Bombero</div>
+          <div class="perfil-cargo" id="perfilCargoTxt">Tercera Compañía</div>
+        </div>
+      </div>
+
+      <div class="section-label">Mi cuenta</div>
+      <div class="row" onclick="window.location.href='editar_datos_personales.html'">
+        <div class="row-l"><div class="row-ico">👤</div><div><b>Mi Perfil</b><span>Datos personales, editables</span></div></div>
+        <span class="row-arrow">›</span>
+      </div>
+      <div class="row" onclick="window.location.href='ficha_bombero.html'">
+        <div class="row-l"><div class="row-ico">📋</div><div><b>Mi Hoja de Vida</b><span>Ascensos, reconocimientos, cursos — solo lectura</span></div></div>
+        <span class="row-arrow">›</span>
+      </div>
+      <div class="row" onclick="window.location.href='gestion_capacitacion.html'">
+        <div class="row-l"><div class="row-ico">🎓</div><div><b>Mis Cursos</b><span>Historial completo de Capacitación</span></div></div>
+        <span class="row-arrow">›</span>
+      </div>
+      <div class="row" onclick="window.location.href='tablet_dotacion.html'">
+        <div class="row-l"><div class="row-ico">🚒</div><div><b>Dotación de mi Compañía</b><span>Solo lectura</span></div></div>
+        <span class="row-arrow">›</span>
+      </div>
+
+      <div class="section-label">Preferencias</div>
+      <div class="row" onclick="window.location.href='notificaciones_celular.html'">
+        <div class="row-l"><div class="row-ico">🔔</div><div><b>Notificaciones</b><span>Qué avisos querés recibir</span></div></div>
+        <span class="row-arrow">›</span>
+      </div>
+
+      <div class="section-label">Según tu Cargo y Roles Funcionales</div>
+      <div id="filasAdmin"></div>
+
+      <div class="row logout-row" onclick="ir('Cerrando sesión…')">
+        <div class="row-l"><div class="row-ico">🚪</div><div><b>Cerrar sesión</b></div></div>
+      </div>
+    </div>
+    <div class="tabbar-real" id="tabbarReal"></div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let cargoActivo = null;
+let rolesActivos = new Set();
+let miNombre = null, miIniciales = null, miCiaLabel = null;
+
+async function cargarSesion(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal')
+    .select('nombre_completo, cargo, companias(nombre), cuerpos(nombre_oficial), personal_roles_funcionales(rol_funcional)')
+    .eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  cargoActivo = perfil.cargo;
+  rolesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
+  miNombre = perfil.nombre_completo;
+  miIniciales = perfil.nombre_completo.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+  miCiaLabel = perfil.companias ? perfil.companias.nombre : 'Cuerpo General';
+  document.getElementById('eyebrowCia').textContent = miCiaLabel;
+  renderTodo();
+}
+
+// Bug corregido en la fusión: "Alta de Personal Rentado" y "Administración
+// (Crear Compañía/Carro)" ya NO pertenecen a una Compañía — son exclusivas
+// de Administración General (Cuerpo General), con su propio login aparte
+// desde la separación de interfaces. Se sacaron de acá.
+// "Inventario" ahora apunta al Inventario real (no a un archivo aparte
+// solo para celular) — la misma pantalla se ve bien en cualquier
+// dispositivo, no hace falta duplicarla.
+const FILAS_ADMIN = [
+  { ico:'📋', nombre:'Asignación de Dotación', desc:'Asignar bomberos a carros',
+    cargos:['Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Capitán','Director'], roles:[], href:'pc_compania.html' },
+  { ico:'📝', nombre:'Solicitudes de Alta', desc:'Aprobar/rechazar postulantes',
+    cargos:['Secretario/a','Director'], roles:[], href:'solicitudes_alta.html' },
+  { ico:'📖', nombre:'Hojas de Vida (de otros) / Dar de Baja', desc:'Editar historial, dar de baja o reactivar',
+    cargos:['Secretario/a','Director'], roles:[], href:'ficha_bombero.html' },
+  { ico:'📦', nombre:'Inventario', desc:'Ingreso, baja, historial de ítems',
+    cargos:['Tesorero/a','Director'], roles:['Depto. Material Menor','Depto. Material Mayor'], href:'inventario.html' },
+  { ico:'🚒', nombre:'Crear Carro', desc:'Alta de un carro nuevo en la Compañía',
+    cargos:['Secretario/a','Director'], roles:[], href:'crear_carro.html' },
+  { ico:'📊', nombre:'Estadísticas', desc:'KPIs y reportes de la Compañía',
+    cargos:['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Secretario/a','Tesorero/a','Director'], roles:[], href:'estadisticas.html' },
+  { ico:'🏅', nombre:'Especialidades', desc:'Asignar insignias a bomberos',
+    cargos:[], roles:['Depto. Especialidad'], href:'gestion_especialidades.html' },
+  { ico:'🎓', nombre:'Capacitación (Gestión)', desc:'Cargar cursos, definir nivel de otros',
+    cargos:[], roles:['Depto. Capacitación'], href:'gestion_capacitacion.html' },
+];
+
+function tieneAcceso(fila){
+  if(fila.cargos.includes(cargoActivo)) return true;
+  for(const r of rolesActivos){ if(fila.roles.includes(r)) return true; }
+  return false;
+}
+
+function renderPerfil(){
+  const rolesTxt = rolesActivos.size ? ' + ' + [...rolesActivos].join(', ') : '';
+  document.getElementById('sesionLabel').textContent = cargoActivo + rolesTxt;
+  document.getElementById('perfilNombre').textContent = miNombre;
+  document.getElementById('perfilIniciales').textContent = miIniciales;
+  document.getElementById('perfilCargoTxt').textContent = `${cargoActivo} · ${miCiaLabel}`;
+}
+
+function renderFilas(){
+  const html = FILAS_ADMIN.map(f => {
+    const ok = tieneAcceso(f);
+    const requisitos = [...f.cargos, ...f.roles].join(' / ') || '—';
+    if(ok){
+      return `<div class="row" onclick="window.location.href='${f.href}'">
+        <div class="row-l"><div class="row-ico">${f.ico}</div><div><b>${f.nombre}</b><span>${f.desc}</span></div></div>
+        <span class="row-arrow">›</span>
+      </div>`;
+    }
+    return `<div class="row locked" onclick="denegado()">
+      <div class="row-l"><div class="row-ico">🔒</div><div><b>${f.nombre}</b><span>Requiere: ${requisitos}</span></div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('filasAdmin').innerHTML = html;
+}
+
+function renderTodo(){ renderPerfil(); renderFilas(); }
+
+async function ir(msg){
+  toast(msg, false);
+  await sb.auth.signOut();
+  setTimeout(()=>window.location.href = 'login_registro.html', 700);
+}
+function denegado(){ toast('No tenés permiso para acceder a esta sección', true); }
+
+function toast(msg, esDenegado){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('denegado', !!esDenegado);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+cargarSesion();
+
+// 6 pestañas — "Más" se fusionó dentro de "Opciones", ya no existe como
+// pestaña aparte.
+const TABS_NAV = [
+  {href:'inicio_celular.html', ic:'🏠', label:'Inicio'},
+  {href:'compania_celular.html', ic:'🚒', label:'Compañía'},
+  {href:'pizarra_celular.html', ic:'📌', label:'Pizarra'},
+  {href:'actividades_celular.html', ic:'📋', label:'Activid.'},
+  {href:'coordenadas_celular.html', ic:'📍', label:'GPS'},
+  {href:'opciones_celular.html', ic:'⚙️', label:'Opciones'},
+];
+(function renderTabbarReal(){
+  const cont = document.getElementById('tabbarReal');
+  if(!cont) return;
+  const actual = location.pathname.split('/').pop();
+  cont.innerHTML = TABS_NAV.map(t => `<a href="${t.href}" class="${t.href===actual?'active':''}"><span class="ic">${t.ic}</span><span>${t.label}</span></a>`).join('');
+})();
+</script>
+</body>
+</html>

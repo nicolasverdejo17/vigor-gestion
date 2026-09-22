@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Tablet R-3 · Historial de Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+    --esp-r:#FF4B5C; --esp-t:#4FA3FF; --esp-h:#FFC94D; --esp-f:#3CF29A; --esp-m:#B77CFF; --esp-c:#E08A5C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background:
+      radial-gradient(1100px 550px at 50% -10%, rgba(73,233,255,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif;
+    height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  /* ---- Identidad fija del Carro (nameplate) ---- */
+  .nameplate{
+    background:linear-gradient(180deg,var(--panel-alt),var(--panel));
+    border-bottom:2px solid var(--brass-dim);
+    padding:0; flex-shrink:0; position:relative;
+  }
+  .nameplate-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; gap:16px; flex-wrap:wrap;
+  }
+  .carro-id{ display:flex; align-items:center; gap:16px;}
+  .carro-badge{
+    width:64px; height:64px; border-radius:8px; flex-shrink:0;
+    background:var(--panel); border:2px solid var(--brass); position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .carro-badge::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:4px;}
+  .carro-badge span{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:20px; color:var(--brass-bright);}
+  .carro-text h1{ font-size:26px; letter-spacing:.05em;}
+  .carro-text .sub{ font-size:12px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; margin-top:3px;}
+
+  .estado-pill{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+    padding:8px 16px; border-radius:4px; background:var(--servicio); color:#fff;
+    display:flex; align-items:center; gap:8px;
+  }
+  .estado-pill::before{ content:""; width:8px; height:8px; border-radius:50%; background:#fff;}
+
+  .clock{ text-align:right; color:var(--text-muted); font-size:12px; line-height:1.3;}
+  .clock strong{ display:block; color:var(--cyan); text-shadow:0 0 12px var(--cyan-glow); font-size:18px; font-family:'JetBrains Mono',monospace;}
+
+  /* ---- Dotación asignada (resumen persistente) ---- */
+  .dotacion-strip{
+    background:var(--panel); border-bottom:1px solid var(--line);
+    padding:10px 28px; flex-shrink:0; display:flex; align-items:center; gap:0; flex-wrap:wrap;
+  }
+  .dot-item{ display:flex; align-items:baseline; gap:8px; padding:4px 20px; border-right:1px dashed var(--line);}
+  .dot-item:last-child{ border-right:none;}
+  .dot-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.1em; white-space:nowrap;}
+  .dot-val{ font-size:13.5px; color:var(--text); font-weight:600;}
+  .dot-val.empty{ color:var(--text-dim); font-weight:400; font-style:italic;}
+
+  /* ---- Menú operativo — 3 accesos grandes ---- */
+  .ops-wrap{ flex:1; min-height:0; padding:24px 28px 28px; display:flex; flex-direction:column;}
+  .ops-hint{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.1em; margin-bottom:14px; flex-shrink:0;}
+  .ops-grid{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+
+  .ops-btn{
+    background:var(--panel); border:2px solid var(--line-strong); border-radius:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    cursor:pointer; position:relative; overflow:hidden; padding:20px;
+    transition:border-color .12s, background .12s;
+  }
+  .ops-btn::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.5;}
+  .ops-btn:hover{ border-color:var(--brass-bright); background:var(--panel-alt);}
+  .ops-btn:active{ transform:scale(.98);}
+  .ops-icon{
+    width:76px; height:76px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--panel-alt); border:2px solid var(--line-strong);
+  }
+  .ops-icon svg{ width:34px; height:34px;}
+  .ops-btn h2{ font-size:20px; letter-spacing:.03em;}
+  .ops-btn p{ margin:0; font-size:12.5px; color:var(--text-muted); text-align:center; line-height:1.4; max-width:220px;}
+
+  .ops-btn.parte .ops-icon{ border-color:var(--burdeo-bright);}
+  .ops-btn.parte:hover{ border-color:var(--burdeo-bright);}
+  .ops-btn.bitacora .ops-icon{ border-color:var(--brass-bright);}
+  .ops-btn.bitacora:hover{ border-color:var(--brass-bright);}
+  .ops-btn.dotacion .ops-icon{ border-color:var(--cyan);}
+  .ops-btn.dotacion:hover{ border-color:var(--cyan);}
+
+  .demo-tag{
+    text-align:center; font-size:11px; color:var(--text-dim); padding:8px 0 0; flex-shrink:0;
+  }
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:14px 24px; border-radius:6px; font-size:14px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* ---- Form de Bitácora ---- */
+  .form-wrap{ flex:1; min-height:0; padding:22px 32px 24px; display:flex; flex-direction:column; overflow:hidden;}
+  .form-head{ display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-shrink:0;}
+  .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12.5px; padding:9px 16px; border-radius:5px; cursor:pointer;
+  }
+  .back-btn:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .form-head h2{ font-size:22px;}
+
+  .form-body{
+    flex:1; min-height:0; background:var(--panel); border:1px solid var(--line-strong);
+    border-radius:10px; padding:24px 28px; overflow-y:auto; position:relative;
+  }
+  .form-body::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4;}
+
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:18px;}
+  .form-field{ display:flex; flex-direction:column; gap:7px;}
+  .form-field.full{ grid-column:1 / -1;}
+  .form-field label{ font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600;}
+  .form-field .readonly-val{
+    background:var(--bg); border:1px solid var(--line); border-radius:6px;
+    padding:13px 14px; font-size:15px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;
+  }
+  .form-field .auto-field-wrap{ position:relative;}
+  .form-field input.auto-field{
+    background:var(--bg); border:1.5px dashed var(--brass-dim); border-radius:6px;
+    padding:13px 40px 13px 14px; font-size:15px; color:var(--text); font-family:'JetBrains Mono',monospace;
+    width:100%;
+  }
+  .form-field input.auto-field:focus{ outline:none; border-color:var(--cyan); border-style:solid;}
+  .auto-field-icon{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    font-size:11px; color:var(--brass-bright); pointer-events:none;
+  }
+  .form-field label .auto-tag{
+    font-size:9px; color:var(--brass-bright); font-weight:400; text-transform:none;
+    letter-spacing:0; margin-left:6px;
+  }
+  .form-field input, .form-field textarea{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:13px 14px; font-size:15px; color:var(--text); font-family:'Inter';
+  }
+  .form-field input:focus, .form-field textarea:focus{ outline:none; border-color:var(--cyan);}
+  .form-field input.mono{ font-family:'JetBrains Mono',monospace;}
+  .form-field textarea{ resize:none; min-height:76px; font-family:'Inter'; line-height:1.4;}
+
+  .btn-guardar{
+    width:100%; margin-top:6px; background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    font-size:16px; padding:15px; border-radius:7px; cursor:pointer; flex-shrink:0;
+  }
+  .btn-guardar:hover{ background:var(--cyan); color:#0D2226;}
+
+  .ult-revision{ font-size:11px; color:var(--text-dim); margin-left:auto;}
+
+  .btn-exportar-hist{
+    margin-left:auto; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11.5px; padding:9px 15px; border-radius:6px; cursor:pointer;
+  }
+  .btn-exportar-hist:hover{ background:var(--cyan); color:#0D2226;}
+
+  .hist-resumen{ display:flex; gap:24px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .hist-resumen-item{ display:flex; flex-direction:column;}
+  .hist-resumen-item b{ font-family:'JetBrains Mono',monospace; font-size:22px; color:var(--cyan);}
+  .hist-resumen-item span{ font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em;}
+
+  .hist-card{ background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:8px; margin-bottom:10px; overflow:hidden;}
+  .hist-card.con-falla{ border-color:var(--emergencia);}
+  .hist-card-head{ display:flex; align-items:center; gap:14px; padding:13px 16px; cursor:pointer;}
+  .hist-fecha{ font-size:13.5px; font-weight:700;}
+  .hist-resp{ font-size:11px; color:var(--text-muted); margin-top:2px;}
+  .hist-badge{
+    margin-left:auto; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    padding:5px 11px; border-radius:10px; color:#fff;
+  }
+  .hist-badge.ok{ background:var(--servicio);}
+  .hist-badge.falla{ background:var(--emergencia);}
+  .hist-arrow{ font-size:10px; color:var(--text-dim);}
+  .hist-detalle{ padding:0 16px 14px; border-top:1px solid var(--line);}
+  .hist-item-row{ display:flex; align-items:center; gap:10px; padding:7px 0; flex-wrap:wrap;}
+  .hist-item-nombre{ font-size:12.5px; flex:1;}
+  .hist-item-estado{ font-size:10px; font-weight:700; text-transform:uppercase; padding:3px 9px; border-radius:8px; color:#fff;}
+  .hist-item-estado.ok{ background:var(--servicio);}
+  .hist-item-estado.falla{ background:var(--emergencia);}
+  .hist-item-estado.na{ background:var(--nodisp);}
+  .hist-item-comentario{ width:100%; font-size:11.5px; color:var(--text-muted); font-style:italic; padding-left:2px;}
+
+  @media print{
+    body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
+    .nameplate, .dotacion-strip, .back-btn, .btn-exportar-hist, .demo-tag, .toast, .hist-arrow{ display:none !important;}
+    .form-wrap{ padding:10px !important;}
+    .form-body{ overflow:visible !important; border:none !important;}
+    .form-body::before{ display:none !important;}
+    .hist-card{ border:1px solid #ccc !important; break-inside:avoid;}
+    .hist-badge.falla, .hist-item-estado.falla{ background:#D8394E !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .hist-badge.ok, .hist-item-estado.ok{ background:#3CF29A !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+
+  .chk-categoria{ margin-bottom:22px;}
+  .chk-categoria:last-child{ margin-bottom:0;}
+  .chk-categoria-titulo{
+    font-family:'Rajdhani'; font-weight:700; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--brass-bright); margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid var(--line);
+  }
+  .chk-item{ padding:9px 0; border-bottom:1px solid var(--line);}
+  .chk-item:last-child{ border-bottom:none;}
+  .chk-item-nombre{ font-size:13.5px; margin-bottom:8px;}
+  .chk-item-opts{ display:flex; gap:6px;}
+  .chk-opt{
+    flex:1; padding:8px 4px; border-radius:5px; border:1.5px solid var(--line-strong); background:var(--panel-alt);
+    color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.02em;
+    text-transform:uppercase; cursor:pointer;
+  }
+  .chk-opt.on.ok{ background:var(--servicio); border-color:var(--servicio); color:#fff;}
+  .chk-opt.on.falla{ background:var(--emergencia); border-color:var(--emergencia); color:#fff;}
+  .chk-opt.on.na{ background:var(--nodisp); border-color:var(--nodisp); color:#fff;}
+  .chk-comentario{
+    width:100%; margin-top:8px; background:var(--bg); border:1.5px solid var(--emergencia); border-radius:5px;
+    padding:9px 12px; font-size:13px; color:var(--text); font-family:'Inter';
+  }
+  .chk-comentario:focus{ outline:none;}
+</style>
+<link rel="manifest" href="manifest-tablet.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="carro-id">
+        <div class="carro-badge"><span id="carroSigla">—</span></div>
+        <div class="carro-text">
+          <h1 id="carroTitulo">Cargando…</h1>
+          <div class="sub" id="carroSub">—</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px;">
+        <div class="estado-pill" id="estadoPill">—</div>
+        <div class="clock"><strong id="clk">—</strong><span id="fechaHoy"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dotacion-strip">
+    <div class="dot-item"><span class="dot-label">Conductor</span><span class="dot-val" id="dotConductor">—</span></div>
+    <div class="dot-item"><span class="dot-label">Oficial a cargo</span><span class="dot-val" id="dotOficial">—</span></div>
+    <div class="dot-item"><span class="dot-label">Tripulantes</span><span class="dot-val" id="dotTripulantes">—</span></div>
+  </div>
+
+  <div class="form-wrap">
+    <div class="form-head">
+      <button class="back-btn" onclick="window.location.href='tablet_checklist.html'">← Volver</button>
+      <h2>Historial de Checklist</h2>
+      <button class="btn-exportar-hist" onclick="exportarPDF()">⬇ Exportar PDF</button>
+    </div>
+
+    <div class="form-body" id="printArea">
+      <div class="hist-resumen">
+        <div class="hist-resumen-item"><b id="totalRevisiones">0</b><span>Revisiones registradas</span></div>
+        <div class="hist-resumen-item"><b id="totalFallasHist">0</b><span>Fallas reportadas en total</span></div>
+      </div>
+
+      <div id="historialLista"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const ESTADO_LABEL_CARRO = { servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
+
+function tick(){
+  const n = new Date();
+  document.getElementById('clk').textContent = n.toLocaleTimeString('es-CL',{hour12:false});
+  document.getElementById('fechaHoy').textContent = n.toLocaleDateString('es-CL', {weekday:'long', day:'numeric', month:'long'});
+}
+tick(); setInterval(tick,1000);
+
+let HISTORIAL = [];
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'tablet_carro.html'; return; }
+
+  const { data: carro } = await sb.rpc('tablet_obtener_carro');
+  if(!carro || !carro[0]){ toast('No se encontró este carro'); return; }
+  const c = carro[0];
+  document.getElementById('carroSigla').textContent = c.t_nomenclatura;
+  document.getElementById('carroTitulo').textContent = `Carro ${c.t_nomenclatura} — ${c.t_tipo_descripcion}`;
+  document.getElementById('carroSub').textContent = `${c.t_compania_nombre || 'Cuerpo General'} · ${c.t_cuerpo_nombre}`;
+  document.getElementById('estadoPill').textContent = ESTADO_LABEL_CARRO[c.t_estado] || c.t_estado;
+
+  const { data: dot } = await sb.rpc('tablet_obtener_dotacion');
+  const conductor = (dot || []).find(d => d.rol === 'conductor');
+  const oficial = (dot || []).find(d => d.rol === 'oficial');
+  const tripulantes = (dot || []).filter(d => d.rol === 'tripulante');
+  document.getElementById('dotConductor').textContent = conductor ? conductor.nombre_completo : 'Sin asignar';
+  document.getElementById('dotOficial').textContent = oficial ? oficial.nombre_completo : 'Sin asignar';
+  document.getElementById('dotTripulantes').textContent = tripulantes.length ? tripulantes.map(t=>t.nombre_completo).join(', ') : 'Sin asignar';
+
+  const { data: checklists } = await sb.rpc('tablet_listar_checklists_con_items');
+  HISTORIAL = checklists || [];
+  renderHistorial();
+}
+
+const ESTADO_LABEL = { ok:'OK', falla:'Falla', na:'No Aplica' };
+let expandido = {};
+
+function renderHistorial(){
+  let totalFallas = 0;
+  document.getElementById('historialLista').innerHTML = HISTORIAL.map((rev, i) => {
+    const fallas = (rev.items || []).filter(it => it.estado==='falla');
+    totalFallas += fallas.length;
+    const abierto = !!expandido[i];
+    const f = new Date(rev.fecha_hora);
+    return `
+      <div class="hist-card ${fallas.length>0?'con-falla':''}">
+        <div class="hist-card-head" onclick="toggleExpandir(${i})">
+          <div>
+            <div class="hist-fecha">${f.toLocaleDateString('es-CL')} — ${f.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
+            <div class="hist-resp">${rev.responsable || 'Sin responsable'} · <span class="mono">${rev.kilometraje} km</span></div>
+          </div>
+          <div class="hist-badge ${fallas.length>0?'falla':'ok'}">${fallas.length>0 ? fallas.length+' falla(s)' : 'Todo OK'}</div>
+          <span class="hist-arrow">${abierto?'▲':'▼'}</span>
+        </div>
+        ${abierto ? `
+          <div class="hist-detalle">
+            ${(rev.items || []).map(it => `
+              <div class="hist-item-row">
+                <span class="hist-item-nombre">${it.nombre}</span>
+                <span class="hist-item-estado ${it.estado}">${ESTADO_LABEL[it.estado]}</span>
+                ${it.comentario ? `<div class="hist-item-comentario">${it.comentario}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+  document.getElementById('totalRevisiones').textContent = HISTORIAL.length;
+  document.getElementById('totalFallasHist').textContent = totalFallas;
+}
+
+function toggleExpandir(i){
+  expandido[i] = !expandido[i];
+  renderHistorial();
+}
+
+function exportarPDF(){
+  // Se expande todo antes de imprimir, para que el PDF muestre el detalle
+  // completo de cada revisión y no solo el resumen colapsado.
+  HISTORIAL.forEach((_, i) => { expandido[i] = true; });
+  renderHistorial();
+  setTimeout(()=>window.print(), 150);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+cargarDatos();
+</script>
+</body>
+</html>

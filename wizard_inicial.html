@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>VIGOR — Asistente de Configuración Inicial</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ====== CSS base de Vigor incorporado directamente — el archivo ya no depende de vigor_base.css ====== */
+/* ============================================================
+   VIGOR — Design tokens base (placa de bronce institucional)
+   Reconstruido desde spec — usar idéntico en las 5 pantallas
+   ============================================================ */
+:root {
+  /* Fondos y estructura */
+  --bg: #060A0F;
+  --panel: #0A131C;
+  --panel-alt: #0E1D28;
+  --line: #132734;
+  --line-strong: #1C3B49;
+
+  /* Texto */
+  --text: #E7F5FA;
+  --text-muted: #7B99A3;
+  --text-dim: #516E78;
+
+  /* Bronce (marco institucional) */
+  --brass: #C97A2E;
+  --brass-bright: #FF9A44;
+  --brass-dim: #8A4E1E;
+
+  /* Cian (marca / acción primaria) */
+  --cyan: #49E9FF;
+  --cyan-dim: #1E6E7D;
+  --cyan-glow: rgba(73,233,255,0.35);
+  --amber-glow: rgba(255,154,68,0.32);
+
+  /* Burdeo (severidad / crisis / acciones críticas) */
+  --burdeo: #7A1620;
+  --burdeo-bright: #D8394E;
+
+  /* Estados operativos */
+  --servicio: #3CF29A;
+  --emergencia: #FF4B5C;
+  --alerta: #FFC94D;
+  --fuera: #C9A63B;
+  --nodisp: #42555C;
+
+  /* Perfil Maestro / Super Admin */
+  --master: #39FF14;
+  --master-dim: #1F9E0A;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+.vigor-wordmark {
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  font-size: 13px;
+  color: var(--brass-bright);
+  padding: 14px 0 10px;
+  text-transform: uppercase;
+}
+
+h1, h2, h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.panel-alt {
+  background: var(--panel-alt);
+  border: 1px solid var(--line-strong);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  padding: 13px 22px;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--cyan);
+  color: #0B1A21;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-critical {
+  background: var(--burdeo);
+  color: var(--text);
+  border: 1px solid var(--burdeo-bright);
+}
+.btn-critical:hover:not(:disabled) { background: var(--burdeo-bright); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--line-strong);
+}
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--brass-dim); }
+
+input, select {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  width: 100%;
+}
+input:focus, select:focus {
+  outline: 2px solid var(--cyan-dim);
+  outline-offset: 1px;
+  border-color: var(--cyan);
+}
+
+
+label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+}
+
+::selection { background: var(--cyan-dim); }
+
+/* ====== Estilos propios de esta pantalla ====== */
+  .wrap { max-width: 620px; margin: 0 auto; padding: 8px 20px 60px; }
+
+  .progress-track { display: flex; gap: 6px; margin-bottom: 8px; }
+  .progress-seg { height: 3px; flex: 1; border-radius: 2px; background: var(--line-strong); }
+  .progress-seg.done { background: var(--cyan); }
+  .progress-seg.active { background: var(--brass-bright); }
+
+  .step-labels { display: flex; justify-content: space-between; margin-bottom: 26px; }
+  .step-labels span { font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  .step-labels span.current { color: var(--brass-bright); font-weight: 600; }
+
+  .panel-body { padding: 26px; margin-bottom: 20px; }
+  .step-title { font-size: 19px; margin-bottom: 6px; }
+  .step-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { margin-bottom: 16px; }
+  .field.full { grid-column: 1 / -1; }
+
+  /* Paso 2 — lista de Compañías */
+  .company-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; margin-bottom: 8px;
+    background: var(--panel-alt); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+  }
+  .company-row input { flex: 1; }
+  .company-row .num-badge {
+    font-family: 'JetBrains Mono'; font-size: 12px; color: var(--brass-bright);
+    background: var(--bg); padding: 5px 9px; border-radius: 5px; border: 1px solid var(--brass-dim);
+    min-width: 40px; text-align: center;
+  }
+  .remove-btn {
+    background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px;
+    padding: 4px 8px;
+  }
+  .remove-btn:hover { color: var(--emergencia); }
+  .add-company-btn {
+    width: 100%; padding: 12px; border: 1px dashed var(--line-strong);
+    background: transparent; color: var(--text-muted); border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 13px; margin-top: 6px;
+  }
+  .add-company-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* Paso 3 — directores por compañía */
+  .director-card {
+    padding: 14px; margin-bottom: 10px;
+    background: var(--panel-alt); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+  }
+  .director-card .dc-title { font-size: 12.5px; color: var(--brass-bright); margin-bottom: 10px; font-weight: 600; }
+
+  /* Paso 4 — operadores */
+  .op-list { margin-bottom: 6px; }
+
+  .nav-actions { display: flex; gap: 10px; justify-content: space-between; }
+  .nav-actions .btn { min-width: 110px; }
+
+  .final-check {
+    text-align: center; padding: 20px 10px 6px;
+  }
+  .final-check .check-icon {
+    width: 56px; height: 56px; margin: 0 auto 16px;
+    border-radius: 50%; background: rgba(60,242,154,0.15); border: 1px solid var(--servicio);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .step[data-step] { display: none; }
+  .step.active { display: block; }
+
+  .wizard-error { color: var(--emergencia); font-size: 12.5px; margin-top: 10px; text-align: right; min-height: 16px; }
+  .hidden { display: none !important; }
+
+  .op-row .op-nombre { flex: 2; }
+  .op-row .op-registro { flex: 1; min-width: 90px; }
+
+  .director-registro { margin-top: 8px; }
+  .director-registro label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+
+  .credenciales-wrap { margin: 20px 0; text-align: left; }
+  .credenciales-titulo { font-size: 12px; color: var(--brass-bright); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 10px; text-align: center; }
+  .codigo-cuerpo-box {
+    margin: 20px 0; padding: 16px 20px; text-align: center;
+    background: var(--panel-alt); border: 2px solid var(--cyan); border-radius: 10px;
+  }
+  .codigo-cuerpo-box .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .codigo-cuerpo-box .valor { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: var(--cyan); letter-spacing: 0.06em; }
+  .codigo-cuerpo-box .nota { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+  .credencial-row {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: 10px 14px; margin-bottom: 8px; background: var(--panel-alt); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm); font-size: 12.5px;
+  }
+  .credencial-row .cr-quien { color: var(--text); }
+  .credencial-row .cr-quien b { color: var(--text); }
+  .credencial-row .cr-quien span { display: block; font-size: 11px; color: var(--text-dim); }
+  .credencial-row .cr-datos { text-align: right; }
+  .credencial-row .cr-pass { font-family: 'JetBrains Mono'; color: var(--cyan); font-size: 13px; font-weight: 600; }
+</style>
+<link rel="manifest" href="manifest-maestro.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor Maestro">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+<div class="vigor-wordmark">VIGOR</div>
+<div class="wrap">
+
+  <div class="progress-track">
+    <div class="progress-seg done"></div>
+    <div class="progress-seg active" id="seg1"></div>
+    <div class="progress-seg" id="seg2"></div>
+    <div class="progress-seg" id="seg3"></div>
+    <div class="progress-seg" id="seg4"></div>
+  </div>
+  <div class="step-labels">
+    <span>Licencia</span>
+    <span class="current" id="lab1">Identidad</span>
+    <span id="lab2">Compañías</span>
+    <span id="lab3">Directores</span>
+    <span id="lab4">Central</span>
+  </div>
+
+  <!-- PASO 1 — Identidad del Cuerpo -->
+  <div class="panel panel-body step active" data-step="1">
+    <h1 class="step-title">Identidad del Cuerpo de Bomberos</h1>
+    <p class="step-sub">Estos datos aparecen en toda la instalación — pantallas, reportes y documentos generados.</p>
+    <div class="grid-2">
+      <div class="field full">
+        <label for="nombreCuerpo">Nombre oficial del Cuerpo</label>
+        <input type="text" id="nombreCuerpo" placeholder="Ej. Cuerpo de Bomberos de [Ciudad]">
+      </div>
+      <div class="field">
+        <label for="regionSelect">Región</label>
+        <select id="regionSelect" onchange="onRegionChange()">
+          <option value="">Seleccioná la región…</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="comuna">Comuna</label>
+        <select id="comuna" disabled>
+          <option value="">Elegí primero la región…</option>
+        </select>
+      </div>
+      <div class="field full" id="manualUbicacionWrap" style="display:none;">
+        <label for="regionManual">País / Región o Provincia</label>
+        <input type="text" id="regionManual" placeholder="Ej. Provincia de Buenos Aires, Argentina">
+      </div>
+      <div class="field full" id="comunaManualWrap" style="display:none;">
+        <label for="comunaManual">Ciudad / Comuna</label>
+        <input type="text" id="comunaManual" placeholder="Ej. Bahía Blanca">
+      </div>
+      <div class="field">
+        <label for="superintendente">Superintendente actual</label>
+        <input type="text" id="superintendente" placeholder="Nombre completo">
+      </div>
+      <div class="field">
+        <label for="superintendenteNumero">N° de Registro del Superintendente</label>
+        <input type="text" class="mono" id="superintendenteNumero" placeholder="Ej. 1">
+      </div>
+      <div class="hint full" style="font-size:11px; color:var(--text-dim); margin-top:-8px;">Con esto se crea su cuenta real de acceso a Administración General — sin esto, nadie podría entrar ahí.</div>
+
+      <div class="field">
+        <label for="comandante">Comandante actual (opcional)</label>
+        <input type="text" id="comandante" placeholder="Nombre completo">
+      </div>
+      <div class="field">
+        <label for="comandanteNumero">N° de Registro del Comandante</label>
+        <input type="text" class="mono" id="comandanteNumero" placeholder="Ej. 2">
+      </div>
+      <div class="hint full" style="font-size:11px; color:var(--text-dim); margin-top:-8px;">Con esto se crea su cuenta real de acceso a Comandancia. Si lo dejás vacío, se puede cargar después.</div>
+    </div>
+  </div>
+
+  <!-- PASO 2 — Crear Compañías -->
+  <div class="panel panel-body step" data-step="2">
+    <h1 class="step-title">Crear Compañías</h1>
+    <p class="step-sub">Agrega cada Compañía del Cuerpo. Puedes editar el detalle de cada una más tarde.</p>
+    <div id="companyList">
+      <div class="company-row">
+        <span class="num-badge mono">1ª</span>
+        <input type="text" placeholder="Ej. Bomba Central">
+        <button class="remove-btn" title="Quitar">✕</button>
+      </div>
+    </div>
+    <button class="add-company-btn" id="addCompanyBtn">+ Agregar Compañía</button>
+  </div>
+
+  <!-- PASO 3 — Directores iniciales -->
+  <div class="panel panel-body step" data-step="3">
+    <h1 class="step-title">Directores iniciales por Compañía</h1>
+    <p class="step-sub">Cada Director tendrá acceso completo a su Compañía desde el primer ingreso, con contraseña temporal.</p>
+    <div id="directorList"></div>
+  </div>
+
+  <!-- PASO 4 — Operadores de Central -->
+  <div class="panel panel-body step" data-step="4">
+    <h1 class="step-title">Operadores de Central de Alarmas</h1>
+    <p class="step-sub">Opcional en este paso — puedes agregarlos más tarde desde Alta de Personal Rentado.</p>
+    <div class="op-list" id="opList">
+      <div class="company-row op-row">
+        <span class="num-badge mono">OP</span>
+        <input type="text" class="op-nombre" placeholder="Nombre del Operador">
+        <input type="text" class="op-registro mono" placeholder="N° Registro">
+        <button class="remove-btn" title="Quitar">✕</button>
+      </div>
+    </div>
+    <button class="add-company-btn" id="addOpBtn">+ Agregar Operador</button>
+  </div>
+
+  <!-- PASO FINAL — Confirmación -->
+  <div class="panel panel-body step" data-step="5">
+    <div class="final-check">
+      <div class="check-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3CF29A" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h1 class="step-title">Configuración lista</h1>
+      <p class="step-sub" id="summaryText">Tu instancia de VIGOR está lista para operar.</p>
+    </div>
+    <div class="codigo-cuerpo-box hidden" id="codigoCuerpoBox">
+      <div class="lbl">Código de Cuerpo</div>
+      <div class="valor mono" id="codigoCuerpoValor">—</div>
+      <div class="nota">Entregale este código a cada bombero — lo van a necesitar una sola vez, al registrarse por primera vez en la app desde su celular.</div>
+    </div>
+    <div class="credenciales-wrap hidden" id="credencialesWrap">
+      <div class="credenciales-titulo">Credenciales generadas — anotalas, no se van a poder ver de nuevo</div>
+      <div id="credencialesList"></div>
+    </div>
+    <button class="btn btn-primary full hidden" id="btnIrPanelMaestro">Ir al Panel Maestro →</button>
+  </div>
+
+  <div class="nav-actions">
+    <button class="btn btn-ghost" id="btnBack">← Atrás</button>
+    <button class="btn btn-primary" id="btnNext">Continuar →</button>
+  </div>
+  <div class="wizard-error" id="wizardError"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // --- Conexión real a Supabase ---
+  const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Este asistente solo tiene sentido después de activar_licencia.html,
+  // que pasa el código real por la URL. Sin él no hay a qué Cuerpo vincular
+  // lo que se cree acá — mismo criterio de "no podés continuar sin
+  // licencia válida" ya aplicado en activar_licencia.html.
+  const licenciaCodigo = new URLSearchParams(location.search).get('licencia');
+  let licenciaInfo = null;
+
+  function bloquearWizard(mensaje) {
+    document.querySelector('.wrap').innerHTML = `
+      <div class="panel panel-body" style="text-align:center;">
+        <h1 class="step-title" style="margin-bottom:12px;">No se puede continuar</h1>
+        <p class="step-sub">${mensaje}</p>
+        <a href="activar_licencia.html" class="btn btn-primary" style="display:inline-block; text-decoration:none;">← Volver a Activar Licencia</a>
+      </div>`;
+  }
+
+  async function verificarLicenciaWizard() {
+    if (!licenciaCodigo) {
+      bloquearWizard('Este asistente solo se puede abrir después de activar una licencia real. Volvé a la pantalla de Activar Licencia.');
+      return false;
+    }
+    const { data, error } = await sb.rpc('validar_licencia', { p_codigo: licenciaCodigo });
+    if (error) {
+      bloquearWizard('No se pudo verificar la licencia — ' + error.message + '. Volvé a la pantalla de Activar Licencia.');
+      return false;
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) {
+      bloquearWizard('El código de licencia de esta sesión no es válido. Volvé a la pantalla de Activar Licencia.');
+      return false;
+    }
+    if (row.v_cuerpo_id) {
+      bloquearWizard('Esta licencia ya fue usada para crear un Cuerpo — este asistente no se puede repetir con el mismo código.');
+      return false;
+    }
+    if (row.v_estado !== 'activada') {
+      bloquearWizard('Esta licencia todavía no está activada (estado: ' + row.v_estado + '). Volvé a la pantalla de Activar Licencia.');
+      return false;
+    }
+    licenciaInfo = row;
+    const nombreEl = document.getElementById('nombreCuerpo');
+    if (nombreEl && !nombreEl.value) nombreEl.value = row.v_nombre_cliente || '';
+    return true;
+  }
+
+  let current = 1;
+  const total = 5;
+  const steps = document.querySelectorAll('.step');
+  const segs = [null, document.getElementById('seg1'), document.getElementById('seg2'), document.getElementById('seg3'), document.getElementById('seg4')];
+  const labs = [null, document.getElementById('lab1'), document.getElementById('lab2'), document.getElementById('lab3'), document.getElementById('lab4')];
+  const btnBack = document.getElementById('btnBack');
+  const btnNext = document.getElementById('btnNext');
+
+  // Las 16 regiones de Chile y sus comunas reales — cualquier Cuerpo del
+  // país se puede dar de alta, no solo las 6 ciudades de antes. La opción
+  // "Otro país / Extranjero" habilita carga manual de ciudad y región.
+  const EXTRANJERO = '__extranjero__';
+  const REGIONES_COMUNAS = {
+    'Región de Arica y Parinacota': ['Arica','Camarones','Putre','General Lagos'],
+    'Región de Tarapacá': ['Iquique','Alto Hospicio','Pozo Almonte','Camiña','Colchane','Huara','Pica'],
+    'Región de Antofagasta': ['Antofagasta','Mejillones','Sierra Gorda','Taltal','Calama','Ollagüe','San Pedro de Atacama','Tocopilla','María Elena'],
+    'Región de Atacama': ['Copiapó','Caldera','Tierra Amarilla','Chañaral','Diego de Almagro','Vallenar','Alto del Carmen','Freirina','Huasco'],
+    'Región de Coquimbo': ['La Serena','Coquimbo','Andacollo','La Higuera','Paiguano','Vicuña','Illapel','Canela','Los Vilos','Salamanca','Ovalle','Combarbalá','Monte Patria','Punitaqui','Río Hurtado'],
+    'Región de Valparaíso': ['Valparaíso','Casablanca','Concón','Juan Fernández','Puchuncaví','Quintero','Viña del Mar','Isla de Pascua','Los Andes','Calle Larga','Rinconada','San Esteban','La Ligua','Cabildo','Papudo','Petorca','Zapallar','Quillota','La Calera','Hijuelas','La Cruz','Nogales','San Antonio','Algarrobo','Cartagena','El Quisco','El Tabo','Santo Domingo','San Felipe','Catemu','Llaillay','Panquehue','Putaendo','Santa María','Limache','Olmué','Villa Alemana','Quilpué'],
+    'Región Metropolitana de Santiago': ['Santiago','Cerrillos','Cerro Navia','Conchalí','El Bosque','Estación Central','Huechuraba','Independencia','La Cisterna','La Florida','La Granja','La Pintana','La Reina','Las Condes','Lo Barnechea','Lo Espejo','Lo Prado','Macul','Maipú','Ñuñoa','Pedro Aguirre Cerda','Peñalolén','Providencia','Pudahuel','Quilicura','Quinta Normal','Recoleta','Renca','San Joaquín','San Miguel','San Ramón','Vitacura','Puente Alto','Pirque','San José de Maipo','Colina','Lampa','Tiltil','San Bernardo','Buin','Calera de Tango','Paine','Melipilla','Alhué','Curacaví','María Pinto','San Pedro','Talagante','El Monte','Isla de Maipo','Padre Hurtado','Peñaflor'],
+    "Región del Libertador General Bernardo O'Higgins": ['Rancagua','Codegua','Coinco','Coltauco','Doñihue','Graneros','Las Cabras','Machalí','Malloa','Mostazal','Olivar','Peumo','Pichidegua','Quinta de Tilcoco','Rengo','Requínoa','San Vicente','Pichilemu','La Estrella','Litueche','Marchihue','Navidad','Paredones','San Fernando','Chépica','Chimbarongo','Lolol','Nancagua','Palmilla','Peralillo','Placilla','Pumanque','Santa Cruz'],
+    'Región del Maule': ['Talca','Constitución','Curepto','Empedrado','Maule','Pelarco','Pencahue','Río Claro','San Clemente','San Rafael','Cauquenes','Chanco','Pelluhue','Curicó','Hualañé','Licantén','Molina','Rauco','Romeral','Sagrada Familia','Teno','Vichuquén','Linares','Colbún','Longaví','Parral','Retiro','San Javier','Villa Alegre','Yerbas Buenas'],
+    'Región de Ñuble': ['Chillán','Bulnes','Chillán Viejo','El Carmen','Pemuco','Pinto','Quillón','San Ignacio','Yungay','Cobquecura','Coelemu','Ninhue','Portezuelo','Quirihue','Ránquil','Treguaco','San Carlos','Coihueco','Ñiquén','San Fabián','San Nicolás'],
+    'Región del Biobío': ['Concepción','Coronel','Chiguayante','Florida','Hualqui','Lota','Penco','San Pedro de la Paz','Santa Juana','Talcahuano','Tomé','Hualpén','Lebu','Arauco','Cañete','Contulmo','Curanilahue','Los Álamos','Tirúa','Los Ángeles','Antuco','Cabrero','Laja','Mulchén','Nacimiento','Negrete','Quilaco','Quilleco','San Rosendo','Santa Bárbara','Tucapel','Yumbel','Alto Biobío'],
+    'Región de la Araucanía': ['Temuco','Carahue','Cunco','Curarrehue','Freire','Galvarino','Gorbea','Lautaro','Loncoche','Melipeuco','Nueva Imperial','Padre las Casas','Perquenco','Pitrufquén','Pucón','Saavedra','Teodoro Schmidt','Toltén','Vilcún','Villarrica','Cholchol','Angol','Collipulli','Curacautín','Ercilla','Lonquimay','Los Sauces','Lumaco','Purén','Renaico','Traiguén','Victoria'],
+    'Región de Los Ríos': ['Valdivia','Corral','Lanco','Los Lagos','Máfil','Mariquina','Paillaco','Panguipulli','La Unión','Futrono','Lago Ranco','Río Bueno'],
+    'Región de Los Lagos': ['Puerto Montt','Calbuco','Cochamó','Fresia','Frutillar','Los Muermos','Llanquihue','Maullín','Puerto Varas','Castro','Ancud','Chonchi','Curaco de Vélez','Dalcahue','Puqueldón','Queilén','Quellón','Quemchi','Quinchao','Osorno','Puerto Octay','Purranque','Puyehue','Río Negro','San Juan de la Costa','San Pablo','Chaitén','Futaleufú','Hualaihué','Palena'],
+    'Región de Aysén del General Carlos Ibáñez del Campo': ['Coyhaique','Lago Verde','Aysén','Cisnes','Guaitecas','Cochrane','Ohiggins',"O'Higgins",'Tortel','Chile Chico','Río Ibáñez'],
+    'Región de Magallanes y de la Antártica Chilena': ['Punta Arenas','Laguna Blanca','Río Verde','San Gregorio','Cabo de Hornos','Antártica','Porvenir','Primavera','Timaukel','Natales'],
+  };
+  // "Ohiggins"/"O'Higgins" quedó duplicado arriba por variantes de escritura — se limpia acá.
+  REGIONES_COMUNAS['Región de Aysén del General Carlos Ibáñez del Campo'] =
+    ['Coyhaique','Lago Verde','Aysén','Cisnes','Guaitecas','Cochrane',"O'Higgins",'Tortel','Chile Chico','Río Ibáñez'];
+
+  const selectRegion = document.getElementById('regionSelect');
+  const selectComuna = document.getElementById('comuna');
+  selectRegion.innerHTML = '<option value="">Seleccioná la región…</option>' +
+    Object.keys(REGIONES_COMUNAS).map(r => `<option value="${r}">${r}</option>`).join('') +
+    `<option value="${EXTRANJERO}">Otro país / Extranjero</option>`;
+
+  function onRegionChange(){
+    const val = selectRegion.value;
+    const esExtranjero = val === EXTRANJERO;
+    document.getElementById('manualUbicacionWrap').style.display = esExtranjero ? 'block' : 'none';
+    document.getElementById('comunaManualWrap').style.display = esExtranjero ? 'block' : 'none';
+    if(esExtranjero){
+      selectComuna.disabled = true;
+      selectComuna.innerHTML = '<option value="">—</option>';
+      return;
+    }
+    const comunas = REGIONES_COMUNAS[val] || [];
+    selectComuna.disabled = comunas.length === 0;
+    selectComuna.innerHTML = comunas.length
+      ? '<option value="">Seleccioná la comuna…</option>' + comunas.map(c => `<option value="${c}">${c}</option>`).join('')
+      : '<option value="">Elegí primero la región…</option>';
+  }
+
+  // Guarda lo escrito en Directores por índice de Compañía, para que ir y volver
+  // entre pasos nunca borre datos ya ingresados (bug corregido: antes se
+  // reconstruía la lista desde cero cada vez que se entraba al paso 3).
+  const directorData = {};
+
+  function render() {
+    steps.forEach(s => s.classList.toggle('active', parseInt(s.dataset.step) === current));
+    for (let i = 1; i <= 4; i++) {
+      segs[i].classList.remove('active', 'done');
+      labs[i].classList.remove('current');
+      if (i < current) segs[i].classList.add('done');
+      else if (i === current) { segs[i].classList.add('active'); labs[i].classList.add('current'); }
+    }
+    btnBack.style.visibility = current === 1 ? 'hidden' : 'visible';
+    btnNext.textContent = current === total ? 'Ir al Panel Maestro' : (current === 4 ? 'Revisar y finalizar →' : 'Continuar →');
+
+    if (current === 3) buildDirectorList();
+  }
+
+  function renumerarCompanias() {
+    // Bug corregido: al quitar una Compañía del medio, las restantes quedaban
+    // con numeración salteada (1ª, 3ª) y al agregar una nueva se repetía un
+    // número ya usado. Ahora se renumera todo el listado cada vez que cambia.
+    document.querySelectorAll('#companyList .company-row').forEach((row, i) => {
+      row.querySelector('.num-badge').textContent = (i + 1) + 'ª';
+    });
+  }
+
+  function buildDirectorList() {
+    // Antes de reconstruir, guarda lo que el usuario ya escribió en este paso.
+    document.querySelectorAll('#directorList .director-card').forEach((card, i) => {
+      const inputs = card.querySelectorAll('input');
+      directorData[i] = { nombre: inputs[0].value, rut: inputs[1].value, registro: inputs[2].value };
+    });
+
+    const companyList = document.getElementById('directorList');
+    companyList.innerHTML = '';
+    document.querySelectorAll('#companyList input').forEach((inp, i) => {
+      const name = inp.value.trim() || ('Compañía ' + (i + 1));
+      const saved = directorData[i] || { nombre: '', rut: '', registro: '' };
+      const div = document.createElement('div');
+      div.className = 'director-card';
+      div.innerHTML = `<div class="dc-title">${i+1}ª Compañía "${name}"</div>
+        <div class="grid-2">
+          <div class="field" style="margin-bottom:0;"><label>Nombre del Director</label><input type="text" placeholder="Nombre completo" value="${saved.nombre}"></div>
+          <div class="field" style="margin-bottom:0;"><label>RUT</label><input type="text" placeholder="12.345.678-9" value="${saved.rut}"></div>
+        </div>
+        <div class="director-registro">
+          <label>N° de Registro (para loguearse en la PC del Cuartel)</label>
+          <input type="text" class="mono" placeholder="Ej. 301" value="${saved.registro}">
+        </div>`;
+      companyList.appendChild(div);
+    });
+  }
+
+  document.getElementById('addCompanyBtn').addEventListener('click', () => {
+    const list = document.getElementById('companyList');
+    const div = document.createElement('div');
+    div.className = 'company-row';
+    div.innerHTML = `<span class="num-badge mono"></span><input type="text" placeholder="Ej. Bomba Central"><button class="remove-btn" title="Quitar">✕</button>`;
+    list.appendChild(div);
+    attachRemove(div);
+    renumerarCompanias();
+  });
+
+  document.getElementById('addOpBtn').addEventListener('click', () => {
+    const list = document.getElementById('opList');
+    const div = document.createElement('div');
+    div.className = 'company-row op-row';
+    div.innerHTML = `<span class="num-badge mono">OP</span><input type="text" class="op-nombre" placeholder="Nombre del Operador"><input type="text" class="op-registro mono" placeholder="N° Registro"><button class="remove-btn" title="Quitar">✕</button>`;
+    list.appendChild(div);
+    attachRemove(div);
+  });
+
+  // Corrección de bug de crash: attachRemove SIEMPRE recibe la fila
+  // (.company-row), nunca el botón directamente — antes la carga inicial
+  // llamaba attachRemove sobre los propios botones, y como un botón no
+  // contiene otro botón adentro, row.querySelector('.remove-btn') devolvía
+  // null y el script se cortaba a mitad de camino, dejando "Continuar" y
+  // "Atrás" sin funcionar en todo el wizard.
+  function attachRemove(row) {
+    const btn = row.querySelector('.remove-btn');
+    btn.addEventListener('click', () => {
+      const esCia = row.closest('#companyList') !== null;
+      row.remove();
+      if (esCia) renumerarCompanias();
+    });
+  }
+  document.querySelectorAll('.company-row').forEach(attachRemove);
+  renumerarCompanias();
+
+  btnNext.addEventListener('click', async () => {
+    // Bug corregido: se podía avanzar del Paso 1 (Identidad) sin completar
+    // el Nombre del Cuerpo ni el Superintendente — datos fundamentales que
+    // después no se usaban en ningún lado, ni siquiera en este resumen.
+    document.getElementById('wizardError').textContent = '';
+    if (current === 1) {
+      const nombreCuerpoEl = document.getElementById('nombreCuerpo');
+      const superintendenteEl = document.getElementById('superintendente');
+      const superintendenteNumeroEl = document.getElementById('superintendenteNumero');
+      let faltantes = false;
+      [nombreCuerpoEl, superintendenteEl, superintendenteNumeroEl].forEach(el => {
+        const vacio = !el.value.trim();
+        el.style.borderColor = vacio ? '#D8394E' : '';
+        if(vacio) faltantes = true;
+      });
+      const esExtranjero = selectRegion.value === EXTRANJERO;
+      if(!selectRegion.value){
+        selectRegion.style.borderColor = '#D8394E';
+        faltantes = true;
+      } else {
+        selectRegion.style.borderColor = '';
+      }
+      if(esExtranjero){
+        const regionManualEl = document.getElementById('regionManual');
+        const comunaManualEl = document.getElementById('comunaManual');
+        [regionManualEl, comunaManualEl].forEach(el => {
+          const vacio = !el.value.trim();
+          el.style.borderColor = vacio ? '#D8394E' : '';
+          if(vacio) faltantes = true;
+        });
+      } else if(selectRegion.value && !selectComuna.value){
+        selectComuna.style.borderColor = '#D8394E';
+        faltantes = true;
+      }
+      const comandanteEl = document.getElementById('comandante');
+      const comandanteNumeroEl = document.getElementById('comandanteNumero');
+      if((comandanteEl.value.trim() && !comandanteNumeroEl.value.trim()) || (!comandanteEl.value.trim() && comandanteNumeroEl.value.trim())){
+        document.getElementById('wizardError').textContent = 'Si cargás un Comandante, completá su nombre Y su N° de Registro (o dejá ambos vacíos).';
+        comandanteEl.style.borderColor = '#D8394E';
+        comandanteNumeroEl.style.borderColor = '#D8394E';
+        faltantes = true;
+      } else {
+        comandanteEl.style.borderColor = '';
+        comandanteNumeroEl.style.borderColor = '';
+      }
+      if(faltantes) return;
+    }
+    if (current === 2) {
+      let faltantes = false;
+      const filas = document.querySelectorAll('#companyList .company-row');
+      if (filas.length === 0) faltantes = true;
+      filas.forEach(row => {
+        const inp = row.querySelector('input');
+        const vacio = !inp.value.trim();
+        inp.style.borderColor = vacio ? '#D8394E' : '';
+        if (vacio) faltantes = true;
+      });
+      if (faltantes) {
+        document.getElementById('wizardError').textContent = 'Completá el nombre de cada Compañía (o quitá las que no vayas a usar) — necesitás al menos una.';
+        return;
+      }
+    }
+    if (current === 3) {
+      let faltantes = false;
+      document.querySelectorAll('#directorList .director-card').forEach(card => {
+        const inputs = card.querySelectorAll('input');
+        const registroEl = inputs[2];
+        const tieneNombre = !!inputs[0].value.trim();
+        const tieneRegistro = !!registroEl.value.trim();
+        registroEl.style.borderColor = (tieneNombre && !tieneRegistro) ? '#D8394E' : '';
+        if (tieneNombre && !tieneRegistro) faltantes = true;
+      });
+      if (faltantes) {
+        document.getElementById('wizardError').textContent = 'Si le pusiste nombre a un Director, también necesita su N° de Registro para poder loguearse.';
+        return;
+      }
+    }
+    if (current === 4) {
+      let faltantes = false;
+      document.querySelectorAll('#opList .op-row').forEach(row => {
+        const registroEl = row.querySelector('.op-registro');
+        const tieneNombre = !!row.querySelector('.op-nombre').value.trim();
+        const tieneRegistro = !!registroEl.value.trim();
+        registroEl.style.borderColor = (tieneNombre && !tieneRegistro) ? '#D8394E' : '';
+        if (tieneNombre && !tieneRegistro) faltantes = true;
+      });
+      if (faltantes) {
+        document.getElementById('wizardError').textContent = 'Si le pusiste nombre a un Operador, también necesita su N° de Registro para poder loguearse.';
+        return;
+      }
+    }
+    if (current < total) {
+      current++;
+      if (current === total) {
+        const nCias = document.querySelectorAll('#companyList .company-row').length;
+        const nOps = Array.from(document.querySelectorAll('#opList .op-row .op-nombre')).filter(i => i.value.trim()).length;
+        const nombreCuerpo = document.getElementById('nombreCuerpo').value.trim();
+        document.getElementById('summaryText').textContent =
+          `${nombreCuerpo} está listo — ${nCias} Compañía(s) creada(s), Directores asignados y ${nOps} Operador(es) de Central registrados. Ya puedes ingresar al Panel Maestro.`;
+      }
+      render();
+    } else {
+      await finalizarWizard();
+    }
+  });
+
+  function construirPayloadCompanias() {
+    const companias = [];
+    const companyRows = document.querySelectorAll('#companyList .company-row');
+    const directorCards = document.querySelectorAll('#directorList .director-card');
+    companyRows.forEach((row, i) => {
+      const nombre = row.querySelector('input').value.trim();
+      let director = null;
+      const card = directorCards[i];
+      if (card) {
+        const inputs = card.querySelectorAll('input');
+        const dNombre = inputs[0].value.trim();
+        const dRegistro = inputs[2].value.trim();
+        if (dNombre) director = { numero_registro: parseInt(dRegistro, 10), nombre_completo: dNombre };
+      }
+      companias.push({ numero: i + 1, nombre, director });
+    });
+    return companias;
+  }
+
+  function construirPayloadOperadores() {
+    const operadores = [];
+    document.querySelectorAll('#opList .op-row').forEach(row => {
+      const nombre = row.querySelector('.op-nombre').value.trim();
+      const registro = row.querySelector('.op-registro').value.trim();
+      if (nombre) operadores.push({ numero_registro: parseInt(registro, 10), nombre_completo: nombre });
+    });
+    return operadores;
+  }
+
+  async function finalizarWizard() {
+    const errorEl = document.getElementById('wizardError');
+    errorEl.textContent = '';
+    btnNext.disabled = true;
+    btnNext.textContent = 'Creando Cuerpo…';
+
+    const esExtranjero = selectRegion.value === EXTRANJERO;
+    const comunaFinal = esExtranjero ? document.getElementById('comunaManual').value.trim() : selectComuna.value;
+    const regionFinal = esExtranjero ? document.getElementById('regionManual').value.trim() : selectRegion.value;
+
+    const { data, error } = await sb.rpc('finalizar_wizard', {
+      p_licencia: licenciaCodigo,
+      p_nombre_oficial: document.getElementById('nombreCuerpo').value.trim(),
+      p_comuna: comunaFinal,
+      p_region: regionFinal,
+      p_centro_lat: null,
+      p_centro_lng: null,
+      p_superintendente: document.getElementById('superintendente').value.trim(),
+      p_superintendente_numero_registro: parseInt(document.getElementById('superintendenteNumero').value.trim(), 10),
+      p_comandante: document.getElementById('comandante').value.trim() || null,
+      p_comandante_numero_registro: document.getElementById('comandanteNumero').value.trim() ? parseInt(document.getElementById('comandanteNumero').value.trim(), 10) : null,
+      p_companias: construirPayloadCompanias(),
+      p_operadores: construirPayloadOperadores()
+    });
+
+    if (error) {
+      btnNext.disabled = false;
+      btnNext.textContent = 'Ir al Panel Maestro';
+      errorEl.textContent = error.code === '23505'
+        ? 'Hay un N° de Registro repetido — cada persona necesita un número distinto.'
+        : 'No se pudo crear el Cuerpo — ' + error.message;
+      return;
+    }
+
+    const resultado = Array.isArray(data) ? data[0] : data;
+    renderCredenciales(resultado.w_personal, resultado.w_cuerpo_id, resultado.w_codigo_cuerpo);
+    btnNext.classList.add('hidden');
+  }
+
+  function renderCredenciales(personal, cuerpoId, codigoCuerpo) {
+    if (codigoCuerpo) {
+      document.getElementById('codigoCuerpoValor').textContent = codigoCuerpo;
+      document.getElementById('codigoCuerpoBox').classList.remove('hidden');
+    }
+    if (personal && personal.length) {
+      document.getElementById('credencialesList').innerHTML = personal.map(p => `
+        <div class="credencial-row">
+          <div class="cr-quien"><b>${p.nombre_completo}</b><span>${p.cargo}${p.compania ? ' — ' + p.compania : ''}</span></div>
+          <div class="cr-datos">N° ${p.numero_registro}<br><span class="cr-pass mono">${p.password_temporal}</span></div>
+        </div>
+      `).join('');
+      document.getElementById('credencialesWrap').classList.remove('hidden');
+    }
+    const btnIr = document.getElementById('btnIrPanelMaestro');
+    btnIr.classList.remove('hidden');
+    btnIr.onclick = () => { window.location.href = 'perfil_maestro.html?cuerpo=' + encodeURIComponent(cuerpoId); };
+  }
+
+  btnBack.addEventListener('click', () => {
+    if (current > 1) { current--; render(); }
+  });
+
+  (async () => {
+    const ok = await verificarLicenciaWizard();
+    if (ok) render();
+  })();
+</script>
+</body>
+</html>

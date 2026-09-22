@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Solicitudes de Alta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+  .role-switch{ display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .role-switch-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-right:2px;}
+  .role-switch-btn{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; font-size:10.5px; padding:6px 11px; border-radius:12px; cursor:pointer;
+  }
+  .role-switch-btn.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+  .locked-note{
+    background:var(--panel-alt); border:1px solid var(--burdeo-bright); border-left:3px solid var(--burdeo-bright);
+    border-radius:6px; padding:16px 20px; font-size:12.5px; color:var(--text-muted); line-height:1.6; text-align:center; max-width:520px; margin:40px auto;
+  }
+
+  .content-wrap{ flex:1; min-height:0; padding:18px 26px 22px; overflow-y:auto;}
+  .head-row{ display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+  .head-row h2{ font-size:18px;}
+  .count-badge{ font-family:'JetBrains Mono',monospace; background:var(--alerta); color:#241505; font-size:12px; font-weight:700; padding:3px 10px; border-radius:12px;}
+
+  .btn-exportar-sol{
+    margin-left:auto; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11.5px; padding:9px 15px; border-radius:6px; cursor:pointer;
+  }
+  .btn-exportar-sol:hover{ background:var(--cyan); color:#0D2226;}
+
+  .hist-sol-row{
+    background:var(--panel); border:1px solid var(--line-strong); border-radius:8px;
+    padding:12px 16px; margin-bottom:8px; position:relative;
+  }
+  .hist-sol-row.aprobado{ border-left:3px solid var(--servicio);}
+  .hist-sol-row.rechazado{ border-left:3px solid var(--burdeo-bright);}
+  .hist-sol-nombre{ font-size:13.5px; font-weight:700; padding-right:90px;}
+  .hist-sol-meta{ font-size:11px; color:var(--text-muted); margin-top:3px;}
+  .hist-sol-motivo{ font-size:11.5px; color:var(--text-muted); font-style:italic; margin-top:5px;}
+  .hist-sol-badge{
+    position:absolute; top:12px; right:16px; font-size:10px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.03em; padding:4px 10px; border-radius:10px; color:#fff;
+  }
+  .hist-sol-badge.aprobado{ background:var(--servicio);}
+  .hist-sol-badge.rechazado{ background:var(--burdeo);}
+
+  @media print{
+    body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
+    .nameplate, .grid, .btn-exportar-sol, .toast, .count-badge, #headPendientes{ display:none !important;}
+    .content-wrap{ overflow:visible !important;}
+    .hist-sol-row{ border:1px solid #ccc !important; break-inside:avoid;}
+    .hist-sol-badge.aprobado, .hist-sol-badge.rechazado{ -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:14px;}
+  .sol-card{
+    background:var(--panel); border:1.5px solid var(--line-strong); border-radius:10px;
+    padding:18px 20px; position:relative; transition:opacity .3s, transform .3s;
+  }
+  .sol-card::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4;}
+  .sol-card.resuelto{ opacity:0; transform:scale(.96); pointer-events:none;}
+
+  .sol-head{ display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .sol-foto{
+    width:48px; height:48px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--alerta);
+    display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:17px; color:var(--text-muted);
+  }
+  .sol-nombre{ font-size:15.5px; font-weight:700;}
+  .sol-fecha{ font-size:11px; color:var(--text-dim); margin-top:2px;}
+
+  .sol-datos{ display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; margin-bottom:16px;}
+  .sol-dato-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em;}
+  .sol-dato-val{ font-size:12.5px; font-weight:600; margin-top:1px;}
+
+  .sol-actions{ display:flex; gap:8px;}
+  .btn-aprobar{
+    flex:1; background:var(--servicio); border:none; color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer;
+  }
+  .btn-aprobar:hover{ filter:brightness(1.1);}
+  .btn-rechazar{
+    flex:1; background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:12.5px; padding:9px; border-radius:6px; cursor:pointer;
+  }
+  .btn-rechazar:hover{ background:rgba(122,22,32,0.12);}
+
+  .empty-state{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:14px;}
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.75); z-index:60; display:none; align-items:center; justify-content:center;}
+  .modal-overlay.show{ display:flex;}
+  .modal-box{ background:var(--panel); border:1.5px solid var(--burdeo-bright); border-radius:12px; padding:22px 24px; width:360px;}
+  .modal-box h3{ font-size:15px; margin-bottom:4px;}
+  .modal-box p{ font-size:12px; color:var(--text-muted); margin-bottom:12px;}
+  .modal-box textarea{
+    width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:11px 12px; font-size:13px; color:var(--text); font-family:'Inter'; resize:none; min-height:70px; margin-bottom:14px;
+  }
+  .modal-box textarea:focus{ outline:none; border-color:var(--burdeo-bright);}
+  .modal-actions{ display:flex; gap:10px;}
+  .modal-cancel{ flex:1; background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Inter'; font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer;}
+  .modal-confirmar{ flex:1.4; background:var(--burdeo); border:1.5px solid var(--burdeo-bright); color:#fff; font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; padding:10px; border-radius:6px; cursor:pointer;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .back-cuartel{
+    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11.5px; padding:7px 13px; border-radius:5px; cursor:pointer; margin-right:12px;
+  }
+  .back-cuartel:hover{ border-color:var(--brass-bright); color:var(--text);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <button class="back-cuartel" onclick="history.back()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Solicitudes de Alta</h1><span id="subtitulo">Vigor</span></div>
+      </div>
+      <div class="role-tag" id="roleTag">Sin sesión</div>
+    </div>
+  </div>
+
+  <div class="content-wrap" id="printArea">
+    <div id="accesoOk">
+      <div class="head-row" id="headPendientes">
+        <h2>Pendientes de revisión</h2>
+        <span class="count-badge" id="countBadge">3</span>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="head-row" style="margin-top:28px;">
+        <h2>Historial de resueltas</h2>
+        <button class="btn-exportar-sol" onclick="window.print()">⬇ Exportar PDF</button>
+      </div>
+      <div id="historialResueltas"></div>
+    </div>
+
+    <div id="accesoDenegado" style="display:none;">
+      <div class="locked-note">🔒 Tu sesión actual no tiene acceso a Solicitudes de Alta. Esta pantalla es exclusiva del Director y Secretario/a de la Compañía.</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="rechazoModal">
+    <div class="modal-box">
+      <h3>Rechazar solicitud</h3>
+      <p>Indicá el motivo — quedará registrado y podrá comunicarse al postulante.</p>
+      <textarea id="motivoRechazo" placeholder="Ej. Falta documentación / no reside en zona de cobertura de la Compañía."></textarea>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="cerrarRechazoModal()">Cancelar</button>
+        <button class="modal-confirmar" onclick="confirmarRechazo()">Confirmar Rechazo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="credencialesModal">
+    <div class="modal-box" style="border-color:var(--cyan);">
+      <h3>Solicitud aprobada</h3>
+      <p id="credencialesNombre" style="margin-bottom:16px;"></p>
+      <div style="background:var(--panel-alt); border:1.5px solid var(--cyan); border-radius:8px; padding:14px 16px; text-align:center; margin-bottom:14px;">
+        <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">N° de Registro</div>
+        <div class="mono" id="credencialesNumero" style="font-size:20px; font-weight:700; color:var(--cyan); margin-bottom:14px;">—</div>
+        <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">Contraseña Temporal</div>
+        <div class="mono" id="credencialesPassword" style="font-size:20px; font-weight:700; color:var(--cyan);">—</div>
+      </div>
+      <p style="font-size:11.5px;">Entregaselos en persona — expira al primer uso o en 7 días. No se van a poder ver de nuevo.</p>
+      <div class="modal-actions">
+        <button class="modal-confirmar" onclick="cerrarCredencialesModal()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// --- Conexión real a Supabase ---
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let SOLICITUDES = [];
+let RESUELTAS = [];
+
+// Solicitudes de Alta es exclusivo del Director y Secretario/a de la
+// Compañía — nadie más, ni siquiera otros Oficiales, tiene acceso.
+// Ahora se evalúa contra el cargo real de la sesión, no un selector demo.
+const ROLES_CON_ACCESO = ['Director','Secretario/a'];
+
+function fmtFecha(iso){
+  return new Date(iso).toLocaleString('es-CL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function renderHistorialResueltas(){
+  document.getElementById('historialResueltas').innerHTML = RESUELTAS.map(r => `
+    <div class="hist-sol-row ${r.estado}">
+      <div class="hist-sol-nombre">${r.nombre_completo}</div>
+      <div class="hist-sol-meta">Solicitó el ${fmtFecha(r.fecha_solicitud)} · Resuelto el ${fmtFecha(r.fecha_resolucion)} por ${r.resuelto_por || '—'}</div>
+      ${r.motivo_rechazo ? `<div class="hist-sol-motivo">Motivo: ${r.motivo_rechazo}</div>` : ''}
+      <span class="hist-sol-badge ${r.estado}">${r.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
+    </div>
+  `).join('');
+}
+
+function iniciales(nombre){
+  return nombre.split(' ').filter((_,i)=>i===0||i===1).map(p=>p[0]).join('').toUpperCase();
+}
+
+function render(){
+  const grid = document.getElementById('grid');
+  if(SOLICITUDES.length===0){
+    grid.innerHTML = `<div class="empty-state">No hay solicitudes pendientes por revisar.</div>`;
+    document.getElementById('countBadge').textContent = '0';
+    return;
+  }
+  document.getElementById('countBadge').textContent = SOLICITUDES.length;
+  grid.innerHTML = SOLICITUDES.map(s => `
+    <div class="sol-card" id="card-${s.id}">
+      <div class="sol-head">
+        <div class="sol-foto">${iniciales(s.nombre_completo)}</div>
+        <div>
+          <div class="sol-nombre">${s.nombre_completo}</div>
+          <div class="sol-fecha">Solicitado ${fmtFecha(s.fecha_solicitud)}</div>
+        </div>
+      </div>
+      <div class="sol-datos">
+        <div><div class="sol-dato-label">RUT</div><div class="sol-dato-val mono">${s.rut}</div></div>
+        <div><div class="sol-dato-label">Fecha nac.</div><div class="sol-dato-val">${s.fecha_nacimiento}</div></div>
+        <div><div class="sol-dato-label">Teléfono</div><div class="sol-dato-val mono">${s.telefono}</div></div>
+        <div><div class="sol-dato-label">Compañía solicitada</div><div class="sol-dato-val">${s.companias ? s.companias.nombre : '—'}</div></div>
+      </div>
+      <div class="sol-actions">
+        <button class="btn-aprobar" onclick="aprobar('${s.id}')">✓ Aprobar</button>
+        <button class="btn-rechazar" onclick="abrirRechazoModal('${s.id}')">✕ Rechazar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function aprobar(id){
+  const s = SOLICITUDES.find(x=>x.id===id);
+  const { data, error } = await sb.rpc('resolver_solicitud_alta', { p_solicitud_id: id, p_aprobar: true });
+  if(error){
+    toast('No se pudo aprobar — ' + error.message);
+    return;
+  }
+  document.getElementById(`card-${id}`).classList.add('resuelto');
+  const r = Array.isArray(data) ? data[0] : data;
+  document.getElementById('credencialesNombre').textContent = `${s.nombre_completo} fue aprobado/a — anotá estos datos antes de cerrar:`;
+  document.getElementById('credencialesNumero').textContent = r.r_numero_registro;
+  document.getElementById('credencialesPassword').textContent = r.r_password_temporal;
+  document.getElementById('credencialesModal').classList.add('show');
+  setTimeout(cargarDatos, 400);
+}
+function cerrarCredencialesModal(){
+  document.getElementById('credencialesModal').classList.remove('show');
+}
+
+let idRechazo = null;
+function abrirRechazoModal(id){
+  idRechazo = id;
+  document.getElementById('motivoRechazo').value = '';
+  document.getElementById('rechazoModal').classList.add('show');
+}
+function cerrarRechazoModal(){
+  document.getElementById('rechazoModal').classList.remove('show');
+}
+async function confirmarRechazo(){
+  const motivo = document.getElementById('motivoRechazo').value.trim();
+  if(!motivo){
+    toast('El motivo de rechazo es obligatorio');
+    return;
+  }
+  const s = SOLICITUDES.find(x=>x.id===idRechazo);
+  const { error } = await sb.rpc('resolver_solicitud_alta', { p_solicitud_id: idRechazo, p_aprobar: false, p_motivo_rechazo: motivo });
+  if(error){
+    toast('No se pudo rechazar — ' + error.message);
+    return;
+  }
+  document.getElementById(`card-${idRechazo}`).classList.add('resuelto');
+  cerrarRechazoModal();
+  toast(`Solicitud de ${s.nombre_completo} rechazada`);
+  setTimeout(cargarDatos, 400);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    document.getElementById('roleTag').textContent = 'Sin sesión';
+    document.getElementById('accesoOk').style.display = 'none';
+    document.getElementById('accesoDenegado').style.display = 'block';
+    document.getElementById('accesoDenegado').querySelector('.locked-note').textContent = '🔒 Necesitás loguearte primero (login_registro.html).';
+    return;
+  }
+
+  const { data: perfil } = await sb.from('personal')
+    .select('nombre_completo, cargo, compania_id, companias(nombre)')
+    .eq('auth_user_id', session.user.id).maybeSingle();
+
+  let companiaScope = perfil ? perfil.compania_id : null;
+  let tieneAcceso = perfil && ROLES_CON_ACCESO.includes(perfil.cargo);
+
+  if(!perfil){
+    // Sesión sin fila en personal — Super Admin entrando desde
+    // perfil_maestro.html/pc_compania.html con ?compania=<id>, mismo
+    // patrón que pc_compania.html.
+    const { data: soyAdmin } = await sb.rpc('soy_super_admin');
+    const companiaUrl = new URLSearchParams(location.search).get('compania');
+    if(soyAdmin && companiaUrl){
+      companiaScope = companiaUrl;
+      tieneAcceso = true;
+    }
+  }
+
+  document.getElementById('roleTag').textContent = perfil ? `${perfil.nombre_completo} · ${perfil.cargo}` : (tieneAcceso ? 'Super Admin' : 'Sin perfil');
+  document.getElementById('subtitulo').textContent = (perfil && perfil.companias ? perfil.companias.nombre + ' · ' : '') + 'Vigor';
+
+  document.getElementById('accesoOk').style.display = tieneAcceso ? 'block' : 'none';
+  document.getElementById('accesoDenegado').style.display = tieneAcceso ? 'none' : 'block';
+  if(!tieneAcceso) return;
+
+  // RLS ya scopea por Compañía para una sesión real de Director/Secretario/a
+  // (mi_compania_id()); el Super Admin tiene acceso a todas, así que acá se
+  // filtra explícitamente a la Compañía que se está administrando.
+  let qPend = sb.from('solicitudes_alta').select('*, companias(nombre)').eq('estado','pendiente').order('fecha_solicitud');
+  let qRes = sb.from('solicitudes_alta').select('*, resuelto_por:resuelto_por_personal_id(nombre_completo)').neq('estado','pendiente').order('fecha_resolucion', { ascending:false });
+  if(!perfil && companiaScope){
+    qPend = qPend.eq('compania_solicitada_id', companiaScope);
+    qRes = qRes.eq('compania_solicitada_id', companiaScope);
+  }
+  const [{ data: pendientes }, { data: resueltas }] = await Promise.all([qPend, qRes]);
+
+  SOLICITUDES = pendientes || [];
+  RESUELTAS = (resueltas || []).map(r => ({ ...r, resuelto_por: r.resuelto_por ? r.resuelto_por.nombre_completo : null }));
+
+  render();
+  renderHistorialResueltas();
+}
+
+cargarDatos();
+</script>
+</body>
+</html>

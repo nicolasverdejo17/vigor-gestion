@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Inventario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif;
+    height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+  .role-switch{ display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .role-switch-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-right:2px;}
+  .role-switch-btn{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; font-size:10px; padding:5px 10px; border-radius:11px; cursor:pointer;
+  }
+  .role-switch-btn.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+
+  .toolbar{ flex-shrink:0; padding:14px 26px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .cat-tabs{ display:flex; gap:6px; flex-wrap:wrap;}
+  .cat-tab{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; font-size:12px; letter-spacing:.03em; text-transform:uppercase;
+    padding:8px 14px; border-radius:20px; cursor:pointer;
+  }
+  .cat-tab.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+  .cat-tab .count{ font-family:'JetBrains Mono',monospace; opacity:.7; margin-left:4px;}
+
+  .subcat-row{ flex-shrink:0; padding:10px 26px; background:var(--bg); border-bottom:1px solid var(--line); display:none; align-items:center; gap:8px; flex-wrap:wrap;}
+  .subcat-row.show{ display:flex;}
+  .subcat-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-right:4px;}
+  .subcat-chip{
+    background:var(--panel); border:1.5px solid var(--brass-dim); color:var(--text-muted);
+    font-size:11.5px; font-weight:600; padding:6px 13px; border-radius:16px; cursor:pointer;
+  }
+  .subcat-chip.on{ background:var(--brass-dim); border-color:var(--brass-bright); color:#fff;}
+  .subcat-add{
+    background:transparent; border:1.5px dashed var(--line-strong); color:var(--text-dim);
+    font-size:11.5px; font-weight:600; padding:6px 13px; border-radius:16px; cursor:pointer;
+  }
+  .subcat-add:hover{ border-color:var(--cyan); color:var(--cyan);}
+  .subcat-input{
+    background:var(--panel-alt); border:1.5px solid var(--cyan); border-radius:16px;
+    padding:6px 13px; font-size:11.5px; color:var(--text); width:150px;
+  }
+  .subcat-input:focus{ outline:none;}
+  .tipo-confirmar-cat{
+    background:var(--servicio); border:none; color:#fff; width:26px; height:26px;
+    border-radius:50%; font-size:12px; font-weight:700; cursor:pointer; margin-left:5px;
+  }
+  .tipo-confirmar-cat:hover{ filter:brightness(1.1);}
+  .tipo-cancelar-cat{
+    background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright); width:26px; height:26px;
+    border-radius:50%; font-size:11px; font-weight:700; cursor:pointer; margin-left:4px;
+  }
+  .tipo-cancelar-cat:hover{ background:rgba(255,75,92,0.1);}
+  .search-box{
+    margin-left:auto; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:8px 12px; color:var(--text); font-size:13px; width:220px;
+  }
+  .search-box:focus{ outline:none; border-color:var(--cyan);}
+  .btn-ingresar{
+    background:var(--alerta); border:none; color:#241505;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:12.5px; padding:10px 18px; border-radius:5px; cursor:pointer;
+  }
+  .btn-ingresar:hover{ filter:brightness(1.08);}
+  .btn-exportar{
+    background:transparent; border:1.5px solid var(--cyan); color:var(--cyan);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:12.5px; padding:10px 16px; border-radius:5px; cursor:pointer;
+  }
+  .btn-exportar:hover{ background:rgba(73,233,255,0.1);}
+
+  /* ---- Modal de exportación ---- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.75); z-index:60; display:none; align-items:center; justify-content:center;}
+  .modal-overlay.show{ display:flex;}
+  .modal-box{ background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px; padding:24px 26px; width:360px; position:relative;}
+  .modal-box::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:8px; opacity:.4; pointer-events:none;}
+  .modal-box h3{ font-size:16px; margin-bottom:4px;}
+  .modal-sub{ font-size:12px; color:var(--text-muted); margin-bottom:16px;}
+  .modal-check-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .modal-check-row:last-of-type{ border-bottom:none;}
+  .modal-checkbox{ width:18px; height:18px; border-radius:4px; border:1.5px solid var(--line-strong); background:var(--panel-alt); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--cyan);}
+  .modal-checkbox.on{ background:var(--cyan-dim); border-color:var(--cyan);}
+  .modal-check-label{ font-size:13px;}
+  .modal-actions{ display:flex; gap:10px; margin-top:18px;}
+  .modal-cancel{ flex:1; background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Inter'; font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer;}
+  .modal-generar{ flex:2; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer;}
+  .modal-generar:hover{ background:var(--cyan); color:#0D2226;}
+
+  /* ---- Print (PDF real vía impresión del navegador) ---- */
+  @media print{
+    body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
+    .nameplate, .toolbar, .subcat-row, .sync-note, .modal-overlay, .toast{ display:none !important;}
+    .table-wrap{ overflow:visible !important; padding:0 !important;}
+    table{ color:#111;}
+    thead th{ color:#333; border-bottom:2px solid #333; background:#fff !important; position:static !important;}
+    tbody tr{ border-bottom:1px solid #ccc;}
+    .td-codigo{ color:#7A5A1E;}
+    .cat-badge, .estado-pill{ -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    tr.print-hidden{ display:none !important;}
+  }
+
+  .sync-note{
+    flex-shrink:0; padding:8px 26px; font-size:11px; color:var(--text-dim);
+    background:var(--bg); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:6px;
+  }
+  .sync-note .dot{ width:6px;height:6px;border-radius:50%; background:var(--cyan);}
+  .sync-note b{ color:var(--brass-bright);}
+
+  .table-wrap{ flex:1; min-height:0; overflow-y:auto; padding:0 26px 20px;}
+  table{ width:100%; border-collapse:separate; border-spacing:0;}
+  thead th{
+    text-align:left; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em;
+    padding:8px 12px; border-bottom:2px solid var(--line-strong); position:sticky; top:0; background:var(--bg);
+  }
+  tbody tr{ border-bottom:1px solid var(--line); cursor:pointer;}
+  tbody tr:hover{ background:var(--panel);}
+  tbody td{ padding:12px; font-size:13.5px; vertical-align:middle;}
+  .td-codigo{ font-family:'JetBrains Mono',monospace; color:var(--brass-bright); font-weight:700;}
+  .td-nombre{ font-weight:600;}
+  .cat-badge{
+    display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+    padding:3px 9px; border-radius:20px;
+  }
+  .cat-badge.material-menor{ background:rgba(73,233,255,0.15); color:var(--cyan); border:1px solid var(--cyan);}
+  .cat-badge.mobiliario{ background:rgba(201,122,46,0.18); color:var(--brass-bright); border:1px solid var(--brass);}
+  .cat-badge.vehiculo{ background:rgba(255,201,77,0.15); color:var(--alerta); border:1px solid var(--alerta);}
+  .cat-badge.tecnologia{ background:rgba(66,85,92,0.2); color:var(--text-muted); border:1px solid var(--line-strong);}
+
+  .estado-pill{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:4px 10px; border-radius:4px;}
+  .estado-pill.bueno{ background:var(--servicio); color:#fff;}
+  .estado-pill.regular{ background:var(--fuera); color:#241505;}
+  .estado-pill.malo{ background:var(--burdeo); color:#fff;}
+  .estado-pill.baja{ background:var(--nodisp); color:#fff;}
+
+  .td-valor{ font-family:'JetBrains Mono',monospace; color:var(--text-muted);}
+  .td-lugar{ color:var(--text-muted); font-size:12.5px;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1 id="tituloInv">Inventario</h1><span>Vigor</span></div>
+      </div>
+      <div class="role-tag" id="roleTag">Sin sesión</div>
+    </div>
+  </div>
+  <div id="sinSesion" style="display:none; padding:40px; text-align:center; color:var(--text-muted);">
+    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+  </div>
+
+  <div class="sync-note">
+    <span class="dot"></span>
+    <span>Esta es <b>una sola base de datos</b>. "Material Menor" no es una lista aparte — es un filtro sincronizado de este mismo inventario, visible además para el Departamento de Material Menor.</span>
+  </div>
+
+  <div class="toolbar">
+    <div class="cat-tabs" id="catTabs"></div>
+    <input class="search-box" id="searchBox" type="text" placeholder="Buscar por código o nombre…" oninput="renderTabla()">
+    <button class="btn-exportar" onclick="abrirExportModal()">⬇ Exportar PDF</button>
+    <button class="btn-ingresar" id="btnIngresar" onclick="window.location.href='ingreso_item.html'">+ Ingresar Ítem</button>
+  </div>
+
+  <div class="subcat-row" id="subcatRow"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Estado</th>
+          <th>Lugar</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody id="tablaBody"></tbody>
+    </table>
+  </div>
+
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal-box">
+      <h3>Exportar a PDF</h3>
+      <div class="modal-sub">Elegí qué categorías incluir en el documento.</div>
+      <div id="exportCheckList"></div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="cerrarExportModal()">Cancelar</button>
+        <button class="modal-generar" onclick="generarPDF()">Generar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// --- Conexión real a Supabase ---
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// CATS/SUBCATS/ITEMS ahora se cargan reales desde Supabase (cargarDatos).
+// Las claves ya no son slugs fijos — son los uuid reales de
+// inventario_categorias, porque el catálogo es 100% dinámico por Cuerpo/Compañía.
+let CATS = { todos: { label:'Todos' } };
+let ITEMS = [];
+let SUBCATS = {};
+let subcatActiva = null;
+let creandoSubcat = false;
+let creandoCategoria = false;
+let catActiva = 'todos';
+let miCuerpoId = null, miCompaniaId = null, miPersonalId = null;
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    document.getElementById('sinSesion').style.display = 'block';
+    return;
+  }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, cargo, cuerpo_id, compania_id, companias(nombre), personal_roles_funcionales(rol_funcional)')
+    .eq('auth_user_id', session.user.id).maybeSingle();
+
+  let nombreCompaniaTitulo = 'Cuerpo General';
+  if(perfil){
+    miPersonalId = perfil.id;
+    miCuerpoId = perfil.cuerpo_id;
+    miCompaniaId = perfil.compania_id;
+    rolActivo = perfil.cargo;
+    rolesFuncionalesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
+    document.getElementById('roleTag').textContent = `${perfil.cargo}`;
+    nombreCompaniaTitulo = perfil.companias ? perfil.companias.nombre : 'Cuerpo General';
+  } else {
+    // Sesión sin fila en personal — Super Admin entrando desde
+    // perfil_maestro.html/pc_compania.html con ?compania=<id>.
+    const { data: soyAdmin } = await sb.rpc('soy_super_admin');
+    const companiaUrl = new URLSearchParams(location.search).get('compania');
+    if(!soyAdmin){
+      document.getElementById('sinSesion').style.display = 'block';
+      return;
+    }
+    if(companiaUrl){
+      const { data: cia } = await sb.from('companias').select('id, nombre, cuerpo_id').eq('id', companiaUrl).maybeSingle();
+      if(cia){ miCompaniaId = cia.id; miCuerpoId = cia.cuerpo_id; nombreCompaniaTitulo = cia.nombre; }
+    }
+    rolActivo = 'Director';
+    document.getElementById('roleTag').textContent = 'Super Admin';
+  }
+  document.getElementById('tituloInv').textContent = 'Inventario — ' + nombreCompaniaTitulo;
+
+  let catQ = sb.from('inventario_categorias').select('*').eq('cuerpo_id', miCuerpoId);
+  catQ = miCompaniaId ? catQ.eq('compania_id', miCompaniaId) : catQ.is('compania_id', null);
+  let itemQ = sb.from('inventario_items').select('*').eq('cuerpo_id', miCuerpoId);
+  itemQ = miCompaniaId ? itemQ.eq('compania_id', miCompaniaId) : itemQ.is('compania_id', null);
+
+  const [{ data: cats }, { data: items }] = await Promise.all([catQ, itemQ]);
+
+  CATS = { todos: { label:'Todos' } };
+  SUBCATS = {};
+  (cats || []).filter(c => !c.parent_id).forEach(c => { CATS[c.id] = { label: c.nombre }; });
+  (cats || []).filter(c => c.parent_id).forEach(c => {
+    if(!SUBCATS[c.parent_id]) SUBCATS[c.parent_id] = [];
+    SUBCATS[c.parent_id].push({ key: c.id, label: c.nombre });
+  });
+
+  ITEMS = (items || []).map(i => ({
+    id: i.id, cod: i.codigo, nombre: i.nombre, cat: i.categoria_id, subcat: i.subcategoria_id,
+    estado: i.estado, lugar: i.lugar_actual || '—',
+    valor: (i.valor !== null && i.valor !== undefined) ? '$' + Number(i.valor).toLocaleString('es-CL') : '—'
+  }));
+
+  document.getElementById('btnIngresar').style.display = puedeModificar() ? '' : 'none';
+  renderTabs();
+  renderTabla();
+}
+
+function renderTabs(){
+  const el = document.getElementById('catTabs');
+  const chips = Object.entries(CATS).map(([key, c])=>{
+    const count = key==='todos' ? ITEMS.length : ITEMS.filter(i=>i.cat===key).length;
+    return `<button class="cat-tab ${catActiva===key?'on':''}" onclick="setCat('${key}')">${c.label} <span class="count">${count}</span></button>`;
+  }).join('');
+  if(!puedeModificar()){ el.innerHTML = chips; return; }
+  const addBtn = creandoCategoria
+    ? `<input class="subcat-input" id="newCatInput" placeholder="Nombre de la categoría…" onkeydown="if(event.key==='Enter') confirmarCategoria(); if(event.key==='Escape') cancelarCategoria();">
+       <button class="tipo-confirmar-cat" onclick="confirmarCategoria()" title="Confirmar">✓</button>
+       <button class="tipo-cancelar-cat" onclick="cancelarCategoria()" title="Cancelar">✕</button>`
+    : `<button class="subcat-add" onclick="creandoCategoria=true; renderTabs(); document.getElementById('newCatInput').focus();">+ Nueva Categoría</button>`;
+  el.innerHTML = chips + addBtn;
+}
+async function confirmarCategoria(){
+  const val = document.getElementById('newCatInput').value.trim();
+  if(!val){ toast('Escribí el nombre de la categoría antes de confirmar'); return; }
+  const { data, error } = await sb.from('inventario_categorias')
+    .insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, nombre: val })
+    .select().single();
+  if(error){ toast('No se pudo crear \u2014 ' + error.message); return; }
+  CATS[data.id] = { label: val };
+  SUBCATS[data.id] = [];
+  creandoCategoria = false;
+  catActiva = data.id;
+  renderTabs();
+  renderSubcats();
+  renderTabla();
+  toast(`Categoría "${val}" creada — ya disponible para ingresar ítems`);
+}
+function cancelarCategoria(){ creandoCategoria = false; renderTabs(); }
+function setCat(key){
+  catActiva = key;
+  subcatActiva = null;
+  creandoSubcat = false;
+  renderTabs();
+  renderSubcats();
+  renderTabla();
+}
+
+function renderSubcats(){
+  const row = document.getElementById('subcatRow');
+  // Antes solo Material Menor podía tener subcategorías — ahora cualquier
+  // categoría (incluidas las nuevas que se creen) puede tenerlas.
+  if(catActiva === 'todos'){ row.classList.remove('show'); row.innerHTML=''; return; }
+  row.classList.add('show');
+  const subcatsDeEstaCategoria = SUBCATS[catActiva] || (SUBCATS[catActiva] = []);
+  const chips = subcatsDeEstaCategoria.map(s=>{
+    const count = ITEMS.filter(i=>i.cat===catActiva && i.subcat===s.key).length;
+    return `<button class="subcat-chip ${subcatActiva===s.key?'on':''}" onclick="setSubcat('${s.key}')">${s.label} <span class="mono" style="opacity:.7;">${count}</span></button>`;
+  }).join('');
+  const allChip = `<button class="subcat-chip ${subcatActiva===null?'on':''}" onclick="setSubcat(null)">Todas</button>`;
+  if(!puedeModificar()){ row.innerHTML = `<span class="subcat-label">Subcategoría</span>` + allChip + chips; return; }
+  const addBtn = creandoSubcat
+    ? `<input class="subcat-input" id="newSubcatInput" placeholder="Nombre…" onkeydown="if(event.key==='Enter') confirmarSubcat(); if(event.key==='Escape') cancelarSubcat();">`
+    : `<button class="subcat-add" onclick="empezarCrearSubcat()">+ Crear subcategoría</button>`;
+  row.innerHTML = `<span class="subcat-label">Subcategoría</span>` + allChip + chips + addBtn;
+  if(creandoSubcat) document.getElementById('newSubcatInput').focus();
+}
+function setSubcat(key){ subcatActiva = key; renderSubcats(); renderTabla(); }
+function empezarCrearSubcat(){ creandoSubcat = true; renderSubcats(); }
+function cancelarSubcat(){ creandoSubcat = false; renderSubcats(); }
+async function confirmarSubcat(){
+  const val = document.getElementById('newSubcatInput').value.trim();
+  if(!val){ creandoSubcat=false; renderSubcats(); return; }
+  const { data, error } = await sb.from('inventario_categorias')
+    .insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, parent_id: catActiva, nombre: val })
+    .select().single();
+  if(error){ toast('No se pudo crear la subcategoría — ' + error.message); return; }
+  const subcatsDeEstaCategoria = SUBCATS[catActiva] || (SUBCATS[catActiva] = []);
+  subcatsDeEstaCategoria.push({ key: data.id, label: val });
+  creandoSubcat = false;
+  subcatActiva = data.id;
+  renderSubcats();
+  renderTabla();
+  toast(`Subcategoría "${val}" creada en ${CATS[catActiva].label}`);
+}
+
+const ESTADO_LABEL = { bueno:'Bueno', regular:'Regular', malo:'Malo', baja:'De Baja' };
+
+function renderTabla(){
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const filtrados = ITEMS.filter(i=>{
+    const matchCat = catActiva==='todos' || i.cat===catActiva;
+    const matchSubcat = !subcatActiva || i.subcat===subcatActiva;
+    const matchQ = !q || i.cod.toLowerCase().includes(q) || i.nombre.toLowerCase().includes(q);
+    return matchCat && matchSubcat && matchQ;
+  });
+  const body = document.getElementById('tablaBody');
+  if(filtrados.length===0){
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim);">Sin ítems que coincidan.</td></tr>`;
+    return;
+  }
+  body.innerHTML = filtrados.map(i=>`
+    <tr onclick="window.location.href='historial_movimientos.html?item=${i.id}'">
+      <td class="td-codigo">${i.cod}</td>
+      <td class="td-nombre">${i.nombre}</td>
+      <td><span class="cat-badge">${CATS[i.cat] ? CATS[i.cat].label : ''}</span></td>
+      <td><span class="estado-pill ${i.estado}">${ESTADO_LABEL[i.estado]}</span></td>
+      <td class="td-lugar">${i.lugar}</td>
+      <td class="td-valor">${i.valor}</td>
+    </tr>
+  `).join('');
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+let exportSel = new Set(Object.keys(CATS).filter(k=>k!=='todos'));
+
+function abrirExportModal(){
+  if(catActiva !== 'todos'){ exportSel = new Set([catActiva]); }
+  else { exportSel = new Set(Object.keys(CATS).filter(k=>k!=='todos')); }
+  renderExportCheckList();
+  document.getElementById('exportModal').classList.add('show');
+}
+function cerrarExportModal(){
+  document.getElementById('exportModal').classList.remove('show');
+}
+function renderExportCheckList(){
+  const el = document.getElementById('exportCheckList');
+  el.innerHTML = Object.entries(CATS).filter(([k])=>k!=='todos').map(([key,c])=>{
+    const on = exportSel.has(key);
+    return `<div class="modal-check-row" onclick="toggleExportCat('${key}')">
+      <div class="modal-checkbox ${on?'on':''}">${on?'✓':''}</div>
+      <div class="modal-check-label">${c.label}</div>
+    </div>`;
+  }).join('');
+}
+function toggleExportCat(key){
+  if(exportSel.has(key)) exportSel.delete(key); else exportSel.add(key);
+  renderExportCheckList();
+}
+function generarPDF(){
+  if(exportSel.size===0){ toast('Elegí al menos una categoría'); return; }
+  document.querySelectorAll('#tablaBody tr').forEach(tr=>{
+    const catLabel = tr.querySelector('.cat-badge');
+    if(!catLabel){ return; }
+    const key = Object.keys(CATS).find(k => CATS[k].label === catLabel.textContent);
+    tr.classList.toggle('print-hidden', key && !exportSel.has(key));
+  });
+  cerrarExportModal();
+  setTimeout(()=>window.print(), 150);
+}
+
+// Ver el inventario: todos los Oficiales administrativos de Compañía
+// (Capitán, Tenientes, Ayudante). Modificarlo (Ingresar Ítem, crear
+// categorías/subcategorías): Director, Tesorero/a, o quien tenga asignado
+// el Rol Funcional Depto. Material Menor / Depto. Material Mayor
+// (ver ficha_bombero.html) — mismo criterio que el menú de Celular.
+const MODIFY_CARGOS = ['Director','Tesorero/a'];
+const MODIFY_ROLES_FUNCIONALES = ['Depto. Material Menor','Depto. Material Mayor'];
+let rolActivo = null;
+let rolesFuncionalesActivos = new Set();
+function puedeModificar(){
+  return MODIFY_CARGOS.includes(rolActivo) || MODIFY_ROLES_FUNCIONALES.some(r => rolesFuncionalesActivos.has(r));
+}
+
+cargarDatos();
+</script>
+</body>
+</html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>VIGOR — Dar de Baja / Reactivar Personal</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ====== CSS base de Vigor incorporado directamente — el archivo ya no depende de vigor_base.css ====== */
+/* ============================================================
+   VIGOR — Design tokens base (placa de bronce institucional)
+   Reconstruido desde spec — usar idéntico en las 5 pantallas
+   ============================================================ */
+:root {
+  /* Fondos y estructura */
+  --bg: #060A0F;
+  --panel: #0A131C;
+  --panel-alt: #0E1D28;
+  --line: #132734;
+  --line-strong: #1C3B49;
+
+  /* Texto */
+  --text: #E7F5FA;
+  --text-muted: #7B99A3;
+  --text-dim: #516E78;
+
+  /* Bronce (marco institucional) */
+  --brass: #C97A2E;
+  --brass-bright: #FF9A44;
+  --brass-dim: #8A4E1E;
+
+  /* Cian (marca / acción primaria) */
+  --cyan: #49E9FF;
+  --cyan-dim: #1E6E7D;
+  --cyan-glow: rgba(73,233,255,0.35);
+  --amber-glow: rgba(255,154,68,0.32);
+
+  /* Burdeo (severidad / crisis / acciones críticas) */
+  --burdeo: #7A1620;
+  --burdeo-bright: #D8394E;
+
+  /* Estados operativos */
+  --servicio: #3CF29A;
+  --emergencia: #FF4B5C;
+  --alerta: #FFC94D;
+  --fuera: #C9A63B;
+  --nodisp: #42555C;
+
+  /* Perfil Maestro / Super Admin */
+  --master: #39FF14;
+  --master-dim: #1F9E0A;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+.vigor-wordmark {
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  font-size: 13px;
+  color: var(--brass-bright);
+  padding: 14px 0 10px;
+  text-transform: uppercase;
+}
+
+h1, h2, h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.panel-alt {
+  background: var(--panel-alt);
+  border: 1px solid var(--line-strong);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  padding: 13px 22px;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--cyan);
+  color: #0B1A21;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-critical {
+  background: var(--burdeo);
+  color: var(--text);
+  border: 1px solid var(--burdeo-bright);
+}
+.btn-critical:hover:not(:disabled) { background: var(--burdeo-bright); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--line-strong);
+}
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--brass-dim); }
+
+input, select {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  width: 100%;
+}
+input:focus, select:focus {
+  outline: 2px solid var(--cyan-dim);
+  outline-offset: 1px;
+  border-color: var(--cyan);
+}
+
+label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+}
+
+::selection { background: var(--cyan-dim); }
+
+/* ====== Estilos propios de esta pantalla ====== */
+  .wrap { max-width: 640px; margin: 0 auto; padding: 8px 20px 60px; }
+  .header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .back-link { color: var(--text-muted); font-size: 13px; text-decoration: none; }
+  .back-link:hover { color: var(--cyan); }
+
+  .person-card {
+    display: flex; gap: 14px; align-items: center;
+    padding: 18px; margin-bottom: 20px;
+  }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--panel-alt); border: 1px solid var(--brass-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Rajdhani'; font-size: 18px; color: var(--brass-bright);
+    flex-shrink: 0;
+  }
+  .person-name { font-size: 16px; font-weight: 600; }
+  .person-meta { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+  .reg-num { font-family: 'JetBrains Mono'; color: var(--brass-bright); }
+
+  .status-badge.servicio { background: rgba(60,242,154,0.15); color: var(--servicio); }
+  .status-badge.baja { background: rgba(66,85,92,0.15); color: var(--nodisp); }
+  .status-badge.suspendido { background: rgba(255,201,77,0.15); color: var(--alerta); }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 22px; }
+  .tab-btn {
+    flex: 1; padding: 11px; text-align: center;
+    background: var(--panel); border: 1px solid var(--line);
+    color: var(--text-muted); font-size: 13px; font-weight: 600;
+    border-radius: var(--radius-sm); cursor: pointer;
+  }
+  .tab-btn.active.baja { background: rgba(122,22,32,0.18); border-color: var(--burdeo-bright); color: var(--burdeo-bright); }
+  .tab-btn.active.reactivar { background: rgba(60,242,154,0.15); border-color: var(--servicio); color: var(--servicio); }
+  .tab-btn.active.suspender { background: rgba(255,201,77,0.15); border-color: var(--alerta); color: var(--alerta); }
+
+  .panel-body { padding: 22px; }
+  .section-title { font-size: 13px; color: var(--brass-bright); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
+
+  .impact-list { list-style: none; padding: 0; margin: 0 0 20px; }
+  .impact-list li {
+    font-size: 13px; color: var(--text-muted);
+    padding: 8px 0 8px 24px; position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .impact-list li:last-child { border-bottom: none; }
+  .impact-list li::before {
+    content: "→"; position: absolute; left: 0; color: var(--brass-dim);
+  }
+  .impact-list li strong { color: var(--text); }
+
+  textarea {
+    font-family: 'Inter'; background: var(--bg);
+    border: 1px solid var(--line-strong); color: var(--text);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    font-size: 14px; width: 100%; min-height: 80px; resize: vertical;
+  }
+  textarea:focus { outline: 2px solid var(--cyan-dim); border-color: var(--cyan); }
+
+  .field { margin-top: 16px; margin-bottom: 4px; }
+
+  select#companiaActiva { margin-top: 6px; }
+
+  .warn-box {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: rgba(255,75,92,0.08);
+    border: 1px solid rgba(255,75,92,0.35);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px; font-size: 12.5px; color: #E39089;
+    margin: 18px 0;
+  }
+
+  .resumen-baja{
+    display:none; background:var(--panel-alt); border:1.5px solid var(--servicio); border-radius:10px;
+    padding:16px 18px; margin:18px 0;
+  }
+  .resumen-baja.show{ display:block;}
+  .resumen-baja-titulo{ font-size:12.5px; font-weight:700; color:var(--servicio); margin-bottom:12px;}
+  .resumen-baja-row{ display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--line); font-size:12.5px;}
+  .resumen-baja-row:last-of-type{ border-bottom:none;}
+  .resumen-baja-row span{ color:var(--text-muted);}
+  .btn-exportar-baja{
+    width:100%; margin-top:14px; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12px; padding:10px; border-radius:6px; cursor:pointer;
+  }
+  .btn-exportar-baja:hover{ background:var(--cyan); color:#0D2226;}
+
+  @media print{
+    body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
+    .nameplate, .tabs, .impact-list, .field, .warn-box, .actions, .btn-exportar-baja, .toast, .modal-overlay{ display:none !important;}
+    .wrap{ padding:10px !important;}
+    .resumen-baja{ border:1px solid #ccc !important;}
+    .resumen-baja-titulo{ color:#111 !important;}
+  }
+
+  .actions { display: flex; gap: 10px; margin-top: 22px; }
+  .actions .btn { flex: 1; }
+
+  .hidden { display: none; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(5,10,15,0.75); z-index: 60;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: var(--panel); border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 22px 24px; width: 380px; }
+  .modal-box.critical { border-color: var(--burdeo-bright); }
+  .modal-box h3 { font-size: 15px; margin-bottom: 8px; }
+  .modal-box p { font-size: 13px; color: var(--text-muted); margin: 0 0 18px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions .btn { flex: 1; }
+
+  .toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: var(--panel-alt); border: 1px solid var(--cyan); color: var(--text);
+    padding: 13px 22px; border-radius: var(--radius-sm); font-size: 13.5px;
+    opacity: 0; pointer-events: none; transition: all .25s; z-index: 50; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 26px; flex-wrap:wrap; max-width:820px; margin:0 auto;}
+  .nameplate-left{ display:flex; align-items:center; gap:14px;}
+  .nameplate .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12.5px; padding:9px 16px; border-radius:5px; cursor:pointer; text-decoration:none; display:inline-block;
+  }
+  .nameplate .back-btn:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .nameplate h1{ font-size:18px; font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0; color:var(--text);}
+  .nameplate span.sub{ font-size:10.5px; color:var(--text-dim); letter-spacing:.08em; text-transform:uppercase; display:block;}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+<div class="nameplate">
+  <div class="nameplate-inner">
+    <div class="nameplate-left">
+      <a href="#" id="volverFichaLink" class="back-btn">← Ficha del Bombero</a>
+      <div>
+        <h1>Dar de Baja / Reactivar</h1>
+        <span class="sub" id="ciaLabel">Vigor</span>
+      </div>
+    </div>
+    <span class="badge status-badge servicio mono" id="statusBadge">—</span>
+  </div>
+</div>
+<div class="wrap">
+  <div class="panel person-card">
+    <div class="avatar" id="avatarIniciales">—</div>
+    <div>
+      <div class="person-name" id="personNombre">—</div>
+      <div class="person-meta">N° Registro <span class="reg-num" id="personReg">—</span> · <span id="personCargoCia">—</span></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab-btn active baja" data-tab="baja">Dar de Baja</div>
+    <div class="tab-btn suspender" data-tab="suspender">Suspender</div>
+    <div class="tab-btn reactivar" data-tab="reactivar">Reactivar</div>
+  </div>
+
+  <!-- ===================== DAR DE BAJA ===================== -->
+  <div class="panel panel-body" id="panelBaja">
+    <div class="section-title">Esto ocurrirá al confirmar</div>
+    <ul class="impact-list">
+      <li>Se recalcula <strong>Al Mando de Compañía / Al Mando de Carro</strong> si la persona lo tenía en este momento.</li>
+      <li>Se libera cualquier <strong>Asignación de Dotación</strong> vigente.</li>
+      <li>Se recalcula la <strong>dotación mínima</strong> de inmediato.</li>
+      <li>El <strong>N° de Registro <span id="impactoReg">—</span> queda retirado para siempre</strong> — nunca se reasigna a otra persona.</li>
+      <li>Su Hoja de Vida se conserva íntegra, solo lectura. Deja de contar en Guardia y listados operativos.</li>
+    </ul>
+
+    <div class="field">
+      <label for="motivo">Motivo de la baja (obligatorio)</label>
+      <textarea id="motivo" placeholder="Describe el motivo…"></textarea>
+    </div>
+
+    <div class="warn-box">
+      ⚠ Esta acción no se puede deshacer directamente. Para restituir a la persona más adelante, deberá usarse <strong>Reactivar</strong> — pero conservará el mismo N° de Registro y volverá sin Cargo ni Roles Funcionales.
+    </div>
+
+    <div class="resumen-baja" id="resumenBaja">
+      <div class="resumen-baja-titulo">✓ Baja confirmada — resumen para archivar en la carpeta del bombero</div>
+      <div class="resumen-baja-row"><span>Nombre</span><b id="resumenNombre">—</b></div>
+      <div class="resumen-baja-row"><span>N° de Registro</span><b class="mono" id="resumenReg">—</b></div>
+      <div class="resumen-baja-row"><span>Cargo previo</span><b id="resumenCargoPrevio">—</b></div>
+      <div class="resumen-baja-row"><span>Fecha de la baja</span><b id="resumenFecha">—</b></div>
+      <div class="resumen-baja-row"><span>Motivo</span><b id="resumenMotivo">—</b></div>
+      <div class="resumen-baja-row"><span>Autorizado por</span><b id="resumenAutorizado">—</b></div>
+      <button class="btn-exportar-baja" onclick="window.print()">⬇ Exportar PDF</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" id="btnCancelBaja">Cancelar</button>
+      <button class="btn btn-critical" id="btnConfirmBaja" disabled>Confirmar baja</button>
+    </div>
+  </div>
+
+  <!-- ===================== SUSPENDER ===================== -->
+  <div class="panel panel-body hidden" id="panelSuspender">
+    <div id="suspenderActivoWrap">
+      <div class="section-title">Esto ocurrirá al confirmar</div>
+      <ul class="impact-list">
+        <li>La persona <strong>no va a poder iniciar sesión</strong> hasta que levantes la suspensión.</li>
+        <li>Conserva su <strong>Cargo, Roles Funcionales y N° de Registro</strong> — a diferencia de la baja, no se pierde nada.</li>
+        <li>Deja de contar en Guardia y listados operativos mientras esté suspendida.</li>
+      </ul>
+      <div class="field">
+        <label for="motivoSuspension">Motivo de la suspensión (obligatorio)</label>
+        <textarea id="motivoSuspension" placeholder="Describe el motivo…"></textarea>
+      </div>
+      <div class="warn-box" style="background: rgba(255,201,77,0.08); border-color: rgba(255,201,77,0.35); color: var(--alerta);">
+        ⚠ A diferencia de la baja, la suspensión es reversible en cualquier momento desde esta misma pantalla — no hace falta reasignar Compañía ni Cargo al levantarla.
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="btnCancelSuspender">Cancelar</button>
+        <button class="btn btn-critical" id="btnConfirmSuspender" disabled>Confirmar suspensión</button>
+      </div>
+    </div>
+    <div id="suspenderActivoOculto" class="hidden" style="text-align:center; color:var(--text-muted); padding:20px 0;">
+      Esta acción es para personal actualmente en servicio. Este bombero ya está dado de baja — usá la pestaña Reactivar.
+    </div>
+    <div id="suspendidoWrap" class="hidden">
+      <div class="section-title">Esta persona está suspendida</div>
+      <p style="font-size:13px; color:var(--text-muted); margin:0 0 18px;">Puede volver a iniciar sesión de inmediato al levantar la suspensión — conserva su Cargo, Roles Funcionales y Compañía tal como estaban.</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="btnLevantarSuspension" style="flex:none; width:100%;">Levantar suspensión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== REACTIVAR ===================== -->
+  <div class="panel panel-body hidden" id="panelReactivar">
+    <div class="section-title">Esto ocurrirá al confirmar</div>
+    <ul class="impact-list">
+      <li>Vuelve como <strong>Bombero raso</strong>, sin Cargo ni Roles Funcionales — el Director los reasigna manualmente si corresponde.</li>
+      <li>Conserva el mismo <strong>N° de Registro <span id="impactoReg2">—</span></strong> — nunca se le asigna uno nuevo.</li>
+      <li>Vuelve a contar en Guardia, dotación mínima y listados operativos de la Compañía elegida.</li>
+    </ul>
+
+    <div class="field">
+      <label for="companiaActiva">Compañía activa a la que se reincorpora</label>
+      <select id="companiaActiva">
+        <option value="" selected>Selecciona una Compañía activa…</option>
+      </select>
+    </div>
+
+    <div class="warn-box" style="background: rgba(255,201,77,0.08); border-color: rgba(255,201,77,0.35); color: var(--alerta);">
+      ⚠ La Compañía original de esta persona puede haber sido eliminada. No se asume que sigue existiendo — elige la Compañía activa donde se reincorpora.
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" id="btnCancelReactivar">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmReactivar" disabled>Confirmar reactivación</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox">
+    <h3 id="modalTitle">Confirmar baja</h3>
+    <p id="modalText">¿Confirmar que deseas dar de baja a R. Salinas? Esta acción no se puede deshacer directamente.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalCancel">Cancelar</button>
+      <button class="btn btn-critical" id="modalConfirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const bomberoId = new URLSearchParams(window.location.search).get('bombero');
+let miNombre = null, miCargo = null;
+let bombero = null;
+
+function iniciales(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2); }
+
+async function cargarDatos(){
+  if(!bomberoId){ toast('Falta el bombero a mostrar'); return; }
+  document.getElementById('volverFichaLink').href = 'ficha_bombero.html?bombero=' + bomberoId;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal').select('nombre_completo, cargo').eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  miNombre = perfil.nombre_completo;
+  miCargo = perfil.cargo;
+
+  const puedeOperar = ['Director','Secretario/a'].includes(miCargo);
+  if(!puedeOperar){
+    document.querySelector('.wrap').innerHTML = '<div class="panel panel-body" style="text-align:center; color:var(--text-muted);">🔒 Esta pantalla es exclusiva de Director y Secretario/a.</div>';
+    return;
+  }
+
+  const { data: b, error } = await sb.from('personal')
+    .select('id, nombre_completo, numero_registro, cargo, estado, cuerpo_id, compania_id, companias(nombre)')
+    .eq('id', bomberoId).single();
+  if(error || !b){ toast('No se encontró ese bombero'); return; }
+  bombero = b;
+
+  document.getElementById('ciaLabel').textContent = (b.companias ? b.companias.nombre : 'Cuerpo General') + ' · Vigor';
+  document.getElementById('avatarIniciales').textContent = iniciales(b.nombre_completo);
+  document.getElementById('personNombre').textContent = b.nombre_completo;
+  document.getElementById('personReg').textContent = 'N° ' + b.numero_registro;
+  document.getElementById('personCargoCia').textContent = `${b.cargo} · ${b.companias ? b.companias.nombre : 'Cuerpo General'}`;
+  document.getElementById('impactoReg').textContent = 'N° ' + b.numero_registro;
+  document.getElementById('impactoReg2').textContent = 'N° ' + b.numero_registro;
+
+  const badge = document.getElementById('statusBadge');
+  if(b.estado === 'dado_de_baja'){ badge.textContent = 'DADO DE BAJA'; badge.className = 'badge status-badge baja mono'; }
+  else if(b.estado === 'suspendido'){ badge.textContent = 'SUSPENDIDO'; badge.className = 'badge status-badge suspendido mono'; }
+  else { badge.textContent = 'EN SERVICIO'; badge.className = 'badge status-badge servicio mono'; }
+
+  document.getElementById('suspenderActivoWrap').classList.toggle('hidden', b.estado !== 'activo');
+  document.getElementById('suspenderActivoOculto').classList.toggle('hidden', b.estado !== 'dado_de_baja');
+  document.getElementById('suspendidoWrap').classList.toggle('hidden', b.estado !== 'suspendido');
+
+  const { data: cias } = await sb.from('companias').select('id, nombre').eq('cuerpo_id', b.cuerpo_id).order('numero');
+  document.getElementById('companiaActiva').insertAdjacentHTML('beforeend',
+    (cias || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')
+  );
+
+  let tabInicial = 'baja';
+  if(b.estado === 'dado_de_baja') tabInicial = 'reactivar';
+  else if(b.estado === 'suspendido') tabInicial = 'suspender';
+  seleccionarTab(tabInicial);
+}
+
+const tabs = document.querySelectorAll('.tab-btn');
+  const panelBaja = document.getElementById('panelBaja');
+  const panelReactivar = document.getElementById('panelReactivar');
+  const panelSuspender = document.getElementById('panelSuspender');
+  const statusBadge = document.getElementById('statusBadge');
+  const TODOS_LOS_PANELES = { baja: panelBaja, suspender: panelSuspender, reactivar: panelReactivar };
+
+  function seleccionarTab(nombre){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === nombre));
+    Object.entries(TODOS_LOS_PANELES).forEach(([n, el]) => el.classList.toggle('hidden', n !== nombre));
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => seleccionarTab(tab.dataset.tab));
+  });
+
+  const motivo = document.getElementById('motivo');
+  const btnConfirmBaja = document.getElementById('btnConfirmBaja');
+  motivo.addEventListener('input', () => {
+    btnConfirmBaja.disabled = motivo.value.trim().length < 5;
+  });
+
+  const companiaActiva = document.getElementById('companiaActiva');
+  const btnConfirmReactivar = document.getElementById('btnConfirmReactivar');
+  companiaActiva.addEventListener('change', () => {
+    btnConfirmReactivar.disabled = companiaActiva.value === '';
+  });
+
+  // Modal propio de confirmación — reemplaza confirm() nativo del navegador,
+  // que rompía la identidad visual del sistema y no distinguía severidad
+  // (acción crítica vs. acción normal) como el resto de las pantallas de Vigor.
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalBox = document.getElementById('modalBox');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText = document.getElementById('modalText');
+  const modalCancel = document.getElementById('modalCancel');
+  const modalConfirm = document.getElementById('modalConfirm');
+  let accionPendiente = null;
+
+  function abrirModal({ titulo, texto, critico, onConfirm }) {
+    modalTitle.textContent = titulo;
+    modalText.textContent = texto;
+    modalBox.classList.toggle('critical', !!critico);
+    modalConfirm.className = 'btn ' + (critico ? 'btn-critical' : 'btn-primary');
+    accionPendiente = onConfirm;
+    modalOverlay.classList.add('show');
+  }
+  function cerrarModal() {
+    modalOverlay.classList.remove('show');
+    accionPendiente = null;
+  }
+  modalCancel.addEventListener('click', cerrarModal);
+  modalConfirm.addEventListener('click', () => {
+    if (accionPendiente) accionPendiente();
+    cerrarModal();
+  });
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  btnConfirmBaja.addEventListener('click', () => {
+    abrirModal({
+      titulo: 'Confirmar baja',
+      texto: `¿Confirmar que deseas dar de baja a ${bombero.nombre_completo}? Esta acción no se puede deshacer directamente.`,
+      critico: true,
+      onConfirm: async () => {
+        const motivoTexto = document.getElementById('motivo').value.trim();
+        const { error } = await sb.rpc('dar_de_baja_personal', { p_personal_id: bomberoId, p_motivo: motivoTexto });
+        if(error){ toast('No se pudo dar de baja — ' + error.message); return; }
+
+        statusBadge.textContent = 'DADO DE BAJA';
+        statusBadge.className = 'badge status-badge baja mono';
+        toast(`${bombero.nombre_completo} fue dado de baja — Hoja de Vida conservada, solo lectura`);
+
+        const ahora = new Date().toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false});
+        document.getElementById('resumenNombre').textContent = bombero.nombre_completo;
+        document.getElementById('resumenReg').textContent = 'N° ' + bombero.numero_registro;
+        document.getElementById('resumenCargoPrevio').textContent = `${bombero.cargo} · ${bombero.companias ? bombero.companias.nombre : 'Cuerpo General'}`;
+        document.getElementById('resumenFecha').textContent = ahora;
+        document.getElementById('resumenMotivo').textContent = motivoTexto;
+        document.getElementById('resumenAutorizado').textContent = `${miCargo} — ${miNombre}`;
+        document.getElementById('resumenBaja').classList.add('show');
+        bombero.estado = 'dado_de_baja';
+      }
+    });
+  });
+
+  btnConfirmReactivar.addEventListener('click', () => {
+    const nombreCia = companiaActiva.options[companiaActiva.selectedIndex].textContent;
+    abrirModal({
+      titulo: 'Confirmar reactivación',
+      texto: '¿Confirmar la reactivación en ' + nombreCia + '?',
+      critico: false,
+      onConfirm: async () => {
+        const { error } = await sb.rpc('reactivar_personal', { p_personal_id: bomberoId, p_compania_destino_id: companiaActiva.value });
+        if(error){ toast('No se pudo reactivar — ' + error.message); return; }
+        statusBadge.textContent = 'EN SERVICIO';
+        statusBadge.className = 'badge status-badge servicio mono';
+        toast('Reactivado en ' + nombreCia + ' — vuelve como Bombero raso');
+        bombero.estado = 'activo';
+      }
+    });
+  });
+
+  // Bug corregido: los botones "Cancelar" de ambos paneles no tenían ninguna
+  // acción conectada — no hacían absolutamente nada al tocarlos.
+  document.getElementById('btnCancelBaja').addEventListener('click', () => toast('Sin cambios — volviendo a la Ficha del Bombero'));
+  document.getElementById('btnCancelReactivar').addEventListener('click', () => toast('Sin cambios — volviendo a la Ficha del Bombero'));
+  document.getElementById('btnCancelSuspender').addEventListener('click', () => toast('Sin cambios — volviendo a la Ficha del Bombero'));
+
+  const motivoSuspension = document.getElementById('motivoSuspension');
+  const btnConfirmSuspender = document.getElementById('btnConfirmSuspender');
+  motivoSuspension.addEventListener('input', () => {
+    btnConfirmSuspender.disabled = motivoSuspension.value.trim().length < 5;
+  });
+
+  btnConfirmSuspender.addEventListener('click', () => {
+    abrirModal({
+      titulo: 'Confirmar suspensión',
+      texto: `¿Confirmar la suspensión de ${bombero.nombre_completo}? No va a poder iniciar sesión hasta que la levantes.`,
+      critico: true,
+      onConfirm: async () => {
+        const motivoTexto = motivoSuspension.value.trim();
+        const { error } = await sb.rpc('suspender_personal', { p_personal_id: bomberoId, p_motivo: motivoTexto });
+        if(error){ toast('No se pudo suspender — ' + error.message); return; }
+        bombero.estado = 'suspendido';
+        statusBadge.textContent = 'SUSPENDIDO';
+        statusBadge.className = 'badge status-badge suspendido mono';
+        toast(`${bombero.nombre_completo} fue suspendido/a`);
+        document.getElementById('suspenderActivoWrap').classList.add('hidden');
+        document.getElementById('suspendidoWrap').classList.remove('hidden');
+      }
+    });
+  });
+
+  document.getElementById('btnLevantarSuspension').addEventListener('click', () => {
+    abrirModal({
+      titulo: 'Levantar suspensión',
+      texto: `¿Levantar la suspensión de ${bombero.nombre_completo}? Va a poder iniciar sesión de inmediato.`,
+      critico: false,
+      onConfirm: async () => {
+        const { error } = await sb.rpc('levantar_suspension_personal', { p_personal_id: bomberoId });
+        if(error){ toast('No se pudo levantar la suspensión — ' + error.message); return; }
+        bombero.estado = 'activo';
+        statusBadge.textContent = 'EN SERVICIO';
+        statusBadge.className = 'badge status-badge servicio mono';
+        toast(`Se levantó la suspensión de ${bombero.nombre_completo}`);
+        document.getElementById('suspendidoWrap').classList.add('hidden');
+        document.getElementById('suspenderActivoWrap').classList.remove('hidden');
+      }
+    });
+  });
+
+  cargarDatos();
+</script>
+</body>
+</html>

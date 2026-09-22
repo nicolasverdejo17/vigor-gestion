@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Gestión de Especialidades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+    --esp-r:#FF5A4E; --esp-t:#4FA3FF; --esp-h:#FFC94D; --esp-f:#3CF29A; --esp-m:#B77CFF; --esp-c:#E08A5C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+
+  .leyenda-row{ flex-shrink:0; padding:10px 26px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .leyenda{ display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  .leyenda-item{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-muted);}
+  .leyenda-dot{ width:18px; height:18px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:#fff; flex-shrink:0;}
+  .btn-nueva-esp{
+    background:transparent; border:1.5px dashed var(--brass-bright); color:var(--brass-bright);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:8px 14px; border-radius:6px; cursor:pointer; flex-shrink:0; white-space:nowrap;
+  }
+  .btn-nueva-esp:hover{ background:rgba(255,154,68,0.1);}
+
+  .content-wrap{ flex:1; min-height:0; padding:16px 26px 20px; overflow-y:auto;}
+  table{ width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; overflow:hidden;}
+  thead th{ text-align:left; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; padding:11px 18px; border-bottom:2px solid var(--line-strong); background:var(--panel-alt);}
+  tbody tr{ border-bottom:1px solid var(--line);}
+  tbody tr:last-child{ border-bottom:none;}
+  tbody td{ padding:12px 18px; font-size:13px; vertical-align:middle;}
+  .td-nombre{ font-weight:600;}
+  .td-reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:11.5px;}
+
+  .insignias-cell{ display:flex; gap:5px; flex-wrap:wrap;}
+  .insignia-badge{
+    width:24px; height:24px; border-radius:5px; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#fff;
+  }
+  .insignia-vacio{ font-size:11.5px; color:var(--text-dim); font-style:italic;}
+
+  .btn-gestionar{
+    background:transparent; border:1.5px solid var(--cyan); color:var(--cyan);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:7px 13px; border-radius:5px; cursor:pointer;
+  }
+  .btn-gestionar:hover{ background:rgba(73,233,255,0.1);}
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.75); z-index:60; display:none; align-items:center; justify-content:center;}
+  .modal-overlay.show{ display:flex;}
+  .modal-box{ background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px; padding:22px 24px; width:380px; position:relative;}
+  .modal-box::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:8px; opacity:.4; pointer-events:none;}
+  .modal-box h3{ font-size:15px; margin-bottom:2px;}
+  .modal-sub{ font-size:11.5px; color:var(--text-muted); margin-bottom:16px;}
+  .modal-esp-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .modal-esp-row:last-of-type{ border-bottom:none;}
+  .modal-checkbox{ width:18px; height:18px; border-radius:4px; border:1.5px solid var(--line-strong); background:var(--panel-alt); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff;}
+  .modal-esp-badge{ width:24px; height:24px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#fff; flex-shrink:0;}
+  .modal-esp-label{ font-size:13px; flex:1;}
+  .modal-actions{ display:flex; gap:10px; margin-top:16px;}
+
+  .m-field{ margin-bottom:14px;}
+  .m-field label{ display:block; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; font-weight:600;}
+  .m-field input{
+    width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:10px 12px; font-size:13.5px; color:var(--text); font-family:'Inter';
+  }
+  .m-field input:focus{ outline:none; border-color:var(--cyan);}
+  .color-picker{ display:flex; gap:8px; flex-wrap:wrap;}
+  .color-opt{
+    width:30px; height:30px; border-radius:6px; cursor:pointer; border:2px solid transparent;
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px;
+  }
+  .color-opt.on{ border-color:#fff;}
+  .color-hex-row{ display:flex; align-items:center; gap:9px; margin-top:10px;}
+  .color-hex-preview{
+    width:30px; height:30px; border-radius:6px; flex-shrink:0; border:1.5px solid var(--line-strong);
+    background:repeating-conic-gradient(#3a3a3a 0% 25%, #2a2a2a 0% 50%) 0 0/10px 10px;
+  }
+  .color-hex-row input{
+    flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:8px 12px; font-size:12.5px; color:var(--text);
+  }
+  .color-hex-row input:focus{ outline:none; border-color:var(--cyan);}
+  .color-hex-row input.invalid{ border-color:var(--burdeo-bright);}
+  .modal-cancel{ flex:1; background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Inter'; font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer;}
+  .modal-guardar{ flex:1.4; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; padding:10px; border-radius:6px; cursor:pointer;}
+  .modal-guardar:hover{ background:var(--cyan); color:#0D2226;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .back-cuartel{
+    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11.5px; padding:7px 13px; border-radius:5px; cursor:pointer; margin-right:12px;
+  }
+  .back-cuartel:hover{ border-color:var(--brass-bright); color:var(--text);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <button class="back-cuartel" onclick="history.back()">← Volver</button><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Gestión de Especialidades</h1><span id="subtitulo">Cuerpo de Bomberos · Vigor</span></div>
+      </div>
+      <div class="role-tag" id="roleTag">Sin sesión</div>
+    </div>
+  </div>
+  <div id="sinSesion" style="display:none; padding:26px;">
+    <p style="color:var(--text-muted);">Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a></p>
+  </div>
+  <div id="sinPermiso" style="display:none; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">
+    🔒 Esta pantalla es exclusiva del Depto. de Especialidad.
+  </div>
+
+  <div id="appWrap" style="display:none; flex:1; min-height:0; flex-direction:column;">
+    <div class="leyenda-row">
+      <div class="leyenda" id="leyenda"></div>
+      <button class="btn-nueva-esp" onclick="abrirModalNueva()">+ Nueva Especialidad</button>
+    </div>
+
+    <div class="content-wrap">
+      <table>
+        <thead>
+          <tr><th>Bombero</th><th>N° Registro</th><th>Especialidades</th><th></th></tr>
+        </thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="espModal">
+    <div class="modal-box">
+      <h3 id="modalNombre">R. Salinas</h3>
+      <div class="modal-sub">Marcá las especialidades habilitadas para este bombero</div>
+      <div id="modalEspList"></div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+        <button class="modal-guardar" onclick="guardarEspecialidades()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="nuevaEspModal">
+    <div class="modal-box">
+      <h3>Nueva Especialidad</h3>
+      <div class="modal-sub">Se suma al catálogo del Cuerpo — queda disponible para asignar a cualquier bombero de inmediato.</div>
+      <div class="m-field">
+        <label>Código (1 letra, la que se ve en la insignia)</label>
+        <input type="text" class="mono" id="nuevaEspCodigo" maxlength="1" placeholder="Ej. B" style="text-transform:uppercase;">
+      </div>
+      <div class="m-field">
+        <label>Nombre completo</label>
+        <input type="text" id="nuevaEspNombre" placeholder="Ej. Buceo / Rescate Acuático">
+      </div>
+      <div class="m-field">
+        <label>Color de la insignia</label>
+        <div class="color-picker" id="nuevaEspColores"></div>
+        <div class="color-hex-row">
+          <span class="color-hex-preview" id="colorHexPreview"></span>
+          <input type="text" class="mono" id="nuevaEspColorHex" placeholder="O escribí un código propio — Ej. #E67E22" maxlength="7" oninput="setColorPorCodigo(this.value)">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="cerrarModalNueva()">Cancelar</button>
+        <button class="modal-guardar" onclick="crearEspecialidad()">Crear Especialidad</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// --- Conexión real a Supabase ---
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ESPECIALIDADES y BOMBEROS ahora se cargan reales desde Supabase
+// (cargarDatos()), scopeados por RLS a mi_cuerpo_id() — nada de esto
+// queda hardcodeado. mi_id / miCompaniaId identifican la sesión real.
+let ESPECIALIDADES = {};
+let BOMBEROS = [];
+let miId = null, miCompaniaId = null;
+
+// Las especialidades son permanentes una vez otorgadas — sin vencimiento
+// ni revalidación periódica. Solo cambian si se asignan o se quitan
+// manualmente (ej. el bombero deja de cumplir el requisito).
+
+// El catálogo de especialidades no viene fijo de fábrica — el Depto. de
+// Especialidad puede sumar nuevas cuando el Cuerpo lo necesite (ej. Buceo,
+// K9, Manejo de Materiales Peligrosos avanzado). Queda disponible de
+// inmediato para asignar a cualquier bombero.
+const PALETA_NUEVA_ESP = ['#1976D2','#00897B','#5D4037','#546E7A','#C62828','#F57F17','#4527A0','#00838F'];
+let colorSeleccionado = null;
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    document.getElementById('sinSesion').style.display = 'block';
+    return;
+  }
+
+  const { data: perfil, error: perfilError } = await sb
+    .from('personal').select('id, compania_id, nombre_completo, cargo, companias(nombre), personal_roles_funcionales(rol_funcional)')
+    .eq('auth_user_id', session.user.id).single();
+  if(perfilError || !perfil){
+    document.getElementById('sinSesion').style.display = 'block';
+    return;
+  }
+  const rolesFuncionalesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
+  if(!rolesFuncionalesActivos.has('Depto. Especialidad')){
+    document.getElementById('sinPermiso').style.display = 'block';
+    return;
+  }
+  miId = perfil.id;
+  miCompaniaId = perfil.compania_id;
+  document.getElementById('roleTag').textContent = `${perfil.nombre_completo} · ${perfil.cargo}`;
+  document.getElementById('subtitulo').textContent = (perfil.companias ? perfil.companias.nombre + ' · ' : '') + 'Vigor';
+
+  const [{ data: esps }, { data: personal }] = await Promise.all([
+    sb.from('especialidades').select('*').order('codigo'),
+    sb.from('personal')
+      .select('id, numero_registro, nombre_completo, personal_especialidades(especialidad_id)')
+      .eq('compania_id', miCompaniaId)
+      .order('numero_registro')
+  ]);
+
+  ESPECIALIDADES = {};
+  (esps || []).forEach(e => { ESPECIALIDADES[e.codigo] = { id: e.id, nombre: e.nombre, hex: e.color_hex }; });
+
+  const codigoPorId = {};
+  (esps || []).forEach(e => { codigoPorId[e.id] = e.codigo; });
+
+  BOMBEROS = (personal || []).map(p => ({
+    id: p.id,
+    nombre: p.nombre_completo,
+    reg: p.numero_registro,
+    esp: (p.personal_especialidades || []).map(pe => codigoPorId[pe.especialidad_id]).filter(Boolean)
+  }));
+
+  document.getElementById('appWrap').style.display = 'flex';
+  renderLeyenda();
+  renderTabla();
+}
+
+function renderColorPicker(){
+  document.getElementById('nuevaEspColores').innerHTML = PALETA_NUEVA_ESP.map(hex =>
+    `<div class="color-opt ${colorSeleccionado===hex?'on':''}" style="background:${hex}" onclick="setColorNueva('${hex}')">${colorSeleccionado===hex?'✓':''}</div>`
+  ).join('');
+  actualizarPreviewHex();
+}
+function setColorNueva(hex){
+  colorSeleccionado = hex;
+  document.getElementById('nuevaEspColorHex').value = hex;
+  document.getElementById('nuevaEspColorHex').classList.remove('invalid');
+  renderColorPicker();
+}
+// Además de la paleta predeterminada, se puede escribir un código de color
+// propio (hex) — pedido explícito del cliente. Al escribir uno válido,
+// ningún swatch de la paleta queda marcado (renderColorPicker ya lo
+// resuelve solo, comparando colorSeleccionado contra cada swatch).
+function setColorPorCodigo(val){
+  const limpio = val.trim();
+  const input = document.getElementById('nuevaEspColorHex');
+  const esValido = /^#[0-9A-Fa-f]{6}$/.test(limpio) || /^#[0-9A-Fa-f]{3}$/.test(limpio);
+  if(esValido){
+    colorSeleccionado = limpio;
+    input.classList.remove('invalid');
+  } else {
+    input.classList.add('invalid');
+  }
+  renderColorPicker();
+}
+function actualizarPreviewHex(){
+  const preview = document.getElementById('colorHexPreview');
+  const esValido = /^#[0-9A-Fa-f]{6}$/.test(colorSeleccionado) || /^#[0-9A-Fa-f]{3}$/.test(colorSeleccionado) || PALETA_NUEVA_ESP.includes(colorSeleccionado);
+  preview.style.background = esValido ? colorSeleccionado : '';
+}
+
+function abrirModalNueva(){
+  document.getElementById('nuevaEspCodigo').value = '';
+  document.getElementById('nuevaEspNombre').value = '';
+  document.getElementById('nuevaEspColorHex').value = '';
+  colorSeleccionado = PALETA_NUEVA_ESP[0];
+  renderColorPicker();
+  document.getElementById('nuevaEspModal').classList.add('show');
+}
+function cerrarModalNueva(){
+  document.getElementById('nuevaEspModal').classList.remove('show');
+}
+async function crearEspecialidad(){
+  const codigo = document.getElementById('nuevaEspCodigo').value.trim().toUpperCase();
+  const nombre = document.getElementById('nuevaEspNombre').value.trim();
+
+  if(!codigo || !nombre){
+    toast('Completá el código y el nombre antes de crear');
+    return;
+  }
+  if(ESPECIALIDADES[codigo]){
+    toast(`Ya existe una especialidad con el código "${codigo}"`);
+    return;
+  }
+
+  const { data, error } = await sb.from('especialidades')
+    .insert({ cuerpo_id: (await sb.rpc('mi_cuerpo_id')).data, codigo, nombre, color_hex: colorSeleccionado })
+    .select().single();
+
+  if(error){
+    toast('No se pudo crear — ' + error.message);
+    return;
+  }
+
+  ESPECIALIDADES[codigo] = { id: data.id, nombre, hex: colorSeleccionado };
+  renderLeyenda();
+  cerrarModalNueva();
+  toast(`Especialidad "${nombre}" creada — ya está disponible para asignar`);
+}
+
+function renderLeyenda(){
+  document.getElementById('leyenda').innerHTML = Object.entries(ESPECIALIDADES).map(([k,e])=>
+    `<div class="leyenda-item"><div class="leyenda-dot" style="background:${e.hex}">${k}</div>${e.nombre}</div>`
+  ).join('');
+}
+
+function renderTabla(){
+  document.getElementById('tablaBody').innerHTML = BOMBEROS.map((b,i)=>{
+    const badges = b.esp.length
+      ? b.esp.map(k=>`<div class="insignia-badge" style="background:${ESPECIALIDADES[k].hex}">${k}</div>`).join('')
+      : `<span class="insignia-vacio">Sin especialidades</span>`;
+    return `
+      <tr>
+        <td class="td-nombre">${b.nombre}</td>
+        <td class="td-reg">N° ${b.reg}</td>
+        <td><div class="insignias-cell">${badges}</div></td>
+        <td><button class="btn-gestionar" onclick="abrirModal(${i})">Gestionar</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+let idxActivo = null;
+let seleccionTemp = [];
+
+function abrirModal(i){
+  idxActivo = i;
+  seleccionTemp = [...BOMBEROS[i].esp];
+  document.getElementById('modalNombre').textContent = BOMBEROS[i].nombre;
+  renderModalList();
+  document.getElementById('espModal').classList.add('show');
+}
+function cerrarModal(){
+  document.getElementById('espModal').classList.remove('show');
+}
+function renderModalList(){
+  document.getElementById('modalEspList').innerHTML = Object.entries(ESPECIALIDADES).map(([k,e])=>{
+    const on = seleccionTemp.includes(k);
+    return `<div class="modal-esp-row" onclick="toggleEsp('${k}')">
+      <div class="modal-checkbox" style="${on?`background:${e.hex};border-color:${e.hex};`:''}">${on?'✓':''}</div>
+      <div class="modal-esp-badge" style="background:${e.hex}">${k}</div>
+      <div class="modal-esp-label">${e.nombre}</div>
+    </div>`;
+  }).join('');
+}
+function toggleEsp(k){
+  if(seleccionTemp.includes(k)) seleccionTemp = seleccionTemp.filter(x=>x!==k);
+  else seleccionTemp.push(k);
+  renderModalList();
+}
+async function guardarEspecialidades(){
+  const bombero = BOMBEROS[idxActivo];
+  const idsNuevos = seleccionTemp.map(k => ESPECIALIDADES[k].id);
+
+  // Reemplaza el set completo — más simple y suficientemente seguro para
+  // un checklist de marcar/desmarcar (mismo criterio que ya usa el resto
+  // del sistema para listas chicas).
+  await sb.from('personal_especialidades').delete().eq('personal_id', bombero.id);
+  if(idsNuevos.length){
+    const { error } = await sb.from('personal_especialidades')
+      .insert(idsNuevos.map(especialidad_id => ({ personal_id: bombero.id, especialidad_id })));
+    if(error){
+      toast('No se pudo guardar — ' + error.message);
+      return;
+    }
+  }
+
+  bombero.esp = [...seleccionTemp];
+  renderTabla();
+  cerrarModal();
+  toast(`Especialidades de ${bombero.nombre} actualizadas`);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+cargarDatos();
+</script>
+</body>
+</html>

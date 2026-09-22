@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Estadísticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1100px 500px at 15% -10%, rgba(73,233,255,0.06), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
+  .brand-text h1{ font-size:19px; letter-spacing:.04em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+
+  .toolbar{ flex-shrink:0; padding:12px 26px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .date-field{ display:flex; align-items:center; gap:6px; position:relative;}
+  .date-field label{ font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em;}
+  .date-trigger{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:5px;
+    padding:7px 10px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px;
+    width:110px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:6px;
+  }
+  .date-trigger:hover{ border-color:var(--brass-bright);}
+  .date-trigger.open{ border-color:var(--cyan);}
+  .date-trigger svg{ width:12px; height:12px; flex-shrink:0; opacity:.6;}
+
+  .cal-popup{
+    position:absolute; top:calc(100% + 8px); left:0; z-index:70;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:10px;
+    padding:14px; width:240px; display:none; box-shadow:0 14px 34px rgba(0,0,0,.5);
+  }
+  .cal-popup.show{ display:block;}
+  .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .cal-nav{ background:var(--panel-alt); border:1px solid var(--line-strong); color:var(--text-muted); width:24px; height:24px; border-radius:5px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px;}
+  .cal-nav:hover{ border-color:var(--cyan); color:var(--cyan);}
+
+  /* ---- Filtro de Compañía (pills, todas visibles) ---- */
+  .cia-filtro-row{ display:flex; gap:5px; flex-wrap:wrap;}
+  .cia-pill{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.02em; text-transform:uppercase;
+    padding:8px 12px; border-radius:6px; cursor:pointer;
+  }
+  .cia-pill.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+
+  /* ---- Filtro de Tipo de Emergencia (desplegable) ---- */
+  .tipo-field{ position:relative;}
+  .tipo-trigger{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:5px;
+    padding:8px 12px; color:var(--text); font-size:12px; cursor:pointer;
+    display:flex; align-items:center; gap:8px; min-width:150px; justify-content:space-between;
+  }
+  .tipo-trigger:hover{ border-color:var(--brass-bright);}
+  .tipo-trigger.open{ border-color:var(--cyan);}
+  .tipo-trigger svg{ width:11px; height:11px; flex-shrink:0; opacity:.6; transition:transform .15s;}
+  .tipo-trigger.open svg{ transform:rotate(180deg);}
+
+  .tipo-popup{
+    position:absolute; top:calc(100% + 8px); left:0; z-index:70;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:10px;
+    padding:8px; width:260px; max-height:320px; overflow-y:auto; display:none; box-shadow:0 14px 34px rgba(0,0,0,.5);
+  }
+  .tipo-popup.show{ display:block;}
+  .tipo-opt{
+    padding:9px 12px; border-radius:6px; font-size:12.5px; cursor:pointer; color:var(--text);
+    display:flex; align-items:center; gap:8px;
+  }
+  .tipo-opt:hover{ background:var(--panel-alt);}
+  .tipo-opt.on{ background:var(--cyan-dim); color:#fff;}
+  .tipo-opt .cod{ font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--brass-bright); min-width:44px;}
+  .tipo-opt.on .cod{ color:#fff;}
+  .cal-month{ font-family:'Rajdhani'; font-weight:700; font-size:12.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--brass-bright);}
+  .cal-weekdays{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:4px;}
+  .cal-weekdays span{ font-size:9.5px; color:var(--text-dim); text-align:center; text-transform:uppercase;}
+  .cal-days{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px;}
+  .cal-day{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:5px;
+    font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--text); cursor:pointer; background:transparent; border:none;
+  }
+  .cal-day:hover{ background:var(--panel-alt);}
+  .cal-day.empty{ visibility:hidden; cursor:default;}
+  .cal-day.selected{ background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-weight:700;}
+  .cal-day.today{ box-shadow:inset 0 0 0 1.5px var(--brass-bright);}
+  .view-toggle{ display:flex; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:3px; margin-left:8px;}
+  .view-btn{ background:transparent; border:none; color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:7px 14px; border-radius:4px; cursor:pointer;}
+  .view-btn.on{ background:var(--cyan-dim); color:#fff;}
+  .btn-exportar{
+    margin-left:auto; background:transparent; border:1.5px solid var(--cyan); color:var(--cyan);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    font-size:12px; padding:9px 16px; border-radius:5px; cursor:pointer;
+  }
+  .btn-exportar:hover{ background:rgba(73,233,255,0.1);}
+
+  .content-wrap{ flex:1; min-height:0; padding:16px 26px 20px; overflow-y:auto;}
+
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;}
+  .kpi-card{ background:var(--panel); border:1px solid var(--line-strong); border-radius:8px; padding:14px 16px; position:relative; overflow:hidden;}
+  .kpi-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:4px; pointer-events:none; opacity:.35;}
+  .kpi-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em;}
+  .kpi-val{ font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700; color:var(--cyan); margin-top:4px;}
+  .kpi-sub{ font-size:11px; color:var(--text-muted); margin-top:2px;}
+
+  .chart-panel{ background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:20px 22px; position:relative;}
+  .chart-panel::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4;}
+  .chart-title{ font-size:12px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.09em; font-weight:700; margin-bottom:18px;}
+  .bars{ display:flex; align-items:flex-end; gap:14px; height:220px; padding:0 4px;}
+  .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+  .bar{ width:100%; max-width:52px; background:var(--cyan-dim); border:1.5px solid var(--cyan); border-radius:4px 4px 0 0; position:relative;}
+  .bar-val{ position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--cyan); white-space:nowrap;}
+  .bar-label{ margin-top:8px; font-size:10.5px; color:var(--text-muted); text-align:center;}
+
+  .table-panel{ background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:6px 0; position:relative; display:none;}
+  .table-panel.show{ display:block;}
+  .table-panel::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4; z-index:0;}
+  table{ width:100%; border-collapse:collapse; position:relative; z-index:1;}
+  thead th{ text-align:left; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; padding:10px 20px; border-bottom:2px solid var(--line-strong);}
+  tbody td{ padding:11px 20px; font-size:13px; border-bottom:1px solid var(--line);}
+  tbody tr:last-child td{ border-bottom:none;}
+  .td-tipo{ font-family:'JetBrains Mono',monospace; color:var(--brass-bright); font-weight:700;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media print{
+    body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
+    .nameplate, .toolbar, .toast{ display:none !important;}
+    .kpi-val{ color:#1B3A5C !important;}
+    table, thead th{ color:#111 !important; border-color:#999 !important;}
+  }
+
+  .central-tabs{ display:flex; gap:6px; padding:0 26px 10px; flex-wrap:wrap;}
+  .central-tab{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:.03em; text-transform:uppercase;
+    padding:8px 14px; border-radius:6px; cursor:pointer; text-decoration:none;
+  }
+  .central-tab.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+  .central-tab:hover{ border-color:var(--brass-bright);}
+  .tab-badge{ display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px; background:var(--emergencia); color:#fff; font-size:9.5px; font-weight:800; border-radius:8px; padding:0 4px; margin-left:6px; vertical-align:middle;}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Historial de Despacho</h1><span id="cuerpoLabel">Central de Alarmas · Vigor</span></div>
+      </div>
+      <div class="role-tag" id="roleTag">Central de Alarmas</div>
+    </div>
+  </div>
+
+  <div class="central-tabs">
+    <a href="comandancia.html" class="central-tab" style="border-color:var(--brass); color:var(--brass-bright);">← Comandancia</a>
+    <a href="consola_despacho.html" class="central-tab">Consola de Despacho</a>
+    <a href="visual_companias.html" class="central-tab">Visual de Compañías</a>
+    <a href="puestos_mando_activos.html" class="central-tab">Puestos de Mando Activos</a>
+    <a href="historial_despacho.html" class="central-tab on">Historial de Despacho</a>
+    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge">3</span></a>
+  </div>
+
+  <div class="toolbar">
+    <div class="date-field">
+      <label>Desde</label>
+      <div class="date-trigger" id="triggerDesde" onclick="toggleCal('desde')">
+        <span id="valDesde">—</span>
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="cal-popup" id="calDesde"></div>
+    </div>
+    <div class="date-field">
+      <label>Hasta</label>
+      <div class="date-trigger" id="triggerHasta" onclick="toggleCal('hasta')">
+        <span id="valHasta">—</span>
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="cal-popup" id="calHasta"></div>
+    </div>
+    <div class="cia-filtro-row" id="ciaFiltroRow"></div>
+
+    <div class="tipo-field">
+      <div class="tipo-trigger" id="tipoTrigger" onclick="toggleTipoPopup()">
+        <span id="tipoLabel">Todos los tipos</span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div class="tipo-popup" id="tipoPopup"></div>
+    </div>
+
+    <button class="btn-exportar" onclick="window.print()">⬇ Exportar PDF</button>
+  </div>
+
+  <div class="content-wrap">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Despachos en el Período</div><div class="kpi-val" id="kpiTotal">0</div><div class="kpi-sub">registrados</div></div>
+      <div class="kpi-card"><div class="kpi-label">Modo A (multi-Compañía)</div><div class="kpi-val" id="kpiModoA">0</div><div class="kpi-sub">despachos combinados</div></div>
+      <div class="kpi-card"><div class="kpi-label">Alertas Especiales</div><div class="kpi-val" id="kpiAlertas">0</div><div class="kpi-sub">en el período</div></div>
+      <div class="kpi-card"><div class="kpi-label">Duración Promedio</div><div class="kpi-val" id="kpiDuracion">—<span style="font-size:15px;"> min</span></div><div class="kpi-sub">por evento</div></div>
+    </div>
+
+    <div class="table-panel show" id="tablePanel">
+      <table>
+        <thead><tr><th>Código</th><th>Dirección</th><th>Compañía(s)</th><th>Carros</th><th>Despachado</th><th>Duración</th></tr></thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let miCuerpoId = null;
+let DESPACHOS = [];
+let TIPOS_CATALOGO = ['12.10','6.6'];
+let NOMBRE_TIPO = { '12.10':'Llamado a Maquinistas', '6.6':'Llamado a Voluntarios' };
+let CIAS = [];
+let ciaFiltro = 'todas';
+let tipoFiltro = null;
+let tipoPopupAbierto = false;
+
+function duracionMinutos(inicio, fin){
+  if(!fin) return null;
+  return Math.round((new Date(fin) - new Date(inicio)) / 60000);
+}
+function duracionTexto(min){
+  if(min === null) return '—';
+  if(min < 60) return `${min} min`;
+  return `${Math.floor(min/60)}h ${String(min%60).padStart(2,'0')}min`;
+}
+function fmtHora(d){
+  return new Date(d).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'}) + ' ' + new Date(d).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: perfil } = await sb.from('personal').select('cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
+  if(!perfil) return;
+  miCuerpoId = perfil.cuerpo_id;
+  document.getElementById('cuerpoLabel').textContent = 'Central de Alarmas · ' + (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+
+  const { data: cias } = await sb.from('companias').select('id, nombre').eq('cuerpo_id', miCuerpoId).order('numero');
+  CIAS = (cias || []).map(c => c.nombre);
+  COMPANIAS_ID_NOMBRE = {}; (cias || []).forEach(c => COMPANIAS_ID_NOMBRE[c.id] = c.nombre);
+
+  const { data: claves } = await sb.from('claves_emergencia').select('codigo, nombre').eq('cuerpo_id', miCuerpoId).eq('activo', true).order('orden');
+  TIPOS_CATALOGO = [...(claves||[]).map(k=>k.codigo), '12.10', '6.6'];
+  NOMBRE_TIPO = {}; (claves||[]).forEach(k => NOMBRE_TIPO[k.codigo] = k.nombre);
+  NOMBRE_TIPO['12.10'] = 'Llamado a Maquinistas'; NOMBRE_TIPO['6.6'] = 'Llamado a Voluntarios';
+
+  const { data: despachos } = await sb.from('despachos')
+    .select('direccion, fecha_hora_despacho, fecha_hora_termino, claves_emergencia(codigo, nombre), despacho_unidades(companias(nombre), carros(nomenclatura))')
+    .eq('cuerpo_id', miCuerpoId);
+  const { data: alertas } = await sb.from('alertas_especiales')
+    .select('tipo, companias_destino, fecha_hora')
+    .eq('cuerpo_id', miCuerpoId);
+
+  const dDespachos = (despachos || []).map(d => {
+    const min = duracionMinutos(d.fecha_hora_despacho, d.fecha_hora_termino);
+    return {
+      cod: d.claves_emergencia.codigo, dir: d.direccion,
+      cias: [...new Set(d.despacho_unidades.map(u=>u.companias.nombre))],
+      carros: d.despacho_unidades.map(u=>u.carros.nomenclatura),
+      fecha: d.fecha_hora_despacho, hora: fmtHora(d.fecha_hora_despacho),
+      duracionMin: min, duracion: duracionTexto(min)
+    };
+  });
+  const dAlertas = (alertas || []).map(a => ({
+    cod: a.tipo === 'acuartelamiento' ? 'ACUART.' : (a.tipo === '12_10' ? '12.10' : '6.6'),
+    dir: `Alerta Especial — ${a.tipo === 'acuartelamiento' ? 'Llamado general' : a.tipo === '12_10' ? 'Llamado a Maquinistas' : 'Llamado a Voluntarios'}`,
+    cias: a.companias_destino ? CIAS_por_id(a.companias_destino) : ['Todas'],
+    carros: ['—'], fecha: a.fecha_hora, hora: fmtHora(a.fecha_hora), duracionMin: null, duracion: '—'
+  }));
+
+  DESPACHOS = [...dDespachos, ...dAlertas].sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+  renderCiaFiltro();
+  renderTabla();
+}
+
+let COMPANIAS_ID_NOMBRE = {};
+function CIAS_por_id(ids){ return ids.map(id => COMPANIAS_ID_NOMBRE[id] || '?'); }
+
+function renderCiaFiltro(){
+  const row = document.getElementById('ciaFiltroRow');
+  const todasBtn = `<button class="cia-pill ${ciaFiltro==='todas'?'on':''}" onclick="setCiaFiltro('todas')">Todas</button>`;
+  const ciaBtns = CIAS.map(c => `<button class="cia-pill ${ciaFiltro===c?'on':''}" onclick="setCiaFiltro('${c}')">${c} Cía</button>`).join('');
+  row.innerHTML = todasBtn + ciaBtns;
+}
+function setCiaFiltro(v){
+  ciaFiltro = v;
+  renderCiaFiltro();
+  renderTabla();
+}
+
+function toggleTipoPopup(){
+  tipoPopupAbierto = !tipoPopupAbierto;
+  document.getElementById('tipoTrigger').classList.toggle('open', tipoPopupAbierto);
+  document.getElementById('tipoPopup').classList.toggle('show', tipoPopupAbierto);
+  if(tipoPopupAbierto) renderTipoPopup();
+}
+function cerrarTipoPopup(){
+  tipoPopupAbierto = false;
+  document.getElementById('tipoTrigger').classList.remove('open');
+  document.getElementById('tipoPopup').classList.remove('show');
+}
+document.addEventListener('click', (e)=>{
+  if(!e.target.isConnected) return;
+  if(e.target.closest('.tipo-field')) return;
+  cerrarTipoPopup();
+});
+
+function renderTipoPopup(){
+  const el = document.getElementById('tipoPopup');
+  const todos = `<div class="tipo-opt ${tipoFiltro===null?'on':''}" onclick="setTipoFiltro(null)">Todos los tipos</div>`;
+  const opts = TIPOS_CATALOGO.map(t => `<div class="tipo-opt ${tipoFiltro===t?'on':''}" onclick="setTipoFiltro('${t}')"><span class="cod">${t}</span>${NOMBRE_TIPO[t]}</div>`).join('');
+  el.innerHTML = todos + opts;
+}
+function setTipoFiltro(t){
+  tipoFiltro = t;
+  document.getElementById('tipoLabel').textContent = t ? `${t} — ${NOMBRE_TIPO[t]}` : 'Todos los tipos';
+  cerrarTipoPopup();
+  renderTabla();
+}
+
+function renderTabla(){
+  const desde = new Date(calState.desde.sel); desde.setHours(0,0,0,0);
+  const hasta = new Date(calState.hasta.sel); hasta.setHours(23,59,59,999);
+  const filtrados = DESPACHOS.filter(d => {
+    const matchCia = ciaFiltro==='todas' || d.cias.includes(ciaFiltro);
+    const matchTipo = !tipoFiltro || d.cod===tipoFiltro;
+    const f = new Date(d.fecha);
+    const matchFecha = f >= desde && f <= hasta;
+    return matchCia && matchTipo && matchFecha;
+  });
+  document.getElementById('kpiTotal').textContent = filtrados.length;
+  document.getElementById('kpiModoA').textContent = filtrados.filter(d => d.cias.length > 1).length;
+  document.getElementById('kpiAlertas').textContent = filtrados.filter(d => d.duracionMin === null).length;
+  const conDuracion = filtrados.filter(d => d.duracionMin !== null);
+  const promedioMin = conDuracion.length ? Math.round(conDuracion.reduce((s,d)=>s+d.duracionMin,0) / conDuracion.length) : null;
+  document.getElementById('kpiDuracion').innerHTML = promedioMin !== null ? `${promedioMin}<span style="font-size:15px;"> min</span>` : `—<span style="font-size:15px;"> min</span>`;
+  const body = document.getElementById('tablaBody');
+  if(filtrados.length===0){
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim);">Sin despachos que coincidan con los filtros elegidos.</td></tr>`;
+    return;
+  }
+  body.innerHTML = filtrados.map(d => `
+    <tr>
+      <td class="td-tipo">${d.cod}</td>
+      <td>${d.dir}</td>
+      <td>${d.cias.join(', ')}</td>
+      <td class="mono">${d.carros.join(', ')}</td>
+      <td class="mono">${d.hora}</td>
+      <td class="mono">${d.duracion}</td>
+    </tr>
+  `).join('');
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const HOY = new Date();
+
+const FECHA_DESDE_DEFECTO = new Date(HOY.getFullYear(), HOY.getMonth()-2, HOY.getDate());
+const calState = {
+  desde: { sel: FECHA_DESDE_DEFECTO, viewYear: FECHA_DESDE_DEFECTO.getFullYear(), viewMonth: FECHA_DESDE_DEFECTO.getMonth() },
+  hasta: { sel: new Date(HOY), viewYear: HOY.getFullYear(), viewMonth: HOY.getMonth() },
+};
+let calAbierto = null;
+
+function fmt(d){
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
+
+function toggleCal(cual){
+  if(calAbierto === cual){ cerrarCal(); return; }
+  calAbierto = cual;
+  document.getElementById('triggerDesde').classList.toggle('open', cual==='desde');
+  document.getElementById('triggerHasta').classList.toggle('open', cual==='hasta');
+  document.getElementById('calDesde').classList.toggle('show', cual==='desde');
+  document.getElementById('calHasta').classList.toggle('show', cual==='hasta');
+  renderCal(cual);
+}
+function cerrarCal(){
+  calAbierto = null;
+  document.getElementById('triggerDesde').classList.remove('open');
+  document.getElementById('triggerHasta').classList.remove('open');
+  document.getElementById('calDesde').classList.remove('show');
+  document.getElementById('calHasta').classList.remove('show');
+}
+document.addEventListener('click', (e)=>{
+  if(!e.target.isConnected) return; // el nodo se regeneró (ej. navegación de mes) antes de evaluar el click
+  if(e.target.closest('.cal-popup') || e.target.closest('.date-trigger')) return;
+  cerrarCal();
+});
+
+function navMes(cual, delta){
+  const s = calState[cual];
+  s.viewMonth += delta;
+  if(s.viewMonth < 0){ s.viewMonth = 11; s.viewYear--; }
+  if(s.viewMonth > 11){ s.viewMonth = 0; s.viewYear++; }
+  renderCal(cual);
+}
+
+function renderCal(cual){
+  const s = calState[cual];
+  const el = document.getElementById(cual==='desde' ? 'calDesde' : 'calHasta');
+  const firstDay = new Date(s.viewYear, s.viewMonth, 1).getDay();
+  const daysInMonth = new Date(s.viewYear, s.viewMonth+1, 0).getDate();
+  const offset = (firstDay + 6) % 7; // lunes primero
+
+  let dayCells = '';
+  for(let i=0;i<offset;i++) dayCells += `<button class="cal-day empty"></button>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const isSel = s.sel.getDate()===d && s.sel.getMonth()===s.viewMonth && s.sel.getFullYear()===s.viewYear;
+    const isToday = HOY.getDate()===d && HOY.getMonth()===s.viewMonth && HOY.getFullYear()===s.viewYear;
+    dayCells += `<button class="cal-day ${isSel?'selected':''} ${isToday?'today':''}" onclick="seleccionarDia('${cual}',${d})">${d}</button>`;
+  }
+
+  el.innerHTML = `
+    <div class="cal-head">
+      <button class="cal-nav" onclick="navMes('${cual}',-1)">‹</button>
+      <span class="cal-month">${MESES[s.viewMonth]} ${s.viewYear}</span>
+      <button class="cal-nav" onclick="navMes('${cual}',1)">›</button>
+    </div>
+    <div class="cal-weekdays"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div class="cal-days">${dayCells}</div>
+  `;
+}
+
+function seleccionarDia(cual, d){
+  const s = calState[cual];
+  s.sel = new Date(s.viewYear, s.viewMonth, d);
+  document.getElementById(cual==='desde' ? 'valDesde' : 'valHasta').textContent = fmt(s.sel);
+  cerrarCal();
+  renderTabla();
+  toast(`Fecha ${cual==='desde'?'inicial':'final'} actualizada: ${fmt(s.sel)}`);
+}
+
+document.getElementById('valDesde').textContent = fmt(calState.desde.sel);
+document.getElementById('valHasta').textContent = fmt(calState.hasta.sel);
+cargarDatos();
+</script>
+</body>
+</html>

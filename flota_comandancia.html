@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Flota de Comandancia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --nodisp:#FFC94D; --fuera:#42555C; --emergencia:#FF4B5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+    height:100vh; display:flex; flex-direction:column;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px;}
+  .brand{ display:flex; align-items:center; gap:12px;}
+  .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12px; padding:9px 16px; border-radius:5px; cursor:pointer; text-decoration:none;
+  }
+  .back-btn:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .brand-mark{ width:34px; height:34px; border-radius:8px; background:var(--panel); border:1.5px solid var(--brass-bright); display:flex; align-items:center; justify-content:center;}
+  .brand-text h1{ font-size:19px;}
+  .brand-text span{ font-size:11px; color:var(--text-dim); letter-spacing:.06em; text-transform:uppercase;}
+  .role-tag{
+    font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--brass); color:var(--brass-bright);
+  }
+
+  .demo-tag{ padding:8px 26px; font-size:11.5px; color:var(--text-dim); flex-shrink:0; border-bottom:1px solid var(--line);}
+
+  .content-wrap{ flex:1; min-height:0; padding:20px 26px; overflow-y:auto;}
+  .content-inner{ max-width:1000px; margin:0 auto;}
+
+  .resumen-row{ display:flex; gap:24px; margin-bottom:22px; padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .resumen-item{ display:flex; flex-direction:column;}
+  .resumen-item b{ font-family:'JetBrains Mono',monospace; font-size:24px; color:var(--cyan);}
+  .resumen-item span{ font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em;}
+
+  .flota-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px;}
+  .carro-card{
+    background:var(--panel); border:2px solid var(--line-strong); border-radius:10px; padding:16px 18px;
+    position:relative; overflow:hidden;
+  }
+  .carro-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:6px; opacity:.35; pointer-events:none;}
+  .carro-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; position:relative; z-index:1;}
+  .carro-nom{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:18px;}
+  .carro-estado-pill{
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    padding:4px 10px; border-radius:9px; color:#fff; cursor:pointer;
+  }
+  .estado-selector{
+    display:none; position:fixed; z-index:130;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:8px;
+    padding:6px; box-shadow:0 10px 30px rgba(0,0,0,.5); width:170px;
+  }
+  .estado-selector.open{ display:block;}
+  .estado-opt{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:5px;
+    cursor:pointer; font-size:12.5px; font-weight:600; color:var(--text);
+  }
+  .estado-opt:hover{ background:var(--panel-alt);}
+  .estado-opt .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .carro-tipo{ font-size:12px; color:var(--text-muted); margin-bottom:10px; position:relative; z-index:1;}
+  .carro-detalle{ font-size:11px; color:var(--text-dim); position:relative; z-index:1; border-top:1px solid var(--line); padding-top:9px;}
+  .btn-ficha-tecnica{
+    width:100%; margin-top:11px; background:var(--panel-alt); border:1.5px solid var(--cyan); color:var(--cyan);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:10.5px; padding:8px; border-radius:6px; cursor:pointer; position:relative; z-index:1;
+  }
+  .btn-ficha-tecnica:hover{ background:var(--cyan-dim); color:#fff;}
+
+  .modal-overlay-ft{ position:fixed; inset:0; background:rgba(5,10,15,0.8); z-index:150; display:none; align-items:center; justify-content:center; padding:20px;}
+  .modal-overlay-ft.show{ display:flex;}
+  .modal-box-ft{ background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px; padding:24px 26px; width:100%; max-width:560px; max-height:88vh; overflow-y:auto;}
+  .modal-box-ft h3{ font-family:'Rajdhani'; font-size:18px; margin-bottom:2px;}
+  .modal-box-ft .ft-sub{ font-size:11.5px; color:var(--text-muted); margin-bottom:18px;}
+  .ft-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; margin-bottom:20px;}
+  .ft-campo{ font-size:11px;}
+  .ft-campo span{ display:block; color:var(--text-dim); text-transform:uppercase; font-size:9.5px; letter-spacing:.05em; margin-bottom:2px;}
+  .ft-campo b{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text);}
+  .ft-campo-edit{ font-size:11px;}
+  .ft-campo-edit span{ display:block; color:var(--text-dim); text-transform:uppercase; font-size:9.5px; letter-spacing:.05em; margin-bottom:4px;}
+  .ft-campo-edit input{
+    width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:5px;
+    padding:7px 9px; font-size:12.5px; color:var(--text); font-family:'Inter';
+  }
+  .ft-campo-edit input:focus{ outline:none; border-color:var(--cyan);}
+  .ft-section-title{ font-size:10.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin:18px 0 9px; padding-bottom:6px; border-bottom:1px solid var(--line);}
+  .ft-equip-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:12px; padding:5px 8px 5px 11px; font-size:11px; color:var(--text-muted); margin:0 6px 6px 0;}
+  .ft-equip-quitar{ background:transparent; border:none; color:var(--burdeo-bright); cursor:pointer; font-size:11px; padding:0; line-height:1;}
+  .ft-add-row{ display:flex; gap:8px; margin-top:8px;}
+  .ft-add-row input{
+    flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:8px 10px; font-size:12px; color:var(--text);
+  }
+  .ft-add-btn{
+    background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; flex-shrink:0;
+    font-family:'Rajdhani'; font-weight:700; font-size:10.5px; text-transform:uppercase; padding:0 14px; border-radius:6px; cursor:pointer;
+  }
+  .ft-mant-row{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:11.5px;}
+  .ft-mant-row:last-child{ border-bottom:none;}
+  .ft-mant-fecha{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); width:80px; flex-shrink:0;}
+  .ft-mant-tag{ font-size:9px; font-weight:700; text-transform:uppercase; padding:3px 8px; border-radius:8px; color:#fff; flex-shrink:0;}
+  .ft-modal-actions{ display:flex; gap:9px; margin-top:20px;}
+  .btn-cerrar-ft{ flex:1; background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; text-transform:uppercase; font-size:11.5px; padding:10px; border-radius:6px; cursor:pointer;}
+  .btn-guardar-ft{ flex:1.4; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700; text-transform:uppercase; font-size:11.5px; padding:10px; border-radius:6px; cursor:pointer;}
+  .btn-guardar-ft:hover{ background:var(--cyan); color:#0D2226;}
+  .carro-detalle b{ color:var(--text-muted);}
+
+  .empty-state{ text-align:center; padding:60px 20px; color:var(--text-dim); font-size:13px;}
+
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:80; max-width:90vw; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <button class="back-btn" onclick="window.location.href='comandancia.html'">← Volver a Comandancia</button>
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#FF9A44" stroke-width="1.6"/></svg></div>
+        <div class="brand-text"><h1>Flota de Comandancia</h1><span>Vigor</span></div>
+      </div>
+      <div class="role-tag" id="roleTag">Sin sesión</div>
+    </div>
+  </div>
+
+  <div class="demo-tag">● Carros con numeración N°0 (K-0, Z-0, J-0…), creados desde "Crear Carro" en modo Superintendente. No pertenecen a ninguna Compañía — por eso no aparecen en Visual de Compañías ni en el Carros/Dotación de ningún PC del Cuartel.</div>
+
+  <div class="content-wrap">
+    <div class="content-inner">
+      <div class="resumen-row">
+        <div class="resumen-item"><b id="totalCarros">0</b><span>Carros de Comandancia</span></div>
+        <div class="resumen-item"><b id="totalServicio">0</b><span>En Servicio</span></div>
+      </div>
+
+      <div class="flota-grid" id="flotaGrid"></div>
+      <div class="estado-selector" id="selEstadoCompartido"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay-ft" id="modalFichaTecnica">
+    <div class="modal-box-ft" id="fichaTecnicaContenido"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// --- Conexión real a Supabase ---
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Carros que no pertenecen a ninguna Compañía — Comandancia los administra
+// directamente. Numeración propia "N°0" (distinta a la numeración interna
+// de cada Compañía), coherente con lo ya definido en crear_carro.html modo
+// Superintendente.
+const COLOR_ESTADO_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const ESTADO_LABEL = { servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
+
+let FLOTA_COMANDANCIA = [];
+
+async function cargarFlota(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    document.getElementById('roleTag').textContent = 'Sin sesión — andá a login_registro.html';
+    return;
+  }
+  const { data: perfil } = await sb.from('personal')
+    .select('nombre_completo, cargo').eq('auth_user_id', session.user.id).single();
+  document.getElementById('roleTag').textContent = perfil ? `${perfil.nombre_completo} · ${perfil.cargo}` : 'Sin perfil';
+
+  const { data: carros, error } = await sb
+    .from('carros')
+    .select('*, mantenciones(*)')
+    .is('compania_id', null)
+    .order('nomenclatura');
+
+  if(error){ toast('No se pudo cargar la flota — ' + error.message); return; }
+
+  FLOTA_COMANDANCIA = (carros || []).map(c => ({
+    id: c.id,
+    nom: c.nomenclatura, tipo: c.tipo_descripcion, estado: c.estado,
+    responsable: c.responsable || '—', detalle: c.detalle || '',
+    marca: c.marca || '', modelo: c.modelo || '', anio: c.anio || '', patente: c.patente,
+    km: c.kilometraje_actual, horometro: c.horometro,
+    capacidad_agua: c.capacidad_agua_l, capacidad_espuma: c.capacidad_espuma_l, dotacion_maxima: c.dotacion_maxima,
+    equipamiento: c.equipamiento || [],
+    mantenciones: (c.mantenciones || []).slice().sort((a,b) => new Date(b.fecha) - new Date(a.fecha))
+      .map(m => ({ id: m.id, fecha: new Date(m.fecha).toLocaleDateString('es-CL'), tipo: m.tipo, desc: m.descripcion, estado: m.estado }))
+  }));
+
+  renderFlota();
+}
+
+function renderFlota(){
+  const grid = document.getElementById('flotaGrid');
+  if(FLOTA_COMANDANCIA.length === 0){
+    grid.innerHTML = `<div class="empty-state">Comandancia todavía no tiene carros propios registrados.</div>`;
+  } else {
+    grid.innerHTML = FLOTA_COMANDANCIA.map((c,i) => `
+      <div class="carro-card">
+        <div class="carro-top">
+          <span class="carro-nom">${c.nom}</span>
+          <span class="carro-estado-pill" style="background:${COLOR_ESTADO_CARRO[c.estado]}" onclick="abrirSelectorEstado(event, ${i})">${ESTADO_LABEL[c.estado]}</span>
+        </div>
+        <div class="carro-tipo">${c.tipo}</div>
+        <div class="carro-detalle">
+          <div>Responsable: <b>${c.responsable}</b></div>
+          <div style="margin-top:4px;">${c.detalle}</div>
+        </div>
+        <button class="btn-ficha-tecnica" onclick="abrirFichaTecnica(${i})">📋 Ver Ficha Técnica</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('totalCarros').textContent = FLOTA_COMANDANCIA.length;
+  document.getElementById('totalServicio').textContent = FLOTA_COMANDANCIA.filter(c=>c.estado==='servicio').length;
+}
+
+// Popover con position:fixed — se posiciona en píxeles exactos relativo al
+// botón que lo abrió, mismo patrón ya usado en pc_compania.html, para que
+// nunca quede recortado por el scroll de la grilla.
+function abrirSelectorEstado(ev, i){
+  ev.stopPropagation();
+  const el = document.getElementById('selEstadoCompartido');
+  const rect = ev.currentTarget.getBoundingClientRect();
+  const anchoPopover = 170;
+  const altoPopoverEstimado = 4 * 36 + 12; // 4 opciones + padding del contenedor
+  const left = Math.min(Math.max(8, rect.left), window.innerWidth - anchoPopover - 8);
+  const cabeAbajo = (rect.bottom + 6 + altoPopoverEstimado) <= window.innerHeight;
+  const top = cabeAbajo ? (rect.bottom + 6) : Math.max(8, rect.top - 6 - altoPopoverEstimado);
+  el.style.left = left + 'px';
+  el.style.top = top + 'px';
+  el.innerHTML = Object.keys(ESTADO_LABEL).map(e =>
+    `<div class="estado-opt" onclick="setEstadoCarro(${i}, '${e}')"><span class="dot" style="background:${COLOR_ESTADO_CARRO[e]}"></span>${ESTADO_LABEL[e]}</div>`
+  ).join('');
+  el.classList.add('open');
+}
+document.addEventListener('click', () => {
+  const sel = document.getElementById('selEstadoCompartido');
+  if(sel) sel.classList.remove('open');
+});
+async function setEstadoCarro(i, estado){
+  const c = FLOTA_COMANDANCIA[i];
+  const { error } = await sb.from('carros').update({ estado }).eq('id', c.id);
+  if(error){ toast('No se pudo actualizar — ' + error.message); return; }
+  c.estado = estado;
+  renderFlota();
+  toast(`${c.nom} — estado actualizado a ${ESTADO_LABEL[estado]}`);
+}
+
+// Ficha Técnica — ampliación real pedida ("Comandancia, alcance completo"):
+// marca, modelo, año, patente, kilometraje, horómetro, capacidades,
+// dotación máxima, equipamiento y mantenciones por carro.
+const MANT_COLOR = { realizada:'#3CF29A', programada:'#49E9FF', pendiente:'#FFC94D' };
+const MANT_LABEL = { realizada:'Realizada', programada:'Programada', pendiente:'Pendiente' };
+
+function abrirFichaTecnica(i){
+  const c = FLOTA_COMANDANCIA[i];
+  document.getElementById('fichaTecnicaContenido').innerHTML = `
+    <h3>${c.nom} — Ficha Técnica</h3>
+    <div class="ft-sub">${c.tipo} · Responsable: ${c.responsable} · <span style="color:var(--cyan);">✎ Editable</span></div>
+
+    <div class="ft-section-title">Datos del Vehículo</div>
+    <div class="ft-grid">
+      <div class="ft-campo-edit"><span>Marca</span><input type="text" id="ft_marca" value="${c.marca}"></div>
+      <div class="ft-campo-edit"><span>Modelo</span><input type="text" id="ft_modelo" value="${c.modelo}"></div>
+      <div class="ft-campo-edit"><span>Año</span><input type="text" id="ft_anio" class="mono" value="${c.anio}" inputmode="numeric"></div>
+      <div class="ft-campo-edit"><span>Patente</span><input type="text" id="ft_patente" class="mono" value="${c.patente}"></div>
+      <div class="ft-campo-edit"><span>Kilometraje (km)</span><input type="text" id="ft_km" class="mono" value="${c.km}" inputmode="numeric"></div>
+      <div class="ft-campo-edit"><span>Horómetro (h)</span><input type="text" id="ft_horometro" class="mono" value="${c.horometro}" inputmode="numeric"></div>
+      <div class="ft-campo-edit"><span>Capacidad de Agua (L)</span><input type="text" id="ft_agua" class="mono" value="${c.capacidad_agua ?? ''}" placeholder="Dejar vacío si no tiene" inputmode="numeric"></div>
+      <div class="ft-campo-edit"><span>Capacidad de Espuma (L)</span><input type="text" id="ft_espuma" class="mono" value="${c.capacidad_espuma ?? ''}" placeholder="Dejar vacío si no tiene" inputmode="numeric"></div>
+      <div class="ft-campo-edit"><span>Dotación Máxima</span><input type="text" id="ft_dotacion" class="mono" value="${c.dotacion_maxima}" inputmode="numeric"></div>
+    </div>
+
+    <div class="ft-section-title">Equipamiento</div>
+    <div id="ft_equipo_lista">${c.equipamiento.map((e,ei) => `<span class="ft-equip-chip">${e} <button class="ft-equip-quitar" onclick="quitarEquipo(${i},${ei})">✕</button></span>`).join('')}</div>
+    <div class="ft-add-row">
+      <input type="text" id="ft_nuevo_equipo" placeholder="Ej. Escalera telescópica 4m">
+      <button class="ft-add-btn" onclick="agregarEquipo(${i})">+ Agregar</button>
+    </div>
+
+    <div class="ft-section-title">Mantenciones</div>
+    <div id="ft_mant_lista">
+      ${c.mantenciones.map(m => `
+        <div class="ft-mant-row">
+          <span class="ft-mant-fecha">${m.fecha}</span>
+          <span class="ft-mant-tag" style="background:${MANT_COLOR[m.estado]}">${MANT_LABEL[m.estado]}</span>
+          <span>${m.tipo} — ${m.desc}</span>
+        </div>
+      `).join('')}
+    </div>
+    <button class="ft-add-btn" style="width:100%; margin-top:8px;" onclick="abrirAgregarMantencion(${i})">+ Agregar Mantención</button>
+
+    <div class="ft-modal-actions">
+      <button class="btn-cerrar-ft" onclick="cerrarFichaTecnica()">Cancelar</button>
+      <button class="btn-guardar-ft" onclick="guardarFichaTecnica(${i})">Guardar Cambios</button>
+    </div>
+  `;
+  document.getElementById('modalFichaTecnica').classList.add('show');
+}
+async function guardarFichaTecnica(i){
+  const c = FLOTA_COMANDANCIA[i];
+  const marca = document.getElementById('ft_marca').value.trim();
+  const modelo = document.getElementById('ft_modelo').value.trim();
+  const patente = document.getElementById('ft_patente').value.trim();
+  if(!marca || !modelo || !patente){ toast('Marca, Modelo y Patente no pueden quedar vacíos'); return; }
+  const anioVal = document.getElementById('ft_anio').value.trim();
+  const anio = anioVal ? parseInt(anioVal, 10) : null;
+  const km = parseInt(document.getElementById('ft_km').value, 10) || 0;
+  const horometro = parseInt(document.getElementById('ft_horometro').value, 10) || 0;
+  const aguaVal = document.getElementById('ft_agua').value.trim();
+  const espumaVal = document.getElementById('ft_espuma').value.trim();
+  const capacidad_agua = aguaVal ? parseInt(aguaVal, 10) : null;
+  const capacidad_espuma = espumaVal ? parseInt(espumaVal, 10) : null;
+  const dotacion_maxima = parseInt(document.getElementById('ft_dotacion').value, 10) || c.dotacion_maxima;
+
+  const { error } = await sb.from('carros').update({
+    marca, modelo, anio, patente,
+    kilometraje_actual: km, horometro,
+    capacidad_agua_l: capacidad_agua, capacidad_espuma_l: capacidad_espuma,
+    dotacion_maxima
+  }).eq('id', c.id);
+  if(error){ toast('No se pudo guardar — ' + error.message); return; }
+
+  Object.assign(c, { marca, modelo, anio, patente, km, horometro, capacidad_agua, capacidad_espuma, dotacion_maxima });
+  cerrarFichaTecnica();
+  toast(`Ficha Técnica de ${c.nom} actualizada`);
+}
+async function agregarEquipo(i){
+  const input = document.getElementById('ft_nuevo_equipo');
+  const val = input.value.trim();
+  if(!val) return;
+  const c = FLOTA_COMANDANCIA[i];
+  const nuevoEquipo = [...c.equipamiento, val];
+  const { error } = await sb.from('carros').update({ equipamiento: nuevoEquipo }).eq('id', c.id);
+  if(error){ toast('No se pudo agregar — ' + error.message); return; }
+  c.equipamiento = nuevoEquipo;
+  abrirFichaTecnica(i); // re-renderiza el modal con el equipo agregado
+}
+async function quitarEquipo(i, ei){
+  const c = FLOTA_COMANDANCIA[i];
+  const nuevoEquipo = c.equipamiento.filter((_, idx) => idx !== ei);
+  const { error } = await sb.from('carros').update({ equipamiento: nuevoEquipo }).eq('id', c.id);
+  if(error){ toast('No se pudo quitar — ' + error.message); return; }
+  c.equipamiento = nuevoEquipo;
+  abrirFichaTecnica(i);
+}
+async function abrirAgregarMantencion(i){
+  const tipo = prompt('Tipo (Preventiva / Correctiva):', 'Preventiva');
+  if(!tipo) return;
+  const desc = prompt('Descripción de la mantención:');
+  if(!desc) return;
+  const c = FLOTA_COMANDANCIA[i];
+  const { data, error } = await sb.from('mantenciones')
+    .insert({ carro_id: c.id, fecha: new Date().toISOString().slice(0,10), tipo, descripcion: desc, estado:'pendiente' })
+    .select().single();
+  if(error){ toast('No se pudo agregar — ' + error.message); return; }
+  c.mantenciones.unshift({ id: data.id, fecha: new Date().toLocaleDateString('es-CL'), tipo, desc, estado:'pendiente' });
+  abrirFichaTecnica(i);
+  toast('Mantención agregada');
+}
+function cerrarFichaTecnica(){
+  document.getElementById('modalFichaTecnica').classList.remove('show');
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+cargarFlota();
+</script>
+</body>
+</html>

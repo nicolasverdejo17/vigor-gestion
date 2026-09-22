@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>VIGOR — Alta de Personal Rentado</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ====== CSS base de Vigor incorporado directamente — el archivo ya no depende de vigor_base.css ====== */
+/* ============================================================
+   VIGOR — Design tokens base (placa de bronce institucional)
+   Reconstruido desde spec — usar idéntico en las 5 pantallas
+   ============================================================ */
+:root {
+  /* Fondos y estructura */
+  --bg: #060A0F;
+  --panel: #0A131C;
+  --panel-alt: #0E1D28;
+  --line: #132734;
+  --line-strong: #1C3B49;
+
+  /* Texto */
+  --text: #E7F5FA;
+  --text-muted: #7B99A3;
+  --text-dim: #516E78;
+
+  /* Bronce (marco institucional) */
+  --brass: #C97A2E;
+  --brass-bright: #FF9A44;
+  --brass-dim: #8A4E1E;
+
+  /* Cian (marca / acción primaria) */
+  --cyan: #49E9FF;
+  --cyan-dim: #1E6E7D;
+  --cyan-glow: rgba(73,233,255,0.35);
+  --amber-glow: rgba(255,154,68,0.32);
+
+  /* Burdeo (severidad / crisis / acciones críticas) */
+  --burdeo: #7A1620;
+  --burdeo-bright: #D8394E;
+
+  /* Estados operativos */
+  --servicio: #3CF29A;
+  --emergencia: #FF4B5C;
+  --alerta: #FFC94D;
+  --fuera: #C9A63B;
+  --nodisp: #42555C;
+
+  /* Perfil Maestro / Super Admin */
+  --master: #39FF14;
+  --master-dim: #1F9E0A;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+.vigor-wordmark {
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  font-size: 13px;
+  color: var(--brass-bright);
+  padding: 14px 0 10px;
+  text-transform: uppercase;
+}
+
+h1, h2, h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.panel-alt {
+  background: var(--panel-alt);
+  border: 1px solid var(--line-strong);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  padding: 13px 22px;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--cyan);
+  color: #0B1A21;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-critical {
+  background: var(--burdeo);
+  color: var(--text);
+  border: 1px solid var(--burdeo-bright);
+}
+.btn-critical:hover:not(:disabled) { background: var(--burdeo-bright); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--line-strong);
+}
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--brass-dim); }
+
+input, select {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  width: 100%;
+}
+input:focus, select:focus {
+  outline: 2px solid var(--cyan-dim);
+  outline-offset: 1px;
+  border-color: var(--cyan);
+}
+
+label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+}
+
+::selection { background: var(--cyan-dim); }
+
+/* ====== Estilos propios de esta pantalla ====== */
+  .wrap { max-width: 640px; margin: 0 auto; padding: 8px 20px 60px; }
+  .back-link { color: var(--text-muted); font-size: 13px; text-decoration: none; display: inline-block; margin-bottom: 18px; }
+  .back-link:hover { color: var(--cyan); }
+
+  h1.page-title { font-size: 20px; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+
+  .type-select {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 26px;
+  }
+  .type-card {
+    padding: 18px 16px; cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: var(--radius);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .type-card:hover { border-color: var(--brass-dim); }
+  .type-card.selected { border-color: var(--cyan); background: var(--panel-alt); }
+  .type-card .t-icon { font-size: 20px; margin-bottom: 8px; }
+  .type-card .t-name { font-family: 'Rajdhani'; font-size: 14.5px; font-weight: 500; }
+  .type-card .t-desc { font-size: 11.5px; color: var(--text-dim); margin-top: 5px; line-height: 1.4; }
+
+  .panel-body { padding: 24px; margin-bottom: 20px; }
+  .section-title { font-size: 13px; color: var(--brass-bright); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { margin-bottom: 16px; }
+
+  .foto-upload{
+    display:flex; align-items:center; gap:14px; background:var(--panel-alt); border:1.5px dashed var(--line-strong);
+    border-radius:8px; padding:12px 16px; margin-bottom:18px; cursor:pointer;
+  }
+  .foto-upload:hover{ border-color:var(--brass-bright); }
+  .foto-upload .circle{
+    width:44px; height:44px; border-radius:50%; background:var(--panel); border:2px solid var(--line-strong);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:18px; color:var(--text-dim);
+  }
+  .foto-upload span{ font-size:12.5px; color:var(--text-muted); }
+  .field.full { grid-column: 1 / -1; }
+
+  .reg-preview {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel-alt); border: 1px solid var(--brass-dim);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    font-size: 12.5px; color: var(--text-muted); margin-bottom: 20px;
+  }
+  .reg-preview .mono { color: var(--brass-bright); font-size: 14px; font-weight: 600; }
+
+  .note-box {
+    font-size: 12px; color: var(--text-dim);
+    background: rgba(73,233,255,0.06); border: 1px solid rgba(73,233,255,0.25);
+    border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 20px; line-height: 1.5;
+  }
+
+  .actions { display: flex; gap: 10px; }
+  .actions .btn { flex: 1; }
+
+  select#tipoCompania:disabled, .field.disabled { opacity: 0.4; pointer-events: none; }
+
+  .field.field-error input, .field.field-error select { border-color: var(--emergencia); }
+
+  .toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: var(--panel-alt); border: 1px solid var(--cyan); color: var(--text);
+    padding: 13px 22px; border-radius: var(--radius-sm); font-size: 13.5px;
+    opacity: 0; pointer-events: none; transition: all .25s; z-index: 50; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; gap:14px; padding:12px 26px; flex-wrap:wrap; max-width:640px; margin:0 auto;}
+  .nameplate .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12.5px; padding:9px 16px; border-radius:5px; cursor:pointer; text-decoration:none; display:inline-block;
+  }
+  .nameplate .back-btn:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .nameplate h1{ font-size:18px; font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0; color:var(--text);}
+  .nameplate span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.08em; text-transform:uppercase;}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+<div class="nameplate">
+  <div class="nameplate-inner">
+    <a href="administracion_general.html" class="back-btn">← Volver a Administración General</a>
+    <div>
+      <h1>Alta de Personal Rentado</h1>
+      <span id="nombreCuerpoHead">— · Vigor</span>
+    </div>
+  </div>
+</div>
+<div id="sinPermiso" style="display:none; padding:40px; text-align:center; color:var(--text-dim,#516E78); font-size:13px;">
+  🔒 Esta pantalla es exclusiva de Superintendente, Vicesuperintendente, Secretario General o Tesorero General.
+</div>
+<div class="wrap" id="wrapContenido">
+  <p class="page-sub">Cuartelero y Operador de Central se crean directo — sin pasar por Solicitudes de Alta.</p>
+
+  <div class="type-select">
+    <div class="type-card selected" id="tipoCuartelero" data-tipo="cuartelero">
+      <div class="t-icon">🏠</div>
+      <div class="t-name">Cuartelero</div>
+      <div class="t-desc">Personal pagado que vive o trabaja en el Cuartel. Marca su llegada y salida igual que un voluntario.</div>
+    </div>
+    <div class="type-card" id="tipoOperador" data-tipo="operador">
+      <div class="t-icon">📡</div>
+      <div class="t-name">Operador de Central</div>
+      <div class="t-desc">Personal pagado de Central de Alarmas — no pertenece a ninguna Compañía.</div>
+    </div>
+  </div>
+
+  <div class="panel panel-body">
+    <div class="section-title">Datos personales</div>
+
+    <div class="foto-upload" onclick="document.getElementById('fotoInput').click()">
+      <div class="circle" id="fotoCircle">📷</div>
+      <span id="fotoLabel">Subir foto de perfil — ayuda a identificarlo en los listados</span>
+    </div>
+    <input type="file" id="fotoInput" accept="image/*" style="display:none;" onchange="previsualizarFoto(this)">
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="nombres">Nombres</label>
+        <input type="text" id="nombres" placeholder="Nombres">
+      </div>
+      <div class="field">
+        <label for="apellidos">Apellidos</label>
+        <input type="text" id="apellidos" placeholder="Apellidos">
+      </div>
+      <div class="field">
+        <label for="rut">RUT</label>
+        <input type="text" id="rut" placeholder="12.345.678-9">
+      </div>
+      <div class="field">
+        <label for="telefono">Teléfono</label>
+        <input type="text" id="telefono" placeholder="+56 9 ....">
+      </div>
+      <div class="field full" id="fieldCompania">
+        <label for="companiaAsignada">Compañía asignada</label>
+        <select id="companiaAsignada">
+          <option value="" selected>Selecciona una Compañía…</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field" id="regManualWrap">
+      <label for="regManual">N° de Registro (a definir a mano)</label>
+      <input type="text" class="mono" id="regManual" placeholder="Ej. 52">
+    </div>
+
+    <div class="note-box" id="noteBox">
+      El Cuartelero marca llegada y salida igual que un voluntario — sin horario especial, sin Cargo, sin Especialidad, sin mando. Para el cálculo de dotación mínima cuenta como si fuera Maquinista.
+    </div>
+
+    <div class="section-title">Credenciales de acceso</div>
+    <div class="grid-2">
+      <div class="field full">
+        <label>Contraseña temporal</label>
+        <div class="reg-preview" style="margin-bottom:0;">
+          <span class="mono" id="claveTemporalPreview" style="font-size:16px; letter-spacing: 0.08em;">••••-••••</span>
+          <span style="margin-left:auto; font-size:11px; color: var(--text-dim);">Expira en 7 días o al primer uso</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-ghost" id="btnCancelar">Cancelar</button>
+    <button class="btn btn-primary" id="btnCrear">Crear cuenta</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let COMPANIAS_DISPONIBLES = [];
+
+  // Las Compañías de este Cuerpo se definen en la Implementación (Crear
+  // Compañía) — nunca una lista fija de 3. Se puebla dinámicamente acá.
+  const ROLES_CON_ACCESO = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
+  async function cargarSesion(){
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session){ toast('Necesitás loguearte primero'); return; }
+    const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
+    if(!perfil || !perfil.cuerpo_id){ toast('No se pudo determinar tu Cuerpo'); return; }
+    if(!ROLES_CON_ACCESO.includes(perfil.cargo)){
+      document.getElementById('wrapContenido').style.display = 'none';
+      document.getElementById('sinPermiso').style.display = 'block';
+      return;
+    }
+    const cuerpoId = perfil.cuerpo_id;
+
+    const { data: cuerpoRow } = await sb.from('cuerpos').select('nombre_oficial').eq('id', cuerpoId).single();
+    document.getElementById('nombreCuerpoHead').textContent = (cuerpoRow ? cuerpoRow.nombre_oficial : '—') + ' · Vigor';
+
+    const { data: cias } = await sb.from('companias').select('id, nombre').eq('cuerpo_id', cuerpoId).order('numero');
+    COMPANIAS_DISPONIBLES = cias || [];
+    document.getElementById('companiaAsignada').insertAdjacentHTML('beforeend',
+      COMPANIAS_DISPONIBLES.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')
+    );
+  }
+  cargarSesion();
+
+  // Contraseña temporal — bug corregido: antes era un texto fijo
+  // ("K9F3-XPQR"), siempre igual sin importar cuántas cuentas se crearan.
+  // Ahora se genera de verdad y es distinta cada vez (mismo patrón real
+  // que restablecer_passwords_global.html).
+  function generarClaveTemporal(){
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s1='', s2='';
+    for(let i=0;i<4;i++) s1 += chars[Math.floor(Math.random()*chars.length)];
+    for(let i=0;i<4;i++) s2 += chars[Math.floor(Math.random()*chars.length)];
+    return `${s1}-${s2}`;
+  }
+  let claveTemporalActual = generarClaveTemporal();
+  document.getElementById('claveTemporalPreview').textContent = claveTemporalActual;
+
+  const cards = document.querySelectorAll('.type-card');
+  const fieldCompania = document.getElementById('fieldCompania');
+  const companiaAsignada = document.getElementById('companiaAsignada');
+  const noteBox = document.getElementById('noteBox');
+
+  const notes = {
+    cuartelero: 'El Cuartelero marca llegada y salida igual que un voluntario — sin horario especial, sin Cargo, sin Especialidad, sin mando. Para el cálculo de dotación mínima cuenta como si fuera Maquinista.',
+    operador: 'El Operador de Central no pertenece a ninguna Compañía — Central de Alarmas es una entidad aparte. Solo el Superintendente o Vicesuperintendente puede darlo de alta.',
+  };
+
+  // Corregido: tanto Cuartelero como Operador definen su N° de Registro a
+  // mano — ninguno de los dos usa un correlativo automático.
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      cards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const tipo = card.dataset.tipo;
+      noteBox.innerHTML = notes[tipo];
+      if (tipo === 'operador') {
+        fieldCompania.classList.add('disabled');
+        companiaAsignada.value = ''; // Un Operador nunca lleva Compañía asignada.
+      } else {
+        fieldCompania.classList.remove('disabled');
+      }
+    });
+  });
+
+  // Foto de perfil — selector de archivo real (no un aviso de mentira),
+  // con vista previa real de la imagen elegida.
+  function previsualizarFoto(input){
+    if(!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const circle = document.getElementById('fotoCircle');
+      circle.style.backgroundImage = `url(${e.target.result})`;
+      circle.style.backgroundSize = 'cover';
+      circle.style.backgroundPosition = 'center';
+      circle.textContent = '';
+      document.getElementById('fotoLabel').textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  document.getElementById('btnCrear').addEventListener('click', async () => {
+    const nombresField = document.getElementById('nombres');
+    const apellidosField = document.getElementById('apellidos');
+    const nombres = nombresField.value.trim();
+    const apellidos = apellidosField.value.trim();
+    nombresField.closest('.field').classList.toggle('field-error', !nombres);
+    apellidosField.closest('.field').classList.toggle('field-error', !apellidos);
+
+    // Corregido: Cuartelero Y Operador definen su N° de Registro a mano —
+    // ninguno de los dos tiene correlativo automático.
+    const regManual = document.getElementById('regManual');
+    const regVal = regManual.value.trim();
+    regManual.closest('.field').classList.toggle('field-error', !regVal);
+    if(!regVal){
+      toast('Escribí el N° de Registro antes de continuar');
+      return;
+    }
+    if (!nombres || !apellidos) {
+      toast('Completa nombres y apellidos antes de continuar');
+      return;
+    }
+
+    const tarjetaSel = document.querySelector('.type-card.selected');
+    const tipo = tarjetaSel.dataset.tipo;
+    const cargoFinal = tipo === 'operador' ? 'Operador de Central' : 'Cuartelero';
+    const companiaId = tipo === 'operador' ? null : (document.getElementById('companiaAsignada').value || null);
+
+    const { data, error } = await sb.rpc('crear_personal_rentado', {
+      p_nombre_completo: `${nombres} ${apellidos}`,
+      p_rut: document.getElementById('rut').value.trim(),
+      p_telefono: document.getElementById('telefono').value.trim(),
+      p_foto_url: null,
+      p_cargo: cargoFinal,
+      p_compania_id: companiaId,
+      p_numero_registro: parseInt(regVal, 10)
+    });
+
+    if(error){
+      const mensajes = {
+        NUMERO_REGISTRO_YA_EXISTE: 'Ese N° de Registro ya está en uso por otra persona.',
+        RUT_YA_EXISTE: 'Ese RUT ya está registrado en el sistema.',
+        CARGO_INVALIDO: 'Tipo de cuenta inválido.',
+      };
+      toast(mensajes[error.message] || ('No se pudo crear la cuenta — ' + error.message));
+      return;
+    }
+
+    claveTemporalActual = data[0].r_password_temporal;
+    document.getElementById('claveTemporalPreview').textContent = claveTemporalActual;
+    toast('Cuenta creada — N° ' + regVal + '. Contraseña temporal ' + claveTemporalActual + ' generada para el primer ingreso.');
+  });
+
+  document.getElementById('btnCancelar').addEventListener('click', () => {
+    toast('Volviendo a Personal…');
+  });
+</script>
+</body>
+</html>

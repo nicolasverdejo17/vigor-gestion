@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Inicio (Celular)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(900px 500px at 50% -10%, rgba(73,233,255,0.08), transparent 60%), #060A0F;
+    font-family:'Inter',sans-serif; color:var(--text);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+
+  #phoneWrap{ height:100%; flex-direction:column; position:relative;}
+
+  .app-head{ padding:10px 18px 8px; flex-shrink:0;}
+  .app-head .eyebrow{ font-size:10px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+  .app-head h1{ font-size:19px; margin-top:2px;}
+  .role-strip{ display:flex; align-items:center; gap:7px; padding:5px 0 0;}
+  .role-strip .dot{ width:6px;height:6px;border-radius:50%; background:var(--cyan);}
+  .role-strip span{ font-size:10.5px; color:var(--text-muted);}
+  .role-strip b{ font-size:10.5px; color:var(--cyan); font-weight:700;}
+
+  .content{ flex:1; overflow-y:auto; padding:6px 18px 18px;}
+  .content::-webkit-scrollbar{ display:none;}
+
+  .resumen-card{
+    background:var(--panel); border:1.5px solid var(--line-strong); border-radius:12px;
+    padding:16px; margin-bottom:14px; position:relative; overflow:hidden;
+  }
+  .resumen-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.35;}
+  .resumen-title{ font-size:10.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:12px; position:relative; z-index:1;}
+  .resumen-stats{ display:flex; position:relative; z-index:1; margin-bottom:12px;}
+  .resumen-stat{ flex:1; text-align:center;}
+  .resumen-stat b{ display:block; font-family:'JetBrains Mono',monospace; font-size:22px; color:var(--cyan); font-weight:700;}
+  .resumen-stat span{ font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.03em;}
+  .resumen-almando{ font-size:12px; color:var(--text-muted); position:relative; z-index:1; padding-top:10px; border-top:1px dashed var(--line-strong);}
+  .resumen-almando b{ color:var(--text); display:block; font-size:13px; margin-top:2px;}
+  .resumen-carros{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; position:relative; z-index:1;}
+  .carro-chip{ display:inline-flex; align-items:center; gap:5px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px; background:var(--panel-alt); border:1.5px solid var(--servicio); padding:4px 9px; border-radius:5px; color:var(--text);}
+  .carro-chip::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--servicio); flex-shrink:0;}
+  .carro-chip.mant{ border-color:var(--alerta);}
+  .carro-chip.mant::before{ background:var(--alerta);}
+
+  .mi-estado-card{
+    background:var(--panel); border:2px solid var(--e-color, var(--line-strong)); border-radius:12px;
+    padding:14px 16px; margin-bottom:14px; position:relative; overflow:hidden; cursor:pointer;
+  }
+  .mi-estado-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.35;}
+  .mi-estado-top{ display:flex; align-items:center; gap:12px; position:relative; z-index:1;}
+  .mi-foto{ width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--line-strong); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:15px; color:var(--text-muted); flex-shrink:0;}
+  .mi-nombre{ font-size:14px; font-weight:700;}
+  .mi-cargo{ font-size:11px; color:var(--text-muted);}
+  .mi-estado-chip{
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
+    padding:5px 10px; border-radius:10px; background:var(--e-color, var(--line-strong)); color:#fff; flex-shrink:0;
+  }
+  .mi-estado-hint{ font-size:10px; color:var(--text-dim); margin-top:9px; position:relative; z-index:1;}
+
+  .section-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:14px 4px 8px;}
+  .noti-row{ display:flex; gap:10px; background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:11px 13px; margin-bottom:7px;}
+  .noti-ico{ font-size:16px; flex-shrink:0;}
+  .noti-txt b{ font-size:12.5px; display:block;}
+  .noti-txt span{ font-size:10.5px; color:var(--text-muted);}
+
+  .toast{
+    position:absolute; bottom:20px; left:16px; right:16px;
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:11px 16px; border-radius:8px; font-size:12.5px; opacity:0; transform:translateY(8px);
+    transition:all .25s; pointer-events:none; text-align:center; z-index:30;
+  }
+  .toast.show{ opacity:1; transform:translateY(0);}
+
+  .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:8.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ font-size:16px; line-height:1;}
+  .tabbar-real a.active{ color:var(--cyan);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div id="sinSesion" style="display:none; padding:40vh 16px 40px; color:var(--text-muted); text-align:center;">
+    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+  </div>
+
+  <div id="phoneWrap" style="display:none;">
+    <div class="app-head">
+      <div class="eyebrow" id="nombreCompaniaCel">—</div>
+      <h1>Inicio</h1>
+      <div class="role-strip"><span class="dot"></span><span>Sesión:</span> <b id="roleLabel">—</b></div>
+    </div>
+
+    <div class="content">
+      <div class="resumen-card">
+        <div class="resumen-title">Resumen de Guardia — Cuartel</div>
+        <div class="resumen-stats">
+          <div class="resumen-stat"><b id="presentesCount">—</b><span>Presentes</span></div>
+          <div class="resumen-stat"><b id="carrosServicioCount">—</b><span>Carros</span></div>
+        </div>
+        <div class="resumen-almando">Al Mando<b id="alMandoTexto">—</b></div>
+        <div class="resumen-carros" id="resumenCarrosChips"></div>
+      </div>
+
+      <div class="mi-estado-card" id="miEstadoCard" onclick="window.location.href='compania_celular.html'">
+        <div class="mi-estado-top" style="margin-bottom:0;">
+          <div class="mi-foto" id="miIniciales">—</div>
+          <div style="flex:1;">
+            <div class="mi-nombre" id="miNombre">—</div>
+            <div class="mi-cargo" id="miCargoReg">—</div>
+          </div>
+          <span class="mi-estado-chip" id="miEstadoChip">—</span>
+        </div>
+        <div class="mi-estado-hint">Tocar para cambiar mi estado, en Compañía →</div>
+      </div>
+
+      <div class="section-label">Notificaciones recientes</div>
+      <div id="notiList"><div class="noti-row"><div class="noti-txt"><span>Cargando…</span></div></div></div>
+    </div>
+    <div class="tabbar-real" id="tabbarReal"></div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// --- Conexión real a Supabase ---
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Mismo modelo de 4 estados que el PC del Cuartel y Compañía (Celular).
+// Acá es SOLO LECTURA — el único lugar donde se cambia de verdad es en
+// Compañía, junto a la lista de Guardia Activa que depende de este estado.
+const COLOR_ESTADO = { disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const PILL_LABEL = { disponible:'Disponible', no_disponible:'No Disponible', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
+const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
+
+let miEstado = 'fuera';
+
+function renderMiEstadoChip(){
+  document.getElementById('miEstadoChip').textContent = PILL_LABEL[miEstado];
+  document.getElementById('miEstadoCard').style.setProperty('--e-color', COLOR_ESTADO[miEstado]);
+}
+
+function iniciales(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase(); }
+
+async function cargarDatos(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    document.getElementById('sinSesion').style.display = 'block';
+    return;
+  }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, numero_registro, nombre_completo, cargo, compania_id, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .eq('auth_user_id', session.user.id).single();
+  if(!perfil || !perfil.compania_id){
+    document.getElementById('sinSesion').style.display = 'block';
+    document.getElementById('sinSesion').textContent = 'Esta sesión no pertenece a ninguna Compañía.';
+    return;
+  }
+  const filaVigente = (perfil.personal_estado_historial || []).find(h => h.hora_fin === null);
+  miEstado = filaVigente ? filaVigente.estado : 'fuera';
+
+  document.getElementById('nombreCompaniaCel').textContent = perfil.companias.nombre;
+  document.getElementById('roleLabel').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
+  document.getElementById('miIniciales').textContent = iniciales(perfil.nombre_completo);
+  document.getElementById('miNombre').textContent = perfil.nombre_completo;
+  document.getElementById('miCargoReg').textContent = `${perfil.cargo} · N° ${perfil.numero_registro}`;
+
+  const [{ data: companeros }, { data: carros }, { data: almando }] = await Promise.all([
+    sb.from('personal').select('personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)').eq('compania_id', perfil.compania_id),
+    sb.from('carros').select('nomenclatura, estado').eq('compania_id', perfil.compania_id),
+    sb.from('compania_al_mando').select('tipo_mando, personal(nombre_completo, cargo)').eq('compania_id', perfil.compania_id).maybeSingle()
+  ]);
+
+  const presentes = (companeros || []).filter(p => {
+    const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
+    return fv && fv.estado !== 'fuera';
+  }).length;
+  document.getElementById('presentesCount').textContent = presentes;
+
+  const enServicio = (carros || []).filter(c => c.estado === 'servicio').length;
+  document.getElementById('carrosServicioCount').textContent = `${enServicio}/${(carros || []).length}`;
+  document.getElementById('resumenCarrosChips').innerHTML = (carros || []).map(c =>
+    `<span class="carro-chip ${c.estado !== 'servicio' ? 'mant' : ''}">${c.nomenclatura}</span>`
+  ).join('');
+
+  const CARGO_ABREV = { 'Director':'Director','Capitán':'Cap.','Teniente 1°':'Tte. 1°','Teniente 2°':'Tte. 2°','Teniente 3°':'Tte. 3°','Teniente 4°':'Tte. 4°','Ayudante Cía.':'Ayte. Cía.' };
+  if(almando && almando.personal){
+    const suf = almando.tipo_mando === 'situacional' ? ' (Comando Situacional)' : '';
+    const pre = almando.tipo_mando === 'situacional' ? '' : (CARGO_ABREV[almando.personal.cargo] || almando.personal.cargo) + ' ';
+    document.getElementById('alMandoTexto').textContent = pre + almando.personal.nombre_completo + suf;
+  } else {
+    document.getElementById('alMandoTexto').textContent = '— Sin personal en el Cuartel —';
+  }
+
+  document.getElementById('phoneWrap').style.display = 'flex';
+  renderMiEstadoChip();
+  renderNotificaciones(perfil);
+}
+
+function tiempoRelativo(fechaIso){
+  const ms = Date.now() - new Date(fechaIso).getTime();
+  const min = Math.floor(ms / 60000);
+  if(min < 60) return `hace ${Math.max(min,0)} min`;
+  const h = Math.floor(min / 60);
+  if(h < 24) return `hace ${h} h`;
+  const d = Math.floor(h / 24);
+  return d === 1 ? 'hace 1 día' : `hace ${d} días`;
+}
+
+async function renderNotificaciones(perfil){
+  const cont = document.getElementById('notiList');
+  const [{ data: actividad }, { data: curso }, { data: aviso }] = await Promise.all([
+    sb.from('actividades').select('nombre, fecha, hora, creado_en').eq('compania_id', perfil.compania_id).order('creado_en', { ascending:false }).limit(1),
+    sb.from('personal_capacitaciones').select('nombre_curso, nivel, creado_en').eq('personal_id', perfil.id).order('creado_en', { ascending:false }).limit(1),
+    sb.from('pizarra_observaciones').select('titulo, contenido, creado_en').eq('compania_id', perfil.compania_id).order('creado_en', { ascending:false }).limit(1),
+  ]);
+
+  const items = [];
+  if(actividad && actividad[0]) items.push({ ico:'📋', tit:`Nueva actividad: ${actividad[0].nombre}`, sub:`${actividad[0].fecha} ${(actividad[0].hora||'').slice(0,5)} — ${tiempoRelativo(actividad[0].creado_en)}`, ts:actividad[0].creado_en });
+  if(curso && curso[0]) items.push({ ico:'🎓', tit:`Curso registrado: ${curso[0].nombre_curso}`, sub:`${curso[0].nivel||'Sin nivel'} — ${tiempoRelativo(curso[0].creado_en)}`, ts:curso[0].creado_en });
+  if(aviso && aviso[0]) items.push({ ico:'📌', tit:`Nuevo aviso en la Pizarra: ${aviso[0].titulo}`, sub:tiempoRelativo(aviso[0].creado_en), ts:aviso[0].creado_en });
+
+  items.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+
+  cont.innerHTML = items.length
+    ? items.map(n => `<div class="noti-row"><div class="noti-ico">${n.ico}</div><div class="noti-txt"><b>${n.tit}</b><span>${n.sub}</span></div></div>`).join('')
+    : `<div class="noti-row"><div class="noti-txt"><span>Sin notificaciones recientes.</span></div></div>`;
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+cargarDatos();
+
+const TABS_NAV = [
+  {href:'inicio_celular.html', ic:'🏠', label:'Inicio'},
+  {href:'compania_celular.html', ic:'🚒', label:'Compañía'},
+  {href:'pizarra_celular.html', ic:'📌', label:'Pizarra'},
+  {href:'actividades_celular.html', ic:'📋', label:'Activid.'},
+  {href:'coordenadas_celular.html', ic:'📍', label:'GPS'},
+  {href:'opciones_celular.html', ic:'⚙️', label:'Opciones'},
+];
+(function renderTabbarReal(){
+  const cont = document.getElementById('tabbarReal');
+  if(!cont) return;
+  const actual = location.pathname.split('/').pop();
+  cont.innerHTML = TABS_NAV.map(t => `<a href="${t.href}" class="${t.href===actual?'active':''}"><span class="ic">${t.ic}</span><span>${t.label}</span></a>`).join('');
+})();
+</script>
+</body>
+</html>

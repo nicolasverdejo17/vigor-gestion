@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Identidad — Cuerpo de Bomberos Central</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F;
+    --panel:#0A131C;
+    --panel-alt:#0E1D28;
+    --line:#132734;
+    --line-strong:#1C3B49;
+    --brass:#C97A2E;
+    --brass-bright:#FF9A44;
+    --brass-dim:#8A4E1E;
+    --cyan:#49E9FF;
+    --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
+    --burdeo:#7A1620;
+    --burdeo-bright:#D8394E;
+    --text:#E7F5FA;
+    --text-muted:#7B99A3;
+    --text-dim:#516E78;
+
+    --servicio:#3CF29A;
+    --emergencia:#FF4B5C;
+    --alerta:#FFC94D;
+    --fuera:#C9A63B;
+    --nodisp:#42555C;
+
+    --esp-r:#FF4B5C; --esp-t:#4FA3FF; --esp-h:#FFC94D; --esp-f:#3CF29A; --esp-m:#B77CFF; --esp-c:#E08A5C;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:
+      radial-gradient(1000px 500px at 20% -10%, rgba(73,233,255,0.06), transparent 60%),
+      var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; padding:40px 24px 90px;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  .intro{color:var(--text-muted);font-size:13px;line-height:1.6;margin-bottom:30px;max-width:760px;}
+  .intro b{color:var(--cyan);}
+
+  /* ---- Nameplate ---- */
+  .nameplate{
+    background:linear-gradient(180deg,var(--panel-alt),var(--panel));
+    border:1px solid var(--line-strong);
+    border-radius:4px;
+    padding:0;
+    margin-bottom:26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .nameplate::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px; pointer-events:none;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:20px 28px; flex-wrap:wrap; gap:14px;}
+  .brand{ display:flex; align-items:center; gap:14px;}
+  .brand-mark{
+    width:38px;height:38px; border:1.5px solid var(--brass); border-radius:3px;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    background:var(--panel);
+  }
+  .brand-mark::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:16px; height:16px; }
+  .brand-text h1{ font-size:19px; color:var(--text); letter-spacing:.05em;}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; display:block; margin-top:2px;}
+  .nameplate-right{ display:flex; align-items:center; gap:18px;}
+  .clock{ text-align:right; color:var(--text-muted); font-size:12px; line-height:1.3;}
+  .clock strong{ display:block; color:var(--cyan); text-shadow:0 0 12px var(--cyan-glow); font-size:15px; font-family:'JetBrains Mono',monospace;}
+
+  .btn-crisis{
+    background:var(--burdeo); border:1.5px solid var(--burdeo-bright); color:#F6DCE0;
+    font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+    font-size:12.5px; padding:9px 16px; border-radius:3px; cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+  }
+  .btn-crisis::before{ content:""; width:7px;height:7px;border-radius:50%; background:#F6DCE0;}
+
+  /* ---- Section label ---- */
+  .section-label{ font-size:11px; letter-spacing:.16em; color:var(--text-dim); text-transform:uppercase; margin:34px 0 12px; display:flex; align-items:center; gap:10px;}
+  .section-label::after{ content:""; flex:1; height:1px; background:var(--line);}
+
+  /* ---- Cards grid ---- */
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  @media (max-width:900px){.grid3{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:4px;
+    padding:0; position:relative; overflow:hidden;
+  }
+  .card-frame{ position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px; pointer-events:none; opacity:.6;}
+  .card-inner{ padding:20px 22px 18px; position:relative;}
+  .card-eyebrow{ font-size:10.5px; letter-spacing:.14em; color:var(--text-dim); text-transform:uppercase; margin-bottom:6px;}
+  .card-title{ font-size:22px; margin-bottom:14px; color:var(--text);}
+  .card-stat-row{ display:flex; gap:22px; flex-wrap:wrap;}
+  .card-stat b{ font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; display:block; color:var(--cyan);}
+  .card-stat span{ font-size:10.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em;}
+
+  /* ---- Guardia detail ---- */
+  .guardia-card{ background:var(--panel); border:1px solid var(--line-strong); border-radius:4px; padding:0; margin-bottom:20px; overflow:hidden; position:relative;}
+  .guardia-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:2px; pointer-events:none;}
+  .guardia-head{ display:flex; justify-content:space-between; align-items:center; padding:16px 22px; border-bottom:1px solid var(--line);}
+  .guardia-head h2{ font-size:19px;}
+  .guardia-resumen{ display:flex; flex-wrap:wrap; padding:16px 22px; background:var(--panel-alt); border-bottom:1px solid var(--line);}
+  .resumen-item{ flex:1; min-width:180px; padding:0 20px; border-right:1px dashed var(--line);}
+  .resumen-item:last-child{border-right:none;}
+  .resumen-label{ font-size:10px; letter-spacing:.12em; color:var(--text-dim); text-transform:uppercase; margin-bottom:6px;}
+  .resumen-val{ font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:700; color:var(--text);}
+  .resumen-nums{ display:flex; flex-wrap:wrap; gap:5px; margin-top:6px;}
+  .resumen-nums span{ font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--bg); border:1px solid var(--line); padding:2px 6px; border-radius:2px; color:var(--text-muted);}
+
+  .bomb-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; padding:18px 22px 22px;}
+  .bomb-card{ background:var(--panel-alt); border:1.5px solid var(--b, var(--nodisp)); border-radius:4px; padding:12px 10px; text-align:center; position:relative;}
+  .bomb-foto{ width:44px;height:44px; border-radius:50%; margin:0 auto 8px; background:linear-gradient(135deg,var(--panel),#0D1613); border:1.5px solid var(--brass-dim); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:600; font-size:14px; color:var(--text-muted);}
+  .bomb-n{ font-size:12.5px; font-weight:600;}
+  .bomb-c{ font-size:10px; color:var(--text-muted); margin-bottom:4px;}
+  .bomb-reg{ font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--text-dim); margin-bottom:6px;}
+  .ins{ width:15px;height:15px;border-radius:3px; font-size:8.5px; font-family:'JetBrains Mono',monospace; font-weight:700; color:#fff; display:inline-flex; align-items:center; justify-content:center; margin:0 1px;}
+  .bomb-dot{ position:absolute; top:7px; right:7px; width:7px;height:7px;border-radius:50%; background:var(--b, var(--nodisp));}
+
+  /* ---- palette legend ---- */
+  .palette{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+  .sw{ display:flex; flex-direction:column; align-items:center; gap:6px;}
+  .sw-color{ width:52px;height:52px;border-radius:5px; border:1px solid var(--line-strong);}
+  .sw span{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-muted);}
+
+  /* ---- buttons demo ---- */
+  .btn-row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .btn-primary{ background:var(--cyan-dim); border:1px solid var(--cyan); color:#DFF7F9; font-family:'Rajdhani'; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:13px; padding:11px 22px; border-radius:3px; cursor:pointer;}
+  .btn-secondary{ background:transparent; border:1px solid var(--brass); color:var(--brass-bright); font-family:'Rajdhani'; font-weight:600; letter-spacing:.04em; text-transform:uppercase; font-size:13px; padding:11px 22px; border-radius:3px; cursor:pointer;}
+  .btn-ghost{ background:transparent; border:1px solid var(--line-strong); color:var(--text-muted); font-family:'Inter'; font-size:13px; padding:11px 20px; border-radius:3px; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a href="perfil_maestro.html" style="display:inline-block; margin-bottom:16px; color:var(--cyan); font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12.5px; text-decoration:none;">← Panel Maestro</a>
+
+  <div class="intro">Identidad institucional definitiva — inspirada en el metal bronce/latón y el acento cian del cofre de referencia, pero aplanada y sobria: sin brillos ni animación, pensada para leerse muchas horas seguidas en el cuartel. <b>El cian es el color de marca</b> (no de estado ni especialidad — esos ya están cerrados y no se tocan).</div>
+
+  <!-- Nameplate -->
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>Tercera Compañía</h1>
+          <span>Cuerpo de Bomberos Central · Terminal de Cuartel</span>
+        </div>
+      </div>
+      <div class="nameplate-right">
+        <div class="clock"><strong id="clk">19:44:02</strong>miércoles, 19 de agosto</div>
+        <button class="btn-crisis">Modo Crisis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 cards -->
+  <div class="grid3">
+    <div class="card">
+      <div class="card-frame"></div>
+      <div class="card-inner">
+        <div class="card-eyebrow">Guardia</div>
+        <div class="card-title">Guardia Activa</div>
+        <div class="card-stat-row">
+          <div class="card-stat"><b>12</b><span>En servicio</span></div>
+          <div class="card-stat"><b style="color:var(--text);font-size:16px;">Tte. Salinas</b><span>Al mando</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-frame"></div>
+      <div class="card-inner">
+        <div class="card-eyebrow">Flota</div>
+        <div class="card-title">Carros / Dotación</div>
+        <div class="card-stat-row">
+          <div class="card-stat"><b>4</b><span>En servicio</span></div>
+          <div class="card-stat"><b>1/1</b><span>Fuera / Mant.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-frame"></div>
+      <div class="card-inner">
+        <div class="card-eyebrow">Pizarra</div>
+        <div class="card-title">Observaciones</div>
+        <div class="card-stat-row">
+          <div class="card-stat"><b>3</b><span>Avisos</span></div>
+          <div class="card-stat"><b>1</b><span>Emergencia</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Guardia — detalle expandido</div>
+
+  <div class="guardia-card">
+    <div class="guardia-head"><h2>Guardia Activa</h2></div>
+    <div class="guardia-resumen">
+      <div class="resumen-item">
+        <div class="resumen-label">Al mando</div>
+        <div class="resumen-val" style="font-size:16px;">Tte. 1° R. Salinas</div>
+      </div>
+      <div class="resumen-item">
+        <div class="resumen-label">Bomberos en servicio</div>
+        <div class="resumen-val">12</div>
+        <div class="resumen-nums"><span>104</span><span>118</span><span>122</span><span>130</span><span>+8</span></div>
+      </div>
+      <div class="resumen-item">
+        <div class="resumen-label">Carros</div>
+        <div class="resumen-nums" style="margin-top:8px;">
+          <span style="color:var(--servicio);border-color:var(--servicio);">B-3</span>
+          <span style="color:var(--servicio);border-color:var(--servicio);">R-3</span>
+          <span style="color:var(--burdeo-bright);border-color:var(--burdeo-bright);">Q-3</span>
+          <span style="color:var(--nodisp);border-color:var(--nodisp);">F-3</span>
+        </div>
+      </div>
+    </div>
+    <div class="bomb-grid">
+      <div class="bomb-card" style="--b:var(--servicio)"><div class="bomb-dot"></div><div class="bomb-foto">RS</div><div class="bomb-n">R. Salinas</div><div class="bomb-c">Teniente 1°</div><div class="bomb-reg">N° 118</div><div><span class="ins" style="background:var(--esp-m)">M</span><span class="ins" style="background:var(--esp-r)">R</span></div></div>
+      <div class="bomb-card" style="--b:var(--servicio)"><div class="bomb-dot"></div><div class="bomb-foto">CH</div><div class="bomb-n">C. Herrera</div><div class="bomb-c">Bombero</div><div class="bomb-reg">N° 104</div><div><span class="ins" style="background:var(--esp-h)">H</span></div></div>
+      <div class="bomb-card" style="--b:var(--fuera)"><div class="bomb-dot"></div><div class="bomb-foto">DF</div><div class="bomb-n">D. Fuentes</div><div class="bomb-c">Bombero</div><div class="bomb-reg">N° 162</div><div style="font-size:9px;color:var(--text-dim);">— sin especialidad —</div></div>
+      <div class="bomb-card" style="--b:var(--servicio)"><div class="bomb-dot"></div><div class="bomb-foto">AR</div><div class="bomb-n">A. Reyes</div><div class="bomb-c">Ayudante Cía.</div><div class="bomb-reg">N° 156</div><div><span class="ins" style="background:var(--esp-f)">F</span></div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Botones</div>
+  <div class="btn-row">
+    <button class="btn-primary">Confirmar despacho</button>
+    <button class="btn-secondary">Asignar dotación</button>
+    <button class="btn-ghost">Cancelar</button>
+  </div>
+
+  <div class="section-label">Paleta de marca (nueva, transversal)</div>
+  <div class="palette">
+    <div class="sw"><div class="sw-color" style="background:#060A0F"></div><span>#060A0F bg</span></div>
+    <div class="sw"><div class="sw-color" style="background:#0A131C"></div><span>#0A131C panel</span></div>
+    <div class="sw"><div class="sw-color" style="background:#C97A2E"></div><span>#C97A2E brass</span></div>
+    <div class="sw"><div class="sw-color" style="background:#FF9A44"></div><span>#FF9A44 brass+</span></div>
+    <div class="sw"><div class="sw-color" style="background:#49E9FF"></div><span>#49E9FF cian</span></div>
+    <div class="sw"><div class="sw-color" style="background:#D8394E"></div><span>#D8394E burdeo</span></div>
+    <div class="sw"><div class="sw-color" style="background:#1E6E7D"></div><span>#1E6E7D cian oscuro</span></div>
+    <div class="sw"><div class="sw-color" style="background:#E9F0EC"></div><span>#E9F0EC texto</span></div>
+  </div>
+
+</div>
+<script>
+function tick(){ document.getElementById('clk').textContent = new Date().toLocaleTimeString('es-CL',{hour12:false}); }
+tick(); setInterval(tick,1000);
+</script>
+</body>
+</html>
