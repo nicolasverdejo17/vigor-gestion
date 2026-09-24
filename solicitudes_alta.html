@@ -250,8 +250,8 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 // Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
 // Opciones — en PC se mantiene el historial normal del navegador.
 function volverCuartel(){
-  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
-  history.back();
+  if(window.history.length > 1){ history.back(); return; }
+  window.location.href = 'opciones_celular.html';
 }
 
 let SOLICITUDES = [];

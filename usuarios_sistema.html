@@ -132,8 +132,8 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 // Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
 // Opciones — en PC se mantiene el historial normal del navegador.
 function volverCuartel(){
-  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
-  history.back();
+  if(window.history.length > 1){ history.back(); return; }
+  window.location.href = 'opciones_celular.html';
 }
 
 // Vigor es un producto comercial configurable — la cantidad de Compañías la
@@ -155,14 +155,23 @@ let USUARIOS = [];
 let CIAS = ['Todas'];
 let ciaFiltro = 'Todas';
 let cuerpoActivo = null;
+let miCompaniaId = null;
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
-  const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
+  const { data: perfil } = await sb.from('personal').select('cuerpo_id, compania_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
   if(perfil && perfil.cuerpo_id){
     cuerpoActivo = perfil.cuerpo_id;
+    // Bug reportado: un Director/Secretario de Compañía veía TODO el
+    // Cuerpo acá (sentía que entraba a una herramienta de "control
+    // maestro") — si la sesión tiene Compañía propia, se acota a esa
+    // sola. Comandancia/Administración General/Super Admin no tienen
+    // compania_id propio, así que a ellos les sigue mostrando el Cuerpo
+    // entero, sin cambios.
+    miCompaniaId = perfil.compania_id || null;
     document.getElementById('roleTag').textContent = 'Sesión: ' + perfil.cargo;
+    document.getElementById('filtroCiaRow').style.display = miCompaniaId ? 'none' : 'flex';
     await cargarUsuarios();
     return;
   }
@@ -179,11 +188,14 @@ async function cargarSesion(){
 
 async function cargarUsuarios(){
   const { data: cuerpoRow } = await sb.from('cuerpos').select('nombre_oficial').eq('id', cuerpoActivo).single();
-  document.getElementById('nombreCuerpoHead').textContent = (cuerpoRow ? cuerpoRow.nombre_oficial : '—') + ' · Todas las Compañías, sin filtro · Vigor';
+  const alcanceTxt = miCompaniaId ? 'Mi Compañía' : 'Todas las Compañías, sin filtro';
+  document.getElementById('nombreCuerpoHead').textContent = (cuerpoRow ? cuerpoRow.nombre_oficial : '—') + ' · ' + alcanceTxt + ' · Vigor';
 
-  const { data } = await sb.from('personal')
+  let query = sb.from('personal')
     .select('id, numero_registro, nombre_completo, cargo, estado, fecha_ingreso, companias(nombre), personal_especialidades(especialidades(codigo))')
     .eq('cuerpo_id', cuerpoActivo);
+  if(miCompaniaId) query = query.eq('compania_id', miCompaniaId);
+  const { data } = await query;
 
   USUARIOS = (data || []).map(p => ({
     id: p.id, reg: p.numero_registro, nombre: p.nombre_completo, cargo: p.cargo,

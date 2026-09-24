@@ -280,8 +280,12 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 // Opciones — en PC vuelve al historial normal del navegador (esta pantalla
 // no tenía ningún botón de Volver antes).
 function volverCuartel(){
-  if(window.innerWidth <= 760){ window.location.href = 'opciones_celular.html'; return; }
-  history.back();
+  // Bug reportado: esta pantalla se abre desde varios lados (Opciones,
+  // Administración General, Panel Maestro) y "Volver" siempre iba fijo a
+  // Opciones en Celular, aunque se haya entrado desde otro lado. Se usa
+  // el historial real, que sabe de dónde vino cada vez.
+  if(window.history.length > 1){ history.back(); return; }
+  window.location.href = 'opciones_celular.html';
 }
 
 // CATS/SUBCATS/ITEMS ahora se cargan reales desde Supabase (cargarDatos).

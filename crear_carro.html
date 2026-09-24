@@ -254,6 +254,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 // Opciones — en PC se mantiene exactamente el destino de siempre
 // (Administración General).
 function volverCrearCarro(){
+  if(window.history.length > 1){ history.back(); return; }
   window.location.href = window.innerWidth <= 760 ? 'opciones_celular.html' : 'administracion_general.html';
 }
 
