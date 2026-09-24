@@ -404,18 +404,16 @@ let bomberoId = params.get('bombero');
 let miPersonalId = null, miCargo = null, esViendoAMiPropiaFicha = false;
 let bomberoActual = null;
 
-// Bug reportado: "Volver" iba siempre a pc_compania.html, sin importar
-// cómo se llegó acá — un bombero viendo su PROPIA ficha desde el Celular
-// (opciones_celular.html) caía en una pantalla de PC del Cuartel que no le
-// corresponde (y le tira "sesión no identificada"). pc_compania.html sigue
-// siendo el destino correcto cuando quien mira es un PC/Director viendo la
-// ficha de OTRA persona.
+// Bug reportado: "Volver" tenía un destino fijo (antes siempre
+// pc_compania.html; después Opciones/Usuarios del Sistema a mano) que no
+// contempla TODAS las pantallas que abren una ficha — Hoja de Servicio,
+// Dar de Baja/Reactivar, el listado de Usuarios, Opciones, el grid del
+// PC — cada una espera volver a la suya. En vez de adivinar el destino,
+// se usa el historial real del navegador, que siempre sabe de dónde vino.
 function volverDesdeFicha(){
-  // En PC (ancho de escritorio) se mantiene el comportamiento de siempre:
-  // siempre vuelve a pc_compania.html, sin importar de quién es la ficha.
-  // Solo en Celular (mobile) cambia el destino: la propia ficha vuelve a
-  // Opciones, la ficha de otra persona vuelve al listado de Usuarios del
-  // Sistema (de donde "Hojas de Vida (de otros)" la abrió).
+  if(window.history.length > 1){ window.history.back(); return; }
+  // Fallback solo para cuando esta pantalla se abrió sin historial previo
+  // (pestaña nueva, link directo).
   if(window.innerWidth > 760){ window.location.href = 'pc_compania.html'; return; }
   window.location.href = esViendoAMiPropiaFicha ? 'opciones_celular.html' : 'usuarios_sistema.html';
 }
