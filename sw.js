@@ -5,7 +5,7 @@
 // conexión a Supabase para guardar — la sincronización offline de datos
 // (partes, bitácoras, checklist) es una funcionalidad aparte, no incluida acá.
 
-const CACHE_NAME = 'vigor-shell-v2';
+const CACHE_NAME = 'vigor-shell-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
