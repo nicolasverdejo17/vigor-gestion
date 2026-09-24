@@ -48,6 +48,14 @@
   .row2{ display:flex; gap:10px;}
   .row2 .field{ flex:1;}
 
+  .tipo-act-row{ display:flex; gap:6px; flex-wrap:wrap;}
+  .tipo-act-btn{
+    flex:1; min-width:72px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:9px 4px; text-align:center; font-family:'Rajdhani'; font-weight:700; font-size:11.5px;
+    letter-spacing:.02em; text-transform:uppercase; color:var(--text-muted); cursor:pointer;
+  }
+  .tipo-act-btn.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+
   .btn-crear{
     width:100%; margin-top:6px; background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
     font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
@@ -85,7 +93,16 @@
     </div>
 
     <div class="content" id="content">
-      <div class="field"><label>Tipo</label><input type="text" id="fTipo" placeholder="Ej. Reunión, Capacitación, Práctica Operativa"></div>
+      <div class="field">
+        <label>Tipo de Actividad</label>
+        <div class="tipo-act-row" id="tipoActRow">
+          <button type="button" class="tipo-act-btn" data-val="Academias" onclick="setTipoActividad('Academias')">Academias</button>
+          <button type="button" class="tipo-act-btn" data-val="Desfiles" onclick="setTipoActividad('Desfiles')">Desfiles</button>
+          <button type="button" class="tipo-act-btn" data-val="Reuniones" onclick="setTipoActividad('Reuniones')">Reuniones</button>
+          <button type="button" class="tipo-act-btn" data-val="Otros" onclick="setTipoActividad('Otros')">Otros</button>
+        </div>
+        <input type="text" id="fTipoOtro" placeholder="Nombre del tipo…" style="display:none; margin-top:8px;">
+      </div>
       <div class="field"><label>Nombre</label><input type="text" id="fNombre" placeholder="Ej. Reunión General de Compañía"></div>
       <div class="row2">
         <div class="field"><label>Fecha</label><input type="date" id="fFecha"></div>
@@ -118,17 +135,24 @@ async function cargarDatos(){
   miPersonalId = perfil.id; miCuerpoId = perfil.cuerpo_id; miCompaniaId = perfil.compania_id;
 }
 function bloquear(msg){
-  document.getElementById('content').innerHTML = `<div class="empty">🔒 ${msg}</div>`;
+  document.getElementById('content').innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; vertical-align:-4px;"><rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/></svg> ${msg}</div>`;
+}
+
+let tipoActividadSel = null;
+function setTipoActividad(v){
+  tipoActividadSel = v;
+  document.querySelectorAll('.tipo-act-btn').forEach(b => b.classList.toggle('on', b.dataset.val === v));
+  document.getElementById('fTipoOtro').style.display = v === 'Otros' ? 'block' : 'none';
 }
 
 async function crearActividad(){
-  const tipo = document.getElementById('fTipo').value.trim();
+  const tipo = tipoActividadSel === 'Otros' ? document.getElementById('fTipoOtro').value.trim() : tipoActividadSel;
   const nombre = document.getElementById('fNombre').value.trim();
   const fecha = document.getElementById('fFecha').value;
   const hora = document.getElementById('fHora').value || null;
   const lugar = document.getElementById('fLugar').value.trim() || null;
   const descripcion = document.getElementById('fDescripcion').value.trim() || null;
-  if(!tipo || !nombre || !fecha){ toast('Completá al menos tipo, nombre y fecha'); return; }
+  if(!tipo || !nombre || !fecha){ toast('Completá al menos el tipo, nombre y fecha'); return; }
 
   const { error } = await sb.from('actividades').insert({
     cuerpo_id: miCuerpoId, compania_id: miCompaniaId, tipo, nombre, fecha, hora, lugar, descripcion,
