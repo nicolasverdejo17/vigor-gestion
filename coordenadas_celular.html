@@ -44,7 +44,8 @@
   .coord-card.error{ border-color:var(--burdeo-bright);}
   .coord-card.error .coord-lat, .coord-card.error .coord-lng{ color:var(--burdeo-bright); font-size:15px;}
   .coord-card::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:9px; pointer-events:none; opacity:.35;}
-  .coord-pin{ font-size:30px; margin-bottom:8px; position:relative; z-index:1;}
+  .coord-pin{ margin-bottom:8px; position:relative; z-index:1;}
+  .coord-pin svg{ width:30px; height:30px; color:var(--cyan);}
   .coord-lat, .coord-lng{ font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:var(--cyan); position:relative; z-index:1;}
   .coord-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-top:10px; position:relative; z-index:1;}
   .coord-label:first-of-type{ margin-top:4px;}
@@ -57,6 +58,7 @@
     font-size:13px; padding:12px; border-radius:8px; cursor:pointer; margin-bottom:16px;
   }
   .btn-actualizar:hover{ background:var(--cyan); color:#0D2226;}
+  .btn-actualizar svg{ width:15px; height:15px; vertical-align:-3px; margin-right:3px;}
   .btn-actualizar.loading{ opacity:.6; pointer-events:none;}
 
   .accion-row{ display:flex; gap:8px; margin-bottom:16px;}
@@ -67,7 +69,8 @@
   }
   .btn-accion:hover{ border-color:var(--brass-bright);}
   .btn-accion:disabled{ opacity:.35; cursor:not-allowed; pointer-events:none;}
-  .btn-accion .ico{ font-size:16px;}
+  .btn-accion .ico{ display:inline-flex;}
+  .btn-accion .ico svg{ width:16px; height:16px;}
 
   .btn-reportar{
     width:100%; background:var(--alerta); border:none; color:#241505;
@@ -91,7 +94,8 @@
   }
   .historial-row.nuevo{ border-color:var(--servicio); animation:destello 1.6s ease-out;}
   @keyframes destello{ 0%{ background:rgba(60,242,154,0.25);} 100%{ background:var(--panel);} }
-  .historial-row .ico{ font-size:14px; flex-shrink:0;}
+  .historial-row .ico{ flex-shrink:0; display:inline-flex;}
+  .historial-row .ico svg{ width:14px; height:14px;}
   .historial-row .info{ flex:1; min-width:0;}
   .historial-row .coords{ font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:600;}
   .historial-row .meta{ font-size:10px; color:var(--text-dim); margin-top:1px;}
@@ -132,7 +136,7 @@
 
     <div class="content">
       <div class="coord-card error" id="coordCard">
-        <div class="coord-pin">📍</div>
+        <div class="coord-pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg></div>
         <div class="coord-label">Latitud</div>
         <div class="coord-lat" id="latVal">— sin datos —</div>
         <div class="coord-label">Longitud</div>
@@ -140,12 +144,12 @@
         <div class="coord-meta">Precisión: <b id="accVal">—</b> · Actualizado <b id="timeVal">nunca</b></div>
       </div>
 
-      <button class="btn-actualizar" id="btnActualizar" onclick="actualizarUbicacion()">📍 Obtener mi ubicación real</button>
+      <button class="btn-actualizar" id="btnActualizar" onclick="actualizarUbicacion()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg> Obtener mi ubicación real</button>
 
       <div class="accion-row">
-        <button class="btn-accion" id="btnCopiar" onclick="copiarCoordenadas()" disabled><span class="ico">📋</span>Copiar</button>
-        <button class="btn-accion" onclick="compartirUbicacion()"><span class="ico">📤</span>Compartir</button>
-        <button class="btn-accion" onclick="verEnMapa()"><span class="ico">🗺️</span>Ver Mapa</button>
+        <button class="btn-accion" id="btnCopiar" onclick="copiarCoordenadas()" disabled><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="4" width="8" height="4" rx="1"/><path d="M8 6H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/></svg></span>Copiar</button>
+        <button class="btn-accion" onclick="compartirUbicacion()"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M7.9 10.8l8.2-4.4M7.9 13.2l8.2 4.4"/></svg></span>Compartir</button>
+        <button class="btn-accion" onclick="verEnMapa()"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg></span>Ver Mapa</button>
       </div>
 
       <button class="btn-reportar" id="btnReportar" onclick="reportarUbicacion()" disabled>Reportar esta Ubicación a Central</button>
@@ -164,6 +168,8 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+const ICO_PIN_BTN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg> Actualizar mi ubicación';
 
 let miLat = null;
 let miLng = null;
@@ -198,7 +204,7 @@ async function cargarHistorial(){
     const diaLabel = esHoy ? 'Hoy' : f.toLocaleDateString('es-CL');
     const hora = f.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', hour12:false});
     return `<div class="historial-row">
-      <span class="ico">📍</span>
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg></span>
       <div class="info"><div class="coords">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div><div class="meta">${diaLabel} · ${hora}</div></div>
     </div>`;
   }).join('');
@@ -219,7 +225,7 @@ function actualizarUbicacion(){
     document.getElementById('btnCopiar').disabled = false;
     document.getElementById('btnReportar').disabled = false;
     btn.classList.remove('loading');
-    btn.textContent = '📍 Actualizar mi ubicación';
+    btn.innerHTML = ICO_PIN_BTN;
     toast('Ubicación real obtenida');
   };
 
@@ -232,7 +238,7 @@ function actualizarUbicacion(){
     document.getElementById('btnCopiar').disabled = true;
     document.getElementById('btnReportar').disabled = true;
     btn.classList.remove('loading');
-    btn.textContent = '📍 Actualizar mi ubicación';
+    btn.innerHTML = ICO_PIN_BTN;
     toast(motivo, true);
   };
 
