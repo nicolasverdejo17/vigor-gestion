@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vigor — Pizarra (Celular)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
     --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
@@ -41,7 +44,20 @@
   .content{ flex:1; overflow-y:auto; padding:6px 18px 18px;}
   .content::-webkit-scrollbar{ display:none;}
 
+  .compose{ padding:0 18px 10px; flex-shrink:0;}
+  .compose-select{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:7px; padding:8px 10px; font-size:12px; color:var(--text); margin-bottom:6px; font-family:'Inter';}
+  .compose-select:focus{ outline:none; border-color:var(--cyan);}
+  .compose-row{ display:flex; gap:8px; align-items:flex-end;}
+  .compose-row textarea{ flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:7px; padding:9px 11px; font-size:12.5px; color:var(--text); font-family:'Inter'; resize:none; min-height:38px; max-height:90px;}
+  .compose-row textarea:focus{ outline:none; border-color:var(--cyan);}
+  .compose-row button{ flex-shrink:0; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase; font-size:11.5px; padding:10px 14px; border-radius:7px; cursor:pointer;}
+
   .obs-item{ background:var(--panel); border:1px solid var(--line-strong); border-left:3px solid var(--brass-bright); border-radius:8px; padding:12px 14px; margin-bottom:9px;}
+  .obs-item.general{ border-left-color:var(--cyan);}
+  .obs-item .obs-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .obs-item .obs-tag{ font-size:9px; font-weight:700; color:var(--cyan); text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:3px;}
+  .obs-item .obs-del{ background:none; border:none; color:var(--text-dim); font-size:14px; cursor:pointer; flex-shrink:0; padding:2px 4px; margin-top:-2px;}
+  .obs-item .obs-del:hover{ color:var(--burdeo-bright);}
   .obs-item time{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); display:block; margin-bottom:4px;}
   .obs-item p{ margin:0; font-size:13px; line-height:1.4;}
   .obs-item .autor{ font-size:10.5px; color:var(--text-muted); margin-top:6px;}
@@ -62,8 +78,8 @@
   .empty{ text-align:center; padding:40px 20px; color:var(--text-dim); font-size:12.5px;}
 
   .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
-  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:8.5px; font-weight:600; letter-spacing:.01em;}
-  .tabbar-real a .ic{ font-size:16px; line-height:1;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:9.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ font-size:19px; line-height:1;}
   .tabbar-real a.active{ color:var(--cyan);}
 </style>
 <link rel="manifest" href="manifest.json">
@@ -95,6 +111,14 @@
       <button class="tab2-btn" id="btnEmerg" onclick="setTab('emergencias')">Emergencias</button>
     </div>
 
+    <div class="compose" id="composeWrap" style="display:none;">
+      <select class="compose-select" id="composeDestino" style="display:none;"></select>
+      <div class="compose-row">
+        <textarea id="composeTexto" placeholder="Escribir un aviso…" rows="1"></textarea>
+        <button id="composeBtn" onclick="publicarAviso()">Publicar</button>
+      </div>
+    </div>
+
     <div class="content" id="content"></div>
 
     <div class="tabbar-real" id="tabbarReal"></div>
@@ -105,13 +129,29 @@
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'vigor-auth-v1' } });
+
+const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
+const ROLES_CUERPO_GENERAL = ['Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
 
 let tabActiva = 'avisos';
 let OBS = [], EMERG = [];
+let PERFIL = null;
+let esOficialCia = false, esGeneral = false;
+let companiasCuerpo = [];
+
+let ultimaAccionLocalMs = 0;
+function marcarAccionLocal(){ ultimaAccionLocalMs = Date.now(); }
+function esEcoPropio(){ return Date.now() - ultimaAccionLocalMs < 2500; }
 
 function fmtHora(iso){
   return new Date(iso).toLocaleString('es-CL', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+}
+
+function diasRestantes(expiraIso){
+  const ms = new Date(expiraIso).getTime() - Date.now();
+  const d = Math.ceil(ms / 86400000);
+  return d <= 0 ? 'vence hoy' : `vence en ${d} día${d===1?'':'s'}`;
 }
 
 function render(){
@@ -128,9 +168,16 @@ function render(){
             ${o.fecha_evento ? `<div class="fecha">${fmtHora(o.fecha_evento)}</div>` : ''}
           </div>`;
       }
+      const puedeBorrar = !o.es_general && esOficialCia && PERFIL && o.compania_id === PERFIL.compania_id;
       return `
-        <div class="obs-item">
-          <time>${fmtHora(o.creado_en)}</time>
+        <div class="obs-item ${o.es_general ? 'general' : ''}">
+          <div class="obs-top">
+            <div>
+              ${o.es_general ? `<span class="obs-tag">📢 Comandancia${o.compania_id ? '' : ' — Todas las Compañías'} · ${diasRestantes(o.expira_en)}</span>` : ''}
+              <time>${fmtHora(o.creado_en)}</time>
+            </div>
+            ${puedeBorrar ? `<button class="obs-del" onclick="borrarAviso('${o.id}')" title="Borrar">🗑</button>` : ''}
+          </div>
           <p>${o.contenido}</p>
           ${o.autor_nombre ? `<div class="autor">Publicado por <b>${o.autor_nombre}</b></div>` : ''}
         </div>`;
@@ -151,7 +198,42 @@ function setTab(t){
   tabActiva = t;
   document.getElementById('btnAvisos').classList.toggle('on', t==='avisos');
   document.getElementById('btnEmerg').classList.toggle('on', t==='emergencias');
+  document.getElementById('composeWrap').style.display = (t==='avisos' && (esOficialCia || esGeneral)) ? 'block' : 'none';
   render();
+}
+
+async function publicarAviso(){
+  const textoEl = document.getElementById('composeTexto');
+  const contenido = textoEl.value.trim();
+  if(!contenido) return;
+  const destino = esGeneral ? (document.getElementById('composeDestino').value || null) : null;
+  marcarAccionLocal();
+  const { error } = await sb.rpc('crear_aviso_pizarra', { p_contenido: contenido, p_compania_id: destino });
+  if(error){ alert('No se pudo publicar el aviso: ' + error.message); return; }
+  textoEl.value = '';
+  await cargarDatos();
+}
+window.publicarAviso = publicarAviso;
+
+async function borrarAviso(id){
+  if(!confirm('¿Borrar este aviso de la Pizarra?')) return;
+  marcarAccionLocal();
+  const { error } = await sb.rpc('borrar_aviso_pizarra', { p_id: id });
+  if(error){ alert('No se pudo borrar: ' + error.message); return; }
+  await cargarDatos();
+}
+window.borrarAviso = borrarAviso;
+
+function renderCompose(){
+  const destinoSel = document.getElementById('composeDestino');
+  if(esGeneral){
+    destinoSel.style.display = 'block';
+    destinoSel.innerHTML = `<option value="">📢 Todas las Compañías</option>` +
+      companiasCuerpo.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+  } else {
+    destinoSel.style.display = 'none';
+  }
+  document.getElementById('composeWrap').style.display = (tabActiva==='avisos' && (esOficialCia || esGeneral)) ? 'block' : 'none';
 }
 
 async function cargarDatos(){
@@ -161,31 +243,43 @@ async function cargarDatos(){
     return;
   }
   const { data: perfil } = await sb.from('personal')
-    .select('nombre_completo, cargo, compania_id, cuerpo_id, companias(nombre)')
+    .select('id, nombre_completo, cargo, compania_id, cuerpo_id, companias(nombre)')
     .eq('auth_user_id', session.user.id).single();
-  if(!perfil || !perfil.compania_id){
+  if(!perfil || !perfil.cuerpo_id){
     document.getElementById('sinSesion').style.display = 'block';
-    document.getElementById('sinSesion').textContent = 'Esta sesión no pertenece a ninguna Compañía.';
+    document.getElementById('sinSesion').textContent = 'Esta sesión no pertenece a ningún Cuerpo.';
     return;
   }
-  document.getElementById('nombreCompaniaCel').textContent = perfil.companias.nombre;
+  PERFIL = perfil;
+  esOficialCia = PRIORIDAD_CARGO_MANDO.includes(perfil.cargo);
+  esGeneral = ROLES_CUERPO_GENERAL.includes(perfil.cargo);
+
+  document.getElementById('nombreCompaniaCel').textContent = perfil.companias ? perfil.companias.nombre : 'Comandancia';
   document.getElementById('roleLabel').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
 
-  const [{ data: obs }, { data: em }] = await Promise.all([
-    sb.from('pizarra_observaciones').select('*, personal(nombre_completo)').eq('compania_id', perfil.compania_id).order('creado_en', { ascending:false }).limit(20),
+  let obsQuery = sb.from('pizarra_observaciones').select('*, personal(nombre_completo)').order('creado_en', { ascending:false }).limit(20);
+  if(perfil.compania_id) obsQuery = obsQuery.or(`compania_id.eq.${perfil.compania_id},compania_id.is.null`);
+
+  const tareas = [
+    obsQuery,
     sb.from('pizarra_emergencias').select('*').eq('cuerpo_id', perfil.cuerpo_id).order('actualizado_en', { ascending:false }).limit(10)
-  ]);
+  ];
+  if(esGeneral) tareas.push(sb.from('companias').select('id, nombre').eq('cuerpo_id', perfil.cuerpo_id).order('nombre'));
+
+  const [{ data: obs }, { data: em }, companiasRes] = await Promise.all(tareas);
   OBS = (obs || []).map(o => ({ ...o, autor_nombre: o.personal ? o.personal.nombre_completo : null }));
   EMERG = em || [];
+  if(esGeneral) companiasCuerpo = (companiasRes && companiasRes.data) || [];
 
   document.getElementById('phoneWrap').style.display = 'flex';
+  renderCompose();
   render();
 
   if(!suscritoPizarraCelular){
     suscritoPizarraCelular = true;
-    sb.channel('pizarra-celular-' + perfil.compania_id)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_observaciones', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_emergencias', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, () => cargarDatos())
+    sb.channel('pizarra-celular-' + perfil.cuerpo_id)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_observaciones', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, () => { if(esEcoPropio()) return; cargarDatos(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pizarra_emergencias', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, () => { if(esEcoPropio()) return; cargarDatos(); })
       .subscribe();
   }
 }

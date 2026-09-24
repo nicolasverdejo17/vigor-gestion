@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vigor — Compañía (Celular)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
     --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
@@ -112,8 +115,8 @@
   .toast.show{ opacity:1; transform:translateY(0);}
 
   .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
-  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:8.5px; font-weight:600; letter-spacing:.01em;}
-  .tabbar-real a .ic{ font-size:16px; line-height:1;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:9.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ font-size:19px; line-height:1;}
   .tabbar-real a.active{ color:var(--cyan);}
 </style>
 <link rel="manifest" href="manifest.json">
@@ -174,7 +177,7 @@
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'vigor-auth-v1' } });
 const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
 
 // Mismo modelo de 4 estados que el PC del Cuartel — coherencia en TODO
