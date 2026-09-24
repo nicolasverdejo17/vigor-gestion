@@ -146,6 +146,12 @@
         <tbody id="capacitacionesBody"></tbody>
       </table>
 
+      <div class="section-title">Asistencia a Actividades</div>
+      <table>
+        <thead><tr><th>Categoría</th><th>Presente</th><th>Ausente</th><th>Justificado</th></tr></thead>
+        <tbody id="actividadesBody"></tbody>
+      </table>
+
     </div>
   </div>
 
@@ -211,8 +217,10 @@ async function renderPeriodo(p){
   if(desdeFecha) qEmergencias = qEmergencias.gte('partes_emergencia.fecha_hora_despacho', desdeISO);
   let qCapacitaciones = sb.from('personal_capacitaciones').select('nombre_curso, fecha, nivel').eq('personal_id', bomberoId).order('fecha', { ascending:false });
   if(desdeFecha) qCapacitaciones = qCapacitaciones.gte('fecha', desdeFecha);
+  let qActividades = sb.from('asistencia').select('estado, actividades!inner(tipo, fecha)').eq('personal_id', bomberoId);
+  if(desdeFecha) qActividades = qActividades.gte('actividades.fecha', desdeFecha);
 
-  const [{ data: guardias }, { data: emergencias }, { data: capacitaciones }] = await Promise.all([qGuardias, qEmergencias, qCapacitaciones]);
+  const [{ data: guardias }, { data: emergencias }, { data: capacitaciones }, { data: actividades }] = await Promise.all([qGuardias, qEmergencias, qCapacitaciones, qActividades]);
 
   const guardiasList = guardias || [];
   const totalHoras = guardiasList.reduce((s,g) => s + (new Date(g.hora_fin || Date.now()) - new Date(g.hora_inicio)) / 3600000, 0);
@@ -244,6 +252,18 @@ async function renderPeriodo(p){
   document.getElementById('capacitacionesBody').innerHTML = (capacitaciones && capacitaciones.length) ? capacitaciones.map(c =>
     `<tr><td>${c.nombre_curso}</td><td class="mono">${new Date(c.fecha+'T00:00:00').toLocaleDateString('es-CL')}</td><td>${c.nivel || ''}</td></tr>`
   ).join('') : '<tr><td colspan="3" style="text-align:center; color:var(--text-dim);">Sin capacitaciones registradas en el período.</td></tr>';
+
+  // Resumen por categoría (Academias, Desfiles, Reuniones, Otros — las
+  // mismas que se eligen al Crear Actividad), no el detalle de cada una.
+  const porTipo = {};
+  (actividades || []).forEach(a => {
+    const tipo = a.actividades.tipo;
+    if(!porTipo[tipo]) porTipo[tipo] = { presente:0, ausente:0, justificado:0 };
+    porTipo[tipo][a.estado] = (porTipo[tipo][a.estado] || 0) + 1;
+  });
+  document.getElementById('actividadesBody').innerHTML = Object.keys(porTipo).length ? Object.entries(porTipo).map(([tipo,v]) =>
+    `<tr><td>${tipo}</td><td class="mono">${v.presente}</td><td class="mono">${v.ausente}</td><td class="mono">${v.justificado}</td></tr>`
+  ).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">Sin actividades registradas en el período.</td></tr>';
 }
 
 function setPeriodo(p, btn){
