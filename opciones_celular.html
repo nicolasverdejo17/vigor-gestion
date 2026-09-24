@@ -117,11 +117,11 @@
 
       <div class="section-label">Mi cuenta</div>
       <div class="row" onclick="window.location.href='editar_datos_personales.html'">
-        <div class="row-l"><div class="row-ico">👤</div><div><b>Mi Perfil</b><span>Datos personales, editables</span></div></div>
+        <div class="row-l"><div class="row-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg></div><div><b>Mi Perfil</b><span>Datos personales, editables</span></div></div>
         <span class="row-arrow">›</span>
       </div>
       <div class="row" onclick="window.location.href='ficha_bombero.html'">
-        <div class="row-l"><div class="row-ico">📋</div><div><b>Mi Hoja de Vida</b><span>Ascensos, reconocimientos, cursos — solo lectura</span></div></div>
+        <div class="row-l"><div class="row-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4"/><path d="M9 12.5h6M9 15.5h6M9 9.5h2"/></svg></div><div><b>Mi Hoja de Vida</b><span>Ascensos, reconocimientos, cursos — solo lectura</span></div></div>
         <span class="row-arrow">›</span>
       </div>
       <div class="row" onclick="window.location.href='gestion_capacitacion.html?mios=1'">
@@ -185,6 +185,12 @@ const ICONOS_ROW = {
   inventario: '<path d="M4 8.5 12 4l8 4.5-8 4.5-8-4.5z"/><path d="M4 8.5V16l8 4.5 8-4.5V8.5"/><path d="M12 13v7.5"/>',
   especialidades: '<path d="M12 3.5 5 6v5.5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-2.5z"/><path d="M9.3 12l1.9 1.9 3.5-3.8"/>',
   cursos: '<path d="M2 9.5 12 5l10 4.5-10 4.5-10-4.5z"/><path d="M6 11.5V16c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4.5"/><path d="M20 10v5"/>',
+  perfil: '<circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/>',
+  dotacion: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 6v4M8.5 15.5l3-2.4M15.5 15.5l-3-2.4"/>',
+  solicitud: '<path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4"/><path d="M12 12v5.2M9.4 14.6h5.2"/>',
+  crearCarro: '<path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/><path d="M19.3 4v4M17.3 6h4"/>',
+  estadisticas: '<path d="M4 20h16"/><path d="M7 20v-6M12 20V7M17 20v-9"/>',
+  lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
 };
 function renderIco(ico){
   return ICONOS_ROW[ico]
@@ -193,17 +199,17 @@ function renderIco(ico){
 }
 
 const FILAS_ADMIN = [
-  { ico:'📋', nombre:'Asignación de Dotación', desc:'Asignar bomberos a carros',
+  { ico:'dotacion', nombre:'Asignación de Dotación', desc:'Asignar bomberos a carros',
     cargos:['Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Capitán','Director'], roles:[], href:'asignacion_dotacion_celular.html' },
-  { ico:'📝', nombre:'Solicitudes de Alta', desc:'Aprobar/rechazar postulantes',
+  { ico:'solicitud', nombre:'Solicitudes de Alta', desc:'Aprobar/rechazar postulantes',
     cargos:['Secretario/a','Director'], roles:[], href:'solicitudes_alta.html' },
   { ico:'hojaDeVida', nombre:'Hojas de Vida (de otros) / Dar de Baja', desc:'Editar historial, dar de baja o reactivar',
     cargos:['Secretario/a','Director'], roles:[], href:'usuarios_sistema.html' },
   { ico:'inventario', nombre:'Inventario', desc:'Ingreso, baja, historial de ítems',
     cargos:['Tesorero/a','Director'], roles:['Depto. Material Menor','Depto. Material Mayor'], href:'inventario.html' },
-  { ico:'🚒', nombre:'Crear Carro', desc:'Alta de un carro nuevo en la Compañía',
+  { ico:'crearCarro', nombre:'Crear Carro', desc:'Alta de un carro nuevo en la Compañía',
     cargos:['Secretario/a','Director'], roles:[], href:'crear_carro.html' },
-  { ico:'📊', nombre:'Estadísticas', desc:'KPIs y reportes de la Compañía',
+  { ico:'estadisticas', nombre:'Estadísticas', desc:'KPIs y reportes de la Compañía',
     cargos:['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Secretario/a','Tesorero/a','Director'], roles:[], href:'estadisticas.html' },
   { ico:'especialidades', nombre:'Especialidades', desc:'Asignar insignias a bomberos',
     cargos:[], roles:['Depto. Especialidad'], href:'gestion_especialidades.html' },
@@ -236,7 +242,7 @@ function renderFilas(){
       </div>`;
     }
     return `<div class="row locked" onclick="denegado()">
-      <div class="row-l"><div class="row-ico">🔒</div><div><b>${f.nombre}</b><span>Requiere: ${requisitos}</span></div></div>
+      <div class="row-l"><div class="row-ico">${renderIco('lock')}</div><div><b>${f.nombre}</b><span>Requiere: ${requisitos}</span></div></div>
     </div>`;
   }).join('');
 
