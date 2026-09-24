@@ -95,7 +95,7 @@
   .toggle.on::before{ left:20px; background:#fff;}
   .toggle.locked-on{ cursor:default; background:var(--nodisp); display:flex; align-items:center; justify-content:center;}
   .toggle.locked-on::before{ display:none;}
-  .candado{ font-size:11px;}
+  .candado{ width:13px; height:13px; color:#fff;}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
@@ -130,7 +130,7 @@
       </div>
       <div class="pref-row locked">
         <div class="pref-info"><b>Silenciar automático si estoy Fuera de Servicio</b><span>Regla fija del sistema — no se puede desactivar</span></div>
-        <div class="toggle on locked-on"><span class="candado">🔒</span></div>
+        <div class="toggle on locked-on"><svg class="candado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/></svg></div>
       </div>
 
       <div class="section-label">Otros avisos</div>

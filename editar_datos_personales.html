@@ -57,8 +57,8 @@
   }
   .form-body::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4;}
 
-  .foto-edit-row{ display:flex; align-items:center; gap:16px; margin-bottom:20px; position:relative; z-index:1;}
-  .foto-edit{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--servicio); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:22px; color:var(--text-muted); flex-shrink:0;}
+  .foto-edit-row{ display:flex; align-items:center; gap:20px; margin-bottom:22px; position:relative; z-index:1;}
+  .foto-edit{ width:132px; height:132px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:3px solid var(--servicio); display:flex; align-items:center; justify-content:center; font-family:'Rajdhani'; font-weight:700; font-size:44px; color:var(--text-muted); flex-shrink:0;}
   .btn-cambiar-foto{ background:transparent; border:1.5px solid var(--cyan); color:var(--cyan); font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase; font-size:11px; padding:8px 14px; border-radius:5px; cursor:pointer;}
 
   .section-title{
@@ -169,8 +169,6 @@
         </div>
       </div>
 
-      <div class="locked-note">🔒 El RUT no es editable desde acá — solo el Perfil Maestro puede corregirlo, por ser un identificador único del sistema.</div>
-
       <div class="section-title">Datos institucionales</div>
       <div class="form-row">
         <div class="form-field">
@@ -182,16 +180,14 @@
           <input type="text" class="mono" id="campoNumeroRegistro" value="" disabled>
         </div>
       </div>
-      <div class="locked-note">🔒 El Cargo no es editable desde acá — solo Director, Secretario/a, Superintendente o Secretario General pueden cambiarlo, desde la Ficha del Bombero.</div>
       <div class="form-row">
         <div class="form-field full">
           <label>Fecha de ingreso al Cuerpo</label>
-          <input type="text" id="campoFechaIngreso" value="" placeholder="dd/mm/aaaa" inputmode="numeric" oninput="this.value = formatearFecha(this.value)">
+          <input type="text" id="campoFechaIngreso" value="" disabled>
         </div>
       </div>
 
       <div class="section-title">Seguridad — Cambiar mi Contraseña</div>
-      <div class="pw-hint">Escribí tu contraseña actual y la nueva que quieras usar. Si no sabés tu contraseña actual, esto no te sirve — contactá al soporte técnico de Vigor para que te generen una temporal.</div>
       <div class="form-row">
         <div class="form-field full">
           <label>Contraseña actual</label>
@@ -299,11 +295,10 @@ async function guardarCambios(){
   const nombre = document.getElementById('campoNombre').value.trim();
   const fechaNacTxt = document.getElementById('campoFechaNac').value.trim();
   const telefono = document.getElementById('campoTelefono').value.trim();
-  const fechaIngresoTxt = document.getElementById('campoFechaIngreso').value.trim();
 
   const campos = [
     {id:'campoNombre', val:nombre}, {id:'campoFechaNac', val:fechaNacTxt},
-    {id:'campoTelefono', val:telefono}, {id:'campoFechaIngreso', val:fechaIngresoTxt},
+    {id:'campoTelefono', val:telefono},
   ];
   let faltantes = false;
   campos.forEach(c => {
@@ -317,15 +312,13 @@ async function guardarCambios(){
     return;
   }
   const fechaNac = ddmmyyyyAIso(fechaNacTxt);
-  const fechaIngreso = ddmmyyyyAIso(fechaIngresoTxt);
-  if(!fechaNac || !fechaIngreso){
-    toast('Las fechas deben tener formato dd/mm/aaaa');
+  if(!fechaNac){
+    toast('La fecha debe tener formato dd/mm/aaaa');
     return;
   }
 
   const { error } = await sb.rpc('actualizar_mis_datos_personales', {
-    p_nombre_completo: nombre, p_fecha_nacimiento: fechaNac, p_telefono: telefono,
-    p_fecha_ingreso: fechaIngreso
+    p_nombre_completo: nombre, p_fecha_nacimiento: fechaNac, p_telefono: telefono
   });
 
   if(error){ toast('No se pudo guardar — ' + error.message); return; }
