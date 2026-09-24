@@ -83,12 +83,17 @@
   .admin-title{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;}
   .admin-btn{
     width:100%; margin-bottom:8px; background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text);
-    font-family:'Inter'; font-weight:600; font-size:12.5px; padding:10px; border-radius:6px; cursor:pointer; text-align:left;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.02em; text-transform:uppercase; font-size:12px;
+    padding:11px 14px; border-radius:8px; cursor:pointer; text-align:left;
+    display:flex; align-items:center; gap:10px;
   }
-  .admin-btn:hover{ border-color:var(--brass-bright);}
+  .admin-btn svg{ width:18px; height:18px; flex-shrink:0; color:var(--cyan);}
+  .admin-btn:hover{ border-color:var(--cyan); background:var(--panel);}
   .admin-btn.warn{ border-color:var(--alerta); color:var(--alerta);}
+  .admin-btn.warn svg{ color:var(--alerta);}
   .admin-btn.warn:hover{ background:rgba(255,201,77,0.1);}
   .admin-btn.danger{ border-color:var(--burdeo-bright); color:var(--burdeo-bright);}
+  .admin-btn.danger svg{ color:var(--burdeo-bright);}
   .admin-btn.danger:hover{ background:rgba(122,22,32,0.12);}
 
   /* ---- Hoja de Vida ---- */
@@ -105,10 +110,11 @@
     font-size:11.5px; padding:8px 14px; border-radius:5px; cursor:pointer;
   }
   .btn-agregar-hv:hover{ filter:brightness(1.08);}
+  .hv-actions{ display:flex; gap:12px;}
   .btn-exportar-hv{
     background:transparent; border:1.5px solid var(--cyan); color:var(--cyan);
     font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
-    font-size:11.5px; padding:8px 14px; border-radius:5px; cursor:pointer; margin-right:8px;
+    font-size:11.5px; padding:8px 14px; border-radius:5px; cursor:pointer;
   }
   .btn-exportar-hv:hover{ background:rgba(73,233,255,0.1);}
 
@@ -255,9 +261,9 @@
 
       <div class="admin-section" id="adminSection" style="display:none;">
         <div class="admin-title">Acciones administrativas — Director/Secretario/a</div>
-        <button class="admin-btn" id="btnEditar" onclick="window.location.href='editar_datos_personales.html'">Editar datos personales</button>
-        <button class="admin-btn" id="btnEditarCargo" onclick="abrirCargoModal()">🎖 Editar Cargo y Roles Funcionales</button>
-        <button class="admin-btn danger" id="btnDarBaja" onclick="window.location.href='dar_de_baja_reactivar_personal.html?bombero='+bomberoId">🚫 Dar de baja / Reactivar</button>
+        <button class="admin-btn" id="btnEditar" onclick="window.location.href='editar_datos_personales.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5l4 4L8 20l-4.5 1L4.5 16.5 14.5 5.5z"/><path d="M12.5 7.5l4 4"/></svg><span>Editar datos personales</span></button>
+        <button class="admin-btn" id="btnEditarCargo" onclick="abrirCargoModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l8-5 8 5"/><path d="M4 10l8-5 8 5"/></svg><span>Editar Cargo y Roles Funcionales</span></button>
+        <button class="admin-btn danger" id="btnDarBaja" onclick="window.location.href='dar_de_baja_reactivar_personal.html?bombero='+bomberoId"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M17 8l4 4M21 8l-4 4"/></svg><span>Dar de baja / Reactivar</span></button>
       </div>
     </div>
 
@@ -271,7 +277,7 @@
     <div class="hv-panel">
       <div class="hv-head">
         <h2>Hoja de Vida</h2>
-        <div>
+        <div class="hv-actions">
           <button class="btn-exportar-hv" onclick="abrirExportModal()">⬇ Exportar PDF</button>
           <button class="btn-agregar-hv" id="btnAgregarHv" style="display:none;" onclick="abrirAgregarModal()">+ Agregar Entrada</button>
         </div>
