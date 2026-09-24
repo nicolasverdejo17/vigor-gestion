@@ -200,22 +200,22 @@ function renderIco(ico){
 }
 
 const FILAS_ADMIN = [
-  { ico:'dotacion', nombre:'Asignación de Dotación', desc:'Asignar bomberos a carros',
-    cargos:['Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Capitán','Director'], roles:[], href:'asignacion_dotacion_celular.html' },
-  { ico:'solicitud', nombre:'Solicitudes de Alta', desc:'Aprobar/rechazar postulantes',
+  { ico:'solicitud', nombre:'Solicitudes de Ingreso', desc:'Aprobar/rechazar postulantes',
     cargos:['Secretario/a','Director'], roles:[], href:'solicitudes_alta.html' },
-  { ico:'hojaDeVida', nombre:'Hojas de Vida (de otros) / Dar de Baja', desc:'Editar historial, dar de baja o reactivar',
+  { ico:'dotacion', nombre:'Dotación de Unidades', desc:'Asignar bomberos a carros',
+    cargos:['Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Capitán','Director'], roles:[], href:'asignacion_dotacion_celular.html' },
+  { ico:'hojaDeVida', nombre:'Registro de Bomberos', desc:'Editar historial, dar de baja o reactivar',
     cargos:['Secretario/a','Director'], roles:[], href:'usuarios_sistema.html' },
-  { ico:'inventario', nombre:'Inventario', desc:'Ingreso, baja, historial de ítems',
-    cargos:['Tesorero/a','Director'], roles:['Depto. Material Menor','Depto. Material Mayor'], href:'inventario.html' },
-  { ico:'crearCarro', nombre:'Crear Carro', desc:'Alta de un carro nuevo en la Compañía',
-    cargos:['Secretario/a','Director'], roles:[], href:'crear_carro.html' },
   { ico:'estadisticas', nombre:'Estadísticas', desc:'KPIs y reportes de la Compañía',
     cargos:['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Secretario/a','Tesorero/a','Director'], roles:[], href:'estadisticas.html' },
+  { ico:'inventario', nombre:'Inventario', desc:'Ingreso, baja, historial de ítems',
+    cargos:['Tesorero/a','Director'], roles:['Depto. Material Menor','Depto. Material Mayor'], href:'inventario.html' },
   { ico:'especialidades', nombre:'Especialidades', desc:'Asignar insignias a bomberos',
     cargos:[], roles:['Depto. Especialidad'], href:'gestion_especialidades.html' },
-  { ico:'cursos', nombre:'Capacitación (Gestión)', desc:'Cargar cursos, definir nivel de otros',
+  { ico:'cursos', nombre:'Cursos y Capacitaciones', desc:'Cargar cursos, definir nivel de otros',
     cargos:[], roles:['Depto. Capacitación'], href:'gestion_capacitacion.html' },
+  { ico:'crearCarro', nombre:'Crear Carro', desc:'Alta de un carro nuevo en la Compañía',
+    cargos:['Secretario/a','Director'], roles:[], href:'crear_carro.html' },
 ];
 
 function tieneAcceso(fila){
