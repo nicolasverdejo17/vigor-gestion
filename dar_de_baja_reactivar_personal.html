@@ -470,7 +470,14 @@ function iniciales(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase().s
 
 async function cargarDatos(){
   if(!bomberoId){ toast('Falta el bombero a mostrar'); return; }
-  document.getElementById('volverFichaLink').href = 'ficha_bombero.html?bombero=' + bomberoId;
+  // Mismo bug que Hoja de Servicio: navegar directo a la Ficha (en vez
+  // de usar el historial) apilaba una Ficha nueva y hacía que "Volver"
+  // desde la Ficha rebotara para acá en lugar de ir al listado.
+  const linkVolverFicha = document.getElementById('volverFichaLink');
+  linkVolverFicha.href = 'ficha_bombero.html?bombero=' + bomberoId;
+  linkVolverFicha.onclick = (e) => {
+    if(window.history.length > 1){ e.preventDefault(); window.history.back(); }
+  };
 
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }

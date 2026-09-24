@@ -170,7 +170,14 @@ async function cargarDatos(){
   const { data: perfil } = await sb.from('personal').select('id, cargo').eq('auth_user_id', session.user.id).single();
   if(!perfil) return;
   if(!bomberoId) bomberoId = perfil.id;
-  document.getElementById('volverFichaBtn').onclick = () => window.location.href = 'ficha_bombero.html?bombero=' + bomberoId;
+  // Bug reportado: este botón abría la Ficha como navegación nueva (no
+  // volvía con el historial), así que se apilaba encima de la Ficha
+  // anterior — y al apretar "Volver" DESDE la Ficha (que usa el
+  // historial real) rebotaba de vuelta acá en lugar de ir al listado.
+  document.getElementById('volverFichaBtn').onclick = () => {
+    if(window.history.length > 1){ window.history.back(); return; }
+    window.location.href = 'ficha_bombero.html?bombero=' + bomberoId;
+  };
 
   const { data: b, error } = await sb.from('personal')
     .select('nombre_completo, numero_registro, cargo, fecha_ingreso, companias(nombre), cuerpos(nombre_oficial)')
