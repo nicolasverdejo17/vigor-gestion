@@ -58,7 +58,7 @@ self.addEventListener('push', (event) => {
       body: 'Nuevo despacho para tu Compañía — abrí la app para ver los detalles.',
       icon: 'icons/apple-touch-icon.png',
       badge: 'icons/favicon-32.png',
-      vibrate: [300, 120, 300, 120, 300],
+      vibrate: [600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 900],
       tag: 'despacho',
       renotify: true,
       requireInteraction: true,

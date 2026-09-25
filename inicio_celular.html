@@ -304,7 +304,7 @@ function reproducirTonoDespacho(){
       osc.stop(ahora + offset + 0.4);
     });
   } catch(e){}
-  if(navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]);
+  if(navigator.vibrate) navigator.vibrate([600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 900]);
 }
 function suscribirAlertaDespacho(perfil){
   sb.channel('despacho-alerta-celular-' + perfil.compania_id)
