@@ -311,7 +311,7 @@ function render(){
       return `<span class="carro-chip ${car.estado}" title="${label}"><span class="nom-txt">${car.nom}</span></span>`;
     }).join('');
     return `
-      <div class="cia-card ${cumpleDotMin?'ok':'alerta'}" onclick="window.location.href='pc_compania.html'">
+      <div class="cia-card ${cumpleDotMin?'ok':'alerta'}">
         <div class="cia-head">
           <div class="cia-nombre">${c.nombre}</div>
           <span class="cia-dotacion-tag ${cumpleDotMin?'ok':'alerta'}" title="Mínimo configurado: ${c.dotMinRequerida} disponibles">${cumpleDotMin?'Dotación Mínima OK':'Dotación Insuficiente'}</span>
