@@ -55,6 +55,12 @@
     padding:5px 9px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text); width:64px;
   }
   .operador-input:focus{ outline:none; border-color:var(--cyan);}
+  .operador-btn{
+    background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; border-radius:5px;
+    padding:5px 10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11.5px;
+    letter-spacing:.03em; cursor:pointer;
+  }
+  .operador-btn:hover{ background:var(--cyan); color:#0D2226;}
 
   .central-tabs{ display:flex; gap:6px; padding:0 28px 10px; flex-wrap:wrap;}
   .central-tab{
@@ -299,6 +305,7 @@
           <div class="operador-row">
             <div class="operadores-lista" id="operadoresLista"></div>
             <input type="text" class="operador-input" id="operadorInput" placeholder="N° reg." inputmode="numeric" onkeydown="if(event.key==='Enter') marcarOperador();">
+            <button type="button" class="operador-btn" onclick="marcarOperador()">Marcar</button>
           </div>
         </div>
         <div class="clock"><strong id="clk">—</strong><span id="fechaHoy">—</span></div>
