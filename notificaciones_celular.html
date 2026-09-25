@@ -123,6 +123,11 @@
         <div class="estado-aviso-texto"><b>Alertas de despacho silenciadas</b> — estás marcado como <span id="estadoAvisoTexto">Fuera de Servicio</span>, así que no vas a recibir tonos ni vibración de despachos mientras estés así.</div>
       </div>
 
+      <div class="estado-aviso" id="pushAviso" style="display:none; border-color:var(--cyan); cursor:pointer;" onclick="activarPush()">
+        <span class="estado-aviso-ico">🔔</span>
+        <div class="estado-aviso-texto"><b>Activar notificaciones push</b> — <span id="pushAvisoTexto">tocá acá para recibir el despacho aunque tengas la app cerrada o el celular bloqueado.</span></div>
+      </div>
+
       <div class="section-label">Despacho</div>
       <div class="pref-row">
         <div class="pref-info"><b>Alertas de despacho</b><span>Tono + vibración cuando Central despacha a tu Compañía</span></div>
@@ -190,6 +195,61 @@ async function cargarDatos(){
   Object.entries(TOGGLE_COL).forEach(([elId, col]) => {
     document.getElementById(elId).classList.toggle('on', !!prefs[col]);
   });
+
+  actualizarAvisoPush();
+}
+
+// Notificaciones push reales (suenan y vibran aunque la app esté cerrada o
+// el celular bloqueado) — a diferencia del tono en vivo de Inicio, que solo
+// suena con la pantalla abierta. Requiere permiso del navegador una vez.
+const VAPID_PUBLIC_KEY = 'BItnU6VJq0_t-DSFaUYRTWZ7MaLuBIzhR9PYvqLnbgi_gYPWPol-ExVflEI98wzFeiwhapE5-4pxywF9vy9YoZ0';
+function urlBase64ToUint8Array(base64String){
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+function soportaPush(){
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+async function actualizarAvisoPush(){
+  const aviso = document.getElementById('pushAviso');
+  if(!soportaPush()){ aviso.style.display = 'none'; return; }
+  if(Notification.permission === 'denied'){
+    document.getElementById('pushAvisoTexto').textContent = 'Bloqueaste las notificaciones en el navegador — activalas desde los ajustes del sitio para recibir despachos con la app cerrada.';
+    aviso.style.display = 'flex';
+    return;
+  }
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  aviso.style.display = sub ? 'none' : 'flex';
+}
+async function activarPush(){
+  if(!soportaPush()){ toast('Tu navegador no soporta notificaciones push'); return; }
+  const permiso = await Notification.requestPermission();
+  if(permiso !== 'granted'){ toast('No se activaron — permiso denegado'); return; }
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub){
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    }
+    const json = sub.toJSON();
+    const { error } = await sb.from('push_subscripciones').upsert({
+      personal_id: miPersonalId,
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+    }, { onConflict: 'endpoint' });
+    if(error){ toast('No se pudo guardar — ' + error.message); return; }
+    toast('Notificaciones activadas');
+    document.getElementById('pushAviso').style.display = 'none';
+  } catch(e){
+    toast('No se pudo activar — ' + e.message);
+  }
 }
 
 async function toggleAjuste(id){

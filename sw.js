@@ -47,3 +47,33 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(req).then((cached) => cached || Response.error()))
   );
 });
+
+// Notificación push de despacho — llega aunque la app esté cerrada o el
+// celular bloqueado. El mensaje viaja sin contenido (push "vacío", sin
+// encriptar) porque solo se usa para despertar al navegador; el texto de
+// la notificación es genérico a propósito.
+self.addEventListener('push', (event) => {
+  event.waitUntil(
+    self.registration.showNotification('Vigor — Despacho', {
+      body: 'Nuevo despacho para tu Compañía — abrí la app para ver los detalles.',
+      icon: 'icons/apple-touch-icon.png',
+      badge: 'icons/favicon-32.png',
+      vibrate: [300, 120, 300, 120, 300],
+      tag: 'despacho',
+      renotify: true,
+      requireInteraction: true,
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((lista) => {
+      for (const c of lista) {
+        if ('focus' in c) return c.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow('inicio_celular.html');
+    })
+  );
+});
