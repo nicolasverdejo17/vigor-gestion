@@ -155,7 +155,7 @@
   .btn-confirmar:hover{ filter:brightness(1.1);}
 
   /* ---- Special alerts ---- */
-  .alertas-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+  .alertas-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
   @media (max-width:760px){ .alertas-grid{grid-template-columns:1fr;} }
   .alerta-btn{
     background:var(--panel-alt); border:2px solid var(--alerta); border-radius:6px; padding:18px 18px 16px;
@@ -892,11 +892,12 @@ function toast(msg){
 // cada Cuerpo puede usar una nomenclatura radial distinta, así que se
 // muestra solo el nombre de la convocatoria.
 const ALERTAS = [
+  { id:'acuartelamiento', title:'Llamado general', desc:'Convoca a todo el personal de la(s) Compañía(s) elegida(s) a presentarse al cuartel.' },
   { id:'12_10', title:'Llamado a Maquinistas', desc:'Falta chofer para un carro o cuartel específico.' },
   { id:'6_6', title:'Llamado a Voluntarios', desc:'Refuerzo para una unidad, cuartel o especialidad puntual.' },
 ];
-const alertaCiasSel = { '12_10': [], '6_6': [] };
-const alertaOpen = { '12_10': false, '6_6': false };
+const alertaCiasSel = { acuartelamiento: [], '12_10': [], '6_6': [] };
+const alertaOpen = { acuartelamiento: false, '12_10': false, '6_6': false };
 
 function renderAlertas(){
   const el = document.getElementById('alertasGrid');

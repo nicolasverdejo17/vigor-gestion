@@ -150,7 +150,25 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 let PUESTOS = [];
 let miCuerpoId = null;
 
+// Bug reportado: el badge de notificaciones "titilaba" (aparecía y
+// volvía a 0) al entrar a Modo Crisis. La suscripción de acá escucha
+// SIN FILTRO 3 tablas (puestos_mando/batallones/batallon_carros, sin
+// cuerpo_id propio) — un solo evento real dispara varios postgres_changes
+// casi al mismo tiempo, y esos llamados a cargarDatos() se pisaban entre
+// sí en el aire. Con este candado, si ya hay uno en curso, los nuevos
+// simplemente esperan a que termine en vez de correr en paralelo.
+let cargandoDatos = false;
 async function cargarDatos(){
+  if(cargandoDatos) return;
+  cargandoDatos = true;
+  try {
+    await cargarDatosInterno();
+  } finally {
+    cargandoDatos = false;
+  }
+}
+
+async function cargarDatosInterno(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
 
