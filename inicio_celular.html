@@ -274,9 +274,22 @@ let suscritoInicioCelular = false;
 // PC del Cuartel, respetando el toggle "Alertas de despacho" y el silencio
 // automático si el bombero está Fuera de Servicio.
 let audioCtxCelular = null;
+// Los navegadores móviles suspenden el AudioContext hasta que haya una
+// interacción real del usuario en la página (tocar/clickear) — como el
+// despacho llega solo, por un evento en tiempo real, sin ningún toque
+// justo antes, el tono quedaba mudo. Se "desbloquea" en el primer toque
+// a la pantalla, para que ya esté listo cuando llegue un despacho real.
+function desbloquearAudioCelular(){
+  if(!audioCtxCelular) audioCtxCelular = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtxCelular.state === 'suspended') audioCtxCelular.resume().catch(()=>{});
+}
+document.addEventListener('touchstart', desbloquearAudioCelular, { once:true, passive:true });
+document.addEventListener('click', desbloquearAudioCelular, { once:true });
+
 function reproducirTonoDespacho(){
   try{
     if(!audioCtxCelular) audioCtxCelular = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtxCelular.state === 'suspended') audioCtxCelular.resume().catch(()=>{});
     const ahora = audioCtxCelular.currentTime;
     [0, 0.42, 0.84, 1.26].forEach((offset, i) => {
       const osc = audioCtxCelular.createOscillator();
