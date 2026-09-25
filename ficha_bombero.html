@@ -127,18 +127,18 @@
   .modal-box.wide{ width:420px;}
   .m-field{ margin-bottom:14px;}
   .m-field label{ display:block; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; font-weight:600;}
-  .m-field input, .m-field textarea{
+  .m-field input, .m-field textarea, .m-field select{
     width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
     padding:10px 12px; font-size:13.5px; color:var(--text); font-family:'Inter'; resize:vertical;
   }
-  .m-field input:focus, .m-field textarea:focus{ outline:none; border-color:var(--cyan);}
+  .m-field input:focus, .m-field textarea:focus, .m-field select:focus{ outline:none; border-color:var(--cyan);}
+  .m-field select option, .m-field select optgroup{ background:var(--panel-alt); color:var(--text);}
   .tipo-select-row{ display:flex; gap:6px; flex-wrap:wrap;}
-  .tipo-opt{ flex:1; min-width:80px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:8px 4px; text-align:center; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer;}
+  .tipo-opt{ flex:1; min-width:70px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:9px 4px; text-align:center; font-size:10.5px; line-height:1.25; font-weight:600; color:var(--text-muted); cursor:pointer;}
   .tipo-opt.on.reconocimiento{ background:var(--brass-dim); border-color:var(--brass-bright); color:#fff;}
   .tipo-opt.on.ascenso{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
   .tipo-opt.on.sancion{ background:var(--burdeo); border-color:var(--burdeo-bright); color:#fff;}
   .tipo-opt.on.curso{ background:transparent; border-color:var(--alerta); color:var(--alerta);}
-  .tipo-opt.on.ingreso{ background:transparent; border-color:var(--servicio); color:var(--servicio);}
   .tipo-opt.on.otro{ background:var(--panel-alt); border-color:var(--text-muted); color:var(--text);}
   .modal-box::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:8px; opacity:.4; pointer-events:none;}
   .modal-box h3{ font-size:16px; margin-bottom:4px;}
@@ -574,11 +574,12 @@ async function guardarCargoModal(){
 // "Curso Aprobado" no es una opción manual acá — se genera solo desde
 // Gestión de Capacitación (efecto secundario al registrar un curso real),
 // para no duplicar el dato ni desincronizar las dos fuentes.
+// "Ingreso" ya no se carga a mano acá — se registra solo, con la fecha
+// del formulario de registro, al aprobarse la Solicitud de Alta.
 const TIPOS_ENTRADA = {
   reconocimiento: { label:'Reconocimiento' },
-  ascenso:         { label:'Ascenso' },
+  ascenso:         { label:'Cargo' },
   sancion:         { label:'Sanción' },
-  ingreso:         { label:'Ingreso' },
   otro:            { label:'Otro' },
 };
 let tipoEntradaSel = 'reconocimiento';
