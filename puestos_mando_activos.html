@@ -127,7 +127,7 @@
     <a href="visual_companias.html" class="central-tab">Visual de Compañías</a>
     <a href="puestos_mando_activos.html" class="central-tab on">Modo Crisis Compañías</a>
     <a href="historial_despacho.html" class="central-tab">Historial de Despacho</a>
-    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge" id="tabBadgeCoords" style="display:none;">0</span></a>
+    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas</a>
   </div>
 
   <div class="content-wrap">
@@ -199,23 +199,6 @@ async function cargarDatosInterno(){
   }));
   render();
   suscribirRealtime();
-  actualizarBadgeCoordenadas();
-}
-
-// Bug reportado: acá quedaba un "3" fijo en el HTML que nunca se
-// actualizaba (no reflejaba nada real) — mismo contador real que ya
-// usa consola_despacho.html.
-async function actualizarBadgeCoordenadas(){
-  const { count } = await sb.from('reportes_coordenadas')
-    .select('id', { count: 'exact', head: true })
-    .eq('cuerpo_id', miCuerpoId).eq('leido', false);
-  const badge = document.getElementById('tabBadgeCoords');
-  if(count > 0){
-    badge.textContent = count;
-    badge.style.display = 'inline-flex';
-  } else {
-    badge.style.display = 'none';
-  }
 }
 
 // Modo Crisis es colaborativo — Central y varias Compañías pueden tener
