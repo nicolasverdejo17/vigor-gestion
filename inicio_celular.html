@@ -261,9 +261,49 @@ async function cargarDatos(){
       .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .subscribe();
+    suscribirAlertaDespacho(perfil);
   }
 }
 let suscritoInicioCelular = false;
+
+// Bug reportado: al confirmar un despacho desde la Central, el celular del
+// bombero "no hacía nada" — Inicio (Celular) nunca escuchaba despachos, así
+// que no había tono, vibración ni aviso alguno (Notificaciones prometía
+// "Tono + vibración cuando Central despacha a tu Compañía" pero nada lo
+// disparaba). Mismo sintetizador local que usa la Consola de Despacho y el
+// PC del Cuartel, respetando el toggle "Alertas de despacho" y el silencio
+// automático si el bombero está Fuera de Servicio.
+let audioCtxCelular = null;
+function reproducirTonoDespacho(){
+  try{
+    if(!audioCtxCelular) audioCtxCelular = new (window.AudioContext || window.webkitAudioContext)();
+    const ahora = audioCtxCelular.currentTime;
+    [0, 0.42, 0.84, 1.26].forEach((offset, i) => {
+      const osc = audioCtxCelular.createOscillator();
+      const gain = audioCtxCelular.createGain();
+      osc.type = 'square';
+      osc.frequency.value = i % 2 === 0 ? 900 : 1300;
+      gain.gain.setValueAtTime(0.0001, ahora + offset);
+      gain.gain.exponentialRampToValueAtTime(0.25, ahora + offset + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ahora + offset + 0.38);
+      osc.connect(gain).connect(audioCtxCelular.destination);
+      osc.start(ahora + offset);
+      osc.stop(ahora + offset + 0.4);
+    });
+  } catch(e){}
+  if(navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 300]);
+}
+function suscribirAlertaDespacho(perfil){
+  sb.channel('despacho-alerta-celular-' + perfil.compania_id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despacho_unidades', filter: `compania_id=eq.${perfil.compania_id}` }, async () => {
+      if(miEstado === 'fuera') return;
+      const { data: prefs } = await sb.from('notificaciones_preferencias').select('alertas_despacho').eq('personal_id', perfil.id).maybeSingle();
+      if(prefs && prefs.alertas_despacho === false) return;
+      reproducirTonoDespacho();
+      toast('Despacho para tu Compañía — revisá la Pizarra');
+    })
+    .subscribe();
+}
 
 function tiempoRelativo(fechaIso){
   const ms = Date.now() - new Date(fechaIso).getTime();
