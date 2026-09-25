@@ -154,7 +154,7 @@
     </div>
 
     <div class="side-panel">
-      <div class="side-title">Compañías con Reportes Hoy</div>
+      <div class="side-title">Bomberos con Reportes Hoy</div>
       <div id="ciaResumen"></div>
     </div>
   </div>
@@ -283,17 +283,19 @@ function actualizarBadge(){
   }
 }
 
+// Bug reportado: este panel agrupaba por Compañía — no decía QUIÉN
+// reportó, solo de qué Compañía era. Ahora agrupa por bombero.
 function renderResumenCias(){
   const conteo = {};
-  REPORTES.forEach(r => { conteo[r.cia] = (conteo[r.cia]||0) + 1; });
+  REPORTES.forEach(r => { conteo[r.nombre] = (conteo[r.nombre]||0) + 1; });
   const el = document.getElementById('ciaResumen');
-  const cias = Object.keys(conteo);
-  if(cias.length === 0){
+  const nombres = Object.keys(conteo);
+  if(nombres.length === 0){
     el.innerHTML = `<div class="empty-state" style="padding:20px 0;">Sin actividad</div>`;
     return;
   }
-  el.innerHTML = cias.map(c => `
-    <div class="cia-mini-row"><span>${c}</span><span class="cia-mini-count">${conteo[c]}</span></div>
+  el.innerHTML = nombres.map(n => `
+    <div class="cia-mini-row"><span>${n}</span><span class="cia-mini-count">${conteo[n]}</span></div>
   `).join('');
 }
 

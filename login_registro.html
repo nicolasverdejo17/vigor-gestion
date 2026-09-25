@@ -419,6 +419,11 @@ async function intentarLogin(){
       if(emailCentral){
         const { error: authError } = await sb.auth.signInWithPassword({ email: emailCentral, password });
         if(authError){ toast('Contraseña incorrecta'); return; }
+        if(esTemporal){
+          toast('Central de Alarmas identificada — definí tu contraseña…');
+          setTimeout(() => { window.location.href = 'definir_nueva_password.html?destino=consola_despacho.html'; }, 500);
+          return;
+        }
         toast('Central de Alarmas identificada — abriendo Consola de Despacho…');
         setTimeout(() => { window.location.href = 'consola_despacho.html'; }, 500);
         return;
@@ -431,6 +436,11 @@ async function intentarLogin(){
       if(emailPc){
         const { error: authError } = await sb.auth.signInWithPassword({ email: emailPc, password });
         if(authError){ toast('Contraseña incorrecta'); return; }
+        if(esTemporal){
+          toast('PC del Cuartel identificado — definí tu contraseña…');
+          setTimeout(() => { window.location.href = 'definir_nueva_password.html?destino=pc_compania.html'; }, 500);
+          return;
+        }
         toast('PC del Cuartel identificado — abriendo Terminal…');
         setTimeout(() => { window.location.href = 'pc_compania.html'; }, 500);
         return;
@@ -440,6 +450,11 @@ async function intentarLogin(){
     if(emailCarro){
       const { error: authError } = await sb.auth.signInWithPassword({ email: emailCarro, password });
       if(authError){ toast('Contraseña incorrecta'); return; }
+      if(esTemporal){
+        toast('Carro identificado — definí tu contraseña…');
+        setTimeout(() => { window.location.href = 'definir_nueva_password.html?destino=tablet_carro.html'; }, 500);
+        return;
+      }
       toast('Carro identificado — abriendo Tablet…');
       setTimeout(() => { window.location.href = 'tablet_carro.html'; }, 500);
       return;

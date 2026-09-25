@@ -155,13 +155,12 @@
   .btn-confirmar:hover{ filter:brightness(1.1);}
 
   /* ---- Special alerts ---- */
-  .alertas-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .alertas-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
   @media (max-width:760px){ .alertas-grid{grid-template-columns:1fr;} }
   .alerta-btn{
     background:var(--panel-alt); border:2px solid var(--alerta); border-radius:6px; padding:18px 18px 16px;
     text-align:left; position:relative;
   }
-  .alerta-btn .code{ font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--alerta); font-size:13px; letter-spacing:.04em;}
   .alerta-btn h3{ font-size:17px; margin:6px 0 4px; color:var(--text);}
   .alerta-btn p{ margin:0; font-size:12px; color:var(--text-muted); line-height:1.4;}
   .alerta-btn .toggle-row{ cursor:pointer; }
@@ -889,13 +888,15 @@ function toast(msg){
 }
 
 /* ---- Alertas especiales con selección de Compañía(s) ---- */
+// Los codigos numericos (antes "12.10"/"6.6") se sacaron de la vista —
+// cada Cuerpo puede usar una nomenclatura radial distinta, así que se
+// muestra solo el nombre de la convocatoria.
 const ALERTAS = [
-  { id:'acuartelamiento', code:'ACUARTELAMIENTO', title:'Llamado general', desc:'Convoca a todo el personal de la(s) Compañía(s) elegida(s) a presentarse al cuartel.' },
-  { id:'12_10', code:'12.10', title:'Llamado a Maquinistas', desc:'Falta chofer para un carro o cuartel específico.' },
-  { id:'6_6', code:'6.6', title:'Llamado a Voluntarios', desc:'Refuerzo para una unidad, cuartel o especialidad puntual.' },
+  { id:'12_10', title:'Llamado a Maquinistas', desc:'Falta chofer para un carro o cuartel específico.' },
+  { id:'6_6', title:'Llamado a Voluntarios', desc:'Refuerzo para una unidad, cuartel o especialidad puntual.' },
 ];
-const alertaCiasSel = { acuartelamiento: [], '12_10': [], '6_6': [] };
-const alertaOpen = { acuartelamiento: false, '12_10': false, '6_6': false };
+const alertaCiasSel = { '12_10': [], '6_6': [] };
+const alertaOpen = { '12_10': false, '6_6': false };
 
 function renderAlertas(){
   const el = document.getElementById('alertasGrid');
@@ -908,14 +909,13 @@ function renderAlertas(){
     return `
       <div class="alerta-btn">
         <div class="toggle-row" onclick="toggleAlertaOpen('${a.id}')">
-          <div class="code">${a.code}</div>
           <h3>${a.title}</h3>
           <p>${a.desc}</p>
         </div>
         <div class="alerta-cias ${alertaOpen[a.id]?'open':''}">
           <div class="lbl">Seleccionar Compañía(s) destino</div>
           <div class="alerta-cia-chips">${chips}</div>
-          <button class="alerta-confirm" onclick="confirmarAlerta('${a.id}')">Lanzar ${a.code}</button>
+          <button class="alerta-confirm" onclick="confirmarAlerta('${a.id}')">Lanzar ${a.title}</button>
         </div>
       </div>`;
   }).join('');
@@ -941,7 +941,7 @@ async function confirmarAlerta(id){
   if(error){ toast(mensajeErrorOperador(error) || 'No se pudo lanzar la alerta — ' + error.message); return; }
   reproducirTono(null);
   const nombresCias = sel.map(ciaId => CIAS_DATA.find(c=>c.id===ciaId).nombre).join(', ');
-  toast(`${a.code} lanzado a: ${nombresCias}`);
+  toast(`${a.title} lanzado a: ${nombresCias}`);
   alertaCiasSel[id] = []; alertaOpen[id] = false;
   renderAlertas();
 }

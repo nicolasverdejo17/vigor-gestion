@@ -196,7 +196,7 @@
     <a href="visual_companias.html" class="central-tab">Visual de Compañías</a>
     <a href="puestos_mando_activos.html" class="central-tab">Puestos de Mando Activos</a>
     <a href="historial_despacho.html" class="central-tab on">Historial de Despacho</a>
-    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge">3</span></a>
+    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge" id="tabBadgeCoords" style="display:none;">0</span></a>
   </div>
 
   <div class="toolbar">
@@ -255,7 +255,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 
 let miCuerpoId = null;
 let DESPACHOS = [];
-let TIPOS_CATALOGO = ['12.10','6.6'];
+let TIPOS_CATALOGO = ['12.10','6.6','ACUART.'];
 let NOMBRE_TIPO = { '12.10':'Llamado a Maquinistas', '6.6':'Llamado a Voluntarios' };
 let CIAS = [];
 let ciaFiltro = 'todas';
@@ -298,9 +298,9 @@ async function cargarDatos(){
   COMPANIAS_ID_NOMBRE = {}; (cias || []).forEach(c => COMPANIAS_ID_NOMBRE[c.id] = c.nombre);
 
   const { data: claves } = await sb.from('claves_emergencia').select('codigo, nombre').eq('cuerpo_id', miCuerpoId).eq('activo', true).order('orden');
-  TIPOS_CATALOGO = [...(claves||[]).map(k=>k.codigo), '12.10', '6.6'];
+  TIPOS_CATALOGO = [...(claves||[]).map(k=>k.codigo), '12.10', '6.6', 'ACUART.'];
   NOMBRE_TIPO = {}; (claves||[]).forEach(k => NOMBRE_TIPO[k.codigo] = k.nombre);
-  NOMBRE_TIPO['12.10'] = 'Llamado a Maquinistas'; NOMBRE_TIPO['6.6'] = 'Llamado a Voluntarios';
+  NOMBRE_TIPO['12.10'] = 'Llamado a Maquinistas'; NOMBRE_TIPO['6.6'] = 'Llamado a Voluntarios'; NOMBRE_TIPO['ACUART.'] = 'Llamado general';
 
   const { data: despachos } = await sb.from('despachos')
     .select('direccion, fecha_hora_despacho, fecha_hora_termino, claves_emergencia(codigo, nombre), despacho_unidades(companias(nombre), carros(nomenclatura))')
@@ -331,6 +331,23 @@ async function cargarDatos(){
   renderCiaFiltro();
   renderTabla();
   suscribirRealtime();
+  actualizarBadgeCoordenadas();
+}
+
+// Bug reportado: acá quedaba un "3" fijo en el HTML que nunca se
+// actualizaba (no reflejaba nada real) — mismo contador real que ya
+// usa consola_despacho.html.
+async function actualizarBadgeCoordenadas(){
+  const { count } = await sb.from('reportes_coordenadas')
+    .select('id', { count: 'exact', head: true })
+    .eq('cuerpo_id', miCuerpoId).eq('leido', false);
+  const badge = document.getElementById('tabBadgeCoords');
+  if(count > 0){
+    badge.textContent = count;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
 }
 
 let suscritoHistorial = false;
@@ -375,15 +392,21 @@ document.addEventListener('click', (e)=>{
   cerrarTipoPopup();
 });
 
+// Los codigos crudos (12.10/6.6/ACUART.) ya no se muestran al usuario —
+// solo el nombre de la convocatoria. Las claves reales del Cuerpo siguen
+// mostrando su código porque ese sí lo define y reconoce cada Cuerpo.
+function etiquetaTipo(t){ return NOMBRE_TIPO[t] || t; }
+const TIPOS_SIN_CODIGO = new Set(['12.10','6.6','ACUART.']);
+
 function renderTipoPopup(){
   const el = document.getElementById('tipoPopup');
   const todos = `<div class="tipo-opt ${tipoFiltro===null?'on':''}" onclick="setTipoFiltro(null)">Todos los tipos</div>`;
-  const opts = TIPOS_CATALOGO.map(t => `<div class="tipo-opt ${tipoFiltro===t?'on':''}" onclick="setTipoFiltro('${t}')"><span class="cod">${t}</span>${NOMBRE_TIPO[t]}</div>`).join('');
+  const opts = TIPOS_CATALOGO.map(t => `<div class="tipo-opt ${tipoFiltro===t?'on':''}" onclick="setTipoFiltro('${t}')">${TIPOS_SIN_CODIGO.has(t) ? '' : `<span class="cod">${t}</span>`}${etiquetaTipo(t)}</div>`).join('');
   el.innerHTML = todos + opts;
 }
 function setTipoFiltro(t){
   tipoFiltro = t;
-  document.getElementById('tipoLabel').textContent = t ? `${t} — ${NOMBRE_TIPO[t]}` : 'Todos los tipos';
+  document.getElementById('tipoLabel').textContent = t ? (TIPOS_SIN_CODIGO.has(t) ? etiquetaTipo(t) : `${t} — ${etiquetaTipo(t)}`) : 'Todos los tipos';
   cerrarTipoPopup();
   renderTabla();
 }
@@ -411,7 +434,7 @@ function renderTabla(){
   }
   body.innerHTML = filtrados.map(d => `
     <tr>
-      <td class="td-tipo">${d.cod}</td>
+      <td class="td-tipo">${TIPOS_SIN_CODIGO.has(d.cod) ? etiquetaTipo(d.cod) : d.cod}</td>
       <td>${d.dir}</td>
       <td>${d.cias.join(', ')}</td>
       <td class="mono">${d.carros.join(', ')}</td>

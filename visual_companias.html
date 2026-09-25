@@ -92,9 +92,14 @@
   .cia-dotacion-tag.alerta{ background:var(--fuera); color:#241505;}
   .cia-dotacion-tag::before{ content:""; width:5px;height:5px;border-radius:50%; background:currentColor; opacity:.7;}
 
-  .cia-stat-row{ display:flex; gap:0; margin-bottom:12px; position:relative; z-index:1;}
-  .cia-stat{ flex:1; text-align:center; padding:0 4px;}
-  .cia-stat b{ display:block; font-family:'JetBrains Mono',monospace; font-size:19px; color:var(--cyan); font-weight:700;}
+  .cia-stat-row{ display:flex; gap:14px; align-items:center; margin-bottom:12px; position:relative; z-index:1;}
+  .ring-wrap{ position:relative; width:72px; height:72px; flex-shrink:0;}
+  .ring-wrap svg{ filter:drop-shadow(0 0 6px var(--cyan-glow));}
+  .ring-val{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring-val b{ font-family:'JetBrains Mono',monospace; font-size:19px; color:var(--cyan); font-weight:700; line-height:1;}
+  .ring-val .of{ font-family:'JetBrains Mono',monospace; font-size:8.5px; color:var(--text-dim); margin-top:2px;}
+  .cia-stat{ flex:1; min-width:0;}
+  .cia-stat b{ display:block; font-family:'JetBrains Mono',monospace; font-size:16px; color:var(--cyan); font-weight:700;}
   .cia-stat span{ font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
 
   .cia-section-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; margin-bottom:6px; position:relative; z-index:1;}
@@ -169,7 +174,7 @@
     <a href="visual_companias.html" class="central-tab on">Visual de Compañías</a>
     <a href="puestos_mando_activos.html" class="central-tab">Puestos de Mando Activos</a>
     <a href="historial_despacho.html" class="central-tab">Historial de Despacho</a>
-    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge">3</span></a>
+    <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge" id="tabBadgeCoords" style="display:none;">0</span></a>
   </div>
 
   <div class="toolbar-config">
@@ -257,6 +262,7 @@ async function cargarDatos(){
 
   document.getElementById('grid').style.display = 'grid';
   render();
+  actualizarBadgeCoordenadas();
 
   if(!suscritoVisualCompanias){
     suscritoVisualCompanias = true;
@@ -265,6 +271,23 @@ async function cargarDatos(){
       .on('postgres_changes', { event: '*', schema: 'public', table: 'carros' }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando' }, () => cargarDatos())
       .subscribe();
+  }
+}
+
+// Bug reportado: acá quedaba un "3" fijo en el HTML que nunca se
+// actualizaba (no reflejaba nada real) — mismo contador real que ya
+// usa consola_despacho.html. Esta pantalla no filtra sus otras consultas
+// por cuerpo_id (confía en la RLS), así que acá se hace lo mismo.
+async function actualizarBadgeCoordenadas(){
+  const { count } = await sb.from('reportes_coordenadas')
+    .select('id', { count: 'exact', head: true })
+    .eq('leido', false);
+  const badge = document.getElementById('tabBadgeCoords');
+  if(count > 0){
+    badge.textContent = count;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
   }
 }
 
@@ -294,8 +317,15 @@ function render(){
           <span class="cia-dotacion-tag ${cumpleDotMin?'ok':'alerta'}" title="Mínimo configurado: ${c.dotMinRequerida} disponibles">${cumpleDotMin?'Dotación Mínima OK':'Dotación Insuficiente'}</span>
         </div>
         <div class="cia-stat-row">
-          <div class="cia-stat"><b>${presentes.length}</b><span>Presentes</span></div>
-          <div class="cia-stat"><b>${c.carrosOk}/${c.carrosTotal}</b><span>Carros</span></div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 72 72" width="72" height="72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="var(--line-strong)" stroke-width="7"/>
+              <circle cx="36" cy="36" r="30" fill="none" stroke="var(--cyan)" stroke-width="7" stroke-linecap="round"
+                stroke-dasharray="188" stroke-dashoffset="${c.regs.length > 0 ? 188 - (188 * presentes.length / c.regs.length) : 188}" transform="rotate(-90 36 36)"/>
+            </svg>
+            <div class="ring-val"><b>${presentes.length}</b><span class="of">de ${c.regs.length}</span></div>
+          </div>
+          <div class="cia-stat"><b>${c.carrosOk}/${c.carrosTotal}</b><span>Carros en Servicio</span></div>
         </div>
         <div class="cia-almando">
           <span class="cia-section-label" style="margin-bottom:2px;">Al Mando</span>
