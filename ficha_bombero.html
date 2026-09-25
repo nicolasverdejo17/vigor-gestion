@@ -133,8 +133,12 @@
   }
   .m-field input:focus, .m-field textarea:focus, .m-field select:focus{ outline:none; border-color:var(--cyan);}
   .m-field select option, .m-field select optgroup{ background:var(--panel-alt); color:var(--text);}
-  .tipo-select-row{ display:flex; gap:6px; flex-wrap:wrap;}
-  .tipo-opt{ flex:1; min-width:70px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:9px 4px; text-align:center; font-size:10.5px; line-height:1.25; font-weight:600; color:var(--text-muted); cursor:pointer;}
+  .tipo-select-row{ display:flex; gap:8px; flex-wrap:wrap;}
+  .tipo-opt{
+    flex:1; min-width:70px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px;
+    padding:10px 10px; text-align:center; font-size:10.5px; line-height:1.3; font-weight:600; color:var(--text-muted);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; text-align:center;
+  }
   .tipo-opt.on.reconocimiento{ background:var(--brass-dim); border-color:var(--brass-bright); color:#fff;}
   .tipo-opt.on.ascenso{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
   .tipo-opt.on.sancion{ background:var(--burdeo); border-color:var(--burdeo-bright); color:#fff;}
