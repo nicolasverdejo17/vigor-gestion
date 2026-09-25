@@ -27,7 +27,9 @@
   .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--brass-dim); flex-shrink:0;}
   .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:16px 28px; max-width:1180px; margin:0 auto;}
   .brand{ display:flex; align-items:center; gap:12px;}
-  .brand-mark{ width:34px; height:34px; border-radius:8px; background:var(--panel); border:1.5px solid var(--cyan); display:flex; align-items:center; justify-content:center;}
+  .brand-mark{ width:36px;height:36px; border:1.5px solid var(--brass); border-radius:3px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel);}
+  .brand-mark::before{ content:""; position:absolute; inset:4px; border:1px solid var(--brass-dim); border-radius:2px;}
+  .brand-mark svg{ width:15px; height:15px;}
   .brand-text h1{ font-size:19px;}
   .brand-text span{ font-size:11px; color:var(--text-dim); letter-spacing:.06em; text-transform:uppercase;}
   .clock{ font-family:'JetBrains Mono',monospace; text-align:right; color:var(--text-muted); font-size:12px;}
