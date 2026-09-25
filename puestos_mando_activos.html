@@ -38,7 +38,8 @@
   .content-wrap{ flex:1; min-height:0; padding:20px 26px 22px; overflow-y:auto;}
   .head-row{ display:flex; align-items:center; gap:10px; margin-bottom:16px;}
   .head-row h2{ font-size:18px;}
-  .count-badge{ font-family:'JetBrains Mono',monospace; background:var(--burdeo); color:#fff; font-size:12px; font-weight:700; padding:3px 10px; border-radius:12px;}
+  .count-badge{ font-family:'JetBrains Mono',monospace; background:var(--panel-alt); border:1px solid var(--line-strong); color:var(--text-dim); font-size:12px; font-weight:700; padding:3px 10px; border-radius:12px;}
+  .count-badge.activo{ background:var(--burdeo); border-color:var(--burdeo-bright); color:#fff;}
 
   .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(380px,1fr)); gap:14px;}
 
@@ -133,7 +134,7 @@
   <div class="content-wrap">
     <div class="head-row">
       <h2>Compañías con Modo Crisis activo</h2>
-      <span class="count-badge" id="countBadge">2</span>
+      <span class="count-badge" id="countBadge">0</span>
     </div>
 
     <div class="grid" id="grid"></div>
@@ -219,10 +220,14 @@ function render(){
   const grid = document.getElementById('grid');
   if(PUESTOS.length===0){
     grid.innerHTML = `<div class="empty-state">Ninguna Compañía tiene el Modo Crisis activo en este momento.</div>`;
-    document.getElementById('countBadge').textContent = '0';
+    const badge0 = document.getElementById('countBadge');
+    badge0.textContent = '0';
+    badge0.classList.remove('activo');
     return;
   }
-  document.getElementById('countBadge').textContent = PUESTOS.length;
+  const badge = document.getElementById('countBadge');
+  badge.textContent = PUESTOS.length;
+  badge.classList.add('activo');
   grid.innerHTML = PUESTOS.map(p => {
     const batHtml = p.batallones.map(b => {
       const label = {emergencia:'En Emergencia', disponible:'Disponible', rancho:'Rancho'}[b.estado];
