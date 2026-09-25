@@ -563,7 +563,8 @@ async function marcarOperador(){
   if(error){
     input.style.borderColor = 'var(--burdeo-bright)';
     setTimeout(()=>{ input.style.borderColor = ''; }, 900);
-    toast('N° de operador no reconocido');
+    const sinSesion = (error.message || '').includes('SIN_SESION');
+    toast(sinSesion ? 'Tu sesión de Central expiró — cerrá sesión y volvé a entrar' : 'N° de operador no reconocido');
     return;
   }
   const fila = data && data[0];
