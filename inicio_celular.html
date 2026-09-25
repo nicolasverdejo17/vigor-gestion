@@ -47,14 +47,19 @@
   }
   .resumen-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.35;}
   .resumen-title{ font-size:10.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:12px; position:relative; z-index:1;}
-  .resumen-stats{ display:flex; align-items:baseline; position:relative; z-index:1; margin-bottom:12px;}
-  .resumen-stat{ display:flex; align-items:baseline; gap:5px; padding:0 14px;}
-  .resumen-stat:first-child{ padding-left:0;}
-  .resumen-stat:not(:last-child){ border-right:1px solid var(--line-strong);}
-  .resumen-stat b{ font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--cyan); font-weight:700;}
-  .resumen-stat span{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.02em;}
-  .resumen-almando{ font-size:12px; color:var(--text-muted); position:relative; z-index:1; padding-top:10px; border-top:1px dashed var(--line-strong);}
-  .resumen-almando b{ color:var(--text); display:block; font-size:13px; margin-top:2px;}
+  .resumen-body{ display:flex; gap:18px; align-items:center; position:relative; z-index:1; margin-bottom:12px;}
+  .ring-wrap{ position:relative; width:88px; height:88px; flex-shrink:0;}
+  .ring-wrap svg{ filter:drop-shadow(0 0 7px var(--cyan-glow));}
+  .ring-val{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring-val b{ font-family:'JetBrains Mono',monospace; font-size:24px; color:var(--cyan); font-weight:700; line-height:1;}
+  .ring-val .of{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); margin-top:2px;}
+  .ring-side{ flex:1; min-width:0;}
+  .ring-stat{ display:flex; align-items:center; gap:8px; padding:5px 0;}
+  .ring-stat svg{ width:14px; height:14px; color:var(--cyan); flex-shrink:0;}
+  .ring-stat .ring-stat-txt{ flex:1; min-width:0;}
+  .ring-stat .lbl{ font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.02em;}
+  .ring-stat .val{ font-size:12px; color:var(--text); font-weight:700; margin-top:1px;}
+  .ring-stat .val.mono{ font-family:'JetBrains Mono',monospace; color:var(--cyan);}
   .resumen-carros{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; position:relative; z-index:1;}
   .carro-chip{ display:inline-flex; align-items:center; gap:5px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px; background:var(--panel-alt); border:1.5px solid var(--servicio); padding:4px 9px; border-radius:5px; color:var(--text);}
   .carro-chip::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--servicio); flex-shrink:0;}
@@ -123,11 +128,27 @@
     <div class="content">
       <div class="resumen-card">
         <div class="resumen-title">Resumen de Guardia — Cuartel</div>
-        <div class="resumen-stats">
-          <div class="resumen-stat"><b id="presentesCount">—</b><span>Presentes</span></div>
-          <div class="resumen-stat"><b id="carrosServicioCount">—</b><span>Carros</span></div>
+        <div class="resumen-body">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 88 88" width="88" height="88">
+              <circle cx="44" cy="44" r="36" fill="none" stroke="var(--line-strong)" stroke-width="8"/>
+              <circle id="ringProgress" cx="44" cy="44" r="36" fill="none" stroke="var(--cyan)" stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="226" stroke-dashoffset="226" transform="rotate(-90 44 44)"/>
+            </svg>
+            <div class="ring-val"><b id="presentesCount">—</b><span class="of" id="presentesTotal">de —</span></div>
+          </div>
+          <div class="ring-side">
+            <div class="ring-stat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9.7a1 1 0 0 1 1-1h6.5l3.3 3.3H19a1 1 0 0 1 1 1V16"/><path d="M3 16h18"/><circle cx="7.5" cy="17.6" r="1.6"/><circle cx="17" cy="17.6" r="1.6"/></svg>
+              <div class="ring-stat-txt"><div class="lbl">Carros en Servicio</div></div>
+              <div class="val mono" id="carrosServicioCount">—</div>
+            </div>
+            <div class="ring-stat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg>
+              <div class="ring-stat-txt"><div class="lbl">Al Mando</div><div class="val" id="alMandoTexto">—</div></div>
+            </div>
+          </div>
         </div>
-        <div class="resumen-almando">Al Mando<b id="alMandoTexto">—</b></div>
         <div class="resumen-carros" id="resumenCarrosChips"></div>
       </div>
 
@@ -203,11 +224,16 @@ async function cargarDatos(){
     sb.from('compania_al_mando').select('tipo_mando, personal(nombre_completo, cargo)').eq('compania_id', perfil.compania_id).maybeSingle()
   ]);
 
+  const totalDotacion = (companeros || []).length;
   const presentes = (companeros || []).filter(p => {
     const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
     return fv && fv.estado !== 'fuera';
   }).length;
   document.getElementById('presentesCount').textContent = presentes;
+  document.getElementById('presentesTotal').textContent = `de ${totalDotacion}`;
+  const ringCircunferencia = 226;
+  const ringPct = totalDotacion > 0 ? presentes / totalDotacion : 0;
+  document.getElementById('ringProgress').style.strokeDashoffset = ringCircunferencia - (ringCircunferencia * ringPct);
 
   const enServicio = (carros || []).filter(c => c.estado === 'servicio').length;
   document.getElementById('carrosServicioCount').textContent = `${enServicio}/${(carros || []).length}`;
