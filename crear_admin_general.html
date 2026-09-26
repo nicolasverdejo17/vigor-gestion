@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIGOR — Crear Administración General</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D;
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --master:#39FF14; --master-dim:#1F9E0A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(1200px 550px at 15% -10%, rgba(57,255,20,0.08), transparent 60%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
+    border:3px solid var(--master);
+  }
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+  .wordmark{ text-align:center; font-family:'Rajdhani'; font-weight:600; letter-spacing:.35em; font-size:12px; color:var(--master); padding:9px 0 7px; text-transform:uppercase; flex-shrink:0; background:var(--bg);}
+  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:2px solid var(--master); flex-shrink:0;}
+  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px;}
+  .back-btn{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:600; font-size:12px; padding:8px 14px; border-radius:5px; cursor:pointer;}
+  .back-btn:hover{ border-color:var(--master); color:var(--master);}
+  .brand-text{ margin-left:16px;}
+  .brand-text h1{ font-size:19px; color:var(--master);}
+  .brand-text span{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
+  .role-tag{ font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; border-radius:4px; background:var(--master-dim); border:1.5px solid var(--master); color:#fff;}
+
+  .content-wrap{ flex:1; min-height:0; padding:22px 30px; display:flex; justify-content:center; overflow-y:auto;}
+  .panel{ width:100%; max-width:460px; background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:22px 26px; height:fit-content;}
+  .panel h3{ font-size:11.5px; color:var(--master); letter-spacing:.08em; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--line);}
+  .field{ margin-bottom:14px;}
+  .field label{ display:block; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:600;}
+  .field input, .field select{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:10px 12px; font-size:13.5px; color:var(--text); font-family:'Inter';}
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--master);}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .warn-box{ display:flex; gap:10px; background:rgba(122,22,32,0.1); border:1px solid var(--burdeo-bright); border-radius:8px; padding:12px 14px; font-size:12px; color:var(--text-muted); margin-bottom:18px; line-height:1.5;}
+  .warn-box b{ color:var(--burdeo-bright);}
+
+  .btn-crear{ width:100%; background:var(--master-dim); border:2px solid var(--master); color:#fff; font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:14px; padding:13px; border-radius:8px; cursor:pointer;}
+  .btn-crear:hover{ background:var(--master); color:#0D2206;}
+
+  .resultado-clave{ margin-top:18px; background:var(--panel-alt); border:1.5px solid var(--master); border-radius:8px; padding:16px 20px; text-align:center;}
+  .resultado-clave .lbl{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;}
+  .resultado-clave .clave{ font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--master); letter-spacing:.05em;}
+  .resultado-clave .nota{ font-size:11px; color:var(--text-dim); margin-top:8px;}
+
+  .toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--panel-alt); border:1px solid var(--master); color:#fff; padding:13px 22px; border-radius:6px; font-size:13.5px; opacity:0; pointer-events:none; transition:all .25s; z-index:50; text-align:center;}
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+<link rel="manifest" href="manifest-maestro.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor Maestro">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div class="wordmark">VIGOR</div>
+
+  <div class="nameplate">
+    <div class="nameplate-inner">
+      <div style="display:flex; align-items:center;">
+        <button class="back-btn" onclick="window.location.href='perfil_maestro.html'">← Panel Maestro</button>
+        <div class="brand-text"><h1>Crear Administración General</h1><span>Superintendente, Vicesuperintendente, Secretario o Tesorero General · Vigor</span></div>
+      </div>
+      <div class="role-tag">Sesión: Super Admin</div>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+    <div class="panel" id="panelForm">
+      <h3>Nuevo Cargo</h3>
+      <div class="warn-box">⚠ Usar solo para el <b>primer</b> Superintendente/Vicesuperintendente/Secretario/Tesorero General de un Cuerpo que nunca tuvo uno — si ya existe alguno con ese cargo, que él mismo cree a los demás desde Alta de Personal Rentado.</div>
+
+      <div class="field">
+        <label>Cuerpo</label>
+        <select id="selCuerpo"><option value="">Cargando…</option></select>
+      </div>
+      <div class="field">
+        <label>Cargo</label>
+        <select id="selCargo">
+          <option value="Superintendente">Superintendente</option>
+          <option value="Vicesuperintendente">Vicesuperintendente</option>
+          <option value="Secretario General">Secretario General</option>
+          <option value="Tesorero General">Tesorero General</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Nombre completo</label>
+        <input type="text" id="inNombre" placeholder="Ej. Marcelo Fuentes Rojas">
+      </div>
+      <div class="field">
+        <label>N° de Registro</label>
+        <input type="text" class="mono" id="inNumero" placeholder="Ej. 1" inputmode="numeric">
+      </div>
+
+      <button class="btn-crear" onclick="crearAdmin()">Crear Cargo</button>
+      <div id="claveResultado"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+async function verificarAcceso(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ toast('Necesitás loguearte primero'); return; }
+  const { data: soyAdmin } = await sb.rpc('soy_super_admin');
+  if(!soyAdmin){
+    document.getElementById('panelForm').innerHTML = `<div style="text-align:center; color:var(--text-dim); font-size:13px; padding:20px 0;">🔒 Esta herramienta es exclusiva de Super Admin.</div>`;
+    return;
+  }
+  const { data: cuerpos } = await sb.from('cuerpos').select('id, nombre_oficial').eq('estado','activo').order('nombre_oficial');
+  const sel = document.getElementById('selCuerpo');
+  sel.innerHTML = (cuerpos || []).map(c => `<option value="${c.id}">${c.nombre_oficial}</option>`).join('') || '<option value="">— Sin Cuerpos activos —</option>';
+}
+verificarAcceso();
+
+async function crearAdmin(){
+  const cuerpoId = document.getElementById('selCuerpo').value;
+  const cargo = document.getElementById('selCargo').value;
+  const nombre = document.getElementById('inNombre').value.trim();
+  const numero = document.getElementById('inNumero').value.trim();
+  const numInt = parseInt(numero, 10);
+  if(!cuerpoId){ toast('Elegí un Cuerpo'); return; }
+  if(!nombre){ toast('Escribí el nombre completo'); return; }
+  if(!numero || isNaN(numInt)){ toast('N° de Registro inválido'); return; }
+
+  const { data, error } = await sb.rpc('crear_admin_general', {
+    p_cuerpo_id: cuerpoId, p_numero_registro: numInt, p_nombre_completo: nombre, p_cargo: cargo
+  });
+  if(error){
+    const MENSAJES = {
+      NUMERO_YA_EXISTE: 'Ese N° de Registro ya está en uso por otra persona.',
+      CARGO_INVALIDO: 'Cargo inválido.',
+      NOMBRE_REQUERIDO: 'Falta el nombre completo.',
+      CUERPO_NO_ENCONTRADO: 'No se encontró ese Cuerpo.',
+      SIN_PERMISO: 'No tenés permiso para esta acción.',
+    };
+    toast(MENSAJES[error.message] || 'No se pudo crear — ' + error.message);
+    return;
+  }
+  const clave = data[0].r_password_temporal;
+  document.getElementById('claveResultado').innerHTML = `
+    <div class="resultado-clave">
+      <div class="lbl">Contraseña Temporal Generada</div>
+      <div class="clave">${clave}</div>
+      <div class="nota">Entregar en persona a ${nombre} (N° ${numInt}) — expira al primer uso o en 7 días</div>
+    </div>
+  `;
+  toast(`${cargo} creado correctamente`);
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
