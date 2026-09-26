@@ -196,6 +196,7 @@ const ICONOS_ROW = {
   crearCarro: '<path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/><path d="M19.3 4v4M17.3 6h4"/>',
   estadisticas: '<path d="M4 20h16"/><path d="M7 20v-6M12 20V7M17 20v-9"/>',
   lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
+  secretaria: '<rect x="5.5" y="3" width="13" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/>',
 };
 function renderIco(ico){
   return ICONOS_ROW[ico]
@@ -214,6 +215,8 @@ const FILAS_ADMIN = [
     cargos:['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Secretario/a','Tesorero/a','Director'], roles:[], href:'estadisticas.html' },
   { ico:'inventario', nombre:'Inventario', desc:'Ingreso, baja, historial de ítems',
     cargos:['Tesorero/a','Director'], roles:['Depto. Material Menor','Depto. Material Mayor'], href:'inventario.html' },
+  { ico:'secretaria', nombre:'Secretaría', desc:'Actas, Sesiones, Citaciones, Acuerdos, Correspondencia y Archivo',
+    cargos:['Secretario/a'], roles:[], href:'secretaria.html' },
   { ico:'especialidades', nombre:'Especialidades', desc:'Asignar insignias a bomberos',
     cargos:[], roles:['Depto. Especialidad'], href:'gestion_especialidades.html' },
   { ico:'cursos', nombre:'Cursos y Capacitaciones', desc:'Cargar cursos, definir nivel de otros',

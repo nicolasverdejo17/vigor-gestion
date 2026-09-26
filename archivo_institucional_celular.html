@@ -93,6 +93,7 @@
     </div>
 
     <div class="content">
+      <div class="cat-row" id="ambitoRow" style="display:none;"></div>
       <div class="cat-row" id="catRow"></div>
       <div id="listaDocs"></div>
     </div>
@@ -127,18 +128,38 @@ function iconoPorExt(nombre){
   return '<path d="M6 3h9l3 3v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M15 3v3h3"/><path d="M8 13h8M8 16.5h8"/>';
 }
 
+let DOCS_CUERPO = [];
+let DOCS_CIA = [];
+let miCompaniaIdArchivo = null;
+let ambitoArchivo = 'cia';
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
-  const { data: perfil } = await sb.from('personal').select('cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).maybeSingle();
+  const { data: perfil } = await sb.from('personal').select('cuerpo_id, compania_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).maybeSingle();
   if(!perfil || !perfil.cuerpo_id) return;
   document.getElementById('nombreCuerpoCel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+  miCompaniaIdArchivo = perfil.compania_id;
 
   const { data } = await sb.from('secretaria_archivo').select('*').eq('cuerpo_id', perfil.cuerpo_id).order('creado_en', { ascending:false });
-  DOCS = data || [];
+  DOCS_CUERPO = (data || []).filter(d => !d.compania_id);
+  DOCS_CIA = miCompaniaIdArchivo ? (data || []).filter(d => d.compania_id === miCompaniaIdArchivo) : [];
+  ambitoArchivo = miCompaniaIdArchivo ? 'cia' : 'cuerpo';
+  renderAmbitos();
   renderCats();
   renderLista();
 }
+
+function renderAmbitos(){
+  const wrap = document.getElementById('ambitoRow');
+  if(!miCompaniaIdArchivo){ wrap.style.display = 'none'; return; }
+  wrap.style.display = 'flex';
+  wrap.innerHTML = `
+    <button class="cat-btn ${ambitoArchivo==='cia'?'on':''}" onclick="setAmbito('cia')">De mi Compañía</button>
+    <button class="cat-btn ${ambitoArchivo==='cuerpo'?'on':''}" onclick="setAmbito('cuerpo')">Del Cuerpo General</button>
+  `;
+}
+function setAmbito(a){ ambitoArchivo = a; renderAmbitos(); renderCats(); renderLista(); }
 
 function renderCats(){
   document.getElementById('catRow').innerHTML = CATEGORIAS.map(c =>
@@ -149,6 +170,7 @@ function setCat(c){ catFiltro = c; renderCats(); renderLista(); }
 
 function renderLista(){
   const cont = document.getElementById('listaDocs');
+  DOCS = ambitoArchivo === 'cia' ? DOCS_CIA : DOCS_CUERPO;
   const filtrados = DOCS.filter(d => catFiltro==='Todas' || d.categoria===catFiltro);
   if(!filtrados.length){
     cont.innerHTML = `<div class="empty-state">Sin documentos ${catFiltro==='Todas'?'':'en '+catFiltro} todavía.</div>`;
