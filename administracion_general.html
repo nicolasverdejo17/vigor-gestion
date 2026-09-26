@@ -213,17 +213,14 @@ const ROLES_CON_ACCESO = ['Superintendente','Vicesuperintendente','Secretario Ge
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ document.getElementById('accesoOk').style.display='none'; document.getElementById('accesoDenegado').style.display='block'; return; }
-  const { data: perfil } = await sb.from('personal').select('cargo, cargo_institucional, cuerpo_id, cuerpos(nombre_oficial, codigo_cuerpo)').eq('auth_user_id', session.user.id).single();
+  const { data: perfil } = await sb.from('personal').select('cargo, cuerpo_id, cuerpos(nombre_oficial, codigo_cuerpo)').eq('auth_user_id', session.user.id).single();
   if(!perfil){ document.getElementById('accesoOk').style.display='none'; document.getElementById('accesoDenegado').style.display='block'; return; }
 
-  document.getElementById('roleTag').textContent = perfil.cargo_institucional || perfil.cargo;
+  document.getElementById('roleTag').textContent = perfil.cargo;
   document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
   document.getElementById('codigoCuerpoValor').textContent = (perfil.cuerpos && perfil.cuerpos.codigo_cuerpo) ? perfil.cuerpos.codigo_cuerpo : '—';
 
-  // Un bombero de Compañía puede tener acceso institucional ADEMÁS de su
-  // cargo normal (cargo_institucional) -- no reemplaza a "cargo", se sube
-  // encima.
-  const tieneAcceso = ROLES_CON_ACCESO.includes(perfil.cargo) || ROLES_CON_ACCESO.includes(perfil.cargo_institucional);
+  const tieneAcceso = ROLES_CON_ACCESO.includes(perfil.cargo);
   document.getElementById('accesoOk').style.display = tieneAcceso ? 'block' : 'none';
   document.getElementById('accesoDenegado').style.display = tieneAcceso ? 'none' : 'block';
   if(!tieneAcceso) return;

@@ -386,9 +386,9 @@ label {
   async function cargarSesion(){
     const { data: { session } } = await sb.auth.getSession();
     if(!session){ toast('Necesitás loguearte primero'); return; }
-    const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo, cargo_institucional').eq('auth_user_id', session.user.id).maybeSingle();
+    const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
     if(!perfil || !perfil.cuerpo_id){ toast('No se pudo determinar tu Cuerpo'); return; }
-    if(!ROLES_CON_ACCESO.includes(perfil.cargo) && !ROLES_CON_ACCESO.includes(perfil.cargo_institucional)){
+    if(!ROLES_CON_ACCESO.includes(perfil.cargo)){
       document.getElementById('wrapContenido').style.display = 'none';
       document.getElementById('sinPermiso').style.display = 'block';
       return;
