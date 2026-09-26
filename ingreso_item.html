@@ -440,6 +440,11 @@ async function guardarIngreso(){
     item_id: item.id, tipo: 'ingreso', detalle: `Ingreso al inventario — ${nombre}`,
     realizado_por: miPersonalId, estado_nuevo: estado, lugar_nuevo: lugar
   });
+  sb.rpc('registrar_auditoria', {
+    p_tipo: 'creacion',
+    p_detalle: `Inventario — Ítem agregado: "${nombre}" (${codigo})`,
+    p_compania_id: miCompaniaId,
+  });
 
   toast(`Ítem "${nombre}" (${codigo}) ingresado correctamente al inventario`);
   setTimeout(()=>window.location.href = 'inventario.html', 900);

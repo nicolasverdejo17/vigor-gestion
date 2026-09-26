@@ -238,7 +238,7 @@
 
   <div class="toolbar">
     <div class="cat-tabs" id="catTabs"></div>
-    <input class="search-box" id="searchBox" type="text" placeholder="Buscar por código o nombre…" oninput="renderTabla()">
+    <input class="search-box" id="searchBox" type="text" placeholder="Buscar por código, nombre, categoría, estado, lugar o valor…" oninput="renderTabla()">
     <button class="btn-exportar" onclick="abrirExportModal()">⬇ Exportar PDF</button>
     <button class="btn-ingresar" id="btnIngresar" onclick="window.location.href='ingreso_item.html'">+ Ingresar Ítem</button>
   </div>
@@ -489,7 +489,7 @@ async function eliminarCategoria(key){
   }
   sb.rpc('registrar_auditoria', {
     p_tipo: 'critico',
-    p_detalle: `Categoría de Inventario eliminada — "${nombreCat}"`,
+    p_detalle: `Inventario — Categoría eliminada: "${nombreCat}"`,
     p_compania_id: miCompaniaId,
   });
   delete CATS[key];
@@ -524,7 +524,7 @@ async function eliminarSubcat(key){
   }
   sb.rpc('registrar_auditoria', {
     p_tipo: 'critico',
-    p_detalle: `Subcategoría de Inventario eliminada — "${nombreSubcat}" (de ${CATS[catActiva] ? CATS[catActiva].label : '—'})`,
+    p_detalle: `Inventario — Subcategoría eliminada: "${nombreSubcat}" (de ${CATS[catActiva] ? CATS[catActiva].label : '—'})`,
     p_compania_id: miCompaniaId,
   });
   SUBCATS[catActiva] = (SUBCATS[catActiva] || []).filter(x => x.key !== key);
@@ -536,12 +536,29 @@ async function eliminarSubcat(key){
 
 const ESTADO_LABEL = { bueno:'Bueno', regular:'Regular', malo:'Malo', baja:'De Baja' };
 
+// Pedido explícito: el buscador debe encontrar por CUALQUIER columna
+// visible en la tabla, no solo código/nombre.
+function subcatLabelDe(subcatId){
+  if(!subcatId) return '';
+  for(const key in SUBCATS){
+    const s = (SUBCATS[key] || []).find(x => x.key === subcatId);
+    if(s) return s.label;
+  }
+  return '';
+}
 function renderTabla(){
   const q = document.getElementById('searchBox').value.trim().toLowerCase();
   const filtrados = ITEMS.filter(i=>{
     const matchCat = catActiva==='todos' || i.cat===catActiva;
     const matchSubcat = !subcatActiva || i.subcat===subcatActiva;
-    const matchQ = !q || i.cod.toLowerCase().includes(q) || i.nombre.toLowerCase().includes(q);
+    const camposBusqueda = [
+      i.cod, i.nombre,
+      CATS[i.cat] ? CATS[i.cat].label : '',
+      subcatLabelDe(i.subcat),
+      ESTADO_LABEL[i.estado] || '',
+      i.lugar, i.valor,
+    ].join(' ').toLowerCase();
+    const matchQ = !q || camposBusqueda.includes(q);
     return matchCat && matchSubcat && matchQ;
   });
   const body = document.getElementById('tablaBody');

@@ -49,7 +49,9 @@
   tbody td{ padding:11px 16px; font-size:12.5px; vertical-align:middle;}
   .td-hora{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:11px; white-space:nowrap;}
   .td-usuario{ font-weight:600;}
-  .evento-tag{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; padding:3px 9px; border-radius:10px; display:inline-block; background:var(--burdeo-bright); color:#fff;}
+  .evento-tag{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; padding:3px 9px; border-radius:10px; display:inline-block; color:#fff;}
+  .evento-tag.critico{ background:var(--burdeo-bright);}
+  .evento-tag.creacion{ background:var(--servicio); color:#0B2A1B;}
   .empty-state{ text-align:center; padding:50px 20px; color:var(--text-dim); font-size:12.5px;}
 
   @media (max-width:760px){
@@ -89,7 +91,7 @@
   </div>
 
   <div class="intro-nota" id="introNota">
-    <b>Qué es esto:</b> registro de acciones críticas (por ahora, eliminaciones) sobre Secretaría e Inventario.
+    <b>Qué es esto:</b> qué se agregó o eliminó en Inventario y en los documentos de Secretaría — nada más.
   </div>
 
   <div class="content-wrap">
@@ -129,12 +131,20 @@ async function cargarDatos(){
   document.getElementById('roleTag').textContent = perfil.cargo;
   document.getElementById('alcanceLabel').textContent = perfil.cargo === 'Superintendente' ? 'Cuerpo General · Vigor' : 'Mi Compañía · Vigor';
 
-  const { data, error } = await sb.from('registro_auditoria')
-    .select('ocurrido_en, usuario_label, tipo, detalle')
-    .order('ocurrido_en', { ascending:false })
-    .limit(200);
-  if(error){ toast('No se pudo cargar — ' + error.message); return; }
-  renderTabla(data || []);
+  // Pedido explícito: acá solo debe verse lo que se agrega o elimina en
+  // Inventario y en los documentos de Secretaría -- no cualquier evento
+  // crítico del sistema (ej. restablecimientos de contraseña), que sigue
+  // siendo exclusivo de Perfil Maestro/Super Admin. Dos consultas
+  // separadas (en vez de un .or() con caracteres especiales en el patrón,
+  // más frágil de parsear) y se combinan acá.
+  const base = () => sb.from('registro_auditoria').select('ocurrido_en, usuario_label, tipo, detalle').order('ocurrido_en', { ascending:false }).limit(200);
+  const [{ data: inv, error: e1 }, { data: sec, error: e2 }] = await Promise.all([
+    base().ilike('detalle', 'Inventario —%'),
+    base().ilike('detalle', 'Secretaría —%'),
+  ]);
+  if(e1 || e2){ toast('No se pudo cargar — ' + (e1 || e2).message); return; }
+  const eventos = [...(inv||[]), ...(sec||[])].sort((a,b) => new Date(b.ocurrido_en) - new Date(a.ocurrido_en)).slice(0, 200);
+  renderTabla(eventos);
 }
 
 function renderTabla(eventos){
@@ -147,7 +157,7 @@ function renderTabla(eventos){
     <tr>
       <td class="td-hora">${new Date(e.ocurrido_en).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false})}</td>
       <td class="td-usuario">${e.usuario_label}</td>
-      <td><span class="evento-tag">${e.tipo}</span></td>
+      <td><span class="evento-tag ${e.tipo}">${e.tipo === 'creacion' ? 'Agregado' : 'Eliminado'}</span></td>
       <td>${e.detalle}</td>
     </tr>
   `).join('');
