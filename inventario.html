@@ -62,6 +62,12 @@
   }
   .cat-tab.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
   .cat-tab .count{ font-family:'JetBrains Mono',monospace; opacity:.7; margin-left:4px;}
+  .cat-tab-wrap{ display:inline-flex; align-items:center; gap:2px;}
+  .cat-tab-accion{
+    width:20px; height:20px; border-radius:50%; background:var(--panel); border:1px solid var(--line-strong);
+    color:var(--text-dim); font-size:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .cat-tab-accion:hover{ border-color:var(--cyan); color:var(--cyan);}
 
   .subcat-row{ flex-shrink:0; padding:10px 26px; background:var(--bg); border-bottom:1px solid var(--line); display:none; align-items:center; gap:8px; flex-wrap:wrap;}
   .subcat-row.show{ display:flex;}
@@ -314,7 +320,12 @@ async function cargarDatos(){
   if(perfil){
     miPersonalId = perfil.id;
     miCuerpoId = perfil.cuerpo_id;
-    miCompaniaId = perfil.compania_id;
+    // Bug reportado: Administración General/Comandancia ahora PUEDEN tener
+    // Compañía propia también (siguen siendo bomberos de ahí, además de su
+    // cargo institucional) -- antes esto los mandaba a ver/editar el
+    // inventario de SU Compañía en vez del inventario del Cuerpo General,
+    // que es el que les corresponde a ellos.
+    miCompaniaId = ROLES_INSTITUCIONALES.includes(perfil.cargo) ? null : perfil.compania_id;
     rolActivo = perfil.cargo;
     rolesFuncionalesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
     document.getElementById('roleTag').textContent = `${perfil.cargo}`;
@@ -365,11 +376,15 @@ async function cargarDatos(){
 
 function renderTabs(){
   const el = document.getElementById('catTabs');
+  const puede = puedeModificar();
   const chips = Object.entries(CATS).map(([key, c])=>{
     const count = key==='todos' ? ITEMS.length : ITEMS.filter(i=>i.cat===key).length;
-    return `<button class="cat-tab ${catActiva===key?'on':''}" onclick="setCat('${key}')">${c.label} <span class="count">${count}</span></button>`;
+    const acciones = (puede && key!=='todos')
+      ? `<span class="cat-tab-accion" onclick="event.stopPropagation(); editarCategoria('${key}')" title="Renombrar">✎</span><span class="cat-tab-accion" onclick="event.stopPropagation(); eliminarCategoria('${key}')" title="Eliminar">✕</span>`
+      : '';
+    return `<span class="cat-tab-wrap"><button class="cat-tab ${catActiva===key?'on':''}" onclick="setCat('${key}')">${c.label} <span class="count">${count}</span></button>${acciones}</span>`;
   }).join('');
-  if(!puedeModificar()){ el.innerHTML = chips; return; }
+  if(!puede){ el.innerHTML = chips; return; }
   const addBtn = creandoCategoria
     ? `<input class="subcat-input" id="newCatInput" placeholder="Nombre de la categoría…" onkeydown="if(event.key==='Enter') confirmarCategoria(); if(event.key==='Escape') cancelarCategoria();">
        <button class="tipo-confirmar-cat" onclick="confirmarCategoria()" title="Confirmar">✓</button>
@@ -409,10 +424,14 @@ function renderSubcats(){
   // categoría (incluidas las nuevas que se creen) puede tenerlas.
   if(catActiva === 'todos'){ row.classList.remove('show'); row.innerHTML=''; return; }
   row.classList.add('show');
+  const puede = puedeModificar();
   const subcatsDeEstaCategoria = SUBCATS[catActiva] || (SUBCATS[catActiva] = []);
   const chips = subcatsDeEstaCategoria.map(s=>{
     const count = ITEMS.filter(i=>i.cat===catActiva && i.subcat===s.key).length;
-    return `<button class="subcat-chip ${subcatActiva===s.key?'on':''}" onclick="setSubcat('${s.key}')">${s.label} <span class="mono" style="opacity:.7;">${count}</span></button>`;
+    const acciones = puede
+      ? `<span class="cat-tab-accion" onclick="event.stopPropagation(); editarSubcat('${s.key}')" title="Renombrar">✎</span><span class="cat-tab-accion" onclick="event.stopPropagation(); eliminarSubcat('${s.key}')" title="Eliminar">✕</span>`
+      : '';
+    return `<span class="cat-tab-wrap"><button class="subcat-chip ${subcatActiva===s.key?'on':''}" onclick="setSubcat('${s.key}')">${s.label} <span class="mono" style="opacity:.7;">${count}</span></button>${acciones}</span>`;
   }).join('');
   const allChip = `<button class="subcat-chip ${subcatActiva===null?'on':''}" onclick="setSubcat(null)">Todas</button>`;
   if(!puedeModificar()){ row.innerHTML = `<span class="subcat-label">Subcategoría</span>` + allChip + chips; return; }
@@ -439,6 +458,68 @@ async function confirmarSubcat(){
   renderSubcats();
   renderTabla();
   toast(`Subcategoría "${val}" creada en ${CATS[catActiva].label}`);
+}
+
+// Pedido explícito: poder editar/eliminar una categoría o subcategoría ya
+// creada, no solo agregar nuevas. Eliminar está bloqueado del lado de la
+// base (FK sin CASCADE) si todavía hay ítems adentro -- se avisa antes de
+// intentarlo, y si igual falla, el mensaje de error de Postgres queda
+// tapado por uno más claro.
+async function editarCategoria(key){
+  const actual = CATS[key].label;
+  const nuevo = prompt('Nuevo nombre de la categoría:', actual);
+  if(!nuevo || !nuevo.trim() || nuevo.trim() === actual) return;
+  const { error } = await sb.from('inventario_categorias').update({ nombre: nuevo.trim() }).eq('id', key);
+  if(error){ toast('No se pudo renombrar — ' + error.message); return; }
+  CATS[key].label = nuevo.trim();
+  renderTabs();
+  renderTabla();
+  toast('Categoría renombrada');
+}
+async function eliminarCategoria(key){
+  const enUso = ITEMS.some(i => i.cat === key);
+  const tieneSubcats = (SUBCATS[key] || []).length > 0;
+  const aviso = tieneSubcats ? ' Se eliminan también sus subcategorías.' : '';
+  if(!confirm(`¿Eliminar la categoría "${CATS[key].label}"?${aviso} Esta acción no se puede deshacer.`)) return;
+  const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
+  if(error){
+    toast(enUso ? 'No se puede eliminar — todavía tiene ítems adentro, movelos primero' : 'No se pudo eliminar — ' + error.message);
+    return;
+  }
+  delete CATS[key];
+  delete SUBCATS[key];
+  if(catActiva === key){ catActiva = 'todos'; subcatActiva = null; }
+  renderTabs();
+  renderSubcats();
+  renderTabla();
+  toast('Categoría eliminada');
+}
+async function editarSubcat(key){
+  const subcatsDeEstaCategoria = SUBCATS[catActiva] || [];
+  const s = subcatsDeEstaCategoria.find(x => x.key === key);
+  if(!s) return;
+  const nuevo = prompt('Nuevo nombre de la subcategoría:', s.label);
+  if(!nuevo || !nuevo.trim() || nuevo.trim() === s.label) return;
+  const { error } = await sb.from('inventario_categorias').update({ nombre: nuevo.trim() }).eq('id', key);
+  if(error){ toast('No se pudo renombrar — ' + error.message); return; }
+  s.label = nuevo.trim();
+  renderSubcats();
+  renderTabla();
+  toast('Subcategoría renombrada');
+}
+async function eliminarSubcat(key){
+  const enUso = ITEMS.some(i => i.subcat === key);
+  if(!confirm('¿Eliminar esta subcategoría? Esta acción no se puede deshacer.')) return;
+  const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
+  if(error){
+    toast(enUso ? 'No se puede eliminar — todavía tiene ítems adentro, movelos primero' : 'No se pudo eliminar — ' + error.message);
+    return;
+  }
+  SUBCATS[catActiva] = (SUBCATS[catActiva] || []).filter(x => x.key !== key);
+  if(subcatActiva === key) subcatActiva = null;
+  renderSubcats();
+  renderTabla();
+  toast('Subcategoría eliminada');
 }
 
 const ESTADO_LABEL = { bueno:'Bueno', regular:'Regular', malo:'Malo', baja:'De Baja' };
@@ -515,8 +596,11 @@ function generarPDF(){
 // (Capitán, Tenientes, Ayudante). Modificarlo (Ingresar Ítem, crear
 // categorías/subcategorías): Director, Tesorero/a, o quien tenga asignado
 // el Rol Funcional Depto. Material Menor / Depto. Material Mayor
-// (ver ficha_bombero.html) — mismo criterio que el menú de Celular.
-const MODIFY_CARGOS = ['Director','Tesorero/a'];
+// (ver ficha_bombero.html) — mismo criterio que el menú de Celular. Los 8
+// cargos institucionales también pueden modificar el inventario del
+// Cuerpo General (Tesorería), que es el que ven ellos acá.
+const ROLES_INSTITUCIONALES = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General','Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
+const MODIFY_CARGOS = ['Director','Tesorero/a', ...ROLES_INSTITUCIONALES];
 const MODIFY_ROLES_FUNCIONALES = ['Depto. Material Menor','Depto. Material Mayor'];
 let rolActivo = null;
 let rolesFuncionalesActivos = new Set();

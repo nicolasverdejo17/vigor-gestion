@@ -175,7 +175,7 @@
 
   <div class="form-wrap">
     <div class="form-head">
-      <button class="back-btn" onclick="window.location.href='inventario.html'">← Volver</button>
+      <button class="back-btn" onclick="volverInventario()">← Volver</button>
       <h2>Ingresar Ítem</h2>
     </div>
 
@@ -246,6 +246,16 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+// Bug reportado: "Volver" acá SIEMPRE forzaba una navegación nueva a
+// inventario.html en vez de usar el historial real -- eso agregaba una
+// entrada duplicada de Inventario en el historial, y el "Volver" DE
+// Inventario terminaba trayendo de vuelta a esta misma pantalla en vez de
+// salir a Administración General/Opciones -- un ida y vuelta sin salida.
+function volverInventario(){
+  if(window.history.length > 1){ history.back(); return; }
+  window.location.href = 'inventario.html';
+}
 
 // CATS/SUBCATS ahora se cargan reales desde Supabase (misma tabla y misma
 // lógica que inventario.html) — las claves son uuid reales.

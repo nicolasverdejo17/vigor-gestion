@@ -185,7 +185,7 @@
 
   <div class="content-wrap">
     <div class="head-row">
-      <button class="back-btn" onclick="window.location.href='inventario.html'">← Volver</button>
+      <button class="back-btn" onclick="volverInventario()">← Volver</button>
       <h2>Historial de Movimientos</h2>
       <button class="btn-exportar-hist" onclick="window.print()">⬇ Exportar PDF</button>
     </div>
@@ -255,6 +255,15 @@
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+// Bug reportado: "Volver" acá SIEMPRE forzaba una navegación nueva a
+// inventario.html en vez de usar el historial real -- ida y vuelta sin
+// salida entre esta pantalla e Inventario (ver mismo fix en
+// ingreso_item.html).
+function volverInventario(){
+  if(window.history.length > 1){ history.back(); return; }
+  window.location.href = 'inventario.html';
+}
 
 const MODIFY_CARGOS = ['Director','Tesorero/a'];
 const MODIFY_ROLES_FUNCIONALES = ['Depto. Material Menor','Depto. Material Mayor'];
