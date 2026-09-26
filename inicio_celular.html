@@ -288,9 +288,28 @@ async function cargarDatos(){
       .subscribe();
     suscribirAlertaDespacho(perfil);
     suscribirAlertaEspecial(perfil);
+    suscribirSecretariaOficiales(perfil);
   }
 }
 let suscritoInicioCelular = false;
+
+// Sesiones/Citaciones de Secretaría deben "verse y notificarse" en el
+// Inicio de los oficiales generales -- se refresca la lista de
+// notificaciones en vivo (misma lógica que ya usan avisos de Pizarra) en
+// vez de necesitar recargar la pantalla a mano.
+function suscribirSecretariaOficiales(perfil){
+  if(!ROLES_OFICIALES_GENERALES.includes(perfil.cargo) || !perfil.cuerpo_id) return;
+  sb.channel('secretaria-oficiales-' + perfil.cuerpo_id)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'secretaria_sesiones', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, () => {
+      renderNotificaciones(perfil);
+      toast('Nueva Sesión informada por Secretaría');
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'secretaria_citaciones', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, () => {
+      renderNotificaciones(perfil);
+      toast('Nueva Citación informada por Secretaría');
+    })
+    .subscribe();
+}
 
 // Bug reportado: al confirmar un despacho desde la Central, el celular del
 // bombero "no hacía nada" — Inicio (Celular) nunca escuchaba despachos, así
@@ -374,9 +393,16 @@ function tiempoRelativo(fechaIso){
   return d === 1 ? 'hace 1 día' : `hace ${d} días`;
 }
 
+// Sesiones y Citaciones de Secretaría son de interés institucional -- solo
+// para los "oficiales generales": los 4 cargos de Administración General,
+// los 4 de Comandancia, y el Director de cada Compañía. Un Voluntario o
+// Teniente normal no las ve acá.
+const ROLES_OFICIALES_GENERALES = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General','Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante','Director'];
+
 async function renderNotificaciones(perfil){
   const cont = document.getElementById('notiList');
-  const [{ data: actividad }, { data: curso }, { data: avisos }] = await Promise.all([
+  const esOficialGeneral = ROLES_OFICIALES_GENERALES.includes(perfil.cargo);
+  const [{ data: actividad }, { data: curso }, { data: avisos }, { data: sesiones }, { data: citaciones }] = await Promise.all([
     sb.from('actividades').select('nombre, fecha, hora, creado_en').eq('compania_id', perfil.compania_id).order('creado_en', { ascending:false }).limit(1),
     sb.from('personal_capacitaciones').select('nombre_curso, nivel, creado_en').eq('personal_id', perfil.id).order('creado_en', { ascending:false }).limit(1),
     // Bug reportado: acá solo se veía el aviso de la propia Compañía (y con
@@ -385,6 +411,8 @@ async function renderNotificaciones(perfil){
     sb.from('pizarra_observaciones').select('contenido, creado_en, es_general, personal(nombre_completo)')
       .or(`compania_id.eq.${perfil.compania_id},compania_id.is.null`)
       .order('creado_en', { ascending:false }).limit(3),
+    esOficialGeneral ? sb.from('secretaria_sesiones').select('titulo, fecha, hora, lugar, creado_en').eq('cuerpo_id', perfil.cuerpo_id).eq('estado','Programada').order('creado_en', { ascending:false }).limit(3) : Promise.resolve({ data: [] }),
+    esOficialGeneral ? sb.from('secretaria_citaciones').select('motivo, fecha_limite_envio, creado_en').eq('cuerpo_id', perfil.cuerpo_id).eq('estado','Enviada').order('creado_en', { ascending:false }).limit(3) : Promise.resolve({ data: [] }),
   ]);
 
   const items = [];
@@ -400,6 +428,8 @@ async function renderNotificaciones(perfil){
       ts: a.creado_en
     });
   });
+  (sesiones || []).forEach(s => items.push({ ico:'📅', tit:`Sesión programada: ${s.titulo}`, sub:`${s.fecha} ${(s.hora||'').slice(0,5)} · ${s.lugar||'—'} — ${tiempoRelativo(s.creado_en)}`, ts:s.creado_en }));
+  (citaciones || []).forEach(c => items.push({ ico:'📨', tit:`Citación: ${c.motivo}`, sub:`Fecha límite de envío: ${c.fecha_limite_envio} — ${tiempoRelativo(c.creado_en)}`, ts:c.creado_en }));
 
   items.sort((a,b) => new Date(b.ts) - new Date(a.ts));
 
