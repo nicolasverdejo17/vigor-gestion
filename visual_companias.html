@@ -163,7 +163,7 @@
     <div class="nameplate-inner">
       <div class="brand">
         <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
-        <div class="brand-text"><h1>Visual de Compañías</h1><span>Central de Alarmas · Cuerpo de Bomberos Central · Vigor</span></div>
+        <div class="brand-text"><h1>Visual de Compañías</h1><span id="cuerpoLabel">Vigor</span></div>
       </div>
       <div class="clock"><strong id="clk">—</strong><span id="fechaHoy">—</span></div>
     </div>
@@ -228,7 +228,14 @@ async function cargarDatos(){
     return;
   }
   const { data: cuerpoCentral } = await sb.rpc('central_obtener_cuerpo');
-  ajustarTabsSegunSesion(!!(cuerpoCentral && cuerpoCentral[0]));
+  const filaCentral = cuerpoCentral && cuerpoCentral[0];
+  ajustarTabsSegunSesion(!!filaCentral);
+  if(filaCentral){
+    document.getElementById('cuerpoLabel').textContent = 'Central de Alarmas · ' + filaCentral.c_nombre_oficial + ' · Vigor';
+  } else {
+    const { data: perfil } = await sb.from('personal').select('cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).maybeSingle();
+    document.getElementById('cuerpoLabel').textContent = (perfil && perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+  }
   const { data: cias } = await sb.from('companias')
     .select(`
       id, nombre, dotacion_minima,

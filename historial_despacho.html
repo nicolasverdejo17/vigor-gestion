@@ -301,7 +301,10 @@ async function cargarDatos(){
     const { data: perfil } = await sb.from('personal').select('cuerpo_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).single();
     if(!perfil) return;
     miCuerpoId = perfil.cuerpo_id;
-    document.getElementById('cuerpoLabel').textContent = 'Central de Alarmas · ' + (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
+    // Bug reportado: acá SIEMPRE decía "Central de Alarmas", aunque quien
+    // entrara fuera Comandancia (no Central) -- etiqueta equivocada para
+    // esa sesión.
+    document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
   }
   ajustarTabsSegunSesion(!!filaCentral);
 
