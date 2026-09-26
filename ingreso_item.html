@@ -281,7 +281,12 @@ async function cargarDatos(){
   if(!perfil) return;
   miPersonalId = perfil.id;
   miCuerpoId = perfil.cuerpo_id;
-  miCompaniaId = perfil.compania_id;
+  // Bug reportado: quedaba "mezclado" con el inventario de Compañía --
+  // Administración General/Comandancia ahora pueden tener Compañía propia
+  // también, así que sin esta exclusión terminaban ingresando el ítem en
+  // SU Compañía en vez del Cuerpo General (mismo fix ya aplicado en
+  // inventario.html).
+  miCompaniaId = ROLES_INSTITUCIONALES.includes(perfil.cargo) ? null : perfil.compania_id;
   rolActivo = perfil.cargo;
   const rolesFuncionalesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
   document.getElementById('roleTag').textContent = perfil.cargo;
@@ -448,7 +453,8 @@ function toast(msg){
 
 // Mismo grupo que modifica el Inventario — ver la sección "Ver Inventario"
 // no alcanza para poder ingresar ítems, hay que poder modificarlo.
-const MODIFY_CARGOS = ['Director','Tesorero/a'];
+const ROLES_INSTITUCIONALES = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General','Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
+const MODIFY_CARGOS = ['Director','Tesorero/a', ...ROLES_INSTITUCIONALES];
 const MODIFY_ROLES_FUNCIONALES = ['Depto. Material Menor','Depto. Material Mayor'];
 let rolActivo = null;
 

@@ -208,6 +208,18 @@
         </div>
 
         <div id="listaCompanias" style="display:flex; flex-direction:column; gap:8px; margin-top:14px;"></div>
+
+        <div id="seccionAuditoria">
+          <div class="section-title">Auditoría</div>
+          <div class="tools-grid">
+            <div class="tool-card" onclick="window.location.href='auditoria_eliminaciones.html'">
+              <div class="tool-ico-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#49E9FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 5 6v5.5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-2.5z"/><path d="M9.3 12l1.9 1.9 3.5-3.8"/></svg></div>
+              <b>Registro de Auditoría</b>
+              <span>Eliminaciones en Secretaría e Inventario del Cuerpo General.</span>
+              <div class="alcance">Cuerpo General</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="accesoDenegado" style="display:none;">
@@ -255,6 +267,7 @@ async function cargarSesion(){
   // Tesorería (y viceversa).
   document.getElementById('seccionSecretaria').style.display = perfil.cargo === 'Secretario General' ? 'block' : 'none';
   document.getElementById('seccionTesoreria').style.display = perfil.cargo === 'Tesorero General' ? 'block' : 'none';
+  document.getElementById('seccionAuditoria').style.display = perfil.cargo === 'Superintendente' ? 'block' : 'none';
 
   await Promise.all([renderDashStats(perfil.cuerpo_id), cargarCompaniasExistentes(perfil.cuerpo_id)]);
 }

@@ -197,6 +197,7 @@ const ICONOS_ROW = {
   estadisticas: '<path d="M4 20h16"/><path d="M7 20v-6M12 20V7M17 20v-9"/>',
   lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
   secretaria: '<rect x="5.5" y="3" width="13" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/>',
+  auditoria: '<path d="M12 3.5 5 6v5.5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-2.5z"/><path d="M9.3 12l1.9 1.9 3.5-3.8"/>',
 };
 function renderIco(ico){
   return ICONOS_ROW[ico]
@@ -217,6 +218,8 @@ const FILAS_ADMIN = [
     cargos:['Tesorero/a','Director'], roles:['Depto. Material Menor','Depto. Material Mayor'], href:'inventario.html' },
   { ico:'secretaria', nombre:'Secretaría', desc:'Actas, Sesiones, Citaciones, Acuerdos, Correspondencia y Archivo',
     cargos:['Secretario/a'], roles:[], href:'secretaria.html' },
+  { ico:'auditoria', nombre:'Registro de Auditoría', desc:'Eliminaciones en Secretaría e Inventario de la Compañía',
+    cargos:['Director'], roles:[], href:'auditoria_eliminaciones.html' },
   { ico:'especialidades', nombre:'Especialidades', desc:'Asignar insignias a bomberos',
     cargos:[], roles:['Depto. Especialidad'], href:'gestion_especialidades.html' },
   { ico:'cursos', nombre:'Cursos y Capacitaciones', desc:'Cargar cursos, definir nivel de otros',

@@ -379,7 +379,7 @@ function renderTabs(){
   const puede = puedeModificar();
   const chips = Object.entries(CATS).map(([key, c])=>{
     const count = key==='todos' ? ITEMS.length : ITEMS.filter(i=>i.cat===key).length;
-    const acciones = (puede && key!=='todos')
+    const acciones = (puede && key!=='todos' && catActiva===key)
       ? `<span class="cat-tab-accion" onclick="event.stopPropagation(); editarCategoria('${key}')" title="Renombrar">✎</span><span class="cat-tab-accion" onclick="event.stopPropagation(); eliminarCategoria('${key}')" title="Eliminar">✕</span>`
       : '';
     return `<span class="cat-tab-wrap"><button class="cat-tab ${catActiva===key?'on':''}" onclick="setCat('${key}')">${c.label} <span class="count">${count}</span></button>${acciones}</span>`;
@@ -428,7 +428,7 @@ function renderSubcats(){
   const subcatsDeEstaCategoria = SUBCATS[catActiva] || (SUBCATS[catActiva] = []);
   const chips = subcatsDeEstaCategoria.map(s=>{
     const count = ITEMS.filter(i=>i.cat===catActiva && i.subcat===s.key).length;
-    const acciones = puede
+    const acciones = (puede && subcatActiva===s.key)
       ? `<span class="cat-tab-accion" onclick="event.stopPropagation(); editarSubcat('${s.key}')" title="Renombrar">✎</span><span class="cat-tab-accion" onclick="event.stopPropagation(); eliminarSubcat('${s.key}')" title="Eliminar">✕</span>`
       : '';
     return `<span class="cat-tab-wrap"><button class="subcat-chip ${subcatActiva===s.key?'on':''}" onclick="setSubcat('${s.key}')">${s.label} <span class="mono" style="opacity:.7;">${count}</span></button>${acciones}</span>`;
@@ -481,11 +481,17 @@ async function eliminarCategoria(key){
   const tieneSubcats = (SUBCATS[key] || []).length > 0;
   const aviso = tieneSubcats ? ' Se eliminan también sus subcategorías.' : '';
   if(!confirm(`¿Eliminar la categoría "${CATS[key].label}"?${aviso} Esta acción no se puede deshacer.`)) return;
+  const nombreCat = CATS[key].label;
   const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
   if(error){
     toast(enUso ? 'No se puede eliminar — todavía tiene ítems adentro, movelos primero' : 'No se pudo eliminar — ' + error.message);
     return;
   }
+  sb.rpc('registrar_auditoria', {
+    p_tipo: 'critico',
+    p_detalle: `Categoría de Inventario eliminada — "${nombreCat}"`,
+    p_compania_id: miCompaniaId,
+  });
   delete CATS[key];
   delete SUBCATS[key];
   if(catActiva === key){ catActiva = 'todos'; subcatActiva = null; }
@@ -509,12 +515,18 @@ async function editarSubcat(key){
 }
 async function eliminarSubcat(key){
   const enUso = ITEMS.some(i => i.subcat === key);
+  const nombreSubcat = (SUBCATS[catActiva] || []).find(x => x.key === key)?.label || '—';
   if(!confirm('¿Eliminar esta subcategoría? Esta acción no se puede deshacer.')) return;
   const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
   if(error){
     toast(enUso ? 'No se puede eliminar — todavía tiene ítems adentro, movelos primero' : 'No se pudo eliminar — ' + error.message);
     return;
   }
+  sb.rpc('registrar_auditoria', {
+    p_tipo: 'critico',
+    p_detalle: `Subcategoría de Inventario eliminada — "${nombreSubcat}" (de ${CATS[catActiva] ? CATS[catActiva].label : '—'})`,
+    p_compania_id: miCompaniaId,
+  });
   SUBCATS[catActiva] = (SUBCATS[catActiva] || []).filter(x => x.key !== key);
   if(subcatActiva === key) subcatActiva = null;
   renderSubcats();
