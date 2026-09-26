@@ -48,18 +48,19 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Notificación push de despacho — llega aunque la app esté cerrada o el
-// celular bloqueado. El mensaje viaja sin contenido (push "vacío", sin
-// encriptar) porque solo se usa para despertar al navegador; el texto de
-// la notificación es genérico a propósito.
+// Notificación push de Central (despacho o Llamado general/Maquinistas/
+// Voluntarios) — llega aunque la app esté cerrada o el celular bloqueado.
+// El mensaje viaja sin contenido (push "vacío", sin encriptar) porque solo
+// se usa para despertar al navegador, así que el texto es genérico a
+// propósito: no hay forma de saber acá cuál de los dos disparó el aviso.
 self.addEventListener('push', (event) => {
   event.waitUntil(
-    self.registration.showNotification('Vigor — Despacho', {
-      body: 'Nuevo despacho para tu Compañía — abrí la app para ver los detalles.',
+    self.registration.showNotification('Vigor — Alerta de Central', {
+      body: 'Central emitió una alerta para tu Compañía — abrí la app para ver los detalles.',
       icon: 'icons/apple-touch-icon.png',
       badge: 'icons/favicon-32.png',
       vibrate: [600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 900],
-      tag: 'despacho',
+      tag: 'alerta-central',
       renotify: true,
       requireInteraction: true,
     })

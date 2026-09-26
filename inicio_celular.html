@@ -202,7 +202,7 @@ async function cargarDatos(){
     return;
   }
   const { data: perfil } = await sb.from('personal')
-    .select('id, numero_registro, nombre_completo, cargo, compania_id, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .select('id, numero_registro, nombre_completo, cargo, compania_id, cuerpo_id, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
     .eq('auth_user_id', session.user.id).single();
   if(!perfil || !perfil.compania_id){
     document.getElementById('sinSesion').style.display = 'block';
@@ -262,6 +262,7 @@ async function cargarDatos(){
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .subscribe();
     suscribirAlertaDespacho(perfil);
+    suscribirAlertaEspecial(perfil);
   }
 }
 let suscritoInicioCelular = false;
@@ -314,6 +315,26 @@ function suscribirAlertaDespacho(perfil){
       if(prefs && prefs.alertas_despacho === false) return;
       reproducirTonoDespacho();
       toast('Despacho para tu Compañía — revisá la Pizarra');
+    })
+    .subscribe();
+}
+
+// Llamado general / Llamado a Maquinistas / Llamado a Voluntarios (tabla
+// alertas_especiales) -- vivían sin ningún aviso al celular, ni tono en
+// vivo ni push, porque solo se cableó el de despacho. companias_destino
+// null significa "todas las Compañías del Cuerpo".
+const ETIQUETA_ALERTA_ESPECIAL = { acuartelamiento: 'Llamado general', '12_10': 'Llamado a Maquinistas', '6_6': 'Llamado a Voluntarios' };
+function suscribirAlertaEspecial(perfil){
+  if(!perfil.cuerpo_id) return;
+  sb.channel('alerta-especial-celular-' + perfil.compania_id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alertas_especiales', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, async (payload) => {
+      const destino = payload.new.companias_destino;
+      if(destino && !destino.includes(perfil.compania_id)) return;
+      if(miEstado === 'fuera') return;
+      const { data: prefs } = await sb.from('notificaciones_preferencias').select('alertas_despacho').eq('personal_id', perfil.id).maybeSingle();
+      if(prefs && prefs.alertas_despacho === false) return;
+      reproducirTonoDespacho();
+      toast(`${ETIQUETA_ALERTA_ESPECIAL[payload.new.tipo] || 'Alerta de Central'} — revisá la app`);
     })
     .subscribe();
 }
