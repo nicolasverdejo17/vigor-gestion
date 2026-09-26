@@ -349,7 +349,17 @@ function hideRecoveryInfo(){
 // dispositivo ni del ancho de pantalla desde el que abra la app. El PC del
 // Cuartel NO es un destino de un login personal — es su propia cuenta
 // institucional (pestaña "PC Cuartel"), igual que el Carro con la Tablet.
+// Un bombero de Compañía puede ADEMÁS tener acceso institucional
+// (Superintendente, etc.) sin dejar de ser bombero — "cargo_institucional"
+// es un segundo sombrero aparte de "cargo", pensado para entrar desde una
+// pantalla ancha (PC/kiosco); desde el celular sigue yendo a su Inicio de
+// siempre, con la MISMA cuenta.
 function destinoPropio(perfil){
+  const esPantallaAncha = window.innerWidth >= 900;
+  if(perfil.cargo_institucional && esPantallaAncha){
+    if(ROLES_COMANDANCIA_REAL.includes(perfil.cargo_institucional)) return 'comandancia.html';
+    if(ROLES_ADMIN_GENERAL_REAL.includes(perfil.cargo_institucional)) return 'administracion_general.html';
+  }
   if(perfil.compania_id) return 'inicio_celular.html';
   if(ROLES_COMANDANCIA_REAL.includes(perfil.cargo)) return 'comandancia.html';
   if(ROLES_ADMIN_GENERAL_REAL.includes(perfil.cargo)) return 'administracion_general.html';
@@ -385,7 +395,7 @@ async function intentarLogin(){
         return;
       }
       const { data: perfil } = await sb.from('personal')
-        .select('estado, debe_cambiar_password, numero_registro, cargo, compania_id, cuerpos(estado)')
+        .select('estado, debe_cambiar_password, numero_registro, cargo, cargo_institucional, compania_id, cuerpos(estado)')
         .eq('auth_user_id', authData.user.id).single();
       if(!perfil || (perfil.cuerpos && perfil.cuerpos.estado !== 'activo')){
         await sb.auth.signOut();
