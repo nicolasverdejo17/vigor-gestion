@@ -118,6 +118,10 @@
   .ft-mant-row:last-child{ border-bottom:none;}
   .ft-mant-fecha{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); width:80px; flex-shrink:0;}
   .ft-mant-tag{ font-size:9px; font-weight:700; text-transform:uppercase; padding:3px 8px; border-radius:8px; color:#fff; flex-shrink:0;}
+  .ft-mant-tag-select{
+    font-family:'Rajdhani',sans-serif; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
+    padding:4px 6px; border-radius:8px; color:#fff; flex-shrink:0; border:none; cursor:pointer;
+  }
   .ft-modal-actions{ display:flex; gap:9px; margin-top:20px;}
   .btn-cerrar-ft{ flex:1; background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; text-transform:uppercase; font-size:11.5px; padding:10px; border-radius:6px; cursor:pointer;}
   .btn-guardar-ft{ flex:1.4; background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700; text-transform:uppercase; font-size:11.5px; padding:10px; border-radius:6px; cursor:pointer;}
@@ -329,12 +333,29 @@ function abrirFichaTecnica(i){
       ${c.mantenciones.map(m => `
         <div class="ft-mant-row">
           <span class="ft-mant-fecha">${m.fecha}</span>
-          <span class="ft-mant-tag" style="background:${MANT_COLOR[m.estado]}">${MANT_LABEL[m.estado]}</span>
+          <select class="ft-mant-tag-select" style="background:${MANT_COLOR[m.estado]}" onchange="cambiarEstadoMantencion(${i}, '${m.id}', this.value, this)">
+            <option value="pendiente" ${m.estado==='pendiente'?'selected':''}>Pendiente</option>
+            <option value="programada" ${m.estado==='programada'?'selected':''}>Programada</option>
+            <option value="realizada" ${m.estado==='realizada'?'selected':''}>Finalizada</option>
+          </select>
           <span>${m.tipo} — ${m.desc}</span>
         </div>
-      `).join('')}
+      `).join('') || '<div style="color:var(--text-dim); font-size:11.5px; padding:6px 0;">Sin mantenciones registradas.</div>'}
     </div>
-    <button class="ft-add-btn" style="width:100%; margin-top:8px;" onclick="abrirAgregarMantencion(${i})">+ Agregar Mantención</button>
+    <div class="ft-add-row" id="ft_mant_form_row" style="display:none; flex-direction:column; gap:8px;">
+      <div style="display:flex; gap:8px;">
+        <select id="ft_mant_tipo" style="flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:8px 10px; font-size:12px; color:var(--text);">
+          <option>Preventiva</option><option>Correctiva</option>
+        </select>
+        <input type="date" id="ft_mant_fecha" style="flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:8px 10px; font-size:12px; color:var(--text);" value="${new Date().toISOString().slice(0,10)}">
+      </div>
+      <input type="text" id="ft_mant_desc" placeholder="Descripción de la mantención">
+      <div style="display:flex; gap:8px;">
+        <button class="btn-cerrar-ft" style="padding:9px;" onclick="cancelarNuevaMantencion()">Cancelar</button>
+        <button class="btn-guardar-ft" style="padding:9px;" onclick="guardarNuevaMantencion(${i})">Guardar Mantención</button>
+      </div>
+    </div>
+    <button class="ft-add-btn" id="ft_mant_toggle_btn" style="width:100%; margin-top:8px;" onclick="mostrarFormMantencion()">+ Agregar Mantención</button>
 
     <div class="ft-modal-actions">
       <button class="btn-cerrar-ft" onclick="cerrarFichaTecnica()">Cancelar</button>
@@ -390,19 +411,42 @@ async function quitarEquipo(i, ei){
   c.equipamiento = nuevoEquipo;
   abrirFichaTecnica(i);
 }
-async function abrirAgregarMantencion(i){
-  const tipo = prompt('Tipo (Preventiva / Correctiva):', 'Preventiva');
-  if(!tipo) return;
-  const desc = prompt('Descripción de la mantención:');
-  if(!desc) return;
+// Bug reportado: "+ Agregar Mantención" usaba prompt() del navegador, sin
+// ningún diseño propio, y no había forma de cambiar el estado de una
+// mantención ya cargada ni de darla por finalizada. Se reemplaza por un
+// formulario en la app (mismo estilo que el resto de la Ficha Técnica) y
+// el estado de cada mantención pasa a ser un select editable en el momento.
+function mostrarFormMantencion(){
+  document.getElementById('ft_mant_form_row').style.display = 'flex';
+  document.getElementById('ft_mant_toggle_btn').style.display = 'none';
+}
+function cancelarNuevaMantencion(){
+  document.getElementById('ft_mant_form_row').style.display = 'none';
+  document.getElementById('ft_mant_toggle_btn').style.display = 'block';
+}
+async function guardarNuevaMantencion(i){
+  const tipo = document.getElementById('ft_mant_tipo').value;
+  const fecha = document.getElementById('ft_mant_fecha').value;
+  const desc = document.getElementById('ft_mant_desc').value.trim();
+  if(!fecha){ toast('Elegí una fecha'); return; }
+  if(!desc){ toast('Escribí una descripción'); return; }
   const c = FLOTA_COMANDANCIA[i];
   const { data, error } = await sb.from('mantenciones')
-    .insert({ carro_id: c.id, fecha: new Date().toISOString().slice(0,10), tipo, descripcion: desc, estado:'pendiente' })
+    .insert({ carro_id: c.id, fecha, tipo, descripcion: desc, estado:'pendiente' })
     .select().single();
   if(error){ toast('No se pudo agregar — ' + error.message); return; }
-  c.mantenciones.unshift({ id: data.id, fecha: new Date().toLocaleDateString('es-CL'), tipo, desc, estado:'pendiente' });
+  c.mantenciones.unshift({ id: data.id, fecha: new Date(fecha+'T00:00:00').toLocaleDateString('es-CL'), tipo, desc, estado:'pendiente' });
   abrirFichaTecnica(i);
   toast('Mantención agregada');
+}
+async function cambiarEstadoMantencion(i, mantId, nuevoEstado, selectEl){
+  const { error } = await sb.from('mantenciones').update({ estado: nuevoEstado }).eq('id', mantId);
+  if(error){ toast('No se pudo actualizar — ' + error.message); return; }
+  const c = FLOTA_COMANDANCIA[i];
+  const m = c.mantenciones.find(x => x.id === mantId);
+  if(m) m.estado = nuevoEstado;
+  if(selectEl) selectEl.style.background = MANT_COLOR[nuevoEstado];
+  toast('Estado de mantención actualizado a ' + MANT_LABEL[nuevoEstado]);
 }
 function cerrarFichaTecnica(){
   document.getElementById('modalFichaTecnica').classList.remove('show');
