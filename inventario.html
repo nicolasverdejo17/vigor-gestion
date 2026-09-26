@@ -62,6 +62,8 @@
   }
   .cat-tab.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
   .cat-tab .count{ font-family:'JetBrains Mono',monospace; opacity:.7; margin-left:4px;}
+  .cat-tab.baja-tab{ border-style:dashed; color:var(--nodisp);}
+  .cat-tab.baja-tab.on{ background:var(--nodisp); border-color:var(--text-dim); color:#fff;}
   .cat-tab-wrap{ display:inline-flex; align-items:center; gap:2px;}
   .cat-tab-accion{
     width:20px; height:20px; border-radius:50%; background:var(--panel); border:1px solid var(--line-strong);
@@ -378,19 +380,25 @@ function renderTabs(){
   const el = document.getElementById('catTabs');
   const puede = puedeModificar();
   const chips = Object.entries(CATS).map(([key, c])=>{
-    const count = key==='todos' ? ITEMS.length : ITEMS.filter(i=>i.cat===key).length;
+    // Pedido explícito: un ítem Dado de Baja no debe seguir apareciendo
+    // en su categoría de siempre ni en "Todos" — se va a su propia
+    // pestaña especial para no entorpecer, sin borrarlo de verdad.
+    const count = key==='todos' ? ITEMS.filter(i=>i.estado!=='baja').length : ITEMS.filter(i=>i.cat===key && i.estado!=='baja').length;
     const acciones = (puede && key!=='todos' && catActiva===key)
       ? `<span class="cat-tab-accion" onclick="event.stopPropagation(); editarCategoria('${key}')" title="Renombrar">✎</span><span class="cat-tab-accion" onclick="event.stopPropagation(); eliminarCategoria('${key}')" title="Eliminar">✕</span>`
       : '';
     return `<span class="cat-tab-wrap"><button class="cat-tab ${catActiva===key?'on':''}" onclick="setCat('${key}')">${c.label} <span class="count">${count}</span></button>${acciones}</span>`;
   }).join('');
-  if(!puede){ el.innerHTML = chips; return; }
+  const countBaja = ITEMS.filter(i=>i.estado==='baja').length;
+  const chipBaja = `<span class="cat-tab-wrap"><button class="cat-tab baja-tab ${catActiva==='__baja__'?'on':''}" onclick="setCat('__baja__')">Dados de Baja <span class="count">${countBaja}</span></button></span>`;
+  const chipsConBaja = chips + chipBaja;
+  if(!puede){ el.innerHTML = chipsConBaja; return; }
   const addBtn = creandoCategoria
     ? `<input class="subcat-input" id="newCatInput" placeholder="Nombre de la categoría…" onkeydown="if(event.key==='Enter') confirmarCategoria(); if(event.key==='Escape') cancelarCategoria();">
        <button class="tipo-confirmar-cat" onclick="confirmarCategoria()" title="Confirmar">✓</button>
        <button class="tipo-cancelar-cat" onclick="cancelarCategoria()" title="Cancelar">✕</button>`
     : `<button class="subcat-add" onclick="creandoCategoria=true; renderTabs(); document.getElementById('newCatInput').focus();">+ Nueva Categoría</button>`;
-  el.innerHTML = chips + addBtn;
+  el.innerHTML = chipsConBaja + addBtn;
 }
 async function confirmarCategoria(){
   const val = document.getElementById('newCatInput').value.trim();
@@ -422,7 +430,7 @@ function renderSubcats(){
   const row = document.getElementById('subcatRow');
   // Antes solo Material Menor podía tener subcategorías — ahora cualquier
   // categoría (incluidas las nuevas que se creen) puede tenerlas.
-  if(catActiva === 'todos'){ row.classList.remove('show'); row.innerHTML=''; return; }
+  if(catActiva === 'todos' || catActiva === '__baja__'){ row.classList.remove('show'); row.innerHTML=''; return; }
   row.classList.add('show');
   const puede = puedeModificar();
   const subcatsDeEstaCategoria = SUBCATS[catActiva] || (SUBCATS[catActiva] = []);
@@ -549,6 +557,10 @@ function subcatLabelDe(subcatId){
 function renderTabla(){
   const q = document.getElementById('searchBox').value.trim().toLowerCase();
   const filtrados = ITEMS.filter(i=>{
+    // Dado de Baja vive en su propia pestaña, aparte de "Todos" y de su
+    // categoría de origen — para no entorpecer el uso diario.
+    if(catActiva === '__baja__') return i.estado === 'baja' && (!q || [i.cod,i.nombre].join(' ').toLowerCase().includes(q));
+    if(i.estado === 'baja') return false;
     const matchCat = catActiva==='todos' || i.cat===catActiva;
     const matchSubcat = !subcatActiva || i.subcat===subcatActiva;
     const camposBusqueda = [
