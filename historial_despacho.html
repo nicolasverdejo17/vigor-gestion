@@ -191,7 +191,7 @@
     </div>
   </div>
 
-  <div class="central-tabs">
+  <div class="central-tabs" id="centralTabs">
     <a href="consola_despacho.html" class="central-tab">Consola de Despacho</a>
     <a href="visual_companias.html" class="central-tab">Visual de Compañías</a>
     <a href="puestos_mando_activos.html" class="central-tab">Puestos de Mando Activos</a>
@@ -275,6 +275,17 @@ function fmtHora(d){
   return new Date(d).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'}) + ' ' + new Date(d).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false});
 }
 
+// Estas 5 pestañas nacieron como herramientas de Central de Alarmas, pero
+// Comandancia entra a la misma pantalla en modo solo-lectura (mismo botón
+// "Historial de Despacho" en comandancia.html) -- sin esto, veía la
+// pestaña "Consola de Despacho" (que no es suya) y no tenía forma de
+// volver directo a su propio panel.
+function ajustarTabsSegunSesion(esCentral){
+  if(esCentral) return;
+  const tabs = document.getElementById('centralTabs');
+  if(tabs) tabs.innerHTML = '<a href="comandancia.html" class="central-tab on">← Volver a Comandancia</a>';
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
@@ -292,6 +303,7 @@ async function cargarDatos(){
     miCuerpoId = perfil.cuerpo_id;
     document.getElementById('cuerpoLabel').textContent = 'Central de Alarmas · ' + (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
   }
+  ajustarTabsSegunSesion(!!filaCentral);
 
   const { data: cias } = await sb.from('companias').select('id, nombre').eq('cuerpo_id', miCuerpoId).order('numero');
   CIAS = (cias || []).map(c => c.nombre);

@@ -674,6 +674,14 @@ function tick(){
 tick(); setInterval(tick,1000);
 
 let CIAS_DATA = []; // [{id, nombre, dotacion_minima, disponibles, carros:[{id,nomenclatura,tipo_descripcion,estado}]}]
+// Comandancia no es una Compañía real (no tiene fila en "companias"), pero
+// Central necesita verla en el mismo panorama -- sus propios Comandantes y
+// su propia Flota (carros con compania_id null). Pedido explícito: que
+// aparezca "como una especie de Compañía" en la Consola de Despacho. Solo
+// informativo por ahora -- despacho_unidades.compania_id es NOT NULL, así
+// que todavía no se puede despachar directo a Comandancia como destino.
+let COMANDANCIA_DATA = { disponibles: 0, carros: [] };
+const ROLES_COMANDANCIA_REAL = ['Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
 
 async function cargarCiasYCarros(){
   const { data: cias } = await sb.from('companias')
@@ -691,6 +699,17 @@ async function cargarCiasYCarros(){
       carros: (carros || []).filter(car => car.compania_id === c.id)
     };
   });
+
+  const { data: comandantes } = await sb.from('personal')
+    .select('personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .eq('cuerpo_id', miCuerpoId).in('cargo', ROLES_COMANDANCIA_REAL);
+  COMANDANCIA_DATA = {
+    disponibles: (comandantes || []).filter(p => {
+      const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
+      return fv && fv.estado === 'disponible';
+    }).length,
+    carros: (carros || []).filter(car => car.compania_id === null)
+  };
 }
 
 function renderCiaStrip(){
@@ -700,7 +719,10 @@ function renderCiaStrip(){
     const carrosOk = c.carros.filter(x => x.estado === 'servicio').length;
     const color = cumpleDotMin ? '#3CF29A' : '#42555C';
     return `<div class="cia-chip" style="--c:${color}"><b>${c.nombre}</b><span>${c.disponibles} en serv. · ${carrosOk}/${c.carros.length} carros</span></div>`;
-  }).join('');
+  }).join('') + (() => {
+    const carrosOkC = COMANDANCIA_DATA.carros.filter(x => x.estado === 'servicio').length;
+    return `<div class="cia-chip" style="--c:#FF9A44" title="Solo informativo — no es destino de despacho todavía"><b>Comandancia</b><span>${COMANDANCIA_DATA.disponibles} Comandantes disp. · ${carrosOkC}/${COMANDANCIA_DATA.carros.length} carros</span></div>`;
+  })();
 }
 let ciaActiva = null;
 let carrosSel = [];

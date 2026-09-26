@@ -169,7 +169,7 @@
     </div>
   </div>
 
-  <div class="central-tabs">
+  <div class="central-tabs" id="centralTabs">
     <a href="consola_despacho.html" class="central-tab">Consola de Despacho</a>
     <a href="visual_companias.html" class="central-tab on">Visual de Compañías</a>
     <a href="puestos_mando_activos.html" class="central-tab">Puestos de Mando Activos</a>
@@ -210,12 +210,25 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 let COMPANIAS = [];
 let suscritoVisualCompanias = false;
 
+// Estas 5 pestañas nacieron como herramientas de Central de Alarmas, pero
+// Comandancia entra a la misma pantalla en modo solo-lectura (mismo botón
+// "Visual de Compañías" en comandancia.html) -- sin esto, veía la pestaña
+// "Consola de Despacho" (que no es suya) y no tenía forma de volver
+// directo a su propio panel.
+function ajustarTabsSegunSesion(esCentral){
+  if(esCentral) return;
+  const tabs = document.getElementById('centralTabs');
+  if(tabs) tabs.innerHTML = '<a href="comandancia.html" class="central-tab on">← Volver a Comandancia</a>';
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
     document.getElementById('sinSesion').style.display = 'block';
     return;
   }
+  const { data: cuerpoCentral } = await sb.rpc('central_obtener_cuerpo');
+  ajustarTabsSegunSesion(!!(cuerpoCentral && cuerpoCentral[0]));
   const { data: cias } = await sb.from('companias')
     .select(`
       id, nombre, dotacion_minima,

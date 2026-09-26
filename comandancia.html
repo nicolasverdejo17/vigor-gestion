@@ -96,9 +96,13 @@
   }
   .tool-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:6px; opacity:.3; pointer-events:none;}
   .tool-card:hover{ border-color:var(--burdeo-bright);}
-  .tool-card .ico{ font-size:20px;}
   .tool-card b{ font-size:13.5px;}
   .tool-card span{ font-size:11px; color:var(--text-muted); line-height:1.4;}
+  .tool-ico-badge{
+    width:34px; height:34px; border:1.5px solid var(--brass); border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; background:var(--panel-alt); position:relative; z-index:1;
+  }
+  .tool-ico-badge svg{ width:17px; height:17px;}
 
   .locked-note{
     background:var(--panel-alt); border:1px solid var(--burdeo-bright); border-left:3px solid var(--burdeo-bright);
@@ -133,6 +137,7 @@
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
         <div class="role-tag" id="roleTag" style="font-family:'Rajdhani'; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; padding:6px 14px; border-radius:4px; background:var(--panel); border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright);">Sin sesión</div>
+        <button onclick="window.location.href='inicio_celular.html'" style="background:transparent; border:1.5px solid var(--cyan-dim); color:var(--cyan); font-family:'Rajdhani'; font-weight:600; font-size:11px; letter-spacing:.03em; text-transform:uppercase; padding:7px 13px; border-radius:5px; cursor:pointer;">← Mi Inicio</button>
         <button onclick="vigorCerrarSesion()" style="background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:600; font-size:11px; letter-spacing:.03em; text-transform:uppercase; padding:7px 13px; border-radius:5px; cursor:pointer;">Cerrar sesión</button>
       </div>
     </div>
@@ -151,17 +156,17 @@
         <div class="section-title">Emergencias y Despachos</div>
         <div class="tools-grid">
           <div class="tool-card" onclick="window.location.href='historial_despacho.html'">
-            <div class="ico">📋</div>
+            <div class="tool-ico-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#49E9FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="3" width="13" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></div>
             <b>Historial de Despacho</b>
             <span>Emergencias y despachos de todas las Compañías, filtrable.</span>
           </div>
           <div class="tool-card" onclick="window.location.href='puestos_mando_activos.html'">
-            <div class="ico">🚨</div>
+            <div class="tool-ico-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#49E9FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 4 20h16L12 3.5Z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="1"/></svg></div>
             <b>Modo Crisis — todas las Compañías</b>
             <span>Qué Compañías tienen Modo Crisis activo, y sus Batallones.</span>
           </div>
           <div class="tool-card" onclick="window.location.href='terminal_coordenadas.html'">
-            <div class="ico">📍</div>
+            <div class="tool-ico-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#49E9FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg></div>
             <b>Terminal de Coordenadas</b>
             <span>Ubicaciones reportadas en tiempo real por cualquier bombero.</span>
           </div>
@@ -170,12 +175,12 @@
         <div class="section-title">Flota</div>
         <div class="tools-grid">
           <div class="tool-card" onclick="window.location.href='visual_companias.html'">
-            <div class="ico">🗺️</div>
+            <div class="tool-ico-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#49E9FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z"/><path d="M9 4v14M15 6v14"/></svg></div>
             <b>Visual de Compañías</b>
             <span>Estado en vivo de Guardia Activa y Carros de todas las Compañías.</span>
           </div>
           <div class="tool-card" onclick="window.location.href='flota_comandancia.html'">
-            <div class="ico">🚒</div>
+            <div class="tool-ico-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#49E9FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9.7a1 1 0 0 1 1-1h6.5l3.3 3.3H19a1 1 0 0 1 1 1V16"/><path d="M3 16h18"/><circle cx="7.5" cy="17.6" r="1.6"/><circle cx="17" cy="17.6" r="1.6"/></svg></div>
             <b>Carros de Comandancia</b>
             <span>Flota propia (N°0) — ficha técnica completa y mantenciones por carro.</span>
           </div>
@@ -191,7 +196,7 @@
         <div class="dash-stats" id="personalOperativoStats"></div>
         <div class="tools-grid">
           <div class="tool-card" onclick="window.location.href='usuarios_sistema.html'">
-            <div class="ico">👥</div>
+            <div class="tool-ico-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#49E9FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.2" r="3"/><path d="M3.5 19.5c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/><circle cx="17.5" cy="9" r="2.2"/><path d="M15.3 19.5c.2-2.2 1.8-3.9 4.2-4.2"/></svg></div>
             <b>Usuarios del Sistema</b>
             <span>Personal de todas las Compañías, con su Cargo y disponibilidad.</span>
           </div>
