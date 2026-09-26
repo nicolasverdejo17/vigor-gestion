@@ -223,9 +223,6 @@
       <div class="hint" style="font-size:11px; color:var(--text-dim); margin:-4px 0 14px; line-height:1.5;">Se crea junto con la Compañía y el PC del Cuartel, en el mismo paso — sin Director no queda nadie con acceso a administrarla.</div>
 
       <button class="btn-guardar" onclick="crearCompania()">Crear Compañía</button>
-
-      <div class="section-title" style="margin-top:28px;">Compañías existentes</div>
-      <div id="listaCompanias" style="display:flex; flex-direction:column; gap:8px;"></div>
     </div>
   </div>
 
@@ -263,58 +260,7 @@ async function cargarSesion(){
   if(cuerpoActivo){
     const { data: cuerpoRow } = await sb.from('cuerpos').select('nombre_oficial').eq('id', cuerpoActivo).single();
     document.getElementById('nombreCuerpoHead').textContent = (cuerpoRow ? cuerpoRow.nombre_oficial : '—') + ' · Vigor';
-    await cargarCompanias();
   }
-}
-
-async function cargarCompanias(){
-  const { data } = await sb.from('companias')
-    .select('id, numero, nombre, personal(id), carros(id)')
-    .eq('cuerpo_id', cuerpoActivo).order('numero');
-  const lista = document.getElementById('listaCompanias');
-  if(!data || !data.length){
-    lista.innerHTML = `<div style="color:var(--text-dim); font-size:12.5px;">Todavía no hay Compañías creadas.</div>`;
-    return;
-  }
-  lista.innerHTML = data.map(c => {
-    const bomberos = (c.personal || []).length;
-    const carros = (c.carros || []).length;
-    const vacia = bomberos === 0 && carros === 0;
-    return `
-      <div style="display:flex; align-items:center; justify-content:space-between; background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:6px; padding:10px 14px; gap:10px;">
-        <div>
-          <div style="font-size:13.5px; font-weight:600;">${c.nombre}</div>
-          <div style="font-size:11px; color:var(--text-dim);">${bomberos} bombero${bomberos!==1?'s':''} · ${carros} carro${carros!==1?'s':''}</div>
-        </div>
-        <div style="display:flex; gap:8px; flex-shrink:0;">
-          <button onclick="regenerarCredencialPc('${c.id}','${c.nombre.replace(/'/g,"\\'")}',${c.numero})"
-            style="background:var(--panel); border:1.5px solid var(--cyan); color:var(--cyan); font-family:'Rajdhani'; font-weight:700; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:7px 12px; border-radius:5px; cursor:pointer;">🔑 Credencial PC</button>
-          <button ${vacia ? '' : 'disabled title="Tiene personal o carros asignados — trasladalos antes de eliminar"'}
-            onclick="eliminarCompania('${c.id}','${c.nombre.replace(/'/g,"\\'")}')"
-            style="background:${vacia ? 'var(--burdeo)' : 'var(--line)'}; border:1.5px solid ${vacia ? 'var(--burdeo-bright)' : 'var(--line-strong)'}; color:${vacia ? '#fff' : 'var(--text-dim)'}; font-family:'Rajdhani'; font-weight:700; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:7px 12px; border-radius:5px; cursor:${vacia ? 'pointer' : 'not-allowed'};">🗑 Eliminar</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-async function regenerarCredencialPc(compania_id, nombre, numero){
-  if(!confirm(`¿Generar una contraseña nueva para el PC del Cuartel de ${nombre}? Si ya había una, deja de funcionar.`)) return;
-  const { data, error } = await sb.rpc('crear_login_pc_cuartel', { p_compania_id: compania_id });
-  if(error){ toast('No se pudo generar — ' + error.message); return; }
-  mostrarCredencialPc(nombre, numero, data[0].r_password_temporal);
-}
-
-async function eliminarCompania(id, nombre){
-  if(!confirm(`¿Eliminar ${nombre}? Esta acción no se puede deshacer.`)) return;
-  const { error } = await sb.rpc('eliminar_compania_vacia', { p_compania_id: id });
-  if(error){
-    const mensajes = { COMPANIA_NO_ESTA_VACIA: 'Esta Compañía ya no está vacía — trasladá su personal y carros antes de eliminarla.' };
-    toast(mensajes[error.message] || ('No se pudo eliminar — ' + error.message));
-    return;
-  }
-  toast(`${nombre} eliminada`);
-  await cargarCompanias();
 }
 cargarSesion();
 
@@ -406,21 +352,6 @@ function mostrarCredencialesNuevaCompania(nombreCompania, numeroCompania, direct
 
 // La contraseña del PC del Cuartel se muestra una sola vez, igual que la
 // del Carro en crear_carro.html — hay que anotarla ahora.
-function mostrarCredencialPc(nombreCompania, numeroCompania, passwordTemporal){
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,15,.75);z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;';
-  modal.innerHTML = `
-    <div style="background:var(--panel);border:1.5px solid var(--brass-dim);border-radius:12px;padding:26px 24px;max-width:380px;width:100%;">
-      <h3 style="font-size:16px;margin-bottom:12px;">🖥️ PC del Cuartel — ${nombreCompania}</h3>
-      <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">
-        Para dejar lista la PC compartida de esta Compañía (o cualquier otra PC del cuartel), andá a <b>login_registro.html</b> → en Usuario poné el N° de Compañía (<b>${numeroCompania}</b>), completá el Código de Cuerpo y esta contraseña. Se guarda una sola sesión por dispositivo — no hace falta repetirlo cada vez. Guardala ahora, no se vuelve a mostrar.
-      </p>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center;color:var(--brass-bright);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:12px;margin-bottom:16px;">${passwordTemporal}</div>
-      <button onclick="this.closest('div[style*=fixed]').remove();" style="width:100%;background:var(--cyan-dim);border:2px solid var(--cyan);color:#fff;font-family:'Rajdhani';font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px;padding:11px;border-radius:7px;cursor:pointer;">Entendido</button>
-    </div>`;
-  document.body.appendChild(modal);
-}
-
 function previsualizarFoto(input){
   if(!input.files || !input.files[0]) return;
   const file = input.files[0];

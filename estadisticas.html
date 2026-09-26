@@ -218,9 +218,12 @@
     </div>
   </div>
 
-  <div class="nivel-tabs">
+  <div class="nivel-tabs" style="align-items:center;">
     <button class="nivel-tab on" id="tabCompania" onclick="setNivel('compania')">Compañía</button>
     <button class="nivel-tab" id="tabCuerpo" onclick="setNivel('cuerpo')">Cuerpo de Bomberos</button>
+    <select id="selCompaniaVista" onchange="onCompaniaVistaChange()" style="display:none; margin:8px 0 8px 10px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:6px 10px; font-size:12.5px; color:var(--text);">
+      <option value="">— Elegí una Compañía —</option>
+    </select>
   </div>
 
   <div class="toolbar">
@@ -320,6 +323,7 @@ const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2�
 const ROLES_CUERPO_GENERAL = ['Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante','Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
 
 let miCuerpoId = null, miCompaniaId = null, miCargo = null, miCuerpoNombre = null, miCompaniaNombre = null;
+let esInstitucional = false;
 let nivelActivo = 'compania';
 let DATA_NIVEL = { compania: null, cuerpo: null };
 let CLAVES = []; // [{id, codigo, nombre}] — catálogo real y configurable del Cuerpo
@@ -352,11 +356,35 @@ async function cargarSesion(){
   }
   document.getElementById('roleTag').textContent = miCargo;
   document.getElementById('cuerpoLabel').textContent = miCuerpoNombre + ' · Vigor';
-  document.getElementById('tabCuerpo').style.display = ROLES_CUERPO_GENERAL.includes(miCargo) ? '' : 'none';
+  esInstitucional = ROLES_CUERPO_GENERAL.includes(miCargo);
+  document.getElementById('tabCuerpo').style.display = esInstitucional ? '' : 'none';
 
   const { data: claves } = await sb.from('claves_emergencia').select('id, codigo, nombre').eq('cuerpo_id', miCuerpoId).eq('activo', true).is('parent_clave_id', null).order('orden');
   CLAVES = claves || [];
 
+  // Pedido explícito: Administración General/Comandancia ahora tienen
+  // Compañía propia además de su cargo institucional (siguen siendo
+  // bomberos de ahí) -- pero acá deben ver primero el Cuerpo entero, y si
+  // quieren ver una Compañía puntual, elegirla ellos mismos de una lista
+  // (nunca la propia precargada por default).
+  if(esInstitucional){
+    const { data: cias } = await sb.from('companias').select('id, nombre').eq('cuerpo_id', miCuerpoId).order('numero');
+    const sel = document.getElementById('selCompaniaVista');
+    sel.innerHTML = '<option value="">— Elegí una Compañía —</option>' + (cias || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    sel.style.display = '';
+    miCompaniaId = null;
+    await setNivel('cuerpo');
+  } else {
+    await setNivel('compania');
+  }
+}
+
+async function onCompaniaVistaChange(){
+  const val = document.getElementById('selCompaniaVista').value;
+  miCompaniaId = val || null;
+  const cias = document.getElementById('selCompaniaVista');
+  miCompaniaNombre = val ? cias.options[cias.selectedIndex].textContent : null;
+  DATA_NIVEL.compania = null;
   await setNivel('compania');
 }
 
@@ -651,6 +679,15 @@ async function setNivel(n){
   document.getElementById('accesoDenegado').style.display = 'none';
   document.getElementById('tabCompania').classList.toggle('on', n==='compania');
   document.getElementById('tabCuerpo').classList.toggle('on', n==='cuerpo');
+
+  // Institucional sin Compañía elegida todavía en la pestaña "Compañía" —
+  // no hay que cargar/mostrar nada hasta que elija una (nunca la propia
+  // precargada).
+  if(n === 'compania' && esInstitucional && !miCompaniaId){
+    document.getElementById('tituloEstadisticas').textContent = 'Elegí una Compañía arriba para ver sus estadísticas';
+    return;
+  }
+
   if(!DATA_NIVEL[n]) await cargarNivel(n);
   renderTodo();
 }

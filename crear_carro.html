@@ -183,12 +183,16 @@
 
     <div class="form-body">
       <div class="section-title">Compañía</div>
-      <div class="cia-locked-card">
+      <div class="cia-locked-card" id="ciaLockedCard">
         <div class="cia-locked-badge" id="ciaLockedBadge">3ª</div>
         <div>
           <div class="cia-locked-nombre">3ª Compañía</div>
           <div class="cia-locked-sub">🔒 Un Director solo puede crear carros para su propia Compañía</div>
         </div>
+      </div>
+      <div class="form-field full" id="ciaSelectorWrap" style="display:none;">
+        <label>Asignar carro a</label>
+        <select id="ciaSelectorField" onchange="onCiaSelectorChange()"></select>
       </div>
 
       <div class="section-title">Identidad del Carro</div>
@@ -293,12 +297,43 @@ async function cargarSesion(){
   miCuerpoId = perfil.cuerpo_id;
   document.getElementById('roleTag').textContent = `${perfil.nombre_completo} · ${perfil.cargo}`;
 
+  // Bug reportado: Administración General/Comandancia ahora PUEDEN tener
+  // Compañía propia también (siguen siendo bomberos de su Compañía,
+  // además de su cargo institucional) -- antes esto los dejaba con el
+  // candado puesto en SU Compañía, sin poder crear carros para otra ni
+  // para Comandancia. Se les da un selector real en vez del candado.
+  const esInstitucional = ROLES_INSTITUCIONALES.includes(perfil.cargo);
+  if(esInstitucional){
+    document.getElementById('ciaLockedCard').style.display = 'none';
+    document.getElementById('ciaSelectorWrap').style.display = 'flex';
+    const { data: cias } = await sb.from('companias').select('id, nombre, numero').eq('cuerpo_id', miCuerpoId).order('numero');
+    const sel = document.getElementById('ciaSelectorField');
+    sel.innerHTML = (cias || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')
+      + `<option value="__comandancia__">Comandancia (Cuerpo General)</option>`;
+    CIAS_SELECTOR = cias || [];
+    onCiaSelectorChange();
+    return;
+  }
+
   if(perfil.compania_id){
     ambito = { esComandancia:false, companiaId: perfil.compania_id, label: perfil.companias.nombre, badge: perfil.companias.numero + 'ª', placeholder:'Ej. B-0' };
   } else {
     ambito = { esComandancia:true, companiaId: null, label:'Comandancia (Cuerpo General)', badge:'N°0', placeholder:'Ej. K-0' };
   }
   renderCiaLocked();
+}
+
+const ROLES_INSTITUCIONALES = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General','Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
+let CIAS_SELECTOR = [];
+function onCiaSelectorChange(){
+  const val = document.getElementById('ciaSelectorField').value;
+  if(val === '__comandancia__'){
+    ambito = { esComandancia:true, companiaId: null, label:'Comandancia (Cuerpo General)', badge:'N°0', placeholder:'Ej. K-0' };
+  } else {
+    const c = CIAS_SELECTOR.find(x => x.id === val);
+    ambito = { esComandancia:false, companiaId: val, label: c ? c.nombre : '—', badge: c ? c.numero + 'ª' : '—', placeholder:'Ej. B-0' };
+  }
+  actualizarPreview();
 }
 
 function onTipoChange(){
