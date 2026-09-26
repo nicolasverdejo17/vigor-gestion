@@ -157,6 +157,7 @@ const NOMBRE_ESP = { R:'Rescate', T:'Trauma', H:'HAZ-MAT', F:'Forestal', M:'Maqu
 const ESP_COLOR = { R:'var(--esp-r)', T:'var(--esp-t)', H:'var(--esp-h)', F:'var(--esp-f)', M:'var(--esp-m)', C:'var(--esp-c)' };
 const ESP_TEXTO = { R:'#fff', T:'#fff', H:'#241505', F:'#0B2B1C', M:'#fff', C:'#241505' };
 
+const ROLES_INSTITUCIONALES = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General','Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
 let USUARIOS = [];
 let CIAS = ['Todas'];
 let ciaFiltro = 'Todas';
@@ -172,10 +173,13 @@ async function cargarSesion(){
     // Bug reportado: un Director/Secretario de Compañía veía TODO el
     // Cuerpo acá (sentía que entraba a una herramienta de "control
     // maestro") — si la sesión tiene Compañía propia, se acota a esa
-    // sola. Comandancia/Administración General/Super Admin no tienen
-    // compania_id propio, así que a ellos les sigue mostrando el Cuerpo
-    // entero, sin cambios.
-    miCompaniaId = perfil.compania_id || null;
+    // sola. Los cargos institucionales (Comandancia/Administración
+    // General) ahora PUEDEN tener Compañía propia también (siguen siendo
+    // bomberos de su Compañía, además de su cargo institucional), así que
+    // se los excluye de esa restricción explícitamente en vez de asumir
+    // que nunca tienen compania_id.
+    const esInstitucional = ROLES_INSTITUCIONALES.includes(perfil.cargo);
+    miCompaniaId = esInstitucional ? null : (perfil.compania_id || null);
     document.getElementById('roleTag').textContent = 'Sesión: ' + perfil.cargo;
     document.getElementById('filtroCiaRow').style.display = miCompaniaId ? 'none' : 'flex';
     await cargarUsuarios();
