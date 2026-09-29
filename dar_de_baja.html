@@ -280,7 +280,7 @@ async function confirmarBaja(){
     await sb.from('inventario_movimiento_fotos').insert({ movimiento_id: mov.id, foto_url: fotoUrl });
   }
 
-  await sb.from('inventario_items').update({ estado: 'baja' }).eq('id', itemId);
+  await sb.from('inventario_items').update({ estado: 'baja', fecha_baja: new Date().toISOString() }).eq('id', itemId);
 
   toast(`Ítem dado de baja con ${fotosAdjuntas.length} foto(s) — queda registrado en su historial`);
   setTimeout(()=>window.location.href = 'inventario.html', 1000);

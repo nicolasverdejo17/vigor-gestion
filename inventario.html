@@ -367,7 +367,7 @@ async function cargarDatos(){
 
   ITEMS = (items || []).map(i => ({
     id: i.id, cod: i.codigo, nombre: i.nombre, cat: i.categoria_id, subcat: i.subcategoria_id,
-    estado: i.estado, lugar: i.lugar_actual || '—',
+    estado: i.estado, lugar: i.lugar_actual || '—', fechaBaja: i.fecha_baja,
     valor: (i.valor !== null && i.valor !== undefined) ? '$' + Number(i.valor).toLocaleString('es-CL') : '—'
   }));
 
@@ -435,7 +435,7 @@ function renderSubcats(){
   const puede = puedeModificar();
   const subcatsDeEstaCategoria = SUBCATS[catActiva] || (SUBCATS[catActiva] = []);
   const chips = subcatsDeEstaCategoria.map(s=>{
-    const count = ITEMS.filter(i=>i.cat===catActiva && i.subcat===s.key).length;
+    const count = ITEMS.filter(i=>i.cat===catActiva && i.subcat===s.key && i.estado!=='baja').length;
     const acciones = (puede && subcatActiva===s.key)
       ? `<span class="cat-tab-accion" onclick="event.stopPropagation(); editarSubcat('${s.key}')" title="Renombrar">✎</span><span class="cat-tab-accion" onclick="event.stopPropagation(); eliminarSubcat('${s.key}')" title="Eliminar">✕</span>`
       : '';
@@ -573,6 +573,9 @@ function renderTabla(){
     const matchQ = !q || camposBusqueda.includes(q);
     return matchCat && matchSubcat && matchQ;
   });
+  if(catActiva === '__baja__'){
+    filtrados.sort((a,b) => new Date(b.fechaBaja || 0) - new Date(a.fechaBaja || 0));
+  }
   const body = document.getElementById('tablaBody');
   if(filtrados.length===0){
     body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim);">Sin ítems que coincidan.</td></tr>`;
