@@ -1686,14 +1686,16 @@
         return (pa===-1?999:pa) - (pb===-1?999:pb);
       });
       const jefe = oficialesPresentes[0];
-      return (CARGO_ABREV[jefe.cargo] || jefe.cargo) + ' ' + jefe.n;
+      return (CARGO_ABREV[jefe.cargo] || jefe.cargo) + ' ' + nombreCorto(jefe.n);
     }
 
     if(presentes.length > 0){
       // Comando Situacional: nadie con Cargo de Oficial presente — asume el
       // mando el bombero más antiguo (menor N° de Registro) de los presentes.
+      // Pedido explícito: mismo formato que el caso de arriba (Cargo +
+      // Nombre y un apellido) -- sin la etiqueta "(Comando Situacional)".
       const masAntiguo = presentes.reduce((a,b) => a.reg < b.reg ? a : b);
-      return masAntiguo.n + ' (Comando Situacional)';
+      return (CARGO_ABREV[masAntiguo.cargo] || masAntiguo.cargo) + ' ' + nombreCorto(masAntiguo.n);
     }
 
     return '— Sin personal en el Cuartel —';
