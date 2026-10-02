@@ -383,12 +383,16 @@
     display:flex; flex-wrap:nowrap; gap:4px; justify-content:center; margin-bottom:5%; overflow:hidden; width:100%;
   }
   /* Pedido explícito: la foto debe ser lo principal de la tarjeta -- ocupa
-     todo el espacio que le sobra después del bloque de datos de abajo. */
+     todo el espacio que le sobra después del bloque de datos de abajo.
+     Bug corregido: con "cover" la foto se recortaba (y en cajas muy
+     distintas de proporción a la foto original, se veía deformada) -- con
+     "contain" se ve SIEMPRE completa, escalada según su propia proporción,
+     con el degradé de fondo rellenando el espacio que sobre. */
   .bomb-card__foto{
     width:100%; flex:1 1 auto; min-height:0; border-radius:10%;
     margin:0 0 5%;
     background:linear-gradient(135deg,#3A4750,#232D35);
-    background-size:cover; background-position:center;
+    background-size:contain; background-repeat:no-repeat; background-position:center;
     display:flex; align-items:center; justify-content:center;
     font-family:'Rajdhani',sans-serif; font-weight:700;
     color:var(--text-muted);
