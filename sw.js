@@ -5,7 +5,7 @@
 // conexión a Supabase para guardar — la sincronización offline de datos
 // (partes, bitácoras, checklist) es una funcionalidad aparte, no incluida acá.
 
-const CACHE_NAME = 'vigor-shell-v3';
+const CACHE_NAME = 'vigor-shell-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -35,8 +35,19 @@ self.addEventListener('fetch', (event) => {
   // "network-first". Se fuerza cache:'no-store' para que cada visita pida
   // la version real al servidor — la cache de este Service Worker sigue
   // sirviendo de respaldo solo cuando no hay conexion.
+  //
+  // Bug corregido (el que de verdad causaba las pantallas desactualizadas):
+  // la navegación principal (abrir/recargar la página) llega acá como un
+  // Request con mode:'navigate', y el spec de Fetch PROHIBE construir un
+  // Request derivado de uno "navigate" cambiándole el cache mode —
+  // fetch(req, {cache:'no-store'}) tira un TypeError en ese caso. Ese error
+  // caía directo al .catch de abajo y terminaba sirviendo la copia vieja
+  // guardada en la cache de ESTE Service Worker — ni siquiera llegaba a la
+  // cache HTTP de 10 minutos de GitHub Pages, el problema era peor. Usar
+  // req.url (string) en vez de req (Request) evita la restricción: no
+  // hereda el mode "navigate".
   event.respondWith(
-    fetch(req, { cache: 'no-store' })
+    fetch(req.url, { cache: 'no-store' })
       .then((res) => {
         if (res && res.ok) {
           const clone = res.clone();
