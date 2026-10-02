@@ -373,17 +373,18 @@
     font-size:8px; padding:2px 5px; border-radius:3px; border:1px solid var(--cyan);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;
   }
-  /* Pedido explícito: las insignias quedaban apiladas en una columna
-     angosta ENCIMA de la foto (tapaban el nombre) — por más que se
-     agrandara la letra, el contenedor las apretaba. Dejan de ser overlay
-     y pasan a ir en su propia fila entre el N° de Registro y el botón de
-     Estado — espacio real, sin taparle nada a nadie. Si no tiene
-     especialidades, la fila queda en 0 — no roba espacio. */
-  /* Pedido explícito: las letras de Especialidad se mostraban en varias
-     filas cuando alguien tenía más de una -- ahora siempre van en una sola
-     fila (nowrap); con tarjetas de tamaño fijo entran todas sin problema. */
+  /* Pedido explícito: las letras de Especialidad van overlay sobre la foto,
+     en columna vertical pegadas al borde derecho -- así liberan el espacio
+     que ocupaban en el bloque de datos (meta), dejando más alto para la
+     foto y para que el nombre entre bien. Al no ocupar lugar en el flujo
+     normal (position:absolute, ancla en .bomb-card, el ancestro
+     position:relative más cercano), no le quita nada a .bomb-card__meta.
+     En modo compacto (ver .bomb-grid.compacto más abajo) la foto
+     desaparece, así que las insignias vuelven al flujo normal (en fila,
+     dentro del bloque de datos) para seguir siendo visibles. */
   .bomb-card__badges{
-    display:flex; flex-wrap:nowrap; gap:3px; justify-content:center; margin-bottom:2%; overflow:hidden; width:100%;
+    position:absolute; top:5%; right:4%; z-index:2;
+    display:flex; flex-direction:column; flex-wrap:nowrap; gap:3px;
   }
   /* Pedido explícito: la foto debe ser lo principal de la tarjeta -- ocupa
      todo el espacio que le sobra después del bloque de datos de abajo,
@@ -439,6 +440,11 @@
   .bomb-grid.compacto .bomb-card__nombre{ font-size:9.5px;}
   .bomb-grid.compacto .bomb-card__cargo{ font-size:8.5px;}
   .bomb-grid.compacto .bomb-card__estado-pill{ font-size:8px; padding:3px;}
+  /* Sin foto, las insignias dejan de ser overlay y vuelven al flujo normal
+     (en fila, dentro del bloque de datos) para seguir viéndose. */
+  .bomb-grid.compacto .bomb-card__badges{
+    position:static; flex-direction:row; justify-content:center; margin-bottom:2%; width:100%;
+  }
   .bomb-grid.compacto .bomb-card__insignia{ width:13px; height:13px; font-size:7px;}
 
   /* ---- Carros panel — SOLO botones, uno por carro ---- */
