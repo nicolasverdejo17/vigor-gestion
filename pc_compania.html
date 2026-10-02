@@ -488,9 +488,22 @@
     cursor:default;
     min-height:60px;
     display:flex; flex-direction:column; justify-content:center; gap:6px;
+    overflow:hidden;
   }
+  /* Pedido explícito (estético): le faltaba el marco interior en bronce que
+     usan el resto de las tarjetas/paneles de la app (ver .card::before) --
+     sin eso quedaba como un bloque de color plano, sin ese detalle propio
+     del "HUD" de Vigor. */
+  .carro-btn::before{
+    content:""; position:absolute; inset:3px; border-radius:6px;
+    border:1px solid rgba(255,255,255,0.35); pointer-events:none;
+  }
+  .carro-btn.oscuro::before{ border-color:rgba(0,0,0,0.22);}
+  /* Pedido explícito: la tipografía del nombre debe ser la misma que usa el
+     resto de los títulos de la app (ej. el nombre de la Compañía en el
+     encabezado, "Cuartel General") -- Rajdhani mayúscula, no JetBrains Mono. */
   .carro-btn__nom{
-    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:18px; letter-spacing:.01em;
+    font-family:'Rajdhani',sans-serif; text-transform:uppercase; font-weight:800; font-size:20px; letter-spacing:.04em;
     color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.3); line-height:1;
   }
   .carro-btn.oscuro .carro-btn__nom{ color:#1A2E22; text-shadow:none;}
