@@ -155,10 +155,14 @@
   .demo-tag{ flex-shrink:0; font-size:11px; }
   .mini-resumen{ flex-shrink:0; }
 
+  /* Pedido explícito: Carros usa muy poco de lo que tiene asignado (son
+     pocos botones chicos) mientras la Pizarra queda apretada -- se achica
+     la columna de Carros y se le da ese espacio a la Pizarra (más ancho Y
+     más alto), en vez de repartir 50/50. */
   .dash-grid{
     flex:1; min-height:0; display:grid;
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:1fr 190px;
+    grid-template-columns:1fr 2fr;
+    grid-template-rows:1fr 260px;
     grid-template-areas:
       "guardia guardia"
       "carros pizarra";
@@ -328,15 +332,21 @@
   .chip--mant::before{ background:#fff; }
 
   /* ---- Bomberos grid ---- */
-  /* El tamaño de columnas/filas se calcula en JS según cuántas tarjetas hay
-     y el espacio real disponible — NUNCA hace scroll, todo debe caber. */
+  /* Pedido explícito: las tarjetas deben ser todas del mismo tamaño
+     estándar siempre (antes se achicaban con JS según cuántos bomberos
+     había, para no scrollear nunca -- eso les daba un tamaño distinto en
+     cada Compañía y, con roster grande, las dejaba minúsculas). Ahora el
+     tamaño es fijo vía CSS y el contenedor scrollea si no entran todas. */
   .bomb-grid{
     display:grid;
-    gap:8px;
+    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+    grid-auto-rows:230px;
+    align-content:start;
+    gap:10px;
     padding:10px 12px;
     flex:1;
     min-height:0;
-    overflow:visible;
+    overflow-y:auto;
   }
   .bomb-card{
     background:var(--panel-alt);
@@ -365,9 +375,14 @@
      y pasan a ir en su propia fila entre el N° de Registro y el botón de
      Estado — espacio real, sin taparle nada a nadie. Si no tiene
      especialidades, la fila queda en 0 — no roba espacio. */
+  /* Pedido explícito: las letras de Especialidad se mostraban en varias
+     filas cuando alguien tenía más de una -- ahora siempre van en una sola
+     fila (nowrap); con tarjetas de tamaño fijo entran todas sin problema. */
   .bomb-card__badges{
-    display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:5%;
+    display:flex; flex-wrap:nowrap; gap:4px; justify-content:center; margin-bottom:5%; overflow:hidden; width:100%;
   }
+  /* Pedido explícito: la foto debe ser lo principal de la tarjeta -- ocupa
+     todo el espacio que le sobra después del bloque de datos de abajo. */
   .bomb-card__foto{
     width:100%; flex:1 1 auto; min-height:0; border-radius:10%;
     margin:0 0 5%;
@@ -377,33 +392,25 @@
     font-family:'Rajdhani',sans-serif; font-weight:700;
     color:var(--text-muted);
     border:2px solid var(--line-strong);
+    font-size:22px;
   }
   .bomb-card__meta{ flex:0 0 auto; width:100%;}
-  .bomb-card__nombre{ font-weight:700; line-height:1.15; margin-bottom:2%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
-  .bomb-card__cargo{ color:var(--text-muted); margin-bottom:4%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
-  .bomb-card__reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:5%;}
+  .bomb-card__nombre{ font-weight:700; line-height:1.15; margin-bottom:2%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; font-size:12px;}
+  .bomb-card__cargo{ color:var(--text-muted); margin-bottom:4%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; font-size:10.5px;}
+  .bomb-card__reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:5%; font-size:8.5px;}
   .bomb-card__estado-pill{
     width:100%; border-radius:5px; font-weight:700; cursor:pointer;
     text-transform:uppercase; letter-spacing:.03em; color:#fff; background:var(--b-color, var(--estado-fueraservicio));
+    font-size:10px; padding:5px 4px;
   }
   .bomb-card__estado-pill:hover{ filter:brightness(1.1);}
   .bomb-card__estado-pill.oscuro{ color:#241505;}
   .bomb-card__insignia{
     border-radius:5px; font-family:'JetBrains Mono',monospace; font-weight:700;
     display:flex; align-items:center; justify-content:center;
-    color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4);
+    color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.4); flex-shrink:0;
+    width:16px; height:16px; font-size:8.5px;
   }
-
-  /* Tiers de tamaño de fuente — se aplican vía JS según el alto de fila calculado.
-     Pedido explícito: las letras de Especialidad quedaban minúsculas e
-     ilegibles en las tarjetas chicas (hasta 4.5px de fuente) — se les pone
-     un piso propio de tamaño, no escalan tan agresivo como el resto de la
-     tarjeta porque tienen que seguir siendo reconocibles de un vistazo. */
-  .bomb-grid[data-tier="xl"] .bomb-card__nombre{ font-size:13px;} .bomb-grid[data-tier="xl"] .bomb-card__cargo{ font-size:11.5px;} .bomb-grid[data-tier="xl"] .bomb-card__reg{ font-size:8.5px;} .bomb-grid[data-tier="xl"] .bomb-card__estado-pill{ font-size:11px; padding:6px 4px;} .bomb-grid[data-tier="xl"] .bomb-card__insignia{ width:18px; height:18px; font-size:9.5px;} .bomb-grid[data-tier="xl"] .bomb-card__foto{ font-size:26px;}
-  .bomb-grid[data-tier="lg"] .bomb-card__nombre{ font-size:11.5px;} .bomb-grid[data-tier="lg"] .bomb-card__cargo{ font-size:10.5px;} .bomb-grid[data-tier="lg"] .bomb-card__reg{ font-size:8px;} .bomb-grid[data-tier="lg"] .bomb-card__estado-pill{ font-size:10px; padding:5px 4px;} .bomb-grid[data-tier="lg"] .bomb-card__insignia{ width:16px; height:16px; font-size:8.5px;} .bomb-grid[data-tier="lg"] .bomb-card__foto{ font-size:21px;}
-  .bomb-grid[data-tier="md"] .bomb-card__nombre{ font-size:10px;} .bomb-grid[data-tier="md"] .bomb-card__cargo{ font-size:9.5px;} .bomb-grid[data-tier="md"] .bomb-card__reg{ font-size:7px;} .bomb-grid[data-tier="md"] .bomb-card__estado-pill{ font-size:8.5px; padding:4px;} .bomb-grid[data-tier="md"] .bomb-card__insignia{ width:15px; height:15px; font-size:8px;} .bomb-grid[data-tier="md"] .bomb-card__foto{ font-size:17px;}
-  .bomb-grid[data-tier="sm"] .bomb-card__nombre{ font-size:9px;} .bomb-grid[data-tier="sm"] .bomb-card__cargo{ font-size:8.5px;} .bomb-grid[data-tier="sm"] .bomb-card__reg{ font-size:6.5px;} .bomb-grid[data-tier="sm"] .bomb-card__estado-pill{ font-size:7.5px; padding:3px;} .bomb-grid[data-tier="sm"] .bomb-card__insignia{ width:14px; height:14px; font-size:7.5px;} .bomb-grid[data-tier="sm"] .bomb-card__foto{ font-size:14px;}
-  .bomb-grid[data-tier="xs"] .bomb-card__nombre{ font-size:8px;} .bomb-grid[data-tier="xs"] .bomb-card__cargo{ font-size:8px;} .bomb-grid[data-tier="xs"] .bomb-card__reg{ display:none;} .bomb-grid[data-tier="xs"] .bomb-card__estado-pill{ font-size:6.5px; padding:2px;} .bomb-grid[data-tier="xs"] .bomb-card__insignia{ width:13px; height:13px; font-size:7px;} .bomb-grid[data-tier="xs"] .bomb-card__foto{ font-size:11px;}
 
   .bomb-card--empty{
     border-style:dashed; border-color:var(--line); cursor:default; opacity:.55;
@@ -414,7 +421,7 @@
   /* ---- Carros panel — SOLO botones, uno por carro, hasta 3 por fila ---- */
   .carros-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(105px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(95px, 1fr));
     grid-auto-rows:min-content;
     gap:6px;
     padding:8px;
@@ -423,7 +430,6 @@
     overflow-y:auto;
     align-content:start;
   }
-  @media (min-width:1px){ .carros-grid{ grid-template-columns:repeat(3, 1fr);} }
 
   /* Botón compacto de color SÓLIDO según el estado del carro — la etiqueta
      de estado adentro tiene un fondo oscuro translúcido para marcar que es
@@ -512,8 +518,10 @@
   /* ---- Pizarra ---- */
   .pizarra-body{ padding:8px 14px 10px; display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1; min-height:0;}
   @media (max-width:760px){ .pizarra-body{grid-template-columns:1fr;} }
-  .pizarra-col{ min-height:0; overflow:hidden; display:flex; flex-direction:column;}
-  .pizarra-col--scroll{ overflow-y:auto;}
+  /* Bug corregido: a esta columna (sin --scroll) le faltaba overflow-y, así
+     que las Emergencias de más abajo quedaban cortadas (overflow:hidden) en
+     vez de poder scrollearse -- "se pierden hacia abajo", reportado. */
+  .pizarra-col{ min-height:0; overflow-y:auto; display:flex; flex-direction:column;}
   .pizarra-col h3{ font-size:12.5px; color:var(--text-muted); margin-bottom:6px; letter-spacing:.06em; flex-shrink:0;}
   .obs-item{
     border-left:3px solid var(--line);
@@ -935,7 +943,6 @@
     renderBombGrid();
     renderCarrosGrid();
     renderMiniResumen();
-    _bombGridObserver.observe(document.getElementById('bombGrid'));
     suscribirTonoDespacho();
   }
 
@@ -1149,35 +1156,20 @@
 
   const CAPACIDAD_MAXIMA = 20; // dotación tope de la Compañía — configurable por implementación
 
-  function ajustarGridSinScroll(gridEl, totalItems, opts){
-    const W = gridEl.clientWidth;
-    const H = gridEl.clientHeight;
-    if(W === 0 || H === 0 || totalItems === 0) return;
-
-    const gap = opts && opts.gap || 8;
-    const RATIO_OBJETIVO = opts && opts.ratio || 0.62; // ancho/alto ideal de una tarjeta (más angosta que alta: la foto ahora es más grande y necesita más alto)
-
-    let mejor = { cols:1, rows:totalItems, cardW:0, cardH:0, score:-1 };
-
-    for(let cols = 1; cols <= totalItems; cols++){
-      const rows = Math.ceil(totalItems / cols);
-      const cardW = (W - gap * (cols - 1)) / cols;
-      const cardH = (H - gap * (rows - 1)) / rows;
-      if(cardW <= 0 || cardH <= 0) continue;
-
-      const anchoEfectivo = Math.min(cardW, cardH * RATIO_OBJETIVO);
-      const score = anchoEfectivo;
-
-      if(score > mejor.score){
-        mejor = { cols, rows, cardW, cardH, score };
-      }
+  // Pedido explícito: los cargos largos (Honorarios y similares) se
+  // muestran como siglas (iniciales de cada palabra, sin contar "de"/"del")
+  // para que entren en la tarjeta sin recortarse -- ej. "Honorario del
+  // Honorable Directorio General" -> "HHDG". Los cargos cortos (Director,
+  // Capitán, Teniente 1°, etc.) se muestran completos como siempre.
+  const CARGO_STOPWORDS = new Set(['de','del','la','los','las','el']);
+  function siglasCargo(cargo){
+    if(!cargo) return '';
+    const palabras = cargo.split(' ').filter(w => w && !CARGO_STOPWORDS.has(w.toLowerCase()));
+    if(palabras.length >= 2 && cargo.length > 14){
+      return palabras.map(w => w[0]).join('').toUpperCase();
     }
-
-    gridEl.style.gridTemplateColumns = `repeat(${mejor.cols}, 1fr)`;
-    gridEl.style.gridTemplateRows = `repeat(${mejor.rows}, 1fr)`;
-    return mejor;
+    return cargo;
   }
-
 
   function renderBombGrid(){
     const bombGrid = document.getElementById('bombGrid');
@@ -1210,7 +1202,7 @@
           <div class="bomb-card__foto"${fotoEstilo}>${b.foto ? '' : initials}</div>
           <div class="bomb-card__meta">
             <div class="bomb-card__nombre" style="cursor:pointer;" onclick="window.location.href='ficha_bombero.html?bombero=${b.id}'">${b.n}</div>
-            <div class="bomb-card__cargo">${b.cargo}</div>
+            <div class="bomb-card__cargo" title="${b.cargo}">${siglasCargo(b.cargo)}</div>
             <div class="bomb-card__reg">N° ${b.reg}</div>
             <div class="bomb-card__badges">${insignias}</div>
             <div class="bomb-card__estado-pill ${oscuro}" onclick="abrirSelectorEstadoBombero(event, ${i})">${PILL_LABEL[b.estado] || b.estado}</div>
@@ -1228,48 +1220,7 @@
       bombGrid.insertAdjacentHTML('beforeend', `<div class="bomb-card bomb-card--empty"><span class="empty-ico">＋</span></div>`);
     }
 
-    // Recalcular tamaño de grid en el próximo frame (ya con el DOM actualizado
-    // y las dimensiones reales del contenedor disponibles).
-    _ultimoTotal = visibles + vacios;
-    requestAnimationFrame(recalcularBombGrid);
   }
-
-  let _ultimoTotal = 0;
-
-  // Recalcula tamaño/columnas de Guardia Activa — extraído a función propia
-  // para no duplicar la lógica entre la carga inicial y cualquier cambio
-  // de tamaño real del contenedor.
-  function recalcularBombGrid(){
-    if(_ultimoTotal === 0) return;
-    const bombGrid = document.getElementById('bombGrid');
-    const res = ajustarGridSinScroll(bombGrid, _ultimoTotal);
-    if(res){
-      let tier = 'xl';
-      if(res.cardH < 95) tier = 'xs';
-      else if(res.cardH < 125) tier = 'sm';
-      else if(res.cardH < 160) tier = 'md';
-      else if(res.cardH < 210) tier = 'lg';
-      bombGrid.dataset.tier = tier;
-    }
-  }
-
-  // Bug corregido (crítico): el tamaño se medía UNA sola vez al cargar. Si
-  // en ese instante el navegador todavía no había terminado de acomodarse
-  // al monitor real (común al pasar de notebook a monitor grande, o al
-  // abrir ya maximizado), la grilla quedaba mal calculada para siempre —
-  // solo pantalla completa (que sí dispara resize) lo corregía. Con
-  // ResizeObserver, cualquier cambio real de tamaño del contenedor se
-  // detecta y recalcula solo, sin depender de un evento de ventana.
-  // Corregido: "ResizeObserver loop completed with undelivered
-  // notifications." — el callback modifica el tamaño del propio grid que
-  // está observando (cambia columnas/filas), lo que dispara otra ronda de
-  // observación casi al instante y el navegador corta el bucle con este
-  // error. Se soluciona diferiendo el cálculo real a requestAnimationFrame,
-  // afuera del callback sincrónico del observer.
-  const _bombGridObserver = new ResizeObserver(() => {
-    requestAnimationFrame(recalcularBombGrid);
-  });
-  window.addEventListener('resize', recalcularBombGrid);
 
   // Selector pequeño de estado (4 opciones de color) — reemplaza el click
   // directo de antes (que solo alternaba 2 estados). Ahora hay 4 posibles,
@@ -1553,9 +1504,16 @@
   //
   // Corregido: Comandante/Segundo Comandante son cargos del Cuerpo
   // General, no de una Compañía — no participan del Al Mando interno de
-  // una Compañía específica aunque estén físicamente presentes. El
-  // Director sigue siendo el rango más alto dentro de su propia Compañía.
+  // una Compañía específica aunque estén físicamente presentes.
+  // Pedido explícito del cliente: el Director es la cabeza ADMINISTRATIVA
+  // de la Compañía (sigue siendo "oficial" para todo lo demás: orden del
+  // listado de bomberos, permisos, etc. — PRIORIDAD_CARGO lo mantiene
+  // primero), pero NO participa del Al Mando operativo — el mando real en
+  // el cuartel/siniestro lo define siempre Capitán > Tenientes > Ayudante
+  // Cía., esté o no el Director presente. Por eso PRIORIDAD_ALMANDO es una
+  // lista aparte, sin Director.
   const PRIORIDAD_CARGO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
+  const PRIORIDAD_ALMANDO = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
   const CARGO_ABREV = {
     'Director':'Director', 'Capitán':'Cap.',
     'Teniente 1°':'Tte. 1°', 'Teniente 2°':'Tte. 2°', 'Teniente 3°':'Tte. 3°', 'Teniente 4°':'Tte. 4°', 'Ayudante Cía.':'Ayte. Cía.',
@@ -1564,12 +1522,12 @@
   function calcularAlMando(){
     // "Fuera de Servicio" no está en el Cuartel — no cuenta para nada acá.
     const presentes = bomberos.filter(b => b.estado !== 'fuera');
-    const oficialesPresentes = presentes.filter(b => b.oficial);
+    const oficialesPresentes = presentes.filter(b => b.oficial && PRIORIDAD_ALMANDO.includes(b.cargo));
 
     if(oficialesPresentes.length > 0){
       oficialesPresentes.sort((a,b) => {
-        const pa = PRIORIDAD_CARGO.indexOf(a.cargo);
-        const pb = PRIORIDAD_CARGO.indexOf(b.cargo);
+        const pa = PRIORIDAD_ALMANDO.indexOf(a.cargo);
+        const pb = PRIORIDAD_ALMANDO.indexOf(b.cargo);
         return (pa===-1?999:pa) - (pb===-1?999:pb);
       });
       const jefe = oficialesPresentes[0];
