@@ -564,19 +564,40 @@
   .estado-opt:hover{ background:var(--panel-alt);}
   .estado-opt .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
 
-  /* Popover de Asignar Dotación — mismo patrón, ancho mayor, también fixed. */
+  /* Popover de Asignar Dotación. Pedido explícito: debe tener el mismo
+     estilo (y los mismos íconos) que el resto de la app -- antes era un
+     cuadro genérico sin título, con un emoji (🚨) en el botón de
+     emergencia. Ahora lleva el mismo marco interior en bronce que usan
+     tarjetas/paneles/modales de Vigor (::before inset), encabezado
+     Rajdhani con botón de cierre explícito, y un ícono SVG propio en vez
+     del emoji. */
   .dot-panel{
     display:none; position:fixed; z-index:125;
-    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:8px;
-    padding:14px; box-shadow:0 10px 30px rgba(0,0,0,.5); width:260px;
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:10px;
+    padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.5); width:270px;
     max-height:75vh; overflow-y:auto;
   }
+  .dot-panel::before{
+    content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim);
+    border-radius:7px; opacity:.4; pointer-events:none;
+  }
   .dot-panel.open{ display:block;}
-  .dot-field{ margin-bottom:10px;}
+  .dot-panel-head{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    margin-bottom:12px; position:relative; z-index:1;
+  }
+  .dot-panel-head h3{ font-size:15px; margin:0;}
+  .dot-panel-head .sub{ font-size:10.5px; color:var(--text-dim); margin-top:4px; line-height:1.45;}
+  .dot-panel-close{
+    background:none; border:none; color:var(--text-dim); font-size:16px; line-height:1;
+    cursor:pointer; padding:2px; flex-shrink:0;
+  }
+  .dot-panel-close:hover{ color:var(--text);}
+  .dot-field{ margin-bottom:10px; position:relative; z-index:1;}
   .dot-field label{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px;}
   .dot-field select{
-    width:100%; background:var(--bg); border:1px solid var(--line-strong); border-radius:4px;
-    padding:7px 9px; color:var(--text); font-size:12px;
+    width:100%; background:var(--bg); border:1px solid var(--line-strong); border-radius:5px;
+    padding:8px 10px; color:var(--text); font-size:12px;
   }
   .dot-field select:focus{ outline:none; border-color:var(--cyan);}
   .dot-trip-chips{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px;}
@@ -595,7 +616,10 @@
     width:100%; background:var(--estado-emergencia); border:none; color:#fff;
     font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
     font-size:11px; padding:9px; border-radius:5px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    position:relative; z-index:1;
   }
+  .btn-marcar-emergencia svg{ width:15px; height:15px; flex-shrink:0;}
   .btn-marcar-emergencia:hover{ filter:brightness(1.1);}
   .carro-card__dot b{ color:var(--text-muted); font-weight:600; }
 
@@ -1505,7 +1529,13 @@
       `<span class="dot-trip-chip">${nombrePorReg(reg)} <button onclick="quitarTripulante(${i},${ti})">✕</button></span>`
     ).join('');
     return `
-      <div style="font-size:11px; color:var(--text-dim); margin-bottom:10px;"><b style="color:var(--text);">${c.nom}</b> · ${c.tipo}<br>${dotTexto(c)}</div>
+      <div class="dot-panel-head">
+        <div>
+          <h3>Asignar Dotación</h3>
+          <div class="sub"><b style="color:var(--text);">${c.nom}</b> · ${c.tipo}<br>${dotTexto(c)}</div>
+        </div>
+        <button class="dot-panel-close" onclick="cerrarDotPanel(${i})" title="Cerrar">✕</button>
+      </div>
       <div class="dot-field">
         <label>Conductor (Maquinista)</label>
         <select onchange="setConductor(${i}, this.value)">
@@ -1532,7 +1562,10 @@
         </div>
       </div>
       <div class="dot-field" style="margin-bottom:0;">
-        <button class="btn-marcar-emergencia" onclick="marcarDotacionEnEmergencia(${i})">🚨 Marcar dotación como En Emergencia</button>
+        <button class="btn-marcar-emergencia" onclick="marcarDotacionEnEmergencia(${i})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 2.5 20h19L12 3.5z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor" stroke="none"/></svg>
+          Marcar dotación como En Emergencia
+        </button>
       </div>
     `;
   }
@@ -1598,6 +1631,10 @@
     renderMiniResumen();
   }
 
+  function cerrarDotPanel(i){
+    carros[i].dotAbierto = false;
+    document.getElementById(`dotPanel-${i}`).classList.remove('open');
+  }
   function toggleDotPanel(ev, i){
     ev.stopPropagation();
     document.querySelectorAll('.estado-selector').forEach(el => el.classList.remove('open'));
