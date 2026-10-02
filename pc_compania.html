@@ -502,11 +502,16 @@
   /* Pedido explícito: la tipografía del nombre debe ser la misma que usa el
      resto de los títulos de la app (ej. el nombre de la Compañía en el
      encabezado, "Cuartel General") -- Rajdhani mayúscula, no JetBrains Mono. */
+  /* Pedido explícito: siempre blanca (sin la variante oscura que tenía
+     antes para los fondos claros) y más grande/gruesa -- se le suma un
+     borde fino oscuro (text-stroke) + sombra más marcada para que siga
+     leyéndose bien incluso sobre los colores de fondo más claros. */
   .carro-btn__nom{
-    font-family:'Rajdhani',sans-serif; text-transform:uppercase; font-weight:800; font-size:20px; letter-spacing:.04em;
-    color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.3); line-height:1;
+    font-family:'Rajdhani',sans-serif; text-transform:uppercase; font-weight:800; font-size:27px; letter-spacing:.03em;
+    color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.5), 0 0 7px rgba(0,0,0,.3);
+    -webkit-text-stroke:0.6px rgba(0,0,0,.35);
+    line-height:1;
   }
-  .carro-btn.oscuro .carro-btn__nom{ color:#1A2E22; text-shadow:none;}
   .carro-btn__estado-pill{
     font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
     padding:3px 8px; border-radius:4px; cursor:pointer; display:inline-block;
