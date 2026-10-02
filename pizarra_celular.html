@@ -259,6 +259,11 @@ async function cargarDatos(){
   document.getElementById('nombreCompaniaCel').textContent = perfil.companias ? perfil.companias.nombre : 'Comandancia';
   document.getElementById('roleLabel').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
 
+  // Pedido explícito: las Emergencias de la Pizarra deben desaparecer solas
+  // a las 24 horas -- misma limpieza que ya corre en pc_compania.html, acá
+  // también para que no dependa de que alguien abra el PC del Cuartel.
+  sb.rpc('limpiar_pizarra_vencida').then(()=>{});
+
   let obsQuery = sb.from('pizarra_observaciones').select('*, personal(nombre_completo)').order('creado_en', { ascending:false }).limit(20);
   if(perfil.compania_id) obsQuery = obsQuery.or(`compania_id.eq.${perfil.compania_id},compania_id.is.null`);
 
