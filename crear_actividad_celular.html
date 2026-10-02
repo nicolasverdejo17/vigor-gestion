@@ -105,7 +105,7 @@
       </div>
       <div class="field"><label>Nombre</label><input type="text" id="fNombre" placeholder="Ej. Reunión General de Compañía"></div>
       <div class="row2">
-        <div class="field"><label>Fecha</label><input type="date" id="fFecha"></div>
+        <div class="field"><label>Fecha</label><input type="text" id="fFecha" placeholder="dd/mm/aaaa" inputmode="numeric" oninput="this.value = formatearFecha(this.value)"></div>
         <div class="field"><label>Hora</label><input type="time" id="fHora"></div>
       </div>
       <div class="field"><label>Lugar</label><input type="text" id="fLugar" placeholder="Ej. Cuartel"></div>
@@ -148,11 +148,11 @@ function setTipoActividad(v){
 async function crearActividad(){
   const tipo = tipoActividadSel === 'Otros' ? document.getElementById('fTipoOtro').value.trim() : tipoActividadSel;
   const nombre = document.getElementById('fNombre').value.trim();
-  const fecha = document.getElementById('fFecha').value;
+  const fecha = fechaAIso(document.getElementById('fFecha').value);
   const hora = document.getElementById('fHora').value || null;
   const lugar = document.getElementById('fLugar').value.trim() || null;
   const descripcion = document.getElementById('fDescripcion').value.trim() || null;
-  if(!tipo || !nombre || !fecha){ toast('Completá al menos el tipo, nombre y fecha'); return; }
+  if(!tipo || !nombre || !fecha){ toast('Completá al menos el tipo, nombre y fecha (dd/mm/aaaa)'); return; }
 
   const { error } = await sb.from('actividades').insert({
     cuerpo_id: miCuerpoId, compania_id: miCompaniaId, tipo, nombre, fecha, hora, lugar, descripcion,
@@ -161,6 +161,18 @@ async function crearActividad(){
   if(error){ toast('No se pudo crear la actividad — ' + error.message); return; }
   toast(`Actividad "${nombre}" creada`);
   setTimeout(()=>window.location.href = 'actividades_celular.html', 900);
+}
+
+function formatearFecha(valor){
+  const limpio = valor.replace(/\D/g, '').slice(0, 8);
+  let out = limpio.slice(0, 2);
+  if(limpio.length > 2) out += '/' + limpio.slice(2, 4);
+  if(limpio.length > 4) out += '/' + limpio.slice(4, 8);
+  return out;
+}
+function fechaAIso(txt){
+  const partes = (txt || '').trim().split('/');
+  return partes.length === 3 ? `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}` : null;
 }
 
 function toast(msg){

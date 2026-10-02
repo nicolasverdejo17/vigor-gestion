@@ -319,7 +319,7 @@ function screens(){
         <div class="hint" style="font-size:11px; margin-top:5px; color:#7B99A3;">La fecha real en que entraste — de ahí se calcula tu antigüedad, no de cuándo se aprueba esta solicitud.</div>
       </div>
 
-      <button class="btn-primary" onclick="enviarSolicitud()">Enviar Solicitud</button>
+      <button class="btn-primary" onclick="enviarSolicitud(this)">Enviar Solicitud</button>
 
       <div class="pending-note">
         <b>Qué sigue:</b> tu solicitud queda pendiente hasta que el Secretario/a o Director de la Compañía la revise y apruebe. Te van a entregar una contraseña temporal para tu primer ingreso.
@@ -519,7 +519,13 @@ function formatearFecha(valor){
   return out;
 }
 
-async function enviarSolicitud(){
+// Bug corregido: si alguien apretaba "Enviar Solicitud" varias veces (doble
+// click, conexión lenta) se mandaban varias solicitudes idénticas. Ahora el
+// botón se bloquea apenas se envía la primera, y al terminar OK la pantalla
+// de registro se cierra sola y vuelve a Iniciar Sesión.
+let enviandoSolicitud = false;
+async function enviarSolicitud(btn){
+  if(enviandoSolicitud) return;
   const campos = ['regNombre', 'regRut', 'regFechaNac', 'regTelefono', 'regFechaIngreso'];
   let faltantes = false;
   campos.forEach(id => {
@@ -547,6 +553,9 @@ async function enviarSolicitud(){
   const fechaIso = aIso(document.getElementById('regFechaNac').value);
   const fechaIngresoIso = aIso(document.getElementById('regFechaIngreso').value);
 
+  enviandoSolicitud = true;
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando…'; }
+
   const { error } = await sb.rpc('crear_solicitud_alta', {
     p_cuerpo_id: cuerpoActivo,
     p_compania_solicitada_id: companiaId,
@@ -559,10 +568,16 @@ async function enviarSolicitud(){
   });
 
   if(error){
+    enviandoSolicitud = false;
+    if(btn){ btn.disabled = false; btn.textContent = 'Enviar Solicitud'; }
     toast('No se pudo enviar la solicitud — ' + error.message);
     return;
   }
   toast('Solicitud enviada — queda pendiente de aprobación');
+  setTimeout(() => {
+    enviandoSolicitud = false;
+    setTab('login');
+  }, 1400);
 }
 
 function toast(msg){

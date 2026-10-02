@@ -307,7 +307,7 @@
       </div>
       <div class="m-field">
         <label>Fecha</label>
-        <input type="date" class="mono" id="entradaFecha">
+        <input type="text" class="mono" id="entradaFecha" placeholder="dd/mm/aaaa" inputmode="numeric" oninput="this.value = formatearFecha(this.value)">
       </div>
       <div class="m-field">
         <label>Detalle</label>
@@ -608,10 +608,10 @@ function cerrarAgregarModal(){
 }
 async function guardarEntradaHV(){
   const titulo = document.getElementById('entradaTitulo').value.trim();
-  const fecha = document.getElementById('entradaFecha').value;
+  const fecha = fechaAIso(document.getElementById('entradaFecha').value);
   const detalle = document.getElementById('entradaDetalle').value.trim() || null;
   if(!titulo || !fecha){
-    toast('Completá al menos el título y la fecha');
+    toast('Completá al menos el título y la fecha (dd/mm/aaaa)');
     return;
   }
   const { data: { session } } = await sb.auth.getSession();
@@ -654,6 +654,20 @@ function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// Autoformateo de fecha dd/mm/aaaa -- mismo patrón usado en el resto de la
+// app (login_registro.html, editar_datos_personales.html).
+function formatearFecha(valor){
+  const limpio = valor.replace(/\D/g, '').slice(0, 8);
+  let out = limpio.slice(0, 2);
+  if(limpio.length > 2) out += '/' + limpio.slice(2, 4);
+  if(limpio.length > 4) out += '/' + limpio.slice(4, 8);
+  return out;
+}
+function fechaAIso(txt){
+  const partes = (txt || '').trim().split('/');
+  return partes.length === 3 ? `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}` : null;
 }
 
 cargarDatos();
