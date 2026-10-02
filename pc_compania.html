@@ -283,19 +283,29 @@
   .section-head h2{ font-size:14px;}
   .section-guardia .section-head h2{ font-size:18px;}
 
+  /* Pedido explícito: se veía desproporcionado -- cada ítem usaba flex:1
+     con un mínimo de 190px, así que en una pantalla ancha quedaban
+     separados por huecos enormes de espacio vacío, y adentro el label (muy
+     chico) y el valor iban alineados por baseline en una sola línea, lo
+     que los hacía ver desparejos entre sí (sobre todo "Carros", cuyos
+     chips no tienen la misma altura que un texto). Ahora cada ítem tiene
+     ancho natural (ni flex:1 ni min-width), label arriba y valor abajo
+     centrados verticalmente, y quedan agrupados con un gap parejo en vez
+     de estirados por toda la barra. */
   .resumen{
-    display:flex; flex-wrap:wrap;
-    padding:5px 18px;
+    display:flex; flex-wrap:wrap; align-items:stretch;
+    padding:8px 18px;
     background:var(--panel-alt);
     border-bottom:1px solid var(--line);
     gap:0; flex-shrink:0;
   }
   .resumen__item{
-    flex:1; min-width:190px;
-    padding:0 18px;
+    flex:0 0 auto;
+    padding:0 22px;
     border-right:1px dashed var(--line);
-    display:flex; align-items:baseline; gap:8px;
+    display:flex; flex-direction:column; justify-content:center; gap:4px;
   }
+  .resumen__item:first-child{ padding-left:0; }
   .resumen__item:last-child{ border-right:none; }
   .resumen__label{
     font-size:9px; letter-spacing:.1em; color:var(--text-dim);
@@ -304,7 +314,7 @@
   .resumen__value{
     font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text);
   }
-  .resumen__value.big{ font-size:15px; font-weight:700; color:var(--cyan); }
+  .resumen__value.big{ font-size:16px; font-weight:700; color:var(--cyan); }
   .resumen__nums{
     display:none;
   }
@@ -313,8 +323,8 @@
     background:#0F1418; border:1px solid var(--line);
     padding:2px 6px; border-radius:3px; color:var(--text-muted);
   }
-  .resumen__carros{ display:flex; flex-wrap:wrap; gap:6px; margin-top:0; }
-  .resumen__item--reg{ flex:0 0 auto; min-width:150px; border-right:none; flex-direction:column; align-items:flex-start; gap:2px;}
+  .resumen__carros{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-height:19px; margin-top:0; }
+  .resumen__item--reg{ flex:0 0 auto; border-right:none; margin-left:auto; align-items:flex-start; gap:4px;}
   .resumen__item--reg input{
     background:var(--bg); border:1px solid var(--line-strong); border-radius:4px;
     padding:5px 9px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px;
@@ -473,14 +483,14 @@
     position:relative;
     background:var(--c-color, var(--estado-fueraservicio));
     border:none;
-    border-radius:10px;
-    padding:14px 36px 12px 16px;
+    border-radius:9px;
+    padding:11px 32px 10px 14px;
     cursor:default;
-    min-height:76px;
-    display:flex; flex-direction:column; justify-content:center; gap:8px;
+    min-height:60px;
+    display:flex; flex-direction:column; justify-content:center; gap:6px;
   }
   .carro-btn__nom{
-    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:23px; letter-spacing:.01em;
+    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:18px; letter-spacing:.01em;
     color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.3); line-height:1;
   }
   .carro-btn.oscuro .carro-btn__nom{ color:#1A2E22; text-shadow:none;}
@@ -492,15 +502,20 @@
   .carro-btn__estado-pill:hover{ background:rgba(0,0,0,0.4);}
   .carro-btn.oscuro .carro-btn__estado-pill{ background:rgba(0,0,0,0.16); color:#1A2E22;}
   .carro-btn.oscuro .carro-btn__estado-pill:hover{ background:rgba(0,0,0,0.26);}
+  /* Pedido explícito: el ícono de "asignar dotación" era un emoji (👥),
+     fuera de tema -- se reemplaza por el mismo ícono de personas (SVG,
+     stroke=currentColor) que ya usa el resto de la app (ej. pestaña
+     "Compañía" del celular). */
   .carro-btn__dot-zone{
-    position:absolute; right:0; top:0; bottom:0; width:30px;
+    position:absolute; right:0; top:0; bottom:0; width:28px;
     display:flex; align-items:center; justify-content:center;
     border-left:1px solid rgba(255,255,255,0.25);
-    border-radius:0 8px 8px 0;
-    color:#fff; font-size:13px;
+    border-radius:0 9px 9px 0;
+    color:#fff;
   }
+  .carro-btn__dot-zone svg{ width:15px; height:15px;}
   .carro-btn__dot-zone:hover{ background:rgba(0,0,0,0.15);}
-  .carro-btn.oscuro .carro-btn__dot-zone{ border-left-color:rgba(0,0,0,0.18);}
+  .carro-btn.oscuro .carro-btn__dot-zone{ border-left-color:rgba(0,0,0,0.18); color:#1A2E22;}
   .carro-btn.oscuro .carro-btn__dot-zone:hover{ background:rgba(0,0,0,0.1);}
 
   /* Selector de estado — popover pequeño, 4 opciones de color sólido.
@@ -563,6 +578,22 @@
      vez de poder scrollearse -- "se pierden hacia abajo", reportado. */
   .pizarra-col{ min-height:0; overflow-y:auto; display:flex; flex-direction:column;}
   .pizarra-col h3{ font-size:12.5px; color:var(--text-muted); margin-bottom:6px; letter-spacing:.06em; flex-shrink:0;}
+  /* Pedido explícito: la barra de scroll (ej. "Emergencias del Cuerpo") debe
+     llevar el estilo/colores de la app, no la barra gris por defecto del
+     sistema -- se reutiliza en cualquier otra zona que scrollee dentro de
+     este panel (Carros, el popover de Asignar Dotación). */
+  .pizarra-col::-webkit-scrollbar, .carros-grid::-webkit-scrollbar, .dot-panel::-webkit-scrollbar{
+    width:7px;
+  }
+  .pizarra-col::-webkit-scrollbar-track, .carros-grid::-webkit-scrollbar-track, .dot-panel::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  .pizarra-col::-webkit-scrollbar-thumb, .carros-grid::-webkit-scrollbar-thumb, .dot-panel::-webkit-scrollbar-thumb{
+    background:var(--brass-dim); border-radius:4px;
+  }
+  .pizarra-col::-webkit-scrollbar-thumb:hover, .carros-grid::-webkit-scrollbar-thumb:hover, .dot-panel::-webkit-scrollbar-thumb:hover{
+    background:var(--brass-bright);
+  }
   .obs-item{
     border-left:3px solid var(--line);
     padding:4px 0 4px 10px; margin-bottom:5px; display:flex; gap:6px; align-items:flex-start;
@@ -1478,7 +1509,7 @@
         <div class="carro-btn ${oscuro}" style="--c-color:${color}">
           <span class="carro-btn__nom">${c.nom}</span>
           <div class="carro-btn__estado-pill" onclick="abrirSelectorEstadoCarro(event, ${i})">${ESTADO_LABEL_CARRO[c.estado]}</div>
-          <div class="carro-btn__dot-zone" onclick="toggleDotPanel(event, ${i})" title="Asignar dotación">👥</div>
+          <div class="carro-btn__dot-zone" onclick="toggleDotPanel(event, ${i})" title="Asignar dotación"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg></div>
 
           <div class="estado-selector" id="selCarro-${i}">
             ${ESTADOS_CARRO.map(e => `<div class="estado-opt" onclick="setEstadoCarro(${i}, '${e}')"><span class="dot" style="background:${COLOR_ESTADO_CARRO[e]}"></span>${ESTADO_LABEL_CARRO[e]}</div>`).join('')}
