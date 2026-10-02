@@ -1343,10 +1343,30 @@
   // Genera SOLO el contenido interno del popover de dotación de un carro —
   // se usa tanto en el primer render como en cada edición puntual, sin
   // tocar el resto de la grilla (evita el salto/descuadre de antes).
+  // Pedido explícito: una vez que un bombero queda asignado a un rol
+  // (Conductor, Oficial o Tripulante) de un Carro, deja de estar disponible
+  // para los otros roles de ESE Carro Y de cualquier otro Carro de la
+  // Compañía — una persona no puede ir en dos dotaciones (o dos roles) a la vez.
+  function regsOcupadosEnOtrosCarros(carroIndex){
+    const regs = new Set();
+    carros.forEach((c, idx) => {
+      if(idx === carroIndex) return;
+      if(c.conductorReg) regs.add(c.conductorReg);
+      if(c.mandoReg) regs.add(c.mandoReg);
+      c.tripulantesReg.forEach(r => regs.add(r));
+    });
+    return regs;
+  }
   function dotPanelContenidoHTML(i){
     const c = carros[i];
     const disp = disponibles();
-    const dispOptions = disp.map(b=>`<option value="${b.reg}">${b.n} (N° ${b.reg})</option>`).join('');
+    const ocupOtros = regsOcupadosEnOtrosCarros(i);
+    const ocupConductor = new Set([...ocupOtros, c.mandoReg, ...c.tripulantesReg].filter(Boolean));
+    const ocupMando = new Set([...ocupOtros, c.conductorReg, ...c.tripulantesReg].filter(Boolean));
+    const ocupTrip = new Set([...ocupOtros, c.conductorReg, c.mandoReg, ...c.tripulantesReg].filter(Boolean));
+    const dispConductor = disp.filter(b => b.reg === c.conductorReg || !ocupConductor.has(b.reg));
+    const dispMando = disp.filter(b => b.reg === c.mandoReg || !ocupMando.has(b.reg));
+    const dispOptions = disp.filter(b => !ocupTrip.has(b.reg)).map(b=>`<option value="${b.reg}">${b.n} (N° ${b.reg})</option>`).join('');
     const tripChips = c.tripulantesReg.map((reg,ti)=>
       `<span class="dot-trip-chip">${nombrePorReg(reg)} <button onclick="quitarTripulante(${i},${ti})">✕</button></span>`
     ).join('');
@@ -1356,14 +1376,14 @@
         <label>Conductor (Maquinista)</label>
         <select onchange="setConductor(${i}, this.value)">
           <option value="">— Sin asignar —</option>
-          ${disp.map(b=>`<option value="${b.reg}" ${c.conductorReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
+          ${dispConductor.map(b=>`<option value="${b.reg}" ${c.conductorReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
         </select>
       </div>
       <div class="dot-field">
         <label>Oficial a cargo (Mando)</label>
         <select onchange="setMando(${i}, this.value)">
           <option value="">— Sin asignar —</option>
-          ${disp.map(b=>`<option value="${b.reg}" ${c.mandoReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
+          ${dispMando.map(b=>`<option value="${b.reg}" ${c.mandoReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
         </select>
       </div>
       <div class="dot-field">
@@ -1454,8 +1474,12 @@
       }
     });
     carros[i].dotAbierto = !carros[i].dotAbierto;
-    if(carros[i].dotAbierto) abrirPopoverSincrono(el, triggerEl, 8);
-    else el.classList.remove('open');
+    if(carros[i].dotAbierto){
+      // Recalcula las opciones disponibles de ESTE panel recién al abrirlo —
+      // puede haber cambiado la dotación de otro Carro mientras estaba cerrado.
+      refreshDotPanel(i);
+      abrirPopoverSincrono(el, triggerEl, 8);
+    } else el.classList.remove('open');
   }
 
   // Idea para complementar "En Emergencia" (bombero) — sigue siendo 100%

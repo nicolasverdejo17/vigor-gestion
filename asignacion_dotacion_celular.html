@@ -199,8 +199,24 @@ function nombrePorId(id){
   return p ? p.nombre : '(no disponible)';
 }
 
-function opcionesDisponibles(seleccionadoId){
-  return DISPONIBLES.map(p => `<option value="${p.id}" ${p.id===seleccionadoId?'selected':''}>${p.nombre} (N° ${p.reg})</option>`).join('');
+// Pedido explícito: una vez que un bombero queda asignado a un rol (Conductor,
+// Oficial o Tripulante) de un Carro, deja de estar disponible para los otros
+// roles de ESE Carro Y de cualquier otro Carro de la Compañía — una persona
+// no puede ir en dos dotaciones (o dos roles) a la vez.
+function idsOcupadosEnOtrosCarros(carroIndex){
+  const ids = new Set();
+  CARROS.forEach((c, idx) => {
+    if(idx === carroIndex) return;
+    if(c.conductorId) ids.add(c.conductorId);
+    if(c.oficialId) ids.add(c.oficialId);
+    c.tripulantesIds.forEach(id => ids.add(id));
+  });
+  return ids;
+}
+function opcionesDisponibles(seleccionadoId, ocupados){
+  return DISPONIBLES
+    .filter(p => p.id === seleccionadoId || !ocupados.has(p.id))
+    .map(p => `<option value="${p.id}" ${p.id===seleccionadoId?'selected':''}>${p.nombre} (N° ${p.reg})</option>`).join('');
 }
 
 function renderCarros(){
@@ -213,6 +229,10 @@ function renderCarros(){
     const tripChips = c.tripulantesIds.map((pid, ti) =>
       `<span class="dot-trip-chip">${nombrePorId(pid)} <button onclick="quitarTripulante(${i},${ti})">✕</button></span>`
     ).join('');
+    const ocupOtros = idsOcupadosEnOtrosCarros(i);
+    const ocupConductor = new Set([...ocupOtros, c.oficialId, ...c.tripulantesIds].filter(Boolean));
+    const ocupOficial = new Set([...ocupOtros, c.conductorId, ...c.tripulantesIds].filter(Boolean));
+    const ocupTrip = new Set([...ocupOtros, c.conductorId, c.oficialId, ...c.tripulantesIds].filter(Boolean));
     return `
       <div class="carro-card">
         <div class="carro-top">
@@ -223,14 +243,14 @@ function renderCarros(){
           <label>Conductor (Maquinista)</label>
           <select onchange="setConductor(${i}, this.value)">
             <option value="">— Sin asignar —</option>
-            ${opcionesDisponibles(c.conductorId)}
+            ${opcionesDisponibles(c.conductorId, ocupConductor)}
           </select>
         </div>
         <div class="dot-field">
           <label>Oficial a cargo (Mando)</label>
           <select onchange="setOficial(${i}, this.value)">
             <option value="">— Sin asignar —</option>
-            ${opcionesDisponibles(c.oficialId)}
+            ${opcionesDisponibles(c.oficialId, ocupOficial)}
           </select>
         </div>
         <div class="dot-field" style="margin-bottom:0;">
@@ -239,7 +259,7 @@ function renderCarros(){
           <div class="dot-trip-add">
             <select id="tripSelect-${i}">
               <option value="">— Elegir disponible —</option>
-              ${opcionesDisponibles(null)}
+              ${opcionesDisponibles(null, ocupTrip)}
             </select>
             <button onclick="agregarTripulante(${i})">+ Agregar</button>
           </div>
