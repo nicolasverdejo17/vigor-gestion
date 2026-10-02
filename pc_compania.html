@@ -332,21 +332,22 @@
   .chip--mant::before{ background:#fff; }
 
   /* ---- Bomberos grid ---- */
-  /* Pedido explícito: las tarjetas deben ser todas del mismo tamaño
-     estándar siempre (antes se achicaban con JS según cuántos bomberos
-     había, para no scrollear nunca -- eso les daba un tamaño distinto en
-     cada Compañía y, con roster grande, las dejaba minúsculas). Ahora el
-     tamaño es fijo vía CSS y el contenedor scrollea si no entran todas. */
+  /* Pedido explícito: NUNCA una barra lateral de scroll acá -- siempre 20
+     puestos fijos a la vista. Mientras la dotación entre en esos 20
+     puestos, el tamaño de columnas/filas (calculado en JS según el espacio
+     real disponible) da tarjetas de un tamaño estándar y consistente,
+     porque el total de celdas es siempre 20 (se rellena con puestos vacíos
+     "+" si hay menos gente). Si se supera ese número, en vez de agregar
+     scroll, se recalculan más columnas/filas -- las tarjetas se achican
+     para que TODAS entren igual en el mismo espacio -- y pasado cierto
+     tamaño se les quita la foto (ver .bomb-grid.compacto más abajo). */
   .bomb-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
-    grid-auto-rows:230px;
-    align-content:start;
     gap:10px;
     padding:10px 12px;
     flex:1;
     min-height:0;
-    overflow-y:auto;
+    overflow:hidden;
   }
   .bomb-card{
     background:var(--panel-alt);
@@ -396,8 +397,10 @@
   }
   .bomb-card__meta{ flex:0 0 auto; width:100%;}
   .bomb-card__nombre{ font-weight:700; line-height:1.15; margin-bottom:2%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; font-size:12px;}
-  .bomb-card__cargo{ color:var(--text-muted); margin-bottom:4%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; font-size:10.5px;}
-  .bomb-card__reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim); margin-bottom:5%; font-size:8.5px;}
+  /* Pedido explícito: el N° de Registro va al lado del Cargo (misma línea),
+     ya no en su línea propia -- deja más alto libre para que la foto
+     vuelva a ocupar ~3/4 de la tarjeta. */
+  .bomb-card__cargo{ color:var(--text-muted); margin-bottom:5%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; font-size:10.5px;}
   .bomb-card__estado-pill{
     width:100%; border-radius:5px; font-weight:700; cursor:pointer;
     text-transform:uppercase; letter-spacing:.03em; color:#fff; background:var(--b-color, var(--estado-fueraservicio));
@@ -418,12 +421,26 @@
   .bomb-card--empty:hover{ border-color:var(--line);}
   .bomb-card--empty .empty-ico{ font-size:1.6em; color:var(--text-dim);}
 
-  /* ---- Carros panel — SOLO botones, uno por carro, hasta 3 por fila ---- */
+  /* Pedido explícito: si la dotación supera los 20 puestos fijos, en vez de
+     scrollear se les quita la foto a TODAS las tarjetas y solo se muestra
+     el recuadro con sus datos -- así siempre entran en el mismo espacio. */
+  .bomb-grid.compacto .bomb-card__foto{ display:none;}
+  .bomb-grid.compacto .bomb-card__meta{ flex:1 1 auto; display:flex; flex-direction:column; justify-content:center;}
+  .bomb-grid.compacto .bomb-card__nombre{ font-size:9.5px;}
+  .bomb-grid.compacto .bomb-card__cargo{ font-size:8.5px;}
+  .bomb-grid.compacto .bomb-card__estado-pill{ font-size:8px; padding:3px;}
+  .bomb-grid.compacto .bomb-card__insignia{ width:13px; height:13px; font-size:7px;}
+
+  /* ---- Carros panel — SOLO botones, uno por carro ---- */
+  /* Pedido explícito: el botón quedaba muy chico -- con menos ancho
+     disponible (se le sacó espacio a esta columna para dárselo a la
+     Pizarra), 2 columnas fijas (en vez de auto-fill de ~95px, que terminaba
+     armando columnas angostas) le dan a cada botón mucho más lugar. */
   .carros-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(95px, 1fr));
+    grid-template-columns:repeat(2, 1fr);
     grid-auto-rows:min-content;
-    gap:6px;
+    gap:8px;
     padding:8px;
     flex:1;
     min-height:0;
@@ -438,28 +455,28 @@
     position:relative;
     background:var(--c-color, var(--estado-fueraservicio));
     border:none;
-    border-radius:6px;
-    padding:6px 28px 6px 8px;
+    border-radius:8px;
+    padding:12px 32px 12px 14px;
     cursor:default;
-    min-height:34px;
-    display:flex; flex-direction:column; justify-content:center; gap:3px;
+    min-height:58px;
+    display:flex; flex-direction:column; justify-content:center; gap:6px;
   }
   .carro-btn__nom{
-    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px;
     color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.2); line-height:1.1;
   }
   .carro-btn__estado-pill{
-    font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
-    padding:2px 5px; border-radius:3px; cursor:pointer; display:inline-block;
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
+    padding:3px 7px; border-radius:4px; cursor:pointer; display:inline-block;
     background:rgba(0,0,0,0.28); color:#fff; width:fit-content; line-height:1.3;
   }
   .carro-btn__estado-pill:hover{ background:rgba(0,0,0,0.4);}
   .carro-btn__dot-zone{
-    position:absolute; right:0; top:0; bottom:0; width:26px;
+    position:absolute; right:0; top:0; bottom:0; width:30px;
     display:flex; align-items:center; justify-content:center;
     border-left:1px solid rgba(255,255,255,0.25);
-    border-radius:0 6px 6px 0;
-    color:#fff; font-size:11px;
+    border-radius:0 8px 8px 0;
+    color:#fff; font-size:13px;
   }
   .carro-btn__dot-zone:hover{ background:rgba(0,0,0,0.15);}
 
@@ -943,6 +960,7 @@
     renderBombGrid();
     renderCarrosGrid();
     renderMiniResumen();
+    _bombGridObserver.observe(document.getElementById('bombGrid'));
     suscribirTonoDespacho();
   }
 
@@ -1202,8 +1220,7 @@
           <div class="bomb-card__foto"${fotoEstilo}>${b.foto ? '' : initials}</div>
           <div class="bomb-card__meta">
             <div class="bomb-card__nombre" style="cursor:pointer;" onclick="window.location.href='ficha_bombero.html?bombero=${b.id}'">${b.n}</div>
-            <div class="bomb-card__cargo" title="${b.cargo}">${siglasCargo(b.cargo)}</div>
-            <div class="bomb-card__reg">N° ${b.reg}</div>
+            <div class="bomb-card__cargo" title="${b.cargo}">${siglasCargo(b.cargo)} · N° ${b.reg}</div>
             <div class="bomb-card__badges">${insignias}</div>
             <div class="bomb-card__estado-pill ${oscuro}" onclick="abrirSelectorEstadoBombero(event, ${i})">${PILL_LABEL[b.estado] || b.estado}</div>
           </div>
@@ -1213,14 +1230,72 @@
         </div>
       `);
     });
-    // Slots vacíos hasta la dotación máxima — muestran capacidad disponible
-    // para nuevas altas, igual que en el sistema de referencia.
+    // Slots vacíos hasta los 20 puestos fijos — muestran capacidad
+    // disponible para nuevas altas. Si ya hay MÁS de 20 bomberos presentes
+    // no se agregan vacíos (no corresponde) -- ahí entra el modo compacto.
     const vacios = Math.max(0, CAPACIDAD_MAXIMA - visibles);
     for(let i=0; i<vacios; i++){
       bombGrid.insertAdjacentHTML('beforeend', `<div class="bomb-card bomb-card--empty"><span class="empty-ico">＋</span></div>`);
     }
+    bombGrid.classList.toggle('compacto', visibles > CAPACIDAD_MAXIMA);
 
+    // Recalcular tamaño de grid en el próximo frame (ya con el DOM
+    // actualizado y las dimensiones reales del contenedor disponibles).
+    _ultimoTotal = visibles + vacios;
+    requestAnimationFrame(recalcularBombGrid);
   }
+
+  let _ultimoTotal = 0;
+
+  // Nunca hace scroll: calcula cuántas columnas/filas entran en el espacio
+  // real disponible para que los _ultimoTotal puestos (siempre 20, o más
+  // si se superó la dotación) queden todos visibles al mismo tiempo.
+  function ajustarGridSinScroll(gridEl, totalItems, opts){
+    const W = gridEl.clientWidth;
+    const H = gridEl.clientHeight;
+    if(W === 0 || H === 0 || totalItems === 0) return;
+
+    const gap = opts && opts.gap || 10;
+    const RATIO_OBJETIVO = opts && opts.ratio || 0.62; // ancho/alto ideal de una tarjeta (vertical: la foto necesita más alto que ancho)
+
+    let mejor = { cols:1, rows:totalItems, cardW:0, cardH:0, score:-1 };
+
+    for(let cols = 1; cols <= totalItems; cols++){
+      const rows = Math.ceil(totalItems / cols);
+      const cardW = (W - gap * (cols - 1)) / cols;
+      const cardH = (H - gap * (rows - 1)) / rows;
+      if(cardW <= 0 || cardH <= 0) continue;
+
+      const anchoEfectivo = Math.min(cardW, cardH * RATIO_OBJETIVO);
+      const score = anchoEfectivo;
+
+      if(score > mejor.score){
+        mejor = { cols, rows, cardW, cardH, score };
+      }
+    }
+
+    gridEl.style.gridTemplateColumns = `repeat(${mejor.cols}, 1fr)`;
+    gridEl.style.gridTemplateRows = `repeat(${mejor.rows}, 1fr)`;
+    return mejor;
+  }
+
+  function recalcularBombGrid(){
+    if(_ultimoTotal === 0) return;
+    ajustarGridSinScroll(document.getElementById('bombGrid'), _ultimoTotal);
+  }
+  // Bug corregido (crítico): el tamaño se medía UNA sola vez al cargar. Si
+  // en ese instante el navegador todavía no había terminado de acomodarse
+  // al monitor real, la grilla quedaba mal calculada para siempre. Con
+  // ResizeObserver, cualquier cambio real de tamaño del contenedor se
+  // detecta y recalcula solo. Corregido: "ResizeObserver loop completed
+  // with undelivered notifications" -- el callback modifica el tamaño del
+  // propio grid que observa, lo que dispararía otra ronda casi al
+  // instante; se difiere el cálculo real a requestAnimationFrame, afuera
+  // del callback sincrónico del observer.
+  const _bombGridObserver = new ResizeObserver(() => {
+    requestAnimationFrame(recalcularBombGrid);
+  });
+  window.addEventListener('resize', recalcularBombGrid);
 
   // Selector pequeño de estado (4 opciones de color) — reemplaza el click
   // directo de antes (que solo alternaba 2 estados). Ahora hay 4 posibles,
