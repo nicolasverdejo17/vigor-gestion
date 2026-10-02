@@ -429,14 +429,23 @@ async function cargarDatos(){
   esViendoAMiPropiaFicha = (bomberoId === miPersonalId);
 
   const { data: b, error } = await sb.from('personal')
-    .select('id, numero_registro, nombre_completo, cargo, rut, fecha_nacimiento, telefono, fecha_ingreso, estado, nivel_capacitacion, compania_id, companias(nombre), personal_especialidades(especialidades(codigo)), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin), personal_roles_funcionales(rol_funcional)')
+    .select('id, numero_registro, nombre_completo, cargo, rut, fecha_nacimiento, telefono, fecha_ingreso, estado, nivel_capacitacion, compania_id, foto_url, companias(nombre), personal_especialidades(especialidades(codigo)), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin), personal_roles_funcionales(rol_funcional)')
     .eq('id', bomberoId).single();
   if(error || !b){ document.getElementById('sinSesion').textContent = 'No se encontró ese bombero.'; document.getElementById('sinSesion').style.display = 'block'; return; }
   bomberoActual = b;
 
   document.getElementById('layoutFicha').style.display = 'grid';
   document.getElementById('ciaLabel').textContent = (b.companias ? b.companias.nombre : 'Cuerpo General') + ' · Vigor';
-  document.getElementById('fotoIniciales').textContent = iniciales(b.nombre_completo);
+  const fotoEl = document.getElementById('fotoIniciales');
+  if(b.foto_url){
+    fotoEl.style.backgroundImage = `url('${b.foto_url}')`;
+    fotoEl.style.backgroundSize = 'cover';
+    fotoEl.style.backgroundPosition = 'center';
+    fotoEl.textContent = '';
+  } else {
+    fotoEl.style.backgroundImage = '';
+    fotoEl.textContent = iniciales(b.nombre_completo);
+  }
   document.getElementById('fNombre').textContent = b.nombre_completo;
   document.getElementById('fCargo').textContent = b.cargo;
   document.getElementById('fReg').textContent = 'N° ' + b.numero_registro;

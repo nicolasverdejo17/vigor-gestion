@@ -160,19 +160,20 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 
 let cargoActivo = null;
 let rolesActivos = new Set();
-let miNombre = null, miIniciales = null, miCiaLabel = null;
+let miNombre = null, miIniciales = null, miCiaLabel = null, miFotoUrl = null;
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Necesitás loguearte primero'); return; }
   const { data: perfil } = await sb.from('personal')
-    .select('nombre_completo, cargo, companias(nombre), cuerpos(nombre_oficial), personal_roles_funcionales(rol_funcional)')
+    .select('nombre_completo, cargo, foto_url, companias(nombre), cuerpos(nombre_oficial), personal_roles_funcionales(rol_funcional)')
     .eq('auth_user_id', session.user.id).single();
   if(!perfil) return;
   cargoActivo = perfil.cargo;
   rolesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
   miNombre = perfil.nombre_completo;
   miIniciales = perfil.nombre_completo.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+  miFotoUrl = perfil.foto_url;
   miCiaLabel = perfil.companias ? perfil.companias.nombre : 'Cuerpo General';
   document.getElementById('eyebrowCia').textContent = miCiaLabel;
   renderTodo();
@@ -238,7 +239,16 @@ function renderPerfil(){
   const rolesTxt = rolesActivos.size ? ' + ' + [...rolesActivos].join(', ') : '';
   document.getElementById('sesionLabel').textContent = cargoActivo + rolesTxt;
   document.getElementById('perfilNombre').textContent = miNombre;
-  document.getElementById('perfilIniciales').textContent = miIniciales;
+  const fotoEl = document.getElementById('perfilIniciales');
+  if(miFotoUrl){
+    fotoEl.style.backgroundImage = `url('${miFotoUrl}')`;
+    fotoEl.style.backgroundSize = 'cover';
+    fotoEl.style.backgroundPosition = 'center';
+    fotoEl.textContent = '';
+  } else {
+    fotoEl.style.backgroundImage = '';
+    fotoEl.textContent = miIniciales;
+  }
   document.getElementById('perfilCargoTxt').textContent = `${cargoActivo} · ${miCiaLabel}`;
 }
 

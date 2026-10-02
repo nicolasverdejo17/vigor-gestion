@@ -198,6 +198,20 @@ function renderMiEstadoChip(){
 }
 
 function iniciales(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase(); }
+// Pedido explícito: si la persona tiene foto de perfil (foto_url), mostrarla
+// en vez de las iniciales -- mismo criterio en todas las pantallas que
+// muestran el avatar de un bombero (acá, Compañía, Ficha del Bombero).
+function pintarFotoOIniciales(el, fotoUrl, nombre){
+  if(fotoUrl){
+    el.style.backgroundImage = `url('${fotoUrl}')`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.textContent = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.textContent = iniciales(nombre);
+  }
+}
 
 // Un bombero de Compañía puede además ser Superintendente/Comandante/etc.
 // (mismo "cargo" de siempre, cambiado desde Hoja de Vida por un Director u
@@ -226,7 +240,7 @@ async function cargarDatos(){
     return;
   }
   const { data: perfil } = await sb.from('personal')
-    .select('id, numero_registro, nombre_completo, cargo, compania_id, cuerpo_id, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .select('id, numero_registro, nombre_completo, cargo, compania_id, cuerpo_id, foto_url, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
     .eq('auth_user_id', session.user.id).single();
   if(!perfil || !perfil.compania_id){
     document.getElementById('sinSesion').style.display = 'block';
@@ -239,7 +253,7 @@ async function cargarDatos(){
   document.getElementById('nombreCompaniaCel').textContent = perfil.companias.nombre;
   document.getElementById('roleLabel').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
   actualizarBannerInstitucional(perfil.cargo);
-  document.getElementById('miIniciales').textContent = iniciales(perfil.nombre_completo);
+  pintarFotoOIniciales(document.getElementById('miIniciales'), perfil.foto_url, perfil.nombre_completo);
   document.getElementById('miNombre').textContent = perfil.nombre_completo;
   document.getElementById('miCargoReg').textContent = `${perfil.cargo} · N° ${perfil.numero_registro}`;
 
