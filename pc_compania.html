@@ -401,16 +401,18 @@
      que ahora es más chico (menos fuente/márgenes) para dejarle más lugar.
      Se le sacó el contorno (quedaba como una "caja aparte" en vez de
      sentirse parte de la tarjeta) y el margen inferior se redujo al mínimo.
-     Bug corregido: con "cover" la foto se recortaba (y en cajas muy
-     distintas de proporción a la foto original, se veía deformada) -- con
-     "contain" se ve SIEMPRE completa, escalada según su propia proporción,
-     sin recortarse ni estirarse, con el degradé de fondo rellenando el
-     espacio que sobre a los costados. */
+     Pedido explícito (decisión final del cliente, entre llenar todo el
+     recuadro recortando un poco los bordes vs. verse siempre completa con
+     franjas vacías): la foto debe llenar TODO el recuadro, sin espacios
+     vacíos arriba/abajo ni a los costados -- "cover" nunca deforma/estira
+     la imagen (mantiene su proporción siempre), solo recorta lo que sobra
+     según la forma del recuadro, igual que cualquier grilla de fotos de
+     perfil (Instagram/WhatsApp). */
   .bomb-card__foto{
     width:100%; flex:1 1 auto; min-height:0; border-radius:10%;
     margin:0 0 2%;
     background:linear-gradient(135deg,#3A4750,#232D35);
-    background-size:contain; background-repeat:no-repeat; background-position:center;
+    background-size:cover; background-repeat:no-repeat; background-position:center;
     display:flex; align-items:center; justify-content:center;
     font-family:'Rajdhani',sans-serif; font-weight:700;
     color:var(--text-muted);
