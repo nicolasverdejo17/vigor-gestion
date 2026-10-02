@@ -228,7 +228,8 @@ function formatearFecha(valor){
   return out;
 }
 
-let miPersonalId = null, miEmail = null;
+let miPersonalId = null, miEmail = null, miCuerpoId = null;
+let fotoFileSeleccionado = null;
 
 function isoADdmmyyyy(iso){
   if(!iso) return '';
@@ -246,10 +247,11 @@ async function cargarSesion(){
   if(!session){ toast('Necesitás loguearte primero'); return; }
   miEmail = session.user.email;
   const { data: p } = await sb.from('personal')
-    .select('id, numero_registro, nombre_completo, rut, fecha_nacimiento, telefono, cargo, fecha_ingreso, foto_url, companias(nombre)')
+    .select('id, cuerpo_id, numero_registro, nombre_completo, rut, fecha_nacimiento, telefono, cargo, fecha_ingreso, foto_url, companias(nombre)')
     .eq('auth_user_id', session.user.id).single();
   if(!p){ toast('No se pudo cargar tu perfil'); return; }
   miPersonalId = p.id;
+  miCuerpoId = p.cuerpo_id;
 
   document.getElementById('nombreCompaniaHead').textContent = (p.companias ? p.companias.nombre : 'Cuerpo General') + ' · Vigor';
   document.getElementById('cargoHead').textContent = p.cargo;
@@ -273,6 +275,7 @@ cargarSesion();
 function previsualizarFoto(input){
   if(!input.files || !input.files[0]) return;
   const file = input.files[0];
+  fotoFileSeleccionado = file;
   const reader = new FileReader();
   reader.onload = (e) => {
     const circle = document.getElementById('fotoCircle');
@@ -282,7 +285,7 @@ function previsualizarFoto(input){
     circle.textContent = '';
   };
   reader.readAsDataURL(file);
-  toast('Foto actualizada — se guarda al confirmar los cambios');
+  toast('Foto lista — se sube al confirmar "Guardar Cambios"');
 }
 
 // Bug corregido: "Guardar Cambios" no leía ningún campo del formulario —
@@ -317,11 +320,24 @@ async function guardarCambios(){
     return;
   }
 
+  // Bug corregido: "Cambiar foto" solo armaba una vista previa local — el
+  // archivo nunca se subía a Storage ni se guardaba en la base. Se sube
+  // acá, recién al confirmar, y se manda junto con el resto de los datos.
+  let fotoUrl = null;
+  if(fotoFileSeleccionado){
+    const ext = (fotoFileSeleccionado.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${miCuerpoId}/perfil/${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('vigor-fotos').upload(path, fotoFileSeleccionado);
+    if(upErr){ toast('No se pudo subir la foto — ' + upErr.message); return; }
+    fotoUrl = sb.storage.from('vigor-fotos').getPublicUrl(path).data.publicUrl;
+  }
+
   const { error } = await sb.rpc('actualizar_mis_datos_personales', {
-    p_nombre_completo: nombre, p_fecha_nacimiento: fechaNac, p_telefono: telefono
+    p_nombre_completo: nombre, p_fecha_nacimiento: fechaNac, p_telefono: telefono, p_foto_url: fotoUrl
   });
 
   if(error){ toast('No se pudo guardar — ' + error.message); return; }
+  fotoFileSeleccionado = null;
   document.getElementById('tituloBombero').textContent = `${nombre} — N° ${document.getElementById('campoNumeroRegistro').value}`;
   toast(`Datos personales de ${nombre} actualizados`);
 }
