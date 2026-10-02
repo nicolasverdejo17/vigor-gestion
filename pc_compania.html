@@ -158,11 +158,14 @@
   /* Pedido explícito: Carros usa muy poco de lo que tiene asignado (son
      pocos botones chicos) mientras la Pizarra queda apretada -- se achica
      la columna de Carros y se le da ese espacio a la Pizarra (más ancho Y
-     más alto), en vez de repartir 50/50. */
+     más alto), en vez de repartir 50/50. Pedido explícito (2): para darle
+     más alto a las tarjetas de Guardia Activa (fila "guardia", 1fr = todo
+     lo que sobra), se le bajó más el alto fijo a esta fila de abajo
+     (260px -> 210px).  */
   .dash-grid{
     flex:1; min-height:0; display:grid;
     grid-template-columns:1fr 2fr;
-    grid-template-rows:1fr 260px;
+    grid-template-rows:1fr 210px;
     grid-template-areas:
       "guardia guardia"
       "carros pizarra";
@@ -349,9 +352,10 @@
     min-height:0;
     overflow:hidden;
   }
+  /* Pedido explícito: sin borde -- la tarjeta ya se distingue por el fondo
+     (panel-alt sobre el fondo general), no necesita un contorno encima. */
   .bomb-card{
     background:var(--panel-alt);
-    border:2px solid var(--line-strong);
     border-radius:10px;
     cursor:default;
     padding:2%;
@@ -363,7 +367,6 @@
     min-height:0;
     overflow:visible;
   }
-  .bomb-card:hover{ border-color:var(--brass-bright);}
   .bomb-card__refuerzo{
     position:absolute; top:6%; left:6%; right:6%; z-index:2; background:var(--cyan-dim); color:#fff;
     font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
@@ -423,7 +426,7 @@
   }
 
   .bomb-card--empty{
-    border-style:dashed; border-color:var(--line); cursor:default; opacity:.55;
+    border-width:2px; border-style:dashed; border-color:var(--line); cursor:default; opacity:.55;
   }
   .bomb-card--empty:hover{ border-color:var(--line);}
   .bomb-card--empty .empty-ico{ font-size:1.6em; color:var(--text-dim);}
@@ -1196,6 +1199,14 @@
     return cargo;
   }
 
+  // Pedido explícito: en la tarjeta solo va el primer nombre + primer
+  // apellido (ej. "Ignacio Bastías Contreras" -> "Ignacio Bastías") -- el
+  // nombre completo sigue disponible en el title (tooltip) y en Ficha del
+  // Bombero al hacer click.
+  function nombreCorto(nombreCompleto){
+    return (nombreCompleto || '').split(' ').filter(Boolean).slice(0, 2).join(' ');
+  }
+
   function renderBombGrid(){
     const bombGrid = document.getElementById('bombGrid');
     bombGrid.innerHTML = '';
@@ -1226,7 +1237,7 @@
           ${refuerzoTag}
           <div class="bomb-card__foto"${fotoEstilo}>${b.foto ? '' : initials}</div>
           <div class="bomb-card__meta">
-            <div class="bomb-card__nombre" style="cursor:pointer;" onclick="window.location.href='ficha_bombero.html?bombero=${b.id}'">${b.n}</div>
+            <div class="bomb-card__nombre" style="cursor:pointer;" title="${b.n}" onclick="window.location.href='ficha_bombero.html?bombero=${b.id}'">${nombreCorto(b.n)}</div>
             <div class="bomb-card__cargo" title="${b.cargo}">${siglasCargo(b.cargo)} · N° ${b.reg}</div>
             <div class="bomb-card__badges">${insignias}</div>
             <div class="bomb-card__estado-pill ${oscuro}" onclick="abrirSelectorEstadoBombero(event, ${i})">${PILL_LABEL[b.estado] || b.estado}</div>
