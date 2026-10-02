@@ -356,6 +356,7 @@
      tamaño se les quita la foto (ver .bomb-grid.compacto más abajo). */
   .bomb-grid{
     display:grid;
+    justify-items:center; align-items:center;
     gap:10px;
     padding:10px 12px;
     flex:1;
@@ -363,8 +364,14 @@
     overflow:hidden;
   }
   /* Pedido explícito: sin borde -- la tarjeta ya se distingue por el fondo
-     (panel-alt sobre el fondo general), no necesita un contorno encima. */
+     (panel-alt sobre el fondo general), no necesita un contorno encima.
+     Bug reportado ("la foto se corta/se ve distinta en pantalla completa"):
+     el tamaño real de la tarjeta queda fijado por JS (--card-w/--card-h,
+     ver ajustarGridSinScroll) en vez de estirarse a lo que mida la celda de
+     la grilla -- así su proporción (y la de la foto, que ocupa ~3/4 de su
+     alto) se mantiene igual sin importar el tamaño de pantalla. */
   .bomb-card{
+    width:var(--card-w, 100%); height:var(--card-h, 100%);
     background:var(--panel-alt);
     border-radius:10px;
     cursor:default;
@@ -444,7 +451,11 @@
 
   /* Pedido explícito: si la dotación supera los 20 puestos fijos, en vez de
      scrollear se les quita la foto a TODAS las tarjetas y solo se muestra
-     el recuadro con sus datos -- así siempre entran en el mismo espacio. */
+     el recuadro con sus datos -- así siempre entran en el mismo espacio.
+     Sin foto no hace falta mantener la proporción vertical fija -- la
+     tarjeta vuelve a estirarse a lo que mida la celda, para aprovechar
+     mejor el espacio con más tarjetas por fila. */
+  .bomb-grid.compacto .bomb-card{ width:100%; height:100%;}
   .bomb-grid.compacto .bomb-card__foto{ display:none;}
   .bomb-grid.compacto .bomb-card__meta{ flex:1 1 auto; display:flex; flex-direction:column; justify-content:center;}
   .bomb-grid.compacto .bomb-card__nombre{ font-size:9.5px;}
@@ -1359,6 +1370,20 @@
 
     gridEl.style.gridTemplateColumns = `repeat(${mejor.cols}, 1fr)`;
     gridEl.style.gridTemplateRows = `repeat(${mejor.rows}, 1fr)`;
+
+    // Bug reportado: al entrar a pantalla completa (o cualquier cambio
+    // grande de tamaño de ventana) la celda de la grilla cambiaba de forma,
+    // y la tarjeta se estiraba a esa forma -- la foto (que ya se ve
+    // completa, sin recortarse, por el contain) quedaba mucho más chica
+    // rodeada de espacio vacío, lo que se percibía como "la corta". Se fija
+    // el tamaño real de cada tarjeta al ideal según RATIO_OBJETIVO, centrada
+    // dentro de su celda, en vez de estirarla a lo que mida la celda -- así
+    // la proporción de la tarjeta (y de la foto) no varía con el tamaño de
+    // pantalla, solo varía cuánto espacio libre queda alrededor.
+    const idealW = Math.min(mejor.cardW, mejor.cardH * RATIO_OBJETIVO);
+    const idealH = idealW / RATIO_OBJETIVO;
+    gridEl.style.setProperty('--card-w', idealW + 'px');
+    gridEl.style.setProperty('--card-h', idealH + 'px');
     return mejor;
   }
 
