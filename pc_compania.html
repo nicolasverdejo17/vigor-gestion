@@ -464,29 +464,34 @@
     align-content:start;
   }
 
-  /* Botón compacto de color SÓLIDO según el estado del carro — la etiqueta
-     de estado adentro tiene un fondo oscuro translúcido para marcar que es
-     la zona clickeable, sin perder el color sólido de fondo del botón. */
+  /* Pedido explícito: el nombre del Carro debe destacar mucho más. Letra
+     bastante más grande y con más peso, y color de texto que se adapta al
+     estado (.oscuro) -- en Servicio/Mantención el fondo es claro (verde
+     menta / ámbar) y el texto blanco de antes casi no se leía; en Fuera de
+     Servicio/Emergencia el fondo es oscuro y sigue en blanco. */
   .carro-btn{
     position:relative;
     background:var(--c-color, var(--estado-fueraservicio));
     border:none;
-    border-radius:8px;
-    padding:12px 32px 12px 14px;
+    border-radius:10px;
+    padding:14px 36px 12px 16px;
     cursor:default;
-    min-height:58px;
-    display:flex; flex-direction:column; justify-content:center; gap:6px;
+    min-height:76px;
+    display:flex; flex-direction:column; justify-content:center; gap:8px;
   }
   .carro-btn__nom{
-    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px;
-    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.2); line-height:1.1;
+    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:23px; letter-spacing:.01em;
+    color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.3); line-height:1;
   }
+  .carro-btn.oscuro .carro-btn__nom{ color:#1A2E22; text-shadow:none;}
   .carro-btn__estado-pill{
-    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
-    padding:3px 7px; border-radius:4px; cursor:pointer; display:inline-block;
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;
+    padding:3px 8px; border-radius:4px; cursor:pointer; display:inline-block;
     background:rgba(0,0,0,0.28); color:#fff; width:fit-content; line-height:1.3;
   }
   .carro-btn__estado-pill:hover{ background:rgba(0,0,0,0.4);}
+  .carro-btn.oscuro .carro-btn__estado-pill{ background:rgba(0,0,0,0.16); color:#1A2E22;}
+  .carro-btn.oscuro .carro-btn__estado-pill:hover{ background:rgba(0,0,0,0.26);}
   .carro-btn__dot-zone{
     position:absolute; right:0; top:0; bottom:0; width:30px;
     display:flex; align-items:center; justify-content:center;
@@ -495,6 +500,8 @@
     color:#fff; font-size:13px;
   }
   .carro-btn__dot-zone:hover{ background:rgba(0,0,0,0.15);}
+  .carro-btn.oscuro .carro-btn__dot-zone{ border-left-color:rgba(0,0,0,0.18);}
+  .carro-btn.oscuro .carro-btn__dot-zone:hover{ background:rgba(0,0,0,0.1);}
 
   /* Selector de estado — popover pequeño, 4 opciones de color sólido.
      position:fixed (no absolute): así nunca lo recorta el scroll de la
@@ -904,6 +911,9 @@
     servicio:COLOR_ESTADO.disponible, mant:COLOR_ESTADO.no_disponible,
     fuera:COLOR_ESTADO.fuera, emergencia:COLOR_ESTADO.emergencia,
   };
+  // En Servicio/Mantención el fondo es claro (verde menta / ámbar) -- el
+  // nombre del Carro necesita texto oscuro ahí para destacar de verdad.
+  const CARRO_ESTADO_OSCURO = { servicio:true, mant:true, fuera:false, emergencia:false };
 
   let carros = [];
 
@@ -1463,8 +1473,9 @@
     carrosGrid.innerHTML = '';
     carros.forEach((c,i)=>{
       const color = COLOR_ESTADO_CARRO[c.estado];
+      const oscuro = CARRO_ESTADO_OSCURO[c.estado] ? 'oscuro' : '';
       carrosGrid.insertAdjacentHTML('beforeend', `
-        <div class="carro-btn" style="--c-color:${color}">
+        <div class="carro-btn ${oscuro}" style="--c-color:${color}">
           <span class="carro-btn__nom">${c.nom}</span>
           <div class="carro-btn__estado-pill" onclick="abrirSelectorEstadoCarro(event, ${i})">${ESTADO_LABEL_CARRO[c.estado]}</div>
           <div class="carro-btn__dot-zone" onclick="toggleDotPanel(event, ${i})" title="Asignar dotación">👥</div>
@@ -1507,6 +1518,7 @@
     // toda la grilla de carros.
     const btn = document.querySelectorAll('.carro-btn')[i];
     btn.style.setProperty('--c-color', COLOR_ESTADO_CARRO[estado]);
+    btn.classList.toggle('oscuro', !!CARRO_ESTADO_OSCURO[estado]);
     btn.querySelector('.carro-btn__estado-pill').textContent = ESTADO_LABEL_CARRO[estado];
     document.getElementById(`selCarro-${i}`).classList.remove('open');
     renderMiniResumen();
