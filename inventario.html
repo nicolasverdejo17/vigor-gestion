@@ -485,16 +485,28 @@ async function editarCategoria(key){
   toast('Categoría renombrada');
 }
 async function eliminarCategoria(key){
-  const enUso = ITEMS.some(i => i.cat === key);
+  // Pedido explícito: un ítem Dado de Baja sigue apuntando a su categoría de
+  // origen solo para fines históricos -- no debe trabar el borrado de una
+  // categoría que ya no tiene ítems ACTIVOS adentro.
+  const enUsoActivos = ITEMS.some(i => i.cat === key && i.estado !== 'baja');
+  if(enUsoActivos){
+    toast('No se puede eliminar — todavía tiene ítems activos adentro, movelos primero');
+    return;
+  }
   const tieneSubcats = (SUBCATS[key] || []).length > 0;
   const aviso = tieneSubcats ? ' Se eliminan también sus subcategorías.' : '';
   if(!confirm(`¿Eliminar la categoría "${CATS[key].label}"?${aviso} Esta acción no se puede deshacer.`)) return;
   const nombreCat = CATS[key].label;
-  const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
-  if(error){
-    toast(enUso ? 'No se puede eliminar — todavía tiene ítems adentro, movelos primero' : 'No se pudo eliminar — ' + error.message);
-    return;
+
+  const bajaIds = ITEMS.filter(i => i.cat === key && i.estado === 'baja').map(i => i.id);
+  if(bajaIds.length){
+    const { error: liberarErr } = await sb.from('inventario_items')
+      .update({ categoria_id: null, subcategoria_id: null }).in('id', bajaIds);
+    if(liberarErr){ toast('No se pudo eliminar — ' + liberarErr.message); return; }
   }
+
+  const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
+  if(error){ toast('No se pudo eliminar — ' + error.message); return; }
   sb.rpc('registrar_auditoria', {
     p_tipo: 'critico',
     p_detalle: `Inventario — Categoría eliminada: "${nombreCat}"`,
@@ -502,6 +514,7 @@ async function eliminarCategoria(key){
   });
   delete CATS[key];
   delete SUBCATS[key];
+  ITEMS.forEach(i => { if(i.cat === key){ i.cat = null; i.subcat = null; } });
   if(catActiva === key){ catActiva = 'todos'; subcatActiva = null; }
   renderTabs();
   renderSubcats();
@@ -522,19 +535,31 @@ async function editarSubcat(key){
   toast('Subcategoría renombrada');
 }
 async function eliminarSubcat(key){
-  const enUso = ITEMS.some(i => i.subcat === key);
+  // Mismo criterio que eliminarCategoria(): un ítem Dado de Baja no debe
+  // trabar el borrado de su subcategoría de origen.
+  const enUsoActivos = ITEMS.some(i => i.subcat === key && i.estado !== 'baja');
   const nombreSubcat = (SUBCATS[catActiva] || []).find(x => x.key === key)?.label || '—';
-  if(!confirm('¿Eliminar esta subcategoría? Esta acción no se puede deshacer.')) return;
-  const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
-  if(error){
-    toast(enUso ? 'No se puede eliminar — todavía tiene ítems adentro, movelos primero' : 'No se pudo eliminar — ' + error.message);
+  if(enUsoActivos){
+    toast('No se puede eliminar — todavía tiene ítems activos adentro, movelos primero');
     return;
   }
+  if(!confirm('¿Eliminar esta subcategoría? Esta acción no se puede deshacer.')) return;
+
+  const bajaIds = ITEMS.filter(i => i.subcat === key && i.estado === 'baja').map(i => i.id);
+  if(bajaIds.length){
+    const { error: liberarErr } = await sb.from('inventario_items')
+      .update({ subcategoria_id: null }).in('id', bajaIds);
+    if(liberarErr){ toast('No se pudo eliminar — ' + liberarErr.message); return; }
+  }
+
+  const { error } = await sb.from('inventario_categorias').delete().eq('id', key);
+  if(error){ toast('No se pudo eliminar — ' + error.message); return; }
   sb.rpc('registrar_auditoria', {
     p_tipo: 'critico',
     p_detalle: `Inventario — Subcategoría eliminada: "${nombreSubcat}" (de ${CATS[catActiva] ? CATS[catActiva].label : '—'})`,
     p_compania_id: miCompaniaId,
   });
+  ITEMS.forEach(i => { if(i.subcat === key) i.subcat = null; });
   SUBCATS[catActiva] = (SUBCATS[catActiva] || []).filter(x => x.key !== key);
   if(subcatActiva === key) subcatActiva = null;
   renderSubcats();
