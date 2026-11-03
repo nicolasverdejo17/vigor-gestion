@@ -47,12 +47,6 @@
   }
   .resumen-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.35;}
   .resumen-title{ font-size:10.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:12px; position:relative; z-index:1;}
-  .resumen-body{ display:flex; gap:18px; align-items:center; position:relative; z-index:1; margin-bottom:12px;}
-  .ring-wrap{ position:relative; width:88px; height:88px; flex-shrink:0;}
-  .ring-wrap svg{ filter:drop-shadow(0 0 7px var(--cyan-glow));}
-  .ring-val{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
-  .ring-val b{ font-family:'JetBrains Mono',monospace; font-size:24px; color:var(--cyan); font-weight:700; line-height:1;}
-  .ring-val .of{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); margin-top:2px;}
   .ring-side{ flex:1; min-width:0;}
   .ring-stat{ display:flex; align-items:center; gap:8px; padding:5px 0;}
   .ring-stat svg{ width:14px; height:14px; color:var(--cyan); flex-shrink:0;}
@@ -60,11 +54,37 @@
   .ring-stat .lbl{ font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.02em;}
   .ring-stat .val{ font-size:12px; color:var(--text); font-weight:700; margin-top:1px;}
   .ring-stat .val.mono{ font-family:'JetBrains Mono',monospace; color:var(--cyan);}
-  .resumen-carros{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; position:relative; z-index:1;}
-  .carro-chip{ display:inline-flex; align-items:center; gap:5px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px; background:var(--panel-alt); border:1.5px solid var(--servicio); padding:4px 9px; border-radius:5px; color:var(--text);}
-  .carro-chip::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--servicio); flex-shrink:0;}
-  .carro-chip.mant{ border-color:var(--alerta);}
-  .carro-chip.mant::before{ background:var(--alerta);}
+  /* Faro: baliza central con haces de luz y las caras de quienes están en el cuartel en órbita.
+     Siempre se ve lleno porque muestra a los presentes, no un porcentaje de la dotación total. */
+  .faro{ position:relative; width:224px; height:224px; max-width:100%; margin:0 auto 4px; z-index:1;
+    --f-color:#42555C; --f-light:#8CA0A8; --f-dark:#26343A; --f-glow:rgba(66,85,92,0);}
+  .faro.ok{ --f-color:#3CF29A; --f-light:#B8FFDA; --f-dark:#117A4B; --f-glow:rgba(60,242,154,0.55);}
+  .faro.emerg{ --f-color:#FF4B5C; --f-light:#FFC2C8; --f-dark:#8A1522; --f-glow:rgba(255,75,92,0.55);}
+  .faro-haces{ position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg, var(--f-glow) 0deg, transparent 50deg, transparent 180deg, var(--f-glow) 180deg, transparent 230deg);
+    -webkit-mask:radial-gradient(circle, transparent 18%, #000 19%, transparent 72%); mask:radial-gradient(circle, transparent 18%, #000 19%, transparent 72%);
+    animation:faro-gira 4s linear infinite;}
+  .faro.vacio .faro-haces{ display:none;}
+  .faro-orbita{ position:absolute; inset:22px; border-radius:50%; border:1px dashed var(--line-strong);}
+  .faro-nucleo{ position:absolute; left:50%; top:50%; width:84px; height:84px; margin:-42px 0 0 -42px; border-radius:50%;
+    background:radial-gradient(circle at 38% 32%, var(--f-light), var(--f-color) 52%, var(--f-dark));
+    box-shadow:0 0 28px var(--f-glow); display:flex; flex-direction:column; align-items:center; justify-content:center; animation:faro-late 2.4s ease-in-out infinite;}
+  .faro.vacio .faro-nucleo{ animation:none;}
+  .faro-nucleo b{ font-family:'JetBrains Mono',monospace; font-size:30px; line-height:1; color:#04201A; font-weight:700;}
+  .faro.vacio .faro-nucleo b{ color:#E7F5FA;}
+  .faro-nucleo span{ font-size:9px; text-transform:uppercase; letter-spacing:.04em; color:#04201A; font-weight:700; margin-top:2px;}
+  .faro.vacio .faro-nucleo span{ color:var(--text-muted);}
+  .faro-av{ position:absolute; width:38px; height:38px; margin:-19px 0 0 -19px; border-radius:50%; background:#26323A center/cover no-repeat;
+    border:2.5px solid var(--a-color); box-shadow:0 0 0 2px var(--panel), 0 0 10px var(--a-color); display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; color:var(--text);}
+  .faro-av.mas{ border-style:dashed; border-color:var(--text-dim); box-shadow:0 0 0 2px var(--panel); font-size:12px; color:var(--text-muted);}
+  .faro-estado{ text-align:center; position:relative; z-index:1; margin-bottom:10px;}
+  .faro-estado b{ display:block; font-size:14px; font-weight:700; color:var(--text-muted);}
+  .faro-estado.ok b{ color:var(--servicio);}
+  .faro-estado.emerg b{ color:var(--emergencia);}
+  .faro-estado span{ font-size:11px; color:var(--text-muted);}
+  @keyframes faro-gira{ to{ transform:rotate(360deg);} }
+  @keyframes faro-late{ 0%,100%{ filter:brightness(.88);} 50%{ filter:brightness(1.12);} }
 
   .mi-estado-card{
     background:var(--panel); border:2px solid var(--e-color, var(--line-strong)); border-radius:12px;
@@ -132,28 +152,19 @@
     <div class="content">
       <div class="resumen-card">
         <div class="resumen-title">Resumen de Guardia — Cuartel</div>
-        <div class="resumen-body">
-          <div class="ring-wrap">
-            <svg viewBox="0 0 88 88" width="88" height="88">
-              <circle cx="44" cy="44" r="36" fill="none" stroke="var(--line-strong)" stroke-width="8"/>
-              <circle id="ringProgress" cx="44" cy="44" r="36" fill="none" stroke="var(--cyan)" stroke-width="8" stroke-linecap="round"
-                stroke-dasharray="226" stroke-dashoffset="226" transform="rotate(-90 44 44)"/>
-            </svg>
-            <div class="ring-val"><b id="presentesCount">—</b><span class="of" id="presentesTotal">de —</span></div>
-          </div>
-          <div class="ring-side">
-            <div class="ring-stat">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9.7a1 1 0 0 1 1-1h6.5l3.3 3.3H19a1 1 0 0 1 1 1V16"/><path d="M3 16h18"/><circle cx="7.5" cy="17.6" r="1.6"/><circle cx="17" cy="17.6" r="1.6"/></svg>
-              <div class="ring-stat-txt"><div class="lbl">Carros en Servicio</div></div>
-              <div class="val mono" id="carrosServicioCount">—</div>
-            </div>
-            <div class="ring-stat">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg>
-              <div class="ring-stat-txt"><div class="lbl">Al Mando</div><div class="val" id="alMandoTexto">—</div></div>
-            </div>
+        <div class="faro vacio" id="faro">
+          <div class="faro-haces"></div>
+          <div class="faro-orbita"></div>
+          <div id="faroAvatares"></div>
+          <div class="faro-nucleo"><b id="presentesCount">—</b><span>en cuartel</span></div>
+        </div>
+        <div class="faro-estado" id="faroEstado"><b>—</b><span></span></div>
+        <div class="ring-side">
+          <div class="ring-stat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg>
+            <div class="ring-stat-txt"><div class="lbl">Al Mando</div><div class="val" id="alMandoTexto">—</div></div>
           </div>
         </div>
-        <div class="resumen-carros" id="resumenCarrosChips"></div>
       </div>
 
       <div class="mi-estado-card" id="miEstadoCard" onclick="window.location.href='compania_celular.html'">
@@ -233,6 +244,45 @@ function actualizarBannerInstitucional(cargo){
   }
 }
 
+
+// Faro: núcleo con el conteo de presentes (verde; rojo si alguien está en emergencia; gris si no hay nadie)
+// y, en órbita, la cara de cada bombero presente con el color de su estado. Más de 10 se resumen en "+N".
+const MAX_AVATARES = 10;
+function renderFaro(presentes){
+  const faro = document.getElementById('faro');
+  const hayEmergencia = presentes.some(p => p.estado === 'emergencia');
+  faro.className = 'faro ' + (presentes.length === 0 ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
+  document.getElementById('presentesCount').textContent = presentes.length;
+
+  const orden = [...presentes].sort((a, b) => {
+    const ia = PRIORIDAD_CARGO_MANDO.indexOf(a.cargo), ib = PRIORIDAD_CARGO_MANDO.indexOf(b.cargo);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.nombre_completo.localeCompare(b.nombre_completo);
+  });
+  const mostrar = orden.length > MAX_AVATARES ? orden.slice(0, MAX_AVATARES - 1) : orden;
+  const extra = orden.length - mostrar.length;
+  const items = mostrar.map(p => ({ p })).concat(extra > 0 ? [{ mas: extra }] : []);
+  const R = 90, C = 112;
+  document.getElementById('faroAvatares').innerHTML = items.map((it, i) => {
+    const ang = (i / items.length) * 2 * Math.PI - Math.PI / 2;
+    const pos = `left:${(C + Math.cos(ang) * R).toFixed(1)}px; top:${(C + Math.sin(ang) * R).toFixed(1)}px;`;
+    if(it.mas) return `<div class="faro-av mas" style="${pos}">+${it.mas}</div>`;
+    const p = it.p, color = COLOR_ESTADO[p.estado] || COLOR_ESTADO.disponible;
+    const ini = p.nombre_completo.split(' ').filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+    const fondo = p.foto_url ? `background-image:url('${p.foto_url}');` : '';
+    return `<div class="faro-av" style="${pos} --a-color:${color}; ${fondo}" title="${p.nombre_completo.replace(/"/g, '')} — ${PILL_LABEL[p.estado] || ''}">${p.foto_url ? '' : ini}</div>`;
+  }).join('');
+
+  const n = (e) => presentes.filter(p => p.estado === e).length;
+  const titulo = presentes.length === 0 ? 'Cuartel sin personal' : hayEmergencia ? 'En emergencia' : 'Guardia activa';
+  const partes = [];
+  if(n('disponible')) partes.push(`${n('disponible')} disponible${n('disponible') === 1 ? '' : 's'}`);
+  if(n('no_disponible')) partes.push(`${n('no_disponible')} no disponible${n('no_disponible') === 1 ? '' : 's'}`);
+  if(n('emergencia')) partes.push(`${n('emergencia')} en emergencia`);
+  const est = document.getElementById('faroEstado');
+  est.className = 'faro-estado ' + (presentes.length === 0 ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
+  est.innerHTML = `<b>${titulo}</b><span>${partes.join(' · ') || 'Nadie en servicio por ahora'}</span>`;
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
@@ -257,28 +307,16 @@ async function cargarDatos(){
   document.getElementById('miNombre').textContent = perfil.nombre_completo;
   document.getElementById('miCargoReg').textContent = `${perfil.cargo} · N° ${perfil.numero_registro}`;
 
-  const [{ data: companeros }, { data: carros }, { data: almando }] = await Promise.all([
-    sb.from('personal').select('personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)').eq('compania_id', perfil.compania_id),
-    sb.from('carros').select('nomenclatura, estado').eq('compania_id', perfil.compania_id),
+  const [{ data: companeros }, { data: almando }] = await Promise.all([
+    sb.from('personal').select('id, nombre_completo, cargo, foto_url, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)').eq('compania_id', perfil.compania_id),
     sb.from('compania_al_mando').select('tipo_mando, personal(nombre_completo, cargo)').eq('compania_id', perfil.compania_id).maybeSingle()
   ]);
 
-  const totalDotacion = (companeros || []).length;
-  const presentes = (companeros || []).filter(p => {
+  const presentes = (companeros || []).map(p => {
     const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
-    return fv && fv.estado !== 'fuera';
-  }).length;
-  document.getElementById('presentesCount').textContent = presentes;
-  document.getElementById('presentesTotal').textContent = `de ${totalDotacion}`;
-  const ringCircunferencia = 226;
-  const ringPct = totalDotacion > 0 ? presentes / totalDotacion : 0;
-  document.getElementById('ringProgress').style.strokeDashoffset = ringCircunferencia - (ringCircunferencia * ringPct);
-
-  const enServicio = (carros || []).filter(c => c.estado === 'servicio').length;
-  document.getElementById('carrosServicioCount').textContent = `${enServicio}/${(carros || []).length}`;
-  document.getElementById('resumenCarrosChips').innerHTML = (carros || []).map(c =>
-    `<span class="carro-chip ${c.estado !== 'servicio' ? 'mant' : ''}">${c.nomenclatura}</span>`
-  ).join('');
+    return fv && fv.estado !== 'fuera' ? { ...p, estado: fv.estado } : null;
+  }).filter(Boolean);
+  renderFaro(presentes);
 
   const CARGO_ABREV = { 'Director':'Director','Capitán':'Cap.','Teniente 1°':'Tte. 1°','Teniente 2°':'Tte. 2°','Teniente 3°':'Tte. 3°','Teniente 4°':'Tte. 4°','Ayudante Cía.':'Ayte. Cía.' };
   if(almando && almando.personal){
@@ -297,7 +335,6 @@ async function cargarDatos(){
     suscritoInicioCelular = true;
     sb.channel('inicio-celular-' + perfil.compania_id)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, () => cargarDatos())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .subscribe();
     suscribirAlertaDespacho(perfil);
