@@ -239,8 +239,7 @@ const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
-// El Libro de Guardia es solo para Capitán, Tenientes y Ayudante de Compañía (la base de datos lo exige igual).
-const CARGOS_OFICIAL_CIA = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante de Compañía','Ayudante Cía.'];
+// El Libro de Guardia es de toda la Compañía: cualquier integrante puede verlo y llenarlo (la base valida la pertenencia).
 const CONFIG_DEF = { hora_inicio:'22:00', hora_fin:'05:00', minimo_total:7, minimo_maquinista:1 };
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const ASIST_LABEL = { completa:'Completa', parcial:'Parcial', ausente:'Ausente', en_curso:'En servicio', pendiente:'Pendiente' };
@@ -314,8 +313,8 @@ async function iniciar(){
   ciaNombre = perfil.companias ? perfil.companias.nombre : '—';
   document.getElementById('wrap').style.display = 'flex';
   document.getElementById('ciaLabel').textContent = ciaNombre;
-  if(!compId || !CARGOS_OFICIAL_CIA.includes(perfil.cargo)){
-    document.getElementById('vista').innerHTML = `<div class="panel"><div class="vacio">🔒 El Libro de Guardia es solo para el Capitán, los Tenientes y el Ayudante de Compañía.</div></div>`;
+  if(!compId){
+    document.getElementById('vista').innerHTML = `<div class="panel"><div class="vacio">El Libro de Guardia es de cada Compañía. Tu usuario no está asignado a una.</div></div>`;
     return;
   }
   const { data: cfg } = await sb.from('guardia_config').select('*').eq('compania_id', compId).maybeSingle();
