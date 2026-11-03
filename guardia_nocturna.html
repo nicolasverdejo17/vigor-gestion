@@ -284,7 +284,7 @@
               <button class="btn-icon" onclick="cambiarMes(-1)" title="Mes anterior"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
               <select id="selMes" onchange="irAMes()"></select>
               <select id="selAnio" onchange="irAMes()"></select>
-              <button class="btn-icon" onclick="cambiarMes(1)" title="Mes siguiente"><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+              <button class="btn-icon" id="btnMesSig" onclick="cambiarMes(1)" title="Mes siguiente"><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
             </div>
             <span class="chip abierto" id="chipMes">Abierto</span>
             <span class="spacer"></span>
@@ -412,6 +412,7 @@ function fechaCorta(k){ const [y, m, d] = k.split('-').map(Number); return `${DI
 
 const ERRORES = {
   MES_CERRADO: 'El mes está cerrado — solo un oficial puede hacer cambios.',
+  MES_NO_HABILITADO: 'El mes siguiente se habilita para anotarse desde el día 20.',
   FECHA_PASADA: 'Esa noche ya pasó, no se puede modificar.',
   YA_INSCRITO: 'Ya estás anotado esa noche.',
   SOLO_TU_COMPANIA: 'Solo podés anotarte en la guardia de tu propia Compañía.',
@@ -547,6 +548,11 @@ function renderTodo(){
   document.getElementById('ciaLabel').textContent = (cia ? cia.nombre : '—') + ' · ' + CONFIG.hora_inicio.slice(0, 5) + ' a ' + CONFIG.hora_fin.slice(0, 5);
   document.getElementById('selMes').value = mes;
   document.getElementById('selAnio').value = anio;
+  const sig = document.getElementById('btnMesSig');
+  const sigM = mes === 12 ? 1 : mes + 1, sigY = mes === 12 ? anio + 1 : anio;
+  sig.disabled = excedeMes(sigY, sigM);
+  sig.style.opacity = sig.disabled ? '.4' : '';
+  sig.title = sig.disabled ? 'El mes siguiente se habilita desde el día 20' : 'Mes siguiente';
   const chip = document.getElementById('chipMes');
   chip.className = 'chip ' + MES_ESTADO;
   chip.innerHTML = (mesAbierto() ? ico('unlock') : ico('lock')) + (mesAbierto() ? 'Abierto' : 'Cerrado');
@@ -649,15 +655,36 @@ function renderVoluntarios(){
     <div class="nota" style="margin-top:8px;">Se calcula solo, con la puesta en servicio real de cada voluntario dentro del horario de la guardia. La cuota cuenta noches completas.</div>`;
 }
 
-// ---- Navegación de mes / compañía ----
+// ---- Navegación de mes ----
+// Un voluntario solo ve el mes en curso (y los anteriores); el mes siguiente se habilita
+// recién desde el día 20. Capitán, Tenientes y Ayudante pueden preparar meses futuros.
+// (La base de datos también lo exige al anotarse.)
+function mesMaximo(){
+  if(puedeInscribir()) return null;
+  const t = new Date();
+  let y = t.getFullYear(), m = t.getMonth() + 1;
+  if(t.getDate() >= 20){ m++; if(m > 12){ m = 1; y++; } }
+  return { anio: y, mes: m };
+}
+function excedeMes(y, m){
+  const mx = mesMaximo();
+  return !!mx && (y * 12 + m) > (mx.anio * 12 + mx.mes);
+}
 function cambiarMes(delta){
-  mes += delta;
-  if(mes < 1){ mes = 12; anio--; } else if(mes > 12){ mes = 1; anio++; }
+  let m = mes + delta, y = anio;
+  if(m < 1){ m = 12; y--; } else if(m > 12){ m = 1; y++; }
+  if(excedeMes(y, m)){ toast('El mes siguiente se habilita para anotarse desde el día 20.', true); return; }
+  mes = m; anio = y;
   recargarMes();
 }
 function irAMes(){
-  mes = Number(document.getElementById('selMes').value);
-  anio = Number(document.getElementById('selAnio').value);
+  const m = Number(document.getElementById('selMes').value), y = Number(document.getElementById('selAnio').value);
+  if(excedeMes(y, m)){
+    toast('El mes siguiente se habilita para anotarse desde el día 20.', true);
+    document.getElementById('selMes').value = mes; document.getElementById('selAnio').value = anio;
+    return;
+  }
+  mes = m; anio = y;
   recargarMes();
 }
 async function recargarMes(){
