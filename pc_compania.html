@@ -1712,7 +1712,8 @@
   // Cía., esté o no el Director presente. Por eso PRIORIDAD_ALMANDO es una
   // lista aparte, sin Director.
   const PRIORIDAD_CARGO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
-  const PRIORIDAD_ALMANDO = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
+  // El Ayudante Cía. no está en la cadena de mando: solo toma el mando si su antigüedad lo indica (Comando Situacional).
+  const PRIORIDAD_ALMANDO = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°'];
   const CARGO_ABREV = {
     'Director':'Director', 'Capitán':'Cap.',
     'Teniente 1°':'Tte. 1°', 'Teniente 2°':'Tte. 2°', 'Teniente 3°':'Tte. 3°', 'Teniente 4°':'Tte. 4°', 'Ayudante Cía.':'Ayte. Cía.',
