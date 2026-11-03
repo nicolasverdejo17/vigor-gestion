@@ -266,7 +266,11 @@ async function cargarGuardia(){
   GUARDIA = (data || []).map(p => {
     const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
     return { id: p.id, n: p.nombre_completo, c: p.cargo, reg: p.numero_registro, foto: p.foto_url, estado: fv ? fv.estado : 'fuera' };
-  }).sort((a,b) => a.reg - b.reg);
+  }).sort((a,b) => {
+    // Mismo orden que el PC del Cuartel: por rango (el Director siempre primero si está en servicio), luego por N° de registro.
+    const ra = PRIORIDAD_CARGO_MANDO.indexOf(a.c), rb = PRIORIDAD_CARGO_MANDO.indexOf(b.c);
+    return (ra < 0 ? 999 : ra) - (rb < 0 ? 999 : rb) || a.reg - b.reg;
+  });
 }
 
 async function cargarCarros(){
