@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vigor — Guardia Nocturna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --cyan-dim:#1E6E7D;
+    --burdeo:#7A1620; --burdeo-bright:#D8394E;
+    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --nodisp:#42555C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    background: radial-gradient(900px 500px at 50% -10%, rgba(73,233,255,0.08), transparent 60%), #060A0F;
+    font-family:'Inter',sans-serif; color:var(--text);
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+  svg.i{ width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0;}
+
+  #wrap{ height:100%; display:none; flex-direction:column; position:relative;}
+
+  .app-head{ padding:10px 18px 8px; flex-shrink:0; display:flex; align-items:center; gap:12px;}
+  .back-btn{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:7px 12px; border-radius:6px; cursor:pointer; flex-shrink:0;
+  }
+  .app-head .titulo{ min-width:0; flex:1;}
+  .app-head .eyebrow{ font-size:10px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+  .app-head h1{ font-size:17px; margin-top:2px;}
+  .btn-icon{
+    background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);
+    width:34px; height:34px; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;
+  }
+  .btn-icon:hover{ color:var(--text); border-color:var(--brass-bright);}
+
+  .content{ flex:1; overflow-y:auto; padding:6px 18px 18px;}
+  .content::-webkit-scrollbar{ width:7px;}
+  .content::-webkit-scrollbar-thumb{ background:var(--brass-dim); border-radius:4px;}
+  .content::-webkit-scrollbar-track{ background:transparent;}
+
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr); gap:14px; max-width:1240px; margin:0 auto;}
+  @media (min-width:960px){ .layout{ grid-template-columns:minmax(0,1fr) 340px; align-items:start;} }
+
+  .panel{
+    background:var(--panel); border:1.5px solid var(--line-strong); border-radius:12px; padding:14px 14px; position:relative;
+  }
+  .panel::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.25;}
+  .panel > *{ position:relative; z-index:1;}
+  .panel h3{ font-size:12.5px; color:var(--brass-bright); letter-spacing:.08em; margin-bottom:10px;}
+
+  /* ---- Barra de mes ---- */
+  .mes-bar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .mes-nav{ display:flex; align-items:center; gap:6px;}
+  .mes-nav select{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:7px; color:var(--text);
+    font-family:'Rajdhani'; font-weight:700; font-size:14px; letter-spacing:.03em; padding:6px 8px; text-transform:uppercase;
+  }
+  .mes-nav select:focus{ outline:none; border-color:var(--cyan);}
+  .chip{
+    font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:4px 10px; border-radius:10px;
+    display:inline-flex; align-items:center; gap:5px; color:#fff;
+  }
+  .chip.abierto{ background:var(--cyan-dim); border:1px solid var(--cyan);}
+  .chip.cerrado{ background:var(--burdeo); border:1px solid var(--burdeo-bright);}
+  .spacer{ flex:1;}
+  .btn-sec{
+    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:11.5px;
+    padding:7px 12px; border-radius:7px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-sec:hover{ border-color:var(--brass-bright); color:var(--text);}
+  .btn-pri{
+    background:var(--cyan-dim); border:2px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:13px;
+    padding:10px 14px; border-radius:8px; cursor:pointer;
+  }
+  .btn-pri:hover{ background:var(--cyan); color:#0D2226;}
+  .btn-pri:disabled, .btn-sec:disabled{ opacity:.5; cursor:not-allowed;}
+  .btn-peligro{
+    background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:13px;
+    padding:10px 14px; border-radius:8px; cursor:pointer;
+  }
+  .btn-peligro:hover{ background:var(--burdeo); color:#fff;}
+
+  .leyenda{ display:flex; gap:12px; flex-wrap:wrap; font-size:10.5px; color:var(--text-dim); margin-bottom:10px;}
+  .leyenda span{ display:inline-flex; align-items:center; gap:5px;}
+  .leyenda i{ width:10px; height:10px; border-radius:3px; display:inline-block;}
+
+  /* ---- Calendario ---- */
+  .cal{ display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:5px;}
+  .cal-head{ font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.06em; color:var(--text-dim); text-transform:uppercase; text-align:center; padding:2px 0 4px;}
+  .dia{
+    min-height:58px; border-radius:8px; background:var(--panel-alt); border:1.5px solid var(--line-strong);
+    padding:5px 5px 4px; cursor:pointer; position:relative; display:flex; flex-direction:column; gap:3px; overflow:hidden; text-align:left;
+    font-family:inherit; color:var(--text);
+  }
+  .dia:hover{ border-color:var(--brass-bright);}
+  .dia.vacio{ background:transparent; border:none; cursor:default; min-height:0;}
+  .dia.roja{ border-color:rgba(255,75,92,.55); background:linear-gradient(180deg, rgba(255,75,92,.13), var(--panel-alt) 70%);}
+  .dia.amarilla{ border-color:rgba(255,201,77,.6); background:linear-gradient(180deg, rgba(255,201,77,.13), var(--panel-alt) 70%);}
+  .dia.verde{ border-color:rgba(60,242,154,.55); background:linear-gradient(180deg, rgba(60,242,154,.13), var(--panel-alt) 70%);}
+  .dia.pasado{ opacity:.55;}
+  .dia.hoy{ box-shadow:0 0 0 2px var(--brass-bright);}
+  .dia-top{ display:flex; align-items:center; justify-content:space-between; gap:4px;}
+  .dia-num{ font-family:'Rajdhani'; font-weight:800; font-size:15px; line-height:1;}
+  .dia-count{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px; line-height:1;
+    padding:2px 5px; border-radius:5px; background:rgba(0,0,0,.35);
+  }
+  .dia.roja .dia-count{ color:var(--emergencia);} .dia.amarilla .dia-count{ color:var(--alerta);} .dia.verde .dia-count{ color:var(--servicio);}
+  .dia-iconos{ display:flex; gap:4px; font-size:11px; color:var(--text-muted); min-height:11px;}
+  .dia-iconos .ok{ color:var(--brass-bright);}
+  .dia-nombres{ display:none; flex-direction:column; gap:1px; font-size:10.5px; color:var(--text-muted); line-height:1.25; overflow:hidden;}
+  .dia-nombres span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .dia-nombres .mas{ color:var(--text-dim);}
+  .dia-mio{ position:absolute; right:5px; bottom:5px; width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 0 2px rgba(73,233,255,.25);}
+  @media (min-width:720px){
+    .cal{ gap:7px;}
+    .dia{ min-height:104px; padding:7px 8px 6px;}
+    .dia-num{ font-size:18px;}
+    .dia-nombres{ display:flex;}
+  }
+
+  /* ---- Resumen ---- */
+  .progreso{ height:9px; background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:6px; overflow:hidden; margin:8px 0 6px;}
+  .progreso > div{ height:100%; background:var(--cyan); transition:width .3s;}
+  .progreso.cumplida > div{ background:var(--servicio);}
+  .mis-num{ font-family:'Rajdhani'; font-weight:800; font-size:30px; line-height:1;}
+  .mis-num small{ font-size:15px; color:var(--text-muted); font-weight:600;}
+  .nota{ font-size:11.5px; color:var(--text-muted); line-height:1.5;}
+  .lista-fechas{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;}
+  .fecha-chip{ font-family:'JetBrains Mono',monospace; font-size:10.5px; background:var(--panel-alt); border:1px solid var(--cyan-dim); color:var(--cyan); border-radius:5px; padding:3px 7px; cursor:pointer;}
+  .tabla-vol{ width:100%; border-collapse:collapse; font-size:12px;}
+  .tabla-vol th{ text-align:left; font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; padding:4px 6px; border-bottom:1px solid var(--line-strong);}
+  .tabla-vol td{ padding:6px 6px; border-bottom:1px solid var(--line);}
+  .tabla-vol .num{ font-family:'JetBrains Mono',monospace; text-align:center;}
+  .tag-ok{ color:var(--servicio); font-weight:700;} .tag-falta{ color:var(--emergencia); font-weight:700;}
+  .scroll-max{ max-height:240px; overflow-y:auto;}
+  .scroll-max::-webkit-scrollbar{ width:6px;} .scroll-max::-webkit-scrollbar-thumb{ background:var(--brass-dim); border-radius:4px;}
+  .sin-cob-item{ display:flex; justify-content:space-between; gap:8px; padding:7px 8px; border:1px solid rgba(255,75,92,.4); border-radius:7px; margin-bottom:5px; cursor:pointer; background:rgba(255,75,92,.07); font-size:12px;}
+  .sin-cob-item b{ font-family:'Rajdhani'; font-size:13px; letter-spacing:.03em; text-transform:uppercase;}
+  .sin-cob-item span{ color:var(--text-muted); font-size:11px; text-align:right;}
+
+  /* ---- Modal ---- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.78); z-index:60; display:none; align-items:center; justify-content:center; padding:18px;}
+  .modal-overlay.show{ display:flex;}
+  .modal-box{
+    background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px; padding:18px 18px 16px;
+    width:100%; max-width:440px; max-height:88vh; overflow-y:auto; position:relative;
+  }
+  .modal-box::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; opacity:.35; pointer-events:none;}
+  .modal-box > *{ position:relative; z-index:1;}
+  .modal-box::-webkit-scrollbar{ width:7px;} .modal-box::-webkit-scrollbar-thumb{ background:var(--brass-dim); border-radius:4px;}
+  @media (max-width:560px){ .modal-overlay{ align-items:flex-end; padding:0;} .modal-box{ border-radius:14px 14px 0 0; max-height:92vh;} }
+  .modal-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;}
+  .modal-head h3{ font-size:16px;}
+  .modal-sub{ font-size:11px; color:var(--text-dim); margin-top:3px;}
+  .modal-x{ background:none; border:none; color:var(--text-dim); font-size:17px; cursor:pointer; padding:2px; line-height:1;}
+  .modal-x:hover{ color:var(--text);}
+  .cob-line{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:9px 11px; border-radius:8px; border:1px solid var(--line-strong); background:var(--panel-alt); margin-bottom:12px; font-size:12px;}
+  .cob-line.roja{ border-color:rgba(255,75,92,.55);} .cob-line.amarilla{ border-color:rgba(255,201,77,.6);} .cob-line.verde{ border-color:rgba(60,242,154,.55);}
+  .cob-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .roja .cob-dot{ background:var(--emergencia);} .amarilla .cob-dot{ background:var(--alerta);} .verde .cob-dot{ background:var(--servicio);}
+  .cob-line b{ font-family:'Rajdhani'; font-size:14px; letter-spacing:.03em; text-transform:uppercase;}
+  .cob-line .falta{ color:var(--text-muted); font-size:11.5px; width:100%;}
+
+  .insc{ display:flex; align-items:center; gap:9px; padding:7px 0; border-bottom:1px solid var(--line);}
+  .insc:last-child{ border-bottom:none;}
+  .avatar{
+    width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#3A4750,#232D35); border:2px solid var(--line-strong);
+    background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani'; font-weight:700; font-size:12px; color:var(--text-muted); flex-shrink:0;
+  }
+  .insc .info{ flex:1; min-width:0;}
+  .insc .nom{ font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .insc .reg{ font-size:10px; color:var(--text-dim); font-family:'JetBrains Mono',monospace;}
+  .func{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:9px; display:inline-flex; align-items:center; gap:4px; border:1px solid var(--line-strong); color:var(--text-muted);}
+  .func.encargado{ color:var(--brass-bright); border-color:var(--brass-dim);}
+  .func.maquinista{ color:var(--cyan); border-color:var(--cyan-dim);}
+  .moon{ color:var(--text-dim); font-size:15px; background:none; border:none; padding:3px; cursor:default; display:flex;}
+  .moon.on{ color:var(--alerta);}
+  button.moon{ cursor:pointer;}
+  .mini-x{ background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:14px; padding:3px;}
+  .mini-x:hover{ color:var(--burdeo-bright);}
+  .vacio-msg{ text-align:center; padding:16px 10px; color:var(--text-dim); font-size:12px;}
+  .bloque{ margin-top:14px; padding-top:12px; border-top:1px solid var(--line-strong);}
+  .bloque label.t{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; font-weight:600;}
+  .fila{ display:flex; gap:7px; align-items:center; flex-wrap:wrap; margin-bottom:8px;}
+  select.sel, input.inp{
+    background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:7px; padding:9px 10px;
+    font-size:13px; color:var(--text); font-family:'Inter'; min-width:0;
+  }
+  select.sel:focus, input.inp:focus{ outline:none; border-color:var(--cyan);}
+  select.sel{ flex:1;}
+  .chk{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); cursor:pointer;}
+  .chk input{ accent-color:var(--cyan);}
+  .aviso{ font-size:11.5px; color:var(--text-muted); background:var(--panel-alt); border:1px dashed var(--line-strong); border-radius:7px; padding:9px 11px; line-height:1.5;}
+  .modal-actions{ display:flex; gap:10px; margin-top:14px;}
+  .modal-actions > *{ flex:1;}
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;}
+  .form-grid label{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px; font-weight:600;}
+  .form-grid input{ width:100%;}
+
+  .empty-state{ text-align:center; padding:40px 20px; color:var(--text-dim); font-size:12.5px; line-height:1.6;}
+  .toast{
+    position:fixed; bottom:84px; left:50%; transform:translateX(-50%) translateY(8px); max-width:90vw; text-align:center;
+    background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9;
+    padding:11px 18px; border-radius:8px; font-size:12.5px; opacity:0; pointer-events:none; transition:all .25s; z-index:80;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast.error{ border-color:var(--burdeo-bright);}
+
+  .tabbar-real{ display:flex; border-top:1px solid var(--line-strong); background:#0C1116; flex-shrink:0; padding-bottom:6px;}
+  .tabbar-real a{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 0 5px; color:var(--text-dim); text-decoration:none; font-size:9.5px; font-weight:600; letter-spacing:.01em;}
+  .tabbar-real a .ic{ line-height:1; display:flex;}
+  .tabbar-real a .ic svg{ width:22px; height:22px;}
+  .tabbar-real a.active{ color:var(--cyan);}
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#060A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</head>
+<body>
+
+  <div id="sinSesion" style="display:none; padding:40vh 16px 40px; color:var(--text-muted); text-align:center;">
+    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+  </div>
+
+  <div id="wrap">
+    <div class="app-head">
+      <button class="back-btn" onclick="volver()">← Volver</button>
+      <div class="titulo">
+        <div class="eyebrow" id="ciaLabel">—</div>
+        <h1>Guardia Nocturna</h1>
+      </div>
+      <button class="btn-icon" id="btnConfig" style="display:none;" onclick="abrirConfig()" title="Configurar horario, mínimos y cuota"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.8"/><path d="M19 12h2.3M16.95 16.95l1.63 1.63M12 19v2.3M7.05 16.95l-1.63 1.63M5 12H2.7M7.05 7.05 5.42 5.42M12 5V2.7M16.95 7.05l1.63-1.63"/></svg></button>
+    </div>
+
+    <div class="content">
+      <div class="layout">
+        <div class="panel">
+          <div class="mes-bar">
+            <div class="mes-nav">
+              <button class="btn-icon" onclick="cambiarMes(-1)" title="Mes anterior"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+              <select id="selMes" onchange="irAMes()"></select>
+              <select id="selAnio" onchange="irAMes()"></select>
+              <button class="btn-icon" onclick="cambiarMes(1)" title="Mes siguiente"><svg class="i" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+            </div>
+            <span class="chip abierto" id="chipMes">Abierto</span>
+            <span class="spacer"></span>
+            <select class="sel" id="selCompania" style="display:none; flex:0 1 190px;" onchange="cambiarCompania(this.value)"></select>
+            <button class="btn-sec" id="btnMesEstado" style="display:none;" onclick="toggleEstadoMes()"></button>
+          </div>
+          <div class="leyenda">
+            <span><i style="background:var(--emergencia)"></i>Incompleta</span>
+            <span><i style="background:var(--alerta)"></i>Mínimo justo</span>
+            <span><i style="background:var(--servicio)"></i>Cubierta</span>
+            <span><svg class="i" viewBox="0 0 24 24" style="color:var(--brass-bright)"><path d="M12 3.2l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.6l-5.3 2.8 1.1-5.9L3.5 9.4l5.9-.8L12 3.2z"/></svg>Encargado</span>
+            <span><svg class="i" viewBox="0 0 24 24" style="color:var(--brass-bright)"><path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/></svg>Maquinista</span>
+            <span><i style="background:var(--cyan); border-radius:50%"></i>Estoy anotado</span>
+          </div>
+          <div class="cal" id="calendario"></div>
+        </div>
+
+        <div id="columnaResumen" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="panel" id="panelMisNoches"></div>
+          <div class="panel" id="panelSinCobertura"></div>
+          <div class="panel" id="panelVoluntarios" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar-real" id="tabbarReal"></div>
+  </div>
+
+  <!-- Modal: detalle del día -->
+  <div class="modal-overlay" id="diaModal" onclick="if(event.target===this) cerrarDia()">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div><h3 id="diaTitulo">—</h3><div class="modal-sub" id="diaSub">—</div></div>
+        <button class="modal-x" onclick="cerrarDia()" title="Cerrar">✕</button>
+      </div>
+      <div id="diaCobertura"></div>
+      <div id="diaLista"></div>
+      <div id="diaAcciones"></div>
+    </div>
+  </div>
+
+  <!-- Modal: configuración -->
+  <div class="modal-overlay" id="configModal" onclick="if(event.target===this) cerrarConfig()">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div><h3>Configurar Guardia</h3><div class="modal-sub" id="configSub">—</div></div>
+        <button class="modal-x" onclick="cerrarConfig()" title="Cerrar">✕</button>
+      </div>
+      <div class="form-grid">
+        <div><label>Hora de inicio</label><input class="inp mono" type="time" id="cfgInicio"></div>
+        <div><label>Hora de término</label><input class="inp mono" type="time" id="cfgFin"></div>
+        <div><label>Mínimo de personas</label><input class="inp mono" type="number" min="1" id="cfgTotal"></div>
+        <div><label>Cuota mensual (noches)</label><input class="inp mono" type="number" min="0" id="cfgCuota"></div>
+        <div><label>Mínimo de encargados</label><input class="inp mono" type="number" min="0" id="cfgEnc"></div>
+        <div><label>Mínimo de maquinistas</label><input class="inp mono" type="number" min="0" id="cfgMaq"></div>
+      </div>
+      <div class="nota">El mínimo de personas incluye al encargado y al maquinista. No hay cupo máximo por noche.</div>
+      <div class="modal-actions">
+        <button class="btn-sec" onclick="cerrarConfig()">Cancelar</button>
+        <button class="btn-pri" id="btnGuardarConfig" onclick="guardarConfig()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+// ---- Constantes ----
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS_SEM = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const ROLES_INSTITUCIONALES = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General','Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
+const CARGOS_OFICIAL_CIA = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante de Compañía','Ayudante Cía.'];
+const CARGOS_ADMIN_CIA = ['Director','Capitán'];
+const CONFIG_DEF = { hora_inicio:'22:00', hora_fin:'05:00', minimo_total:7, minimo_encargado:1, minimo_maquinista:1, cuota_mensual:9 };
+const FUNC_LABEL = { encargado:'Encargado', maquinista:'Maquinista', bombero:'Bombero' };
+
+const IC = {
+  star: '<path d="M12 3.2l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.6l-5.3 2.8 1.1-5.9L3.5 9.4l5.9-.8L12 3.2z"/>',
+  truck: '<path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
+  unlock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 6.9-1.9"/>',
+};
+const ico = (k) => `<svg class="i" viewBox="0 0 24 24">${IC[k]}</svg>`;
+
+// ---- Estado ----
+let PERFIL = null, COMPANIAS = [], compId = null;
+let anio = new Date().getFullYear(), mes = new Date().getMonth() + 1;
+let CONFIG = { ...CONFIG_DEF }, MES_ESTADO = 'abierto', INSCS = [], PERSONAL = [];
+let diaSel = null, canal = null, enviando = false;
+
+// ---- Utilidades ----
+const pad = (n) => String(n).padStart(2, '0');
+const clave = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
+const hoyClave = () => { const t = new Date(); return clave(t.getFullYear(), t.getMonth() + 1, t.getDate()); };
+const diasEnMes = (y, m) => new Date(y, m, 0).getDate();
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function nombreCorto(n){ return (n || '').split(' ').filter(Boolean).slice(0, 2).join(' '); }
+function nombreCelda(n){ const p = (n || '').split(' ').filter(Boolean); return p.length > 1 ? `${p[0]} ${p[1][0]}.` : (p[0] || '—'); }
+function iniciales(n){ return (n || '').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase(); }
+function avatar(p){
+  const foto = p && p.foto_url ? ` style="background-image:url('${esc(p.foto_url)}')"` : '';
+  return `<div class="avatar"${foto}>${p && p.foto_url ? '' : esc(iniciales(p ? p.nombre_completo : ''))}</div>`;
+}
+function fechaLarga(k){
+  const [y, m, d] = k.split('-').map(Number);
+  const t = new Date(y, m - 1, d).toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' });
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+function fechaCorta(k){ const [y, m, d] = k.split('-').map(Number); return `${DIAS_SEM[(new Date(y, m - 1, d).getDay() + 6) % 7]} ${d}`; }
+
+const ERRORES = {
+  MES_CERRADO: 'El mes está cerrado — solo un oficial puede hacer cambios.',
+  FECHA_PASADA: 'Esa noche ya pasó, no se puede modificar.',
+  YA_INSCRITO: 'Ya estás anotado esa noche.',
+  SOLO_TU_COMPANIA: 'Solo podés anotarte en la guardia de tu propia Compañía.',
+  FUNCION_INVALIDA: 'Función no válida — el Encargado lo asigna un oficial.',
+  SIN_PERMISO: 'No tenés permiso para hacer esto.',
+  SIN_SESION: 'Tu sesión expiró — volvé a iniciar sesión.',
+  VOLUNTARIO_NO_ES_DE_LA_COMPANIA: 'Ese voluntario no pertenece a esta Compañía.',
+};
+function msgError(e){
+  const m = (e && e.message) || '';
+  const k = Object.keys(ERRORES).find(x => m.includes(x));
+  return k ? ERRORES[k] : 'No se pudo completar — ' + m;
+}
+
+// ---- Permisos (solo para mostrar/ocultar; la base de datos los exige igual) ----
+const esInstitucional = () => ROLES_INSTITUCIONALES.includes(PERFIL.cargo);
+const esMiCompania = () => compId === PERFIL.compania_id;
+const puedeInscribir = () => esInstitucional() || (CARGOS_OFICIAL_CIA.includes(PERFIL.cargo) && esMiCompania());
+const puedeAdministrar = () => esInstitucional() || (CARGOS_ADMIN_CIA.includes(PERFIL.cargo) && esMiCompania());
+const mesAbierto = () => MES_ESTADO === 'abierto';
+
+// ---- Carga ----
+async function iniciar(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ document.getElementById('sinSesion').style.display = 'block'; return; }
+  const { data: perfil } = await sb.from('personal')
+    .select('id, nombre_completo, cargo, compania_id, cuerpo_id')
+    .eq('auth_user_id', session.user.id).maybeSingle();
+  if(!perfil){
+    document.getElementById('sinSesion').style.display = 'block';
+    document.getElementById('sinSesion').textContent = 'Esta sesión no tiene acceso a la Guardia Nocturna.';
+    return;
+  }
+  PERFIL = perfil;
+  const { data: cias } = await sb.from('companias').select('id, nombre, numero').eq('cuerpo_id', perfil.cuerpo_id).order('numero');
+  COMPANIAS = cias || [];
+  if(esInstitucional()){
+    compId = (COMPANIAS.find(c => c.id === perfil.compania_id) || COMPANIAS[0] || {}).id || null;
+  } else {
+    compId = perfil.compania_id;
+  }
+  if(!compId){
+    document.getElementById('sinSesion').style.display = 'block';
+    document.getElementById('sinSesion').textContent = 'No pertenecés a ninguna Compañía.';
+    return;
+  }
+  document.getElementById('wrap').style.display = 'flex';
+  armarSelectores();
+  await cargarCompania();
+}
+
+function armarSelectores(){
+  document.getElementById('selMes').innerHTML = MESES.map((n, i) => `<option value="${i + 1}">${n}</option>`).join('');
+  const a0 = new Date().getFullYear();
+  document.getElementById('selAnio').innerHTML = [a0 - 1, a0, a0 + 1, a0 + 2].map(y => `<option value="${y}">${y}</option>`).join('');
+  const sc = document.getElementById('selCompania');
+  if(esInstitucional() && COMPANIAS.length > 1){
+    sc.style.display = '';
+    sc.innerHTML = COMPANIAS.map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
+  }
+}
+
+async function cargarCompania(){
+  const { data: pers } = await sb.from('personal')
+    .select('id, nombre_completo, numero_registro, cargo, foto_url')
+    .eq('compania_id', compId).neq('estado', 'dado_de_baja').order('nombre_completo');
+  PERSONAL = pers || [];
+  await cargarMes();
+  renderTodo();
+  suscribir();
+}
+
+async function cargarMes(){
+  const ini = clave(anio, mes, 1), fin = clave(anio, mes, diasEnMes(anio, mes));
+  const [cfg, mrow, insc] = await Promise.all([
+    sb.from('guardia_config').select('*').eq('compania_id', compId).maybeSingle(),
+    sb.from('guardia_mes').select('estado').eq('compania_id', compId).eq('anio', anio).eq('mes', mes).maybeSingle(),
+    sb.from('guardia_inscripcion')
+      .select('id, fecha, voluntario_id, funcion, pernocta, voluntario:personal!guardia_inscripcion_voluntario_id_fkey(nombre_completo, numero_registro, foto_url)')
+      .eq('compania_id', compId).gte('fecha', ini).lte('fecha', fin).order('created_at'),
+  ]);
+  CONFIG = { ...CONFIG_DEF, ...(cfg.data || {}) };
+  MES_ESTADO = (mrow.data && mrow.data.estado) || 'abierto';
+  INSCS = insc.data || [];
+}
+
+function suscribir(){
+  if(canal){ sb.removeChannel(canal); canal = null; }
+  let t = null;
+  const recargar = () => { clearTimeout(t); t = setTimeout(async () => { await cargarMes(); renderTodo(); if(diaSel) renderDiaLista(); }, 350); };
+  canal = sb.channel('guardia-' + compId)
+    .on('postgres_changes', { event:'*', schema:'public', table:'guardia_inscripcion', filter:`compania_id=eq.${compId}` }, recargar)
+    .on('postgres_changes', { event:'*', schema:'public', table:'guardia_mes', filter:`compania_id=eq.${compId}` }, recargar)
+    .subscribe();
+}
+
+// ---- Cobertura ----
+function inscritosDe(k){ return INSCS.filter(i => i.fecha === k); }
+function cobertura(lista){
+  const total = lista.length;
+  const enc = lista.filter(i => i.funcion === 'encargado').length;
+  const maq = lista.filter(i => i.funcion === 'maquinista').length;
+  const faltas = [];
+  if(total < CONFIG.minimo_total) faltas.push(`Faltan ${CONFIG.minimo_total - total} persona${CONFIG.minimo_total - total === 1 ? '' : 's'}`);
+  if(enc < CONFIG.minimo_encargado) faltas.push('Falta encargado');
+  if(maq < CONFIG.minimo_maquinista) faltas.push('Falta maquinista');
+  const nivel = faltas.length ? 'roja' : (total === CONFIG.minimo_total ? 'amarilla' : 'verde');
+  return { total, enc, maq, faltas, nivel };
+}
+const NIVEL_TXT = { roja:'Incompleta', amarilla:'Mínimo justo', verde:'Cubierta' };
+
+// ---- Render principal ----
+function renderTodo(){
+  const cia = COMPANIAS.find(c => c.id === compId);
+  document.getElementById('ciaLabel').textContent = (cia ? cia.nombre : '—') + ' · ' + CONFIG.hora_inicio.slice(0, 5) + ' a ' + CONFIG.hora_fin.slice(0, 5);
+  document.getElementById('selMes').value = mes;
+  document.getElementById('selAnio').value = anio;
+  const sc = document.getElementById('selCompania'); if(sc.style.display !== 'none') sc.value = compId;
+  const chip = document.getElementById('chipMes');
+  chip.className = 'chip ' + MES_ESTADO;
+  chip.innerHTML = (mesAbierto() ? ico('unlock') : ico('lock')) + (mesAbierto() ? 'Abierto' : 'Cerrado');
+  const bm = document.getElementById('btnMesEstado');
+  bm.style.display = puedeAdministrar() ? '' : 'none';
+  bm.innerHTML = (mesAbierto() ? ico('lock') + 'Cerrar mes' : ico('unlock') + 'Reabrir mes');
+  document.getElementById('btnConfig').style.display = puedeAdministrar() ? '' : 'none';
+  renderCalendario();
+  renderMisNoches();
+  renderSinCobertura();
+  renderVoluntarios();
+}
+
+function renderCalendario(){
+  const hoy = hoyClave();
+  const n = diasEnMes(anio, mes);
+  const offset = (new Date(anio, mes - 1, 1).getDay() + 6) % 7;
+  let h = DIAS_SEM.map(d => `<div class="cal-head">${d}</div>`).join('');
+  for(let i = 0; i < offset; i++) h += '<div class="dia vacio"></div>';
+  for(let d = 1; d <= n; d++){
+    const k = clave(anio, mes, d);
+    const lista = inscritosDe(k);
+    const cob = cobertura(lista);
+    const mio = lista.some(i => i.voluntario_id === PERFIL.id);
+    const nombres = lista.slice(0, 4).map(i => `<span>${esc(nombreCelda(i.voluntario && i.voluntario.nombre_completo))}</span>`).join('')
+      + (lista.length > 4 ? `<span class="mas">+${lista.length - 4} más</span>` : '');
+    h += `<button class="dia ${cob.nivel} ${k < hoy ? 'pasado' : ''} ${k === hoy ? 'hoy' : ''}" onclick="abrirDia('${k}')">
+      <div class="dia-top"><span class="dia-num">${d}</span><span class="dia-count">${cob.total}</span></div>
+      <div class="dia-iconos">
+        <span class="${cob.enc >= CONFIG.minimo_encargado && cob.enc > 0 ? 'ok' : ''}" title="Encargado">${cob.enc ? ico('star') : ''}</span>
+        <span class="${cob.maq >= CONFIG.minimo_maquinista && cob.maq > 0 ? 'ok' : ''}" title="Maquinista">${cob.maq ? ico('truck') : ''}</span>
+      </div>
+      <div class="dia-nombres">${nombres}</div>
+      ${mio ? '<span class="dia-mio" title="Estás anotado"></span>' : ''}
+    </button>`;
+  }
+  document.getElementById('calendario').innerHTML = h;
+}
+
+function renderMisNoches(){
+  const p = document.getElementById('panelMisNoches');
+  const mis = INSCS.filter(i => i.voluntario_id === PERFIL.id).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  if(!esMiCompania()){
+    p.innerHTML = `<h3>Mis noches</h3><div class="nota">Estás viendo la guardia de otra Compañía.</div>`;
+    return;
+  }
+  const cuota = CONFIG.cuota_mensual;
+  const pct = cuota > 0 ? Math.min(100, Math.round(mis.length / cuota * 100)) : 100;
+  const cumple = mis.length >= cuota;
+  p.innerHTML = `<h3>Mis noches · ${MESES[mes - 1]}</h3>
+    <div class="mis-num">${mis.length}<small> / ${cuota}</small></div>
+    <div class="progreso ${cumple ? 'cumplida' : ''}"><div style="width:${pct}%"></div></div>
+    <div class="nota">${cumple ? 'Cuota del mes cumplida.' : `Te faltan ${cuota - mis.length} noche${cuota - mis.length === 1 ? '' : 's'} para la cuota.`}</div>
+    ${mis.length ? `<div class="lista-fechas">${mis.map(i => `<span class="fecha-chip" onclick="abrirDia('${i.fecha}')">${fechaCorta(i.fecha)}</span>`).join('')}</div>` : ''}`;
+}
+
+function renderSinCobertura(){
+  const p = document.getElementById('panelSinCobertura');
+  const hoy = hoyClave(), n = diasEnMes(anio, mes);
+  const items = [];
+  for(let d = 1; d <= n; d++){
+    const k = clave(anio, mes, d);
+    if(k < hoy) continue;
+    const cob = cobertura(inscritosDe(k));
+    if(cob.nivel === 'roja') items.push({ k, cob });
+  }
+  p.innerHTML = `<h3>Noches sin cobertura</h3>` + (items.length
+    ? `<div class="scroll-max">${items.map(x => `<div class="sin-cob-item" onclick="abrirDia('${x.k}')"><b>${fechaCorta(x.k)}</b><span>${x.cob.faltas.join(' · ')}</span></div>`).join('')}</div>`
+    : `<div class="nota"><span class="tag-ok">Todo cubierto.</span> Ninguna noche pendiente de este mes tiene faltantes.</div>`);
+}
+
+function renderVoluntarios(){
+  const p = document.getElementById('panelVoluntarios');
+  if(!puedeInscribir()){ p.style.display = 'none'; return; }
+  p.style.display = '';
+  const cuota = CONFIG.cuota_mensual;
+  const filas = PERSONAL.map(v => ({ v, n: INSCS.filter(i => i.voluntario_id === v.id).length })).sort((a, b) => a.n - b.n || a.v.nombre_completo.localeCompare(b.v.nombre_completo));
+  p.innerHTML = `<h3>Cumplimiento del mes</h3>
+    <div class="scroll-max"><table class="tabla-vol"><thead><tr><th>Voluntario</th><th style="text-align:center">Noches</th><th>Cuota</th></tr></thead><tbody>
+    ${filas.map(({ v, n }) => `<tr><td>${esc(nombreCorto(v.nombre_completo))}</td><td class="num">${n}</td><td>${n >= cuota ? '<span class="tag-ok">Cumple</span>' : `<span class="tag-falta">Faltan ${cuota - n}</span>`}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="nota" style="margin-top:8px;">Noches cumplidas, faltas y permutas se suman cuando esté listo el Libro de Guardia.</div>`;
+}
+
+// ---- Navegación de mes / compañía ----
+function cambiarMes(delta){
+  mes += delta;
+  if(mes < 1){ mes = 12; anio--; } else if(mes > 12){ mes = 1; anio++; }
+  recargarMes();
+}
+function irAMes(){
+  mes = Number(document.getElementById('selMes').value);
+  anio = Number(document.getElementById('selAnio').value);
+  recargarMes();
+}
+async function recargarMes(){
+  const sel = document.getElementById('selAnio');
+  if(![...sel.options].some(o => Number(o.value) === anio)) sel.insertAdjacentHTML('beforeend', `<option value="${anio}">${anio}</option>`);
+  await cargarMes();
+  renderTodo();
+  suscribir();
+}
+async function cambiarCompania(id){
+  compId = id;
+  await cargarCompania();
+}
+
+// ---- Día ----
+function abrirDia(k){
+  diaSel = k;
+  document.getElementById('diaTitulo').textContent = fechaLarga(k);
+  document.getElementById('diaSub').textContent = `Guardia ${CONFIG.hora_inicio.slice(0, 5)} a ${CONFIG.hora_fin.slice(0, 5)}`;
+  renderDiaLista();
+  renderDiaAcciones();
+  document.getElementById('diaModal').classList.add('show');
+}
+function cerrarDia(){
+  diaSel = null;
+  document.getElementById('diaModal').classList.remove('show');
+}
+
+function renderDiaLista(){
+  if(!diaSel) return;
+  const lista = inscritosDe(diaSel);
+  const cob = cobertura(lista);
+  const oficial = puedeInscribir();
+  document.getElementById('diaCobertura').innerHTML = `<div class="cob-line ${cob.nivel}">
+    <span class="cob-dot"></span><b>${cob.total} anotado${cob.total === 1 ? '' : 's'}</b><span style="color:var(--text-muted)">· ${NIVEL_TXT[cob.nivel]} (mínimo ${CONFIG.minimo_total})</span>
+    ${cob.faltas.length ? `<span class="falta">${cob.faltas.join(' · ')}</span>` : ''}
+  </div>`;
+  const orden = { encargado:0, maquinista:1, bombero:2 };
+  const ord = [...lista].sort((a, b) => orden[a.funcion] - orden[b.funcion]);
+  document.getElementById('diaLista').innerHTML = ord.length ? ord.map(i => {
+    const v = i.voluntario || {};
+    const funcHtml = oficial
+      ? `<select class="sel" style="flex:0 0 112px; padding:5px 7px; font-size:11.5px;" onchange="cambiarFuncion('${i.id}', this.value)">${Object.keys(FUNC_LABEL).map(f => `<option value="${f}" ${i.funcion === f ? 'selected' : ''}>${FUNC_LABEL[f]}</option>`).join('')}</select>`
+      : `<span class="func ${i.funcion}">${i.funcion === 'encargado' ? ico('star') : i.funcion === 'maquinista' ? ico('truck') : ''}${FUNC_LABEL[i.funcion]}</span>`;
+    const puedePern = oficial || (i.voluntario_id === PERFIL.id && mesAbierto());
+    const luna = puedePern
+      ? `<button class="moon ${i.pernocta ? 'on' : ''}" title="${i.pernocta ? 'Pernocta' : 'No pernocta'}" onclick="togglePernocta('${i.id}', ${!i.pernocta})">${ico('moon')}</button>`
+      : `<span class="moon ${i.pernocta ? 'on' : ''}" title="${i.pernocta ? 'Pernocta' : ''}">${i.pernocta ? ico('moon') : ''}</span>`;
+    return `<div class="insc">${avatar({ nombre_completo: v.nombre_completo, foto_url: v.foto_url })}
+      <div class="info"><div class="nom">${esc(nombreCorto(v.nombre_completo))}${i.voluntario_id === PERFIL.id ? ' <span style="color:var(--cyan); font-size:10px;">(vos)</span>' : ''}</div><div class="reg">N° ${esc(v.numero_registro)}</div></div>
+      ${funcHtml}${luna}
+      ${oficial ? `<button class="mini-x" title="Quitar de la guardia" onclick="quitarInscripcion('${i.id}')">✕</button>` : ''}
+    </div>`;
+  }).join('') : `<div class="vacio-msg">Nadie anotado esta noche todavía.</div>`;
+}
+
+function renderDiaAcciones(){
+  if(!diaSel) return;
+  const k = diaSel, hoy = hoyClave();
+  const mia = inscritosDe(k).find(i => i.voluntario_id === PERFIL.id);
+  const pasada = k < hoy;
+  let h = '';
+  if(esMiCompania()){
+    if(mia){
+      if(!pasada && mesAbierto()){
+        h += `<div class="bloque"><button class="btn-peligro" style="width:100%" id="btnQuitarme" onclick="quitarme()">Quitarme de esta noche</button></div>`;
+      } else {
+        h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: solo un oficial puede cambiar tu inscripción.'}</div></div>`;
+      }
+    } else if(!pasada && mesAbierto()){
+      h += `<div class="bloque"><label class="t">Anotarme esta noche</label>
+        <div class="fila"><select class="sel" id="miFuncion"><option value="bombero">Como bombero</option><option value="maquinista">Como maquinista</option></select>
+        <label class="chk"><input type="checkbox" id="miPernocta"> Pernocto</label></div>
+        <button class="btn-pri" style="width:100%" id="btnAnotarme" onclick="anotarme()">Anotarme</button></div>`;
+    } else {
+      h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: pedile a un oficial que te anote.'}</div></div>`;
+    }
+  }
+  if(puedeInscribir()){
+    const yaIds = new Set(inscritosDe(k).map(i => i.voluntario_id));
+    const disp = PERSONAL.filter(v => !yaIds.has(v.id));
+    h += `<div class="bloque"><label class="t">Agregar voluntario (oficial)</label>
+      ${disp.length ? `<div class="fila"><select class="sel" id="addVol">${disp.map(v => `<option value="${v.id}">${esc(nombreCorto(v.nombre_completo))} (N° ${esc(v.numero_registro)})</option>`).join('')}</select>
+      <select class="sel" id="addFunc" style="flex:0 0 118px;">${Object.keys(FUNC_LABEL).map(f => `<option value="${f}" ${f === 'bombero' ? 'selected' : ''}>${FUNC_LABEL[f]}</option>`).join('')}</select></div>
+      <button class="btn-sec" style="width:100%; justify-content:center;" id="btnAgregar" onclick="agregarVoluntario()">Agregar a la guardia</button>`
+      : `<div class="aviso">Todos los voluntarios de la Compañía ya están anotados.</div>`}</div>`;
+  }
+  document.getElementById('diaAcciones').innerHTML = h;
+}
+
+// ---- Acciones (todas pasan por RPC; la base valida las reglas) ----
+async function ejecutar(boton, fn, okMsg, cerrar){
+  if(enviando) return;
+  enviando = true;
+  const txt = boton ? boton.textContent : '';
+  if(boton){ boton.disabled = true; boton.textContent = 'Guardando…'; }
+  const { error } = await fn();
+  enviando = false;
+  if(error){
+    if(boton){ boton.disabled = false; boton.textContent = txt; }
+    toast(msgError(error), true);
+    return false;
+  }
+  if(boton){ boton.disabled = false; boton.textContent = txt; }
+  await cargarMes();
+  renderTodo();
+  if(cerrar) cerrarDia();
+  else if(diaSel){ renderDiaLista(); renderDiaAcciones(); }
+  if(okMsg) toast(okMsg);
+  return true;
+}
+function anotarme(){
+  const f = document.getElementById('miFuncion').value, p = document.getElementById('miPernocta').checked;
+  ejecutar(document.getElementById('btnAnotarme'), () => sb.rpc('guardia_anotarme', { p_compania_id: compId, p_fecha: diaSel, p_funcion: f, p_pernocta: p }), 'Quedaste anotado para ' + fechaCorta(diaSel), true);
+}
+function quitarme(){
+  ejecutar(document.getElementById('btnQuitarme'), () => sb.rpc('guardia_quitarme', { p_compania_id: compId, p_fecha: diaSel }), 'Te quitaste de ' + fechaCorta(diaSel), true);
+}
+function agregarVoluntario(){
+  const v = document.getElementById('addVol').value, f = document.getElementById('addFunc').value;
+  ejecutar(document.getElementById('btnAgregar'), () => sb.rpc('guardia_inscribir', { p_compania_id: compId, p_fecha: diaSel, p_voluntario_id: v, p_funcion: f, p_pernocta: false }), 'Voluntario agregado a la guardia', false);
+}
+function cambiarFuncion(id, f){ ejecutar(null, () => sb.rpc('guardia_actualizar', { p_inscripcion_id: id, p_funcion: f }), 'Función actualizada', false); }
+function togglePernocta(id, v){ ejecutar(null, () => sb.rpc('guardia_actualizar', { p_inscripcion_id: id, p_pernocta: v }), null, false); }
+function quitarInscripcion(id){
+  if(!confirm('¿Quitar a esta persona de la guardia de esta noche?')) return;
+  ejecutar(null, () => sb.rpc('guardia_quitar_inscripcion', { p_inscripcion_id: id }), 'Quitado de la guardia', false);
+}
+
+// ---- Mes y configuración ----
+async function toggleEstadoMes(){
+  const nuevo = mesAbierto() ? 'cerrado' : 'abierto';
+  const txt = nuevo === 'cerrado'
+    ? `¿Cerrar ${MESES[mes - 1]} ${anio}? Después del cierre los voluntarios ya no podrán anotarse ni quitarse — solo un oficial.`
+    : `¿Reabrir ${MESES[mes - 1]} ${anio} para que los voluntarios vuelvan a anotarse?`;
+  if(!confirm(txt)) return;
+  await ejecutar(document.getElementById('btnMesEstado'), () => sb.rpc('guardia_set_mes_estado', { p_compania_id: compId, p_anio: anio, p_mes: mes, p_estado: nuevo }), nuevo === 'cerrado' ? 'Mes cerrado' : 'Mes reabierto', false);
+}
+function abrirConfig(){
+  const cia = COMPANIAS.find(c => c.id === compId);
+  document.getElementById('configSub').textContent = cia ? cia.nombre : '';
+  document.getElementById('cfgInicio').value = CONFIG.hora_inicio.slice(0, 5);
+  document.getElementById('cfgFin').value = CONFIG.hora_fin.slice(0, 5);
+  document.getElementById('cfgTotal').value = CONFIG.minimo_total;
+  document.getElementById('cfgCuota').value = CONFIG.cuota_mensual;
+  document.getElementById('cfgEnc').value = CONFIG.minimo_encargado;
+  document.getElementById('cfgMaq').value = CONFIG.minimo_maquinista;
+  document.getElementById('configModal').classList.add('show');
+}
+function cerrarConfig(){ document.getElementById('configModal').classList.remove('show'); }
+async function guardarConfig(){
+  const v = (id) => document.getElementById(id).value;
+  const total = parseInt(v('cfgTotal'), 10), enc = parseInt(v('cfgEnc'), 10), maq = parseInt(v('cfgMaq'), 10), cuota = parseInt(v('cfgCuota'), 10);
+  if(!v('cfgInicio') || !v('cfgFin') || [total, enc, maq, cuota].some(isNaN) || total < 1){ toast('Completá todos los campos (el mínimo de personas debe ser al menos 1).', true); return; }
+  const ok = await ejecutar(document.getElementById('btnGuardarConfig'),
+    () => sb.rpc('guardia_guardar_config', { p_compania_id: compId, p_hora_inicio: v('cfgInicio'), p_hora_fin: v('cfgFin'), p_minimo_total: total, p_minimo_encargado: enc, p_minimo_maquinista: maq, p_cuota: cuota }),
+    'Configuración guardada', false);
+  if(ok) cerrarConfig();
+}
+
+function volver(){
+  if(window.history.length > 1){ history.back(); return; }
+  window.location.href = 'opciones_celular.html';
+}
+function toast(msg, error){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.toggle('error', !!error); t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+const ICONOS_TAB = {
+  inicio: '<path d="M4 12 12 5l8 7"/><path d="M6.5 10.5V19a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-8.5"/><path d="M10 20v-5h4v5"/>',
+  compania: '<path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/>',
+  pizarra: '<rect x="4" y="5" width="16" height="14" rx="1.6"/><path d="M7.7 10h7M7.7 13.6h4.6"/><circle cx="16.3" cy="8.3" r="1.3"/>',
+  actividades: '<rect x="4" y="5.5" width="16" height="14" rx="1.6"/><path d="M4 9.5h16"/><path d="M8 3.5v3M16 3.5v3"/><path d="M8.5 13.5l2 2 4-4.2"/>',
+  gps: '<path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/>',
+  opciones: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.8"/><g stroke-width="2.3"><path d="M19 12h2.3M16.95 16.95l1.63 1.63M12 19v2.3M7.05 16.95l-1.63 1.63M5 12H2.7M7.05 7.05 5.42 5.42M12 5V2.7M16.95 7.05l1.63-1.63"/></g>',
+};
+const TABS_NAV = [
+  {href:'inicio_celular.html', ic:'inicio', label:'Inicio'},
+  {href:'compania_celular.html', ic:'compania', label:'Compañía'},
+  {href:'pizarra_celular.html', ic:'pizarra', label:'Pizarra'},
+  {href:'actividades_celular.html', ic:'actividades', label:'Activid.'},
+  {href:'coordenadas_celular.html', ic:'gps', label:'GPS'},
+  {href:'opciones_celular.html', ic:'opciones', label:'Opciones'},
+];
+document.getElementById('tabbarReal').innerHTML = TABS_NAV.map(t =>
+  `<a href="${t.href}" class="${t.href==='opciones_celular.html'?'active':''}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONOS_TAB[t.ic]}</svg></span><span>${t.label}</span></a>`
+).join('');
+
+iniciar();
+</script>
+</body>
+</html>
