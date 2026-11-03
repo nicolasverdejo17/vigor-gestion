@@ -112,6 +112,11 @@
   .dia.verde{ border-color:rgba(60,242,154,.55); background:linear-gradient(180deg, rgba(60,242,154,.13), var(--panel-alt) 70%);}
   .dia.pasado{ opacity:.55;}
   .dia.hoy{ box-shadow:0 0 0 2px var(--brass-bright);}
+  /* Vista de bombero: sin colores de cobertura ni contadores (eso es solo para oficiales) */
+  .dia.neutro{ min-height:50px;}
+  .dia.neutro.mio{ border-color:var(--cyan); background:linear-gradient(180deg, rgba(73,233,255,.14), var(--panel-alt) 75%);}
+  .dia-check{ color:var(--cyan); font-size:15px; display:flex;}
+  body.es-bombero .solo-oficial{ display:none !important;}
   .dia-top{ display:flex; align-items:center; justify-content:space-between; gap:4px;}
   .dia-num{ font-family:'Rajdhani'; font-weight:800; font-size:15px; line-height:1;}
   .dia-count{
@@ -186,7 +191,6 @@
   .insc .nom{ font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .insc .reg{ font-size:10px; color:var(--text-dim); font-family:'JetBrains Mono',monospace;}
   .func{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:9px; display:inline-flex; align-items:center; gap:4px; border:1px solid var(--line-strong); color:var(--text-muted);}
-  .func.encargado{ color:var(--brass-bright); border-color:var(--brass-dim);}
   .func.maquinista{ color:var(--cyan); border-color:var(--cyan-dim);}
   .moon{ color:var(--text-dim); font-size:15px; background:none; border:none; padding:3px; cursor:default; display:flex;}
   .moon.on{ color:var(--alerta);}
@@ -266,15 +270,13 @@
             </div>
             <span class="chip abierto" id="chipMes">Abierto</span>
             <span class="spacer"></span>
-            <select class="sel" id="selCompania" style="display:none; flex:0 1 190px;" onchange="cambiarCompania(this.value)"></select>
             <button class="btn-sec" id="btnMesEstado" style="display:none;" onclick="toggleEstadoMes()"></button>
           </div>
           <div class="leyenda">
-            <span><i style="background:var(--emergencia)"></i>Incompleta</span>
-            <span><i style="background:var(--alerta)"></i>Mínimo justo</span>
-            <span><i style="background:var(--servicio)"></i>Cubierta</span>
-            <span><svg class="i" viewBox="0 0 24 24" style="color:var(--brass-bright)"><path d="M12 3.2l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.6l-5.3 2.8 1.1-5.9L3.5 9.4l5.9-.8L12 3.2z"/></svg>Encargado</span>
-            <span><svg class="i" viewBox="0 0 24 24" style="color:var(--brass-bright)"><path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/></svg>Maquinista</span>
+            <span class="solo-oficial"><i style="background:var(--emergencia)"></i>Incompleta</span>
+            <span class="solo-oficial"><i style="background:var(--alerta)"></i>Mínimo justo</span>
+            <span class="solo-oficial"><i style="background:var(--servicio)"></i>Cubierta</span>
+            <span class="solo-oficial"><svg class="i" viewBox="0 0 24 24" style="color:var(--brass-bright)"><path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/></svg>Hay maquinista</span>
             <span><i style="background:var(--cyan); border-radius:50%"></i>Estoy anotado</span>
           </div>
           <div class="cal" id="calendario"></div>
@@ -314,11 +316,10 @@
         <div><label>Hora de inicio</label><input class="inp mono" type="time" id="cfgInicio"></div>
         <div><label>Hora de término</label><input class="inp mono" type="time" id="cfgFin"></div>
         <div><label>Mínimo de personas</label><input class="inp mono" type="number" min="1" id="cfgTotal"></div>
-        <div><label>Cuota mensual (noches)</label><input class="inp mono" type="number" min="0" id="cfgCuota"></div>
-        <div><label>Mínimo de encargados</label><input class="inp mono" type="number" min="0" id="cfgEnc"></div>
         <div><label>Mínimo de maquinistas</label><input class="inp mono" type="number" min="0" id="cfgMaq"></div>
+        <div><label>Cuota mensual (noches)</label><input class="inp mono" type="number" min="0" id="cfgCuota"></div>
       </div>
-      <div class="nota">El mínimo de personas incluye al encargado y al maquinista. No hay cupo máximo por noche.</div>
+      <div class="nota">El mínimo de personas incluye a los maquinistas. No hay cupo máximo por noche.</div>
       <div class="modal-actions">
         <button class="btn-sec" onclick="cerrarConfig()">Cancelar</button>
         <button class="btn-pri" id="btnGuardarConfig" onclick="guardarConfig()">Guardar</button>
@@ -337,14 +338,15 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 // ---- Constantes ----
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIAS_SEM = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-const ROLES_INSTITUCIONALES = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General','Comandante','Segundo Comandante','Tercer Comandante','Cuarto Comandante'];
-const CARGOS_OFICIAL_CIA = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante de Compañía','Ayudante Cía.'];
-const CARGOS_ADMIN_CIA = ['Director','Capitán'];
-const CONFIG_DEF = { hora_inicio:'22:00', hora_fin:'05:00', minimo_total:7, minimo_encargado:1, minimo_maquinista:1, cuota_mensual:9 };
-const FUNC_LABEL = { encargado:'Encargado', maquinista:'Maquinista', bombero:'Bombero' };
+// Ver todo y gestionar las inscripciones: Capitán, Tenientes y Ayudante de Compañía (nadie más).
+// Cerrar/reabrir el mes y configurar: solo Capitán y Tenientes. (La base de datos lo exige igual.)
+const CARGOS_OFICIAL_CIA = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante de Compañía','Ayudante Cía.'];
+const CARGOS_ADMIN_CIA = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°'];
+const CONFIG_DEF = { hora_inicio:'22:00', hora_fin:'05:00', minimo_total:7, minimo_maquinista:1, cuota_mensual:9 };
+const FUNC_LABEL = { maquinista:'Maquinista', bombero:'Bombero' };
 
 const IC = {
-  star: '<path d="M12 3.2l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.6l-5.3 2.8 1.1-5.9L3.5 9.4l5.9-.8L12 3.2z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   truck: '<path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/>',
   moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
@@ -353,7 +355,7 @@ const IC = {
 const ico = (k) => `<svg class="i" viewBox="0 0 24 24">${IC[k]}</svg>`;
 
 // ---- Estado ----
-let PERFIL = null, COMPANIAS = [], compId = null;
+let PERFIL = null, COMPANIAS = [], compId = null, MI_ES_MAQ = false;
 let anio = new Date().getFullYear(), mes = new Date().getMonth() + 1;
 let CONFIG = { ...CONFIG_DEF }, MES_ESTADO = 'abierto', INSCS = [], PERSONAL = [];
 let diaSel = null, canal = null, enviando = false;
@@ -383,7 +385,8 @@ const ERRORES = {
   FECHA_PASADA: 'Esa noche ya pasó, no se puede modificar.',
   YA_INSCRITO: 'Ya estás anotado esa noche.',
   SOLO_TU_COMPANIA: 'Solo podés anotarte en la guardia de tu propia Compañía.',
-  FUNCION_INVALIDA: 'Función no válida — el Encargado lo asigna un oficial.',
+  FUNCION_INVALIDA: 'Función no válida.',
+  NO_ES_MAQUINISTA: 'Solo quien tiene asignado el rol de Maquinista puede anotarse como maquinista.',
   SIN_PERMISO: 'No tenés permiso para hacer esto.',
   SIN_SESION: 'Tu sesión expiró — volvé a iniciar sesión.',
   VOLUNTARIO_NO_ES_DE_LA_COMPANIA: 'Ese voluntario no pertenece a esta Compañía.',
@@ -395,11 +398,10 @@ function msgError(e){
 }
 
 // ---- Permisos (solo para mostrar/ocultar; la base de datos los exige igual) ----
-const esInstitucional = () => ROLES_INSTITUCIONALES.includes(PERFIL.cargo);
-const esMiCompania = () => compId === PERFIL.compania_id;
-const puedeInscribir = () => esInstitucional() || (CARGOS_OFICIAL_CIA.includes(PERFIL.cargo) && esMiCompania());
-const puedeAdministrar = () => esInstitucional() || (CARGOS_ADMIN_CIA.includes(PERFIL.cargo) && esMiCompania());
+const puedeInscribir = () => CARGOS_OFICIAL_CIA.includes(PERFIL.cargo);
+const puedeAdministrar = () => CARGOS_ADMIN_CIA.includes(PERFIL.cargo);
 const mesAbierto = () => MES_ESTADO === 'abierto';
+const esMaquinistaDe = (p) => !!p && (p.cargo === 'Maquinista' || (p.personal_especialidades || []).some(x => x.especialidades && x.especialidades.codigo === 'M'));
 
 // ---- Carga ----
 async function iniciar(){
@@ -414,18 +416,20 @@ async function iniciar(){
     return;
   }
   PERFIL = perfil;
-  const { data: cias } = await sb.from('companias').select('id, nombre, numero').eq('cuerpo_id', perfil.cuerpo_id).order('numero');
-  COMPANIAS = cias || [];
-  if(esInstitucional()){
-    compId = (COMPANIAS.find(c => c.id === perfil.compania_id) || COMPANIAS[0] || {}).id || null;
-  } else {
-    compId = perfil.compania_id;
-  }
+  compId = perfil.compania_id;
   if(!compId){
     document.getElementById('sinSesion').style.display = 'block';
     document.getElementById('sinSesion').textContent = 'No pertenecés a ninguna Compañía.';
     return;
   }
+  const [{ data: cia }, { data: esp }] = await Promise.all([
+    sb.from('companias').select('id, nombre, numero').eq('id', compId).maybeSingle(),
+    sb.from('personal_especialidades').select('especialidades(codigo)').eq('personal_id', perfil.id),
+  ]);
+  COMPANIAS = cia ? [cia] : [];
+  // Solo ve la opción "maquinista" quien lo tiene asignado en el sistema (especialidad M o cargo Maquinista)
+  MI_ES_MAQ = esMaquinistaDe({ cargo: perfil.cargo, personal_especialidades: esp || [] });
+  document.body.classList.toggle('es-bombero', !puedeInscribir());
   document.getElementById('wrap').style.display = 'flex';
   armarSelectores();
   await cargarCompania();
@@ -435,18 +439,18 @@ function armarSelectores(){
   document.getElementById('selMes').innerHTML = MESES.map((n, i) => `<option value="${i + 1}">${n}</option>`).join('');
   const a0 = new Date().getFullYear();
   document.getElementById('selAnio').innerHTML = [a0 - 1, a0, a0 + 1, a0 + 2].map(y => `<option value="${y}">${y}</option>`).join('');
-  const sc = document.getElementById('selCompania');
-  if(esInstitucional() && COMPANIAS.length > 1){
-    sc.style.display = '';
-    sc.innerHTML = COMPANIAS.map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
-  }
 }
 
 async function cargarCompania(){
-  const { data: pers } = await sb.from('personal')
-    .select('id, nombre_completo, numero_registro, cargo, foto_url')
-    .eq('compania_id', compId).neq('estado', 'dado_de_baja').order('nombre_completo');
-  PERSONAL = pers || [];
+  // La lista de voluntarios solo la necesitan (y solo la ven) Capitán, Tenientes y Ayudante.
+  if(puedeInscribir()){
+    const { data: pers } = await sb.from('personal')
+      .select('id, nombre_completo, numero_registro, cargo, foto_url, personal_especialidades(especialidades(codigo))')
+      .eq('compania_id', compId).neq('estado', 'dado_de_baja').order('nombre_completo');
+    PERSONAL = (pers || []).map(p => ({ ...p, maq: esMaquinistaDe(p) }));
+  } else {
+    PERSONAL = [];
+  }
   await cargarMes();
   renderTodo();
   suscribir();
@@ -480,14 +484,12 @@ function suscribir(){
 function inscritosDe(k){ return INSCS.filter(i => i.fecha === k); }
 function cobertura(lista){
   const total = lista.length;
-  const enc = lista.filter(i => i.funcion === 'encargado').length;
   const maq = lista.filter(i => i.funcion === 'maquinista').length;
   const faltas = [];
   if(total < CONFIG.minimo_total) faltas.push(`Faltan ${CONFIG.minimo_total - total} persona${CONFIG.minimo_total - total === 1 ? '' : 's'}`);
-  if(enc < CONFIG.minimo_encargado) faltas.push('Falta encargado');
-  if(maq < CONFIG.minimo_maquinista) faltas.push('Falta maquinista');
+  if(maq < CONFIG.minimo_maquinista) faltas.push(CONFIG.minimo_maquinista - maq === 1 ? 'Falta maquinista' : `Faltan ${CONFIG.minimo_maquinista - maq} maquinistas`);
   const nivel = faltas.length ? 'roja' : (total === CONFIG.minimo_total ? 'amarilla' : 'verde');
-  return { total, enc, maq, faltas, nivel };
+  return { total, maq, faltas, nivel };
 }
 const NIVEL_TXT = { roja:'Incompleta', amarilla:'Mínimo justo', verde:'Cubierta' };
 
@@ -497,7 +499,6 @@ function renderTodo(){
   document.getElementById('ciaLabel').textContent = (cia ? cia.nombre : '—') + ' · ' + CONFIG.hora_inicio.slice(0, 5) + ' a ' + CONFIG.hora_fin.slice(0, 5);
   document.getElementById('selMes').value = mes;
   document.getElementById('selAnio').value = anio;
-  const sc = document.getElementById('selCompania'); if(sc.style.display !== 'none') sc.value = compId;
   const chip = document.getElementById('chipMes');
   chip.className = 'chip ' + MES_ESTADO;
   chip.innerHTML = (mesAbierto() ? ico('unlock') : ico('lock')) + (mesAbierto() ? 'Abierto' : 'Cerrado');
@@ -505,6 +506,7 @@ function renderTodo(){
   bm.style.display = puedeAdministrar() ? '' : 'none';
   bm.innerHTML = (mesAbierto() ? ico('lock') + 'Cerrar mes' : ico('unlock') + 'Reabrir mes');
   document.getElementById('btnConfig').style.display = puedeAdministrar() ? '' : 'none';
+  document.getElementById('panelSinCobertura').style.display = puedeInscribir() ? '' : 'none';
   renderCalendario();
   renderMisNoches();
   renderSinCobertura();
@@ -517,17 +519,24 @@ function renderCalendario(){
   const offset = (new Date(anio, mes - 1, 1).getDay() + 6) % 7;
   let h = DIAS_SEM.map(d => `<div class="cal-head">${d}</div>`).join('');
   for(let i = 0; i < offset; i++) h += '<div class="dia vacio"></div>';
+  const oficial = puedeInscribir();
   for(let d = 1; d <= n; d++){
     const k = clave(anio, mes, d);
     const lista = inscritosDe(k);
-    const cob = cobertura(lista);
     const mio = lista.some(i => i.voluntario_id === PERFIL.id);
+    if(!oficial){
+      // Bombero: solo ve lo suyo -- sin cobertura, contadores ni nombres de otros
+      h += `<button class="dia neutro ${mio ? 'mio' : ''} ${k < hoy ? 'pasado' : ''} ${k === hoy ? 'hoy' : ''}" onclick="abrirDia('${k}')">
+        <div class="dia-top"><span class="dia-num">${d}</span>${mio ? `<span class="dia-check" title="Estás anotado">${ico('check')}</span>` : ''}</div>
+      </button>`;
+      continue;
+    }
+    const cob = cobertura(lista);
     const nombres = lista.slice(0, 4).map(i => `<span>${esc(nombreCelda(i.voluntario && i.voluntario.nombre_completo))}</span>`).join('')
       + (lista.length > 4 ? `<span class="mas">+${lista.length - 4} más</span>` : '');
     h += `<button class="dia ${cob.nivel} ${k < hoy ? 'pasado' : ''} ${k === hoy ? 'hoy' : ''}" onclick="abrirDia('${k}')">
       <div class="dia-top"><span class="dia-num">${d}</span><span class="dia-count">${cob.total}</span></div>
       <div class="dia-iconos">
-        <span class="${cob.enc >= CONFIG.minimo_encargado && cob.enc > 0 ? 'ok' : ''}" title="Encargado">${cob.enc ? ico('star') : ''}</span>
         <span class="${cob.maq >= CONFIG.minimo_maquinista && cob.maq > 0 ? 'ok' : ''}" title="Maquinista">${cob.maq ? ico('truck') : ''}</span>
       </div>
       <div class="dia-nombres">${nombres}</div>
@@ -540,10 +549,6 @@ function renderCalendario(){
 function renderMisNoches(){
   const p = document.getElementById('panelMisNoches');
   const mis = INSCS.filter(i => i.voluntario_id === PERFIL.id).sort((a, b) => a.fecha.localeCompare(b.fecha));
-  if(!esMiCompania()){
-    p.innerHTML = `<h3>Mis noches</h3><div class="nota">Estás viendo la guardia de otra Compañía.</div>`;
-    return;
-  }
   const cuota = CONFIG.cuota_mensual;
   const pct = cuota > 0 ? Math.min(100, Math.round(mis.length / cuota * 100)) : 100;
   const cumple = mis.length >= cuota;
@@ -600,10 +605,6 @@ async function recargarMes(){
   renderTodo();
   suscribir();
 }
-async function cambiarCompania(id){
-  compId = id;
-  await cargarCompania();
-}
 
 // ---- Día ----
 function abrirDia(k){
@@ -622,19 +623,24 @@ function cerrarDia(){
 function renderDiaLista(){
   if(!diaSel) return;
   const lista = inscritosDe(diaSel);
-  const cob = cobertura(lista);
   const oficial = puedeInscribir();
-  document.getElementById('diaCobertura').innerHTML = `<div class="cob-line ${cob.nivel}">
-    <span class="cob-dot"></span><b>${cob.total} anotado${cob.total === 1 ? '' : 's'}</b><span style="color:var(--text-muted)">· ${NIVEL_TXT[cob.nivel]} (mínimo ${CONFIG.minimo_total})</span>
-    ${cob.faltas.length ? `<span class="falta">${cob.faltas.join(' · ')}</span>` : ''}
-  </div>`;
-  const orden = { encargado:0, maquinista:1, bombero:2 };
+  // La cobertura y la lista de los demás son solo para Capitán, Tenientes y Ayudante.
+  if(oficial){
+    const cob = cobertura(lista);
+    document.getElementById('diaCobertura').innerHTML = `<div class="cob-line ${cob.nivel}">
+      <span class="cob-dot"></span><b>${cob.total} anotado${cob.total === 1 ? '' : 's'}</b><span style="color:var(--text-muted)">· ${NIVEL_TXT[cob.nivel]} (mínimo ${CONFIG.minimo_total})</span>
+      ${cob.faltas.length ? `<span class="falta">${cob.faltas.join(' · ')}</span>` : ''}
+    </div>`;
+  } else {
+    document.getElementById('diaCobertura').innerHTML = '';
+  }
+  const orden = { maquinista:0, bombero:1 };
   const ord = [...lista].sort((a, b) => orden[a.funcion] - orden[b.funcion]);
   document.getElementById('diaLista').innerHTML = ord.length ? ord.map(i => {
     const v = i.voluntario || {};
     const funcHtml = oficial
-      ? `<select class="sel" style="flex:0 0 112px; padding:5px 7px; font-size:11.5px;" onchange="cambiarFuncion('${i.id}', this.value)">${Object.keys(FUNC_LABEL).map(f => `<option value="${f}" ${i.funcion === f ? 'selected' : ''}>${FUNC_LABEL[f]}</option>`).join('')}</select>`
-      : `<span class="func ${i.funcion}">${i.funcion === 'encargado' ? ico('star') : i.funcion === 'maquinista' ? ico('truck') : ''}${FUNC_LABEL[i.funcion]}</span>`;
+      ? `<select class="sel" style="flex:0 0 112px; padding:5px 7px; font-size:11.5px;" onchange="cambiarFuncion('${i.id}', this.value)">${opcionesFuncion(i.voluntario_id, i.funcion)}</select>`
+      : `<span class="func ${i.funcion}">${i.funcion === 'maquinista' ? ico('truck') : ''}${FUNC_LABEL[i.funcion]}</span>`;
     const puedePern = oficial || (i.voluntario_id === PERFIL.id && mesAbierto());
     const luna = puedePern
       ? `<button class="moon ${i.pernocta ? 'on' : ''}" title="${i.pernocta ? 'Pernocta' : 'No pernocta'}" onclick="togglePernocta('${i.id}', ${!i.pernocta})">${ico('moon')}</button>`
@@ -644,7 +650,19 @@ function renderDiaLista(){
       ${funcHtml}${luna}
       ${oficial ? `<button class="mini-x" title="Quitar de la guardia" onclick="quitarInscripcion('${i.id}')">✕</button>` : ''}
     </div>`;
-  }).join('') : `<div class="vacio-msg">Nadie anotado esta noche todavía.</div>`;
+  }).join('') : `<div class="vacio-msg">${oficial ? 'Nadie anotado esta noche todavía.' : 'Todavía no estás anotado esta noche.'}</div>`;
+}
+
+// "Maquinista" solo se ofrece a quien lo tiene asignado en el sistema
+function opcionesFuncion(volId, actual){
+  const p = PERSONAL.find(x => x.id === volId);
+  const puedeMaq = (p && p.maq) || actual === 'maquinista';
+  return `<option value="bombero" ${actual === 'bombero' ? 'selected' : ''}>${FUNC_LABEL.bombero}</option>`
+    + (puedeMaq ? `<option value="maquinista" ${actual === 'maquinista' ? 'selected' : ''}>${FUNC_LABEL.maquinista}</option>` : '');
+}
+function actualizarFuncionAdd(){
+  const sel = document.getElementById('addVol'), f = document.getElementById('addFunc');
+  if(sel && f) f.innerHTML = opcionesFuncion(sel.value, 'bombero');
 }
 
 function renderDiaAcciones(){
@@ -653,28 +671,30 @@ function renderDiaAcciones(){
   const mia = inscritosDe(k).find(i => i.voluntario_id === PERFIL.id);
   const pasada = k < hoy;
   let h = '';
-  if(esMiCompania()){
-    if(mia){
-      if(!pasada && mesAbierto()){
-        h += `<div class="bloque"><button class="btn-peligro" style="width:100%" id="btnQuitarme" onclick="quitarme()">Quitarme de esta noche</button></div>`;
-      } else {
-        h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: solo un oficial puede cambiar tu inscripción.'}</div></div>`;
-      }
-    } else if(!pasada && mesAbierto()){
-      h += `<div class="bloque"><label class="t">Anotarme esta noche</label>
-        <div class="fila"><select class="sel" id="miFuncion"><option value="bombero">Como bombero</option><option value="maquinista">Como maquinista</option></select>
-        <label class="chk"><input type="checkbox" id="miPernocta"> Pernocto</label></div>
-        <button class="btn-pri" style="width:100%" id="btnAnotarme" onclick="anotarme()">Anotarme</button></div>`;
+  if(mia){
+    if(!pasada && mesAbierto()){
+      h += `<div class="bloque"><button class="btn-peligro" style="width:100%" id="btnQuitarme" onclick="quitarme()">Quitarme de esta noche</button></div>`;
     } else {
-      h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: pedile a un oficial que te anote.'}</div></div>`;
+      h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: solo un oficial puede cambiar tu inscripción.'}</div></div>`;
     }
+  } else if(!pasada && mesAbierto()){
+    // La opción "maquinista" solo aparece si tenés ese rol asignado en el sistema
+    const selFuncion = MI_ES_MAQ
+      ? `<select class="sel" id="miFuncion"><option value="bombero">Como bombero</option><option value="maquinista">Como maquinista</option></select>`
+      : `<input type="hidden" id="miFuncion" value="bombero">`;
+    h += `<div class="bloque"><label class="t">Anotarme esta noche</label>
+      <div class="fila">${selFuncion}
+      <label class="chk"><input type="checkbox" id="miPernocta"> Pernocto</label></div>
+      <button class="btn-pri" style="width:100%" id="btnAnotarme" onclick="anotarme()">Anotarme</button></div>`;
+  } else {
+    h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: pedile a un oficial que te anote.'}</div></div>`;
   }
   if(puedeInscribir()){
     const yaIds = new Set(inscritosDe(k).map(i => i.voluntario_id));
     const disp = PERSONAL.filter(v => !yaIds.has(v.id));
-    h += `<div class="bloque"><label class="t">Agregar voluntario (oficial)</label>
-      ${disp.length ? `<div class="fila"><select class="sel" id="addVol">${disp.map(v => `<option value="${v.id}">${esc(nombreCorto(v.nombre_completo))} (N° ${esc(v.numero_registro)})</option>`).join('')}</select>
-      <select class="sel" id="addFunc" style="flex:0 0 118px;">${Object.keys(FUNC_LABEL).map(f => `<option value="${f}" ${f === 'bombero' ? 'selected' : ''}>${FUNC_LABEL[f]}</option>`).join('')}</select></div>
+    h += `<div class="bloque"><label class="t">Agregar voluntario</label>
+      ${disp.length ? `<div class="fila"><select class="sel" id="addVol" onchange="actualizarFuncionAdd()">${disp.map(v => `<option value="${v.id}">${esc(nombreCorto(v.nombre_completo))} (N° ${esc(v.numero_registro)})</option>`).join('')}</select>
+      <select class="sel" id="addFunc" style="flex:0 0 118px;">${opcionesFuncion(disp[0].id, 'bombero')}</select></div>
       <button class="btn-sec" style="width:100%; justify-content:center;" id="btnAgregar" onclick="agregarVoluntario()">Agregar a la guardia</button>`
       : `<div class="aviso">Todos los voluntarios de la Compañía ya están anotados.</div>`}</div>`;
   }
@@ -736,17 +756,16 @@ function abrirConfig(){
   document.getElementById('cfgFin').value = CONFIG.hora_fin.slice(0, 5);
   document.getElementById('cfgTotal').value = CONFIG.minimo_total;
   document.getElementById('cfgCuota').value = CONFIG.cuota_mensual;
-  document.getElementById('cfgEnc').value = CONFIG.minimo_encargado;
   document.getElementById('cfgMaq').value = CONFIG.minimo_maquinista;
   document.getElementById('configModal').classList.add('show');
 }
 function cerrarConfig(){ document.getElementById('configModal').classList.remove('show'); }
 async function guardarConfig(){
   const v = (id) => document.getElementById(id).value;
-  const total = parseInt(v('cfgTotal'), 10), enc = parseInt(v('cfgEnc'), 10), maq = parseInt(v('cfgMaq'), 10), cuota = parseInt(v('cfgCuota'), 10);
-  if(!v('cfgInicio') || !v('cfgFin') || [total, enc, maq, cuota].some(isNaN) || total < 1){ toast('Completá todos los campos (el mínimo de personas debe ser al menos 1).', true); return; }
+  const total = parseInt(v('cfgTotal'), 10), maq = parseInt(v('cfgMaq'), 10), cuota = parseInt(v('cfgCuota'), 10);
+  if(!v('cfgInicio') || !v('cfgFin') || [total, maq, cuota].some(isNaN) || total < 1){ toast('Completá todos los campos (el mínimo de personas debe ser al menos 1).', true); return; }
   const ok = await ejecutar(document.getElementById('btnGuardarConfig'),
-    () => sb.rpc('guardia_guardar_config', { p_compania_id: compId, p_hora_inicio: v('cfgInicio'), p_hora_fin: v('cfgFin'), p_minimo_total: total, p_minimo_encargado: enc, p_minimo_maquinista: maq, p_cuota: cuota }),
+    () => sb.rpc('guardia_guardar_config', { p_compania_id: compId, p_hora_inicio: v('cfgInicio'), p_hora_fin: v('cfgFin'), p_minimo_total: total, p_minimo_maquinista: maq, p_cuota: cuota }),
     'Configuración guardada', false);
   if(ok) cerrarConfig();
 }
