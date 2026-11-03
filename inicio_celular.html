@@ -58,7 +58,7 @@
      Siempre se ve lleno porque muestra a los presentes, no un porcentaje de la dotación total. */
   .faro{ position:relative; width:224px; height:224px; max-width:100%; margin:0 auto 4px; z-index:1;
     --f-color:#42555C; --f-light:#8CA0A8; --f-dark:#26343A; --f-glow:rgba(66,85,92,0);}
-  .faro.ok{ --f-color:#3CF29A; --f-light:#B8FFDA; --f-dark:#117A4B; --f-glow:rgba(60,242,154,0.55);}
+  .faro.ok{ --f-color:#49E9FF; --f-light:#CFF8FF; --f-dark:#1E6E7D; --f-glow:rgba(73,233,255,0.5);}
   .faro.emerg{ --f-color:#FF4B5C; --f-light:#FFC2C8; --f-dark:#8A1522; --f-glow:rgba(255,75,92,0.55);}
   .faro-haces{ position:absolute; inset:0; border-radius:50%;
     background:conic-gradient(from 0deg, var(--f-glow) 0deg, transparent 50deg, transparent 180deg, var(--f-glow) 180deg, transparent 230deg);
@@ -68,21 +68,23 @@
   .faro-orbita{ position:absolute; inset:22px; border-radius:50%; border:1px dashed var(--line-strong);}
   .faro-nucleo{ position:absolute; left:50%; top:50%; width:84px; height:84px; margin:-42px 0 0 -42px; border-radius:50%;
     background:radial-gradient(circle at 38% 32%, var(--f-light), var(--f-color) 52%, var(--f-dark));
-    box-shadow:0 0 28px var(--f-glow); display:flex; flex-direction:column; align-items:center; justify-content:center; animation:faro-late 2.4s ease-in-out infinite;}
-  .faro.vacio .faro-nucleo{ animation:none;}
-  .faro-nucleo b{ font-family:'JetBrains Mono',monospace; font-size:30px; line-height:1; color:#04201A; font-weight:700;}
-  .faro.vacio .faro-nucleo b{ color:#E7F5FA;}
-  .faro-nucleo span{ font-size:9px; text-transform:uppercase; letter-spacing:.04em; color:#04201A; font-weight:700; margin-top:2px;}
-  .faro.vacio .faro-nucleo span{ color:var(--text-muted);}
+    box-shadow:0 0 28px var(--f-glow); animation:faro-late 2.4s ease-in-out infinite;}
+  .faro.vacio .faro-nucleo{ animation:none; box-shadow:none; background:#1B2A31; border:1.5px solid var(--line-strong);}
   .faro-av{ position:absolute; width:38px; height:38px; margin:-19px 0 0 -19px; border-radius:50%; background:#26323A center/cover no-repeat;
     border:2.5px solid var(--a-color); box-shadow:0 0 0 2px var(--panel), 0 0 10px var(--a-color); display:flex; align-items:center; justify-content:center;
     font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; color:var(--text);}
   .faro-av.mas{ border-style:dashed; border-color:var(--text-dim); box-shadow:0 0 0 2px var(--panel); font-size:12px; color:var(--text-muted);}
   .faro-estado{ text-align:center; position:relative; z-index:1; margin-bottom:10px;}
   .faro-estado b{ display:block; font-size:14px; font-weight:700; color:var(--text-muted);}
-  .faro-estado.ok b{ color:var(--servicio);}
+  .faro-estado.ok b{ color:var(--cyan);}
   .faro-estado.emerg b{ color:var(--emergencia);}
   .faro-estado span{ font-size:11px; color:var(--text-muted);}
+  .resumen-carros{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin:0 0 10px; position:relative; z-index:1;}
+  .carro-chip{ --c:var(--servicio); display:inline-flex; align-items:center; gap:5px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px; background:var(--panel-alt); border:1.5px solid var(--c); padding:3px 8px; border-radius:5px; color:var(--text);}
+  .carro-chip::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--c); flex-shrink:0;}
+  .carro-chip.mant{ --c:var(--alerta);}
+  .carro-chip.fuera{ --c:var(--nodisp);}
+  .carro-chip.emergencia{ --c:var(--emergencia);}
   @keyframes faro-gira{ to{ transform:rotate(360deg);} }
   @keyframes faro-late{ 0%,100%{ filter:brightness(.88);} 50%{ filter:brightness(1.12);} }
 
@@ -156,9 +158,10 @@
           <div class="faro-haces"></div>
           <div class="faro-orbita"></div>
           <div id="faroAvatares"></div>
-          <div class="faro-nucleo"><b id="presentesCount">—</b><span>en cuartel</span></div>
+          <div class="faro-nucleo"></div>
         </div>
         <div class="faro-estado" id="faroEstado"><b>—</b><span></span></div>
+        <div class="resumen-carros" id="resumenCarrosChips"></div>
         <div class="ring-side">
           <div class="ring-stat">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg>
@@ -252,7 +255,6 @@ function renderFaro(presentes){
   const faro = document.getElementById('faro');
   const hayEmergencia = presentes.some(p => p.estado === 'emergencia');
   faro.className = 'faro ' + (presentes.length === 0 ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
-  document.getElementById('presentesCount').textContent = presentes.length;
 
   const orden = [...presentes].sort((a, b) => {
     const ia = PRIORIDAD_CARGO_MANDO.indexOf(a.cargo), ib = PRIORIDAD_CARGO_MANDO.indexOf(b.cargo);
@@ -274,13 +276,13 @@ function renderFaro(presentes){
 
   const n = (e) => presentes.filter(p => p.estado === e).length;
   const titulo = presentes.length === 0 ? 'Cuartel sin personal' : hayEmergencia ? 'En emergencia' : 'Guardia activa';
-  const partes = [];
+  const partes = [`${presentes.length} en el cuartel`];
   if(n('disponible')) partes.push(`${n('disponible')} disponible${n('disponible') === 1 ? '' : 's'}`);
   if(n('no_disponible')) partes.push(`${n('no_disponible')} no disponible${n('no_disponible') === 1 ? '' : 's'}`);
   if(n('emergencia')) partes.push(`${n('emergencia')} en emergencia`);
   const est = document.getElementById('faroEstado');
   est.className = 'faro-estado ' + (presentes.length === 0 ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
-  est.innerHTML = `<b>${titulo}</b><span>${partes.join(' · ') || 'Nadie en servicio por ahora'}</span>`;
+  est.innerHTML = `<b>${titulo}</b><span>${presentes.length ? partes.join(' · ') : 'Nadie en servicio por ahora'}</span>`;
 }
 
 async function cargarDatos(){
@@ -307,8 +309,9 @@ async function cargarDatos(){
   document.getElementById('miNombre').textContent = perfil.nombre_completo;
   document.getElementById('miCargoReg').textContent = `${perfil.cargo} · N° ${perfil.numero_registro}`;
 
-  const [{ data: companeros }, { data: almando }] = await Promise.all([
+  const [{ data: companeros }, { data: carros }, { data: almando }] = await Promise.all([
     sb.from('personal').select('id, nombre_completo, cargo, foto_url, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)').eq('compania_id', perfil.compania_id),
+    sb.from('carros').select('nomenclatura, estado').eq('compania_id', perfil.compania_id).order('nomenclatura'),
     sb.from('compania_al_mando').select('tipo_mando, personal(nombre_completo, cargo)').eq('compania_id', perfil.compania_id).maybeSingle()
   ]);
 
@@ -317,6 +320,9 @@ async function cargarDatos(){
     return fv && fv.estado !== 'fuera' ? { ...p, estado: fv.estado } : null;
   }).filter(Boolean);
   renderFaro(presentes);
+  document.getElementById('resumenCarrosChips').innerHTML = (carros || []).map(c =>
+    `<span class="carro-chip ${['mant', 'fuera', 'emergencia'].includes(c.estado) ? c.estado : ''}" title="${c.nomenclatura}">${c.nomenclatura}</span>`
+  ).join('');
 
   const CARGO_ABREV = { 'Director':'Director','Capitán':'Cap.','Teniente 1°':'Tte. 1°','Teniente 2°':'Tte. 2°','Teniente 3°':'Tte. 3°','Teniente 4°':'Tte. 4°','Ayudante Cía.':'Ayte. Cía.' };
   if(almando && almando.personal){
@@ -335,6 +341,7 @@ async function cargarDatos(){
     suscritoInicioCelular = true;
     sb.channel('inicio-celular-' + perfil.compania_id)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .subscribe();
     suscribirAlertaDespacho(perfil);
