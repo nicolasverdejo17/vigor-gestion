@@ -148,7 +148,7 @@
         <span class="row-arrow">›</span>
       </div>
 
-      <div class="section-label">Según tu Cargo y Roles Funcionales</div>
+      <div class="section-label" id="labelAdmin">Según tu Cargo y Roles Funcionales</div>
       <div id="filasAdmin"></div>
 
       <div class="row logout-row" onclick="ir('Cerrando sesión…')">
@@ -261,21 +261,16 @@ function renderPerfil(){
 }
 
 function renderFilas(){
-  const html = FILAS_ADMIN.map(f => {
-    const ok = tieneAcceso(f);
-    const requisitos = [...f.cargos, ...f.roles].join(' / ') || '—';
-    if(ok){
-      return `<div class="row" onclick="window.location.href='${f.href}'">
-        <div class="row-l"><div class="row-ico">${renderIco(f.ico)}</div><div><b>${f.nombre}</b><span>${f.desc}</span></div></div>
-        <span class="row-arrow">›</span>
-      </div>`;
-    }
-    return `<div class="row locked" onclick="denegado()">
-      <div class="row-l"><div class="row-ico">${renderIco('lock')}</div><div><b>${f.nombre}</b><span>Requiere: ${requisitos}</span></div></div>
-    </div>`;
-  }).join('');
+  // Solo se muestran las secciones a las que la persona tiene acceso; el resto no aparece.
+  const html = FILAS_ADMIN.filter(tieneAcceso).map(f =>
+    `<div class="row" onclick="window.location.href='${f.href}'">
+      <div class="row-l"><div class="row-ico">${renderIco(f.ico)}</div><div><b>${f.nombre}</b><span>${f.desc}</span></div></div>
+      <span class="row-arrow">›</span>
+    </div>`
+  ).join('');
 
   document.getElementById('filasAdmin').innerHTML = html;
+  document.getElementById('labelAdmin').style.display = html ? '' : 'none';
 }
 
 function renderTodo(){ renderPerfil(); renderFilas(); }
