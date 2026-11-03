@@ -116,6 +116,24 @@
   .dia.neutro{ min-height:50px;}
   .dia.neutro.mio{ border-color:var(--cyan); background:linear-gradient(180deg, rgba(73,233,255,.14), var(--panel-alt) 75%);}
   .dia-check{ color:var(--cyan); font-size:15px; display:flex;}
+  /* Cumplimiento automático de mis noches */
+  .dia.neutro.mio.completa{ border-color:var(--servicio); background:linear-gradient(180deg, rgba(60,242,154,.16), var(--panel-alt) 75%);}
+  .dia.neutro.mio.parcial{ border-color:var(--alerta); background:linear-gradient(180deg, rgba(255,201,77,.16), var(--panel-alt) 75%);}
+  .dia.neutro.mio.ausente{ border-color:var(--emergencia); background:linear-gradient(180deg, rgba(255,75,92,.16), var(--panel-alt) 75%);}
+  .completa .dia-check, .dia-check.completa{ color:var(--servicio);}
+  .dia-check.parcial{ color:var(--alerta);} .dia-check.ausente{ color:var(--emergencia);}
+  .dia-mio.completa{ background:var(--servicio); box-shadow:0 0 0 2px rgba(60,242,154,.25);}
+  .dia-mio.parcial{ background:var(--alerta); box-shadow:0 0 0 2px rgba(255,201,77,.25);}
+  .dia-mio.ausente{ background:var(--emergencia); box-shadow:0 0 0 2px rgba(255,75,92,.25);}
+  .asist{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 7px; border-radius:8px; border:1px solid var(--line-strong); color:var(--text-muted); display:inline-block;}
+  .asist.completa{ color:var(--servicio); border-color:rgba(60,242,154,.5);}
+  .asist.parcial{ color:var(--alerta); border-color:rgba(255,201,77,.55);}
+  .asist.ausente{ color:var(--emergencia); border-color:rgba(255,75,92,.55);}
+  .asist-det{ font-size:10px; color:var(--text-dim); margin-top:2px; font-family:'JetBrains Mono',monospace;}
+  .stats-noches{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
+  .stat-pill{ font-size:10.5px; padding:3px 9px; border-radius:9px; border:1px solid var(--line-strong); color:var(--text-muted);}
+  .stat-pill b{ font-family:'JetBrains Mono',monospace; margin-right:4px;}
+  .stat-pill.completa b{ color:var(--servicio);} .stat-pill.parcial b{ color:var(--alerta);} .stat-pill.ausente b{ color:var(--emergencia);} .stat-pill.pendiente b{ color:var(--cyan);}
   body.es-bombero .solo-oficial{ display:none !important;}
   .dia-top{ display:flex; align-items:center; justify-content:space-between; gap:4px;}
   .dia-num{ font-family:'Rajdhani'; font-weight:800; font-size:15px; line-height:1;}
@@ -277,7 +295,13 @@
             <span class="solo-oficial"><i style="background:var(--alerta)"></i>Mínimo justo</span>
             <span class="solo-oficial"><i style="background:var(--servicio)"></i>Cubierta</span>
             <span class="solo-oficial"><svg class="i" viewBox="0 0 24 24" style="color:var(--brass-bright)"><path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/></svg>Hay maquinista</span>
-            <span><i style="background:var(--cyan); border-radius:50%"></i>Estoy anotado</span>
+          </div>
+          <div class="leyenda">
+            <span style="color:var(--text-muted)">Mis noches:</span>
+            <span><i style="background:var(--cyan); border-radius:50%"></i>Anotada</span>
+            <span><i style="background:var(--servicio); border-radius:50%"></i>Completa</span>
+            <span><i style="background:var(--alerta); border-radius:50%"></i>Parcial</span>
+            <span><i style="background:var(--emergencia); border-radius:50%"></i>Ausente</span>
           </div>
           <div class="cal" id="calendario"></div>
         </div>
@@ -318,8 +342,9 @@
         <div><label>Mínimo de personas</label><input class="inp mono" type="number" min="1" id="cfgTotal"></div>
         <div><label>Mínimo de maquinistas</label><input class="inp mono" type="number" min="0" id="cfgMaq"></div>
         <div><label>Cuota mensual (noches)</label><input class="inp mono" type="number" min="0" id="cfgCuota"></div>
+        <div><label>Tolerancia (minutos)</label><input class="inp mono" type="number" min="0" max="120" id="cfgTol"></div>
       </div>
-      <div class="nota">El mínimo de personas incluye a los maquinistas. No hay cupo máximo por noche.</div>
+      <div class="nota">El mínimo de personas incluye a los maquinistas. No hay cupo máximo por noche. El cumplimiento se calcula solo con la hora de puesta en servicio: <b>Completa</b> si estuvo todo el horario (con esa tolerancia), <b>Parcial</b> si llegó tarde o se retiró antes, <b>Ausente</b> si no estuvo.</div>
       <div class="modal-actions">
         <button class="btn-sec" onclick="cerrarConfig()">Cancelar</button>
         <button class="btn-pri" id="btnGuardarConfig" onclick="guardarConfig()">Guardar</button>
@@ -342,11 +367,16 @@ const DIAS_SEM = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 // Cerrar/reabrir el mes y configurar: solo Capitán y Tenientes. (La base de datos lo exige igual.)
 const CARGOS_OFICIAL_CIA = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante de Compañía','Ayudante Cía.'];
 const CARGOS_ADMIN_CIA = ['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°'];
-const CONFIG_DEF = { hora_inicio:'22:00', hora_fin:'05:00', minimo_total:7, minimo_maquinista:1, cuota_mensual:9 };
+const CONFIG_DEF = { hora_inicio:'22:00', hora_fin:'05:00', minimo_total:7, minimo_maquinista:1, cuota_mensual:9, tolerancia_minutos:5 };
+// Cumplimiento automático: se calcula en la base cruzando la inscripción con las horas reales
+// en que la persona estuvo en servicio dentro de la ventana de la guardia.
+const ASIST_LABEL = { completa:'Completa', parcial:'Parcial', ausente:'Ausente', pendiente:'Pendiente' };
 const FUNC_LABEL = { maquinista:'Maquinista', bombero:'Bombero' };
 
 const IC = {
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  cross: '<path d="M6 6l12 12M18 6L6 18"/>',
+  half: '<path d="M6 12h12"/>',
   truck: '<path d="M3 15.5V9.7a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8"/><path d="M3 15.5h15.5"/><circle cx="7" cy="16.7" r="1.6"/><circle cx="15.5" cy="16.7" r="1.6"/>',
   moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
@@ -357,7 +387,7 @@ const ico = (k) => `<svg class="i" viewBox="0 0 24 24">${IC[k]}</svg>`;
 // ---- Estado ----
 let PERFIL = null, COMPANIAS = [], compId = null, MI_ES_MAQ = false;
 let anio = new Date().getFullYear(), mes = new Date().getMonth() + 1;
-let CONFIG = { ...CONFIG_DEF }, MES_ESTADO = 'abierto', INSCS = [], PERSONAL = [];
+let CONFIG = { ...CONFIG_DEF }, MES_ESTADO = 'abierto', INSCS = [], PERSONAL = [], ASIST = {};
 let diaSel = null, canal = null, enviando = false;
 
 // ---- Utilidades ----
@@ -458,16 +488,19 @@ async function cargarCompania(){
 
 async function cargarMes(){
   const ini = clave(anio, mes, 1), fin = clave(anio, mes, diasEnMes(anio, mes));
-  const [cfg, mrow, insc] = await Promise.all([
+  const [cfg, mrow, insc, asist] = await Promise.all([
     sb.from('guardia_config').select('*').eq('compania_id', compId).maybeSingle(),
     sb.from('guardia_mes').select('estado').eq('compania_id', compId).eq('anio', anio).eq('mes', mes).maybeSingle(),
     sb.from('guardia_inscripcion')
       .select('id, fecha, voluntario_id, funcion, pernocta, voluntario:personal!guardia_inscripcion_voluntario_id_fkey(nombre_completo, numero_registro, foto_url)')
       .eq('compania_id', compId).gte('fecha', ini).lte('fecha', fin).order('created_at'),
+    sb.rpc('guardia_asistencia_mes', { p_compania_id: compId, p_anio: anio, p_mes: mes }),
   ]);
   CONFIG = { ...CONFIG_DEF, ...(cfg.data || {}) };
   MES_ESTADO = (mrow.data && mrow.data.estado) || 'abierto';
   INSCS = insc.data || [];
+  ASIST = {};
+  (asist.data || []).forEach(a => { ASIST[a.inscripcion_id] = a; });
 }
 
 function suscribir(){
@@ -492,6 +525,21 @@ function cobertura(lista){
   return { total, maq, faltas, nivel };
 }
 const NIVEL_TXT = { roja:'Incompleta', amarilla:'Mínimo justo', verde:'Cubierta' };
+
+// ---- Asistencia (calculada en la base con la puesta en servicio real) ----
+const estadoAsist = (inscId) => (ASIST[inscId] && ASIST[inscId].estado) || 'pendiente';
+function hhmm(iso){ return iso ? new Date(iso).toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false }) : '—'; }
+function durTxt(min){ const h = Math.floor(min / 60), m = min % 60; return h ? `${h} h${m ? ' ' + m + ' min' : ''}` : `${m} min`; }
+function detalleAsist(a){
+  if(!a || a.estado === 'pendiente') return 'Se calcula al terminar la guardia';
+  if(a.estado === 'ausente') return 'No estuvo en servicio en el horario de la guardia';
+  return `En servicio ${hhmm(a.entrada)} → ${hhmm(a.salida)} · ${durTxt(a.minutos_presente)} de ${durTxt(a.minutos_guardia)}`;
+}
+function contarAsist(lista){
+  const c = { completa:0, parcial:0, ausente:0, pendiente:0 };
+  lista.forEach(i => { c[estadoAsist(i.id)]++; });
+  return c;
+}
 
 // ---- Render principal ----
 function renderTodo(){
@@ -523,11 +571,15 @@ function renderCalendario(){
   for(let d = 1; d <= n; d++){
     const k = clave(anio, mes, d);
     const lista = inscritosDe(k);
-    const mio = lista.some(i => i.voluntario_id === PERFIL.id);
+    const miInsc = lista.find(i => i.voluntario_id === PERFIL.id);
+    const mio = !!miInsc;
+    const ea = miInsc ? estadoAsist(miInsc.id) : '';
     if(!oficial){
-      // Bombero: solo ve lo suyo -- sin cobertura, contadores ni nombres de otros
-      h += `<button class="dia neutro ${mio ? 'mio' : ''} ${k < hoy ? 'pasado' : ''} ${k === hoy ? 'hoy' : ''}" onclick="abrirDia('${k}')">
-        <div class="dia-top"><span class="dia-num">${d}</span>${mio ? `<span class="dia-check" title="Estás anotado">${ico('check')}</span>` : ''}</div>
+      // Bombero: solo ve lo suyo -- sin cobertura, contadores ni nombres de otros.
+      // Sus noches se pintan según el cumplimiento automático (completa / parcial / ausente).
+      const icono = ea === 'ausente' ? 'cross' : ea === 'parcial' ? 'half' : 'check';
+      h += `<button class="dia neutro ${mio ? 'mio ' + ea : ''} ${k < hoy ? 'pasado' : ''} ${k === hoy ? 'hoy' : ''}" onclick="abrirDia('${k}')">
+        <div class="dia-top"><span class="dia-num">${d}</span>${mio ? `<span class="dia-check ${ea}" title="${ASIST_LABEL[ea]}">${ico(icono)}</span>` : ''}</div>
       </button>`;
       continue;
     }
@@ -540,7 +592,7 @@ function renderCalendario(){
         <span class="${cob.maq >= CONFIG.minimo_maquinista && cob.maq > 0 ? 'ok' : ''}" title="Maquinista">${cob.maq ? ico('truck') : ''}</span>
       </div>
       <div class="dia-nombres">${nombres}</div>
-      ${mio ? '<span class="dia-mio" title="Estás anotado"></span>' : ''}
+      ${mio ? `<span class="dia-mio ${ea}" title="Estás anotado · ${ASIST_LABEL[ea]}"></span>` : ''}
     </button>`;
   }
   document.getElementById('calendario').innerHTML = h;
@@ -550,13 +602,22 @@ function renderMisNoches(){
   const p = document.getElementById('panelMisNoches');
   const mis = INSCS.filter(i => i.voluntario_id === PERFIL.id).sort((a, b) => a.fecha.localeCompare(b.fecha));
   const cuota = CONFIG.cuota_mensual;
-  const pct = cuota > 0 ? Math.min(100, Math.round(mis.length / cuota * 100)) : 100;
-  const cumple = mis.length >= cuota;
+  // La cuota cuenta solo noches COMPLETAS (estuvo en servicio toda la guardia, según la puesta en servicio real).
+  const c = contarAsist(mis);
+  const pct = cuota > 0 ? Math.min(100, Math.round(c.completa / cuota * 100)) : 100;
+  const cumple = c.completa >= cuota;
+  const faltan = cuota - c.completa;
   p.innerHTML = `<h3>Mis noches · ${MESES[mes - 1]}</h3>
-    <div class="mis-num">${mis.length}<small> / ${cuota}</small></div>
+    <div class="mis-num">${c.completa}<small> / ${cuota} completas</small></div>
     <div class="progreso ${cumple ? 'cumplida' : ''}"><div style="width:${pct}%"></div></div>
-    <div class="nota">${cumple ? 'Cuota del mes cumplida.' : `Te faltan ${cuota - mis.length} noche${cuota - mis.length === 1 ? '' : 's'} para la cuota.`}</div>
-    ${mis.length ? `<div class="lista-fechas">${mis.map(i => `<span class="fecha-chip" onclick="abrirDia('${i.fecha}')">${fechaCorta(i.fecha)}</span>`).join('')}</div>` : ''}`;
+    <div class="nota">${cumple ? 'Cuota del mes cumplida.' : `Te faltan ${faltan} noche${faltan === 1 ? '' : 's'} completa${faltan === 1 ? '' : 's'} para la cuota${c.pendiente ? ` (tenés ${c.pendiente} anotada${c.pendiente === 1 ? '' : 's'} por cumplir)` : ''}.`}</div>
+    <div class="stats-noches">
+      <span class="stat-pill pendiente"><b>${c.pendiente}</b>por cumplir</span>
+      <span class="stat-pill completa"><b>${c.completa}</b>completas</span>
+      <span class="stat-pill parcial"><b>${c.parcial}</b>parciales</span>
+      <span class="stat-pill ausente"><b>${c.ausente}</b>ausentes</span>
+    </div>
+    ${mis.length ? `<div class="lista-fechas">${mis.map(i => `<span class="fecha-chip" style="${{ completa:'color:var(--servicio);border-color:rgba(60,242,154,.5)', parcial:'color:var(--alerta);border-color:rgba(255,201,77,.55)', ausente:'color:var(--emergencia);border-color:rgba(255,75,92,.55)' }[estadoAsist(i.id)] || ''}" onclick="abrirDia('${i.fecha}')">${fechaCorta(i.fecha)}</span>`).join('')}</div>` : ''}`;
 }
 
 function renderSinCobertura(){
@@ -579,12 +640,13 @@ function renderVoluntarios(){
   if(!puedeInscribir()){ p.style.display = 'none'; return; }
   p.style.display = '';
   const cuota = CONFIG.cuota_mensual;
-  const filas = PERSONAL.map(v => ({ v, n: INSCS.filter(i => i.voluntario_id === v.id).length })).sort((a, b) => a.n - b.n || a.v.nombre_completo.localeCompare(b.v.nombre_completo));
+  const filas = PERSONAL.map(v => ({ v, c: contarAsist(INSCS.filter(i => i.voluntario_id === v.id)) }))
+    .sort((a, b) => a.c.completa - b.c.completa || a.v.nombre_completo.localeCompare(b.v.nombre_completo));
   p.innerHTML = `<h3>Cumplimiento del mes</h3>
-    <div class="scroll-max"><table class="tabla-vol"><thead><tr><th>Voluntario</th><th style="text-align:center">Noches</th><th>Cuota</th></tr></thead><tbody>
-    ${filas.map(({ v, n }) => `<tr><td>${esc(nombreCorto(v.nombre_completo))}</td><td class="num">${n}</td><td>${n >= cuota ? '<span class="tag-ok">Cumple</span>' : `<span class="tag-falta">Faltan ${cuota - n}</span>`}</td></tr>`).join('')}
+    <div class="scroll-max"><table class="tabla-vol"><thead><tr><th>Voluntario</th><th style="text-align:center" title="Completas">Comp.</th><th style="text-align:center" title="Parciales">Parc.</th><th style="text-align:center" title="Ausentes">Aus.</th><th style="text-align:center" title="Anotadas por cumplir">Pend.</th><th>Cuota</th></tr></thead><tbody>
+    ${filas.map(({ v, c }) => `<tr><td>${esc(nombreCorto(v.nombre_completo))}</td><td class="num tag-ok">${c.completa}</td><td class="num" style="color:var(--alerta)">${c.parcial}</td><td class="num" style="color:var(--emergencia)">${c.ausente}</td><td class="num" style="color:var(--cyan)">${c.pendiente}</td><td>${c.completa >= cuota ? '<span class="tag-ok">Cumple</span>' : `<span class="tag-falta">Faltan ${cuota - c.completa}</span>`}</td></tr>`).join('')}
     </tbody></table></div>
-    <div class="nota" style="margin-top:8px;">Noches cumplidas, faltas y permutas se suman cuando esté listo el Libro de Guardia.</div>`;
+    <div class="nota" style="margin-top:8px;">Se calcula solo, con la puesta en servicio real de cada voluntario dentro del horario de la guardia. La cuota cuenta noches completas.</div>`;
 }
 
 // ---- Navegación de mes / compañía ----
@@ -645,8 +707,10 @@ function renderDiaLista(){
     const luna = puedePern
       ? `<button class="moon ${i.pernocta ? 'on' : ''}" title="${i.pernocta ? 'Pernocta' : 'No pernocta'}" onclick="togglePernocta('${i.id}', ${!i.pernocta})">${ico('moon')}</button>`
       : `<span class="moon ${i.pernocta ? 'on' : ''}" title="${i.pernocta ? 'Pernocta' : ''}">${i.pernocta ? ico('moon') : ''}</span>`;
+    const ea = estadoAsist(i.id);
+    const asistHtml = `<div class="asist-det"><span class="asist ${ea}">${ASIST_LABEL[ea]}</span>${ea === 'pendiente' ? '' : ' ' + esc(detalleAsist(ASIST[i.id]))}</div>`;
     return `<div class="insc">${avatar({ nombre_completo: v.nombre_completo, foto_url: v.foto_url })}
-      <div class="info"><div class="nom">${esc(nombreCorto(v.nombre_completo))}${i.voluntario_id === PERFIL.id ? ' <span style="color:var(--cyan); font-size:10px;">(vos)</span>' : ''}</div><div class="reg">N° ${esc(v.numero_registro)}</div></div>
+      <div class="info"><div class="nom">${esc(nombreCorto(v.nombre_completo))}${i.voluntario_id === PERFIL.id ? ' <span style="color:var(--cyan); font-size:10px;">(vos)</span>' : ''}</div><div class="reg">N° ${esc(v.numero_registro)}</div>${asistHtml}</div>
       ${funcHtml}${luna}
       ${oficial ? `<button class="mini-x" title="Quitar de la guardia" onclick="quitarInscripcion('${i.id}')">✕</button>` : ''}
     </div>`;
@@ -756,16 +820,17 @@ function abrirConfig(){
   document.getElementById('cfgFin').value = CONFIG.hora_fin.slice(0, 5);
   document.getElementById('cfgTotal').value = CONFIG.minimo_total;
   document.getElementById('cfgCuota').value = CONFIG.cuota_mensual;
+  document.getElementById('cfgTol').value = CONFIG.tolerancia_minutos;
   document.getElementById('cfgMaq').value = CONFIG.minimo_maquinista;
   document.getElementById('configModal').classList.add('show');
 }
 function cerrarConfig(){ document.getElementById('configModal').classList.remove('show'); }
 async function guardarConfig(){
   const v = (id) => document.getElementById(id).value;
-  const total = parseInt(v('cfgTotal'), 10), maq = parseInt(v('cfgMaq'), 10), cuota = parseInt(v('cfgCuota'), 10);
-  if(!v('cfgInicio') || !v('cfgFin') || [total, maq, cuota].some(isNaN) || total < 1){ toast('Completá todos los campos (el mínimo de personas debe ser al menos 1).', true); return; }
+  const total = parseInt(v('cfgTotal'), 10), maq = parseInt(v('cfgMaq'), 10), cuota = parseInt(v('cfgCuota'), 10), tol = parseInt(v('cfgTol'), 10);
+  if(!v('cfgInicio') || !v('cfgFin') || [total, maq, cuota, tol].some(isNaN) || total < 1 || tol < 0 || tol > 120){ toast('Completá todos los campos (el mínimo de personas debe ser al menos 1).', true); return; }
   const ok = await ejecutar(document.getElementById('btnGuardarConfig'),
-    () => sb.rpc('guardia_guardar_config', { p_compania_id: compId, p_hora_inicio: v('cfgInicio'), p_hora_fin: v('cfgFin'), p_minimo_total: total, p_minimo_maquinista: maq, p_cuota: cuota }),
+    () => sb.rpc('guardia_guardar_config', { p_compania_id: compId, p_hora_inicio: v('cfgInicio'), p_hora_fin: v('cfgFin'), p_minimo_total: total, p_minimo_maquinista: maq, p_cuota: cuota, p_tolerancia: tol }),
     'Configuración guardada', false);
   if(ok) cerrarConfig();
 }
