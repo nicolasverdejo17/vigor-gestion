@@ -381,13 +381,14 @@ const IC = {
   moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
   unlock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 6.9-1.9"/>',
+  libro: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5v-15z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 8h6M9 11.5h4"/>',
 };
 const ico = (k) => `<svg class="i" viewBox="0 0 24 24">${IC[k]}</svg>`;
 
 // ---- Estado ----
 let PERFIL = null, COMPANIAS = [], compId = null, MI_ES_MAQ = false;
 let anio = new Date().getFullYear(), mes = new Date().getMonth() + 1;
-let CONFIG = { ...CONFIG_DEF }, MES_ESTADO = 'abierto', INSCS = [], PERSONAL = [], ASIST = {};
+let CONFIG = { ...CONFIG_DEF }, MES_ESTADO = 'abierto', INSCS = [], PERSONAL = [], ASIST = {}, LIBROS = {};
 let diaSel = null, canal = null, enviando = false;
 
 // ---- Utilidades ----
@@ -489,14 +490,18 @@ async function cargarCompania(){
 
 async function cargarMes(){
   const ini = clave(anio, mes, 1), fin = clave(anio, mes, diasEnMes(anio, mes));
-  const [cfg, mrow, insc, asist] = await Promise.all([
+  const [cfg, mrow, insc, asist, libros] = await Promise.all([
     sb.from('guardia_config').select('*').eq('compania_id', compId).maybeSingle(),
     sb.from('guardia_mes').select('estado').eq('compania_id', compId).eq('anio', anio).eq('mes', mes).maybeSingle(),
     sb.from('guardia_inscripcion')
       .select('id, fecha, voluntario_id, funcion, pernocta, voluntario:personal!guardia_inscripcion_voluntario_id_fkey(nombre_completo, numero_registro, foto_url)')
       .eq('compania_id', compId).gte('fecha', ini).lte('fecha', fin).order('created_at'),
     sb.rpc('guardia_asistencia_mes', { p_compania_id: compId, p_anio: anio, p_mes: mes }),
+    // El libro es solo de oficiales (la base lo restringe igual): a un bombero no le llega ninguna fila
+    sb.from('libro_guardia').select('id, fecha, estado').eq('compania_id', compId).eq('tipo', 'nocturna').gte('fecha', ini).lte('fecha', fin),
   ]);
+  LIBROS = {};
+  (libros.data || []).forEach(l => { LIBROS[l.fecha] = l; });
   CONFIG = { ...CONFIG_DEF, ...(cfg.data || {}) };
   MES_ESTADO = (mrow.data && mrow.data.estado) || 'abierto';
   INSCS = insc.data || [];
@@ -596,6 +601,7 @@ function renderCalendario(){
       <div class="dia-top"><span class="dia-num">${d}</span><span class="dia-count">${cob.total}</span></div>
       <div class="dia-iconos">
         <span class="${cob.maq >= CONFIG.minimo_maquinista && cob.maq > 0 ? 'ok' : ''}" title="Maquinista">${cob.maq ? ico('truck') : ''}</span>
+        ${LIBROS[k] ? `<span class="ok" title="Libro de guardia ${LIBROS[k].estado}" style="${LIBROS[k].estado === 'abierto' ? 'color:var(--cyan)' : ''}">${ico('libro')}</span>` : ''}
       </div>
       <div class="dia-nombres">${nombres}</div>
       ${mio ? `<span class="dia-mio ${ea}" title="Estás anotado · ${ASIST_LABEL[ea]}"></span>` : ''}
@@ -779,6 +785,11 @@ function renderDiaAcciones(){
       <button class="btn-pri" style="width:100%" id="btnAnotarme" onclick="anotarme()">Anotarme</button></div>`;
   } else {
     h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: pedile a un oficial que te anote.'}</div></div>`;
+  }
+  if(puedeInscribir() && k <= hoy){
+    const lib = LIBROS[k];
+    h += `<div class="bloque"><label class="t">Libro de guardia</label>
+      <a class="btn-sec" style="width:100%; justify-content:center; text-decoration:none;" href="libro_guardia.html?${lib ? 'id=' + encodeURIComponent(lib.id) : 'fecha=' + k}">${ico('libro')} ${lib ? (lib.estado === 'abierto' ? 'Continuar el libro' : 'Ver el libro (cerrado)') : 'Abrir libro de guardia'}</a></div>`;
   }
   if(puedeInscribir()){
     const yaIds = new Set(inscritosDe(k).map(i => i.voluntario_id));

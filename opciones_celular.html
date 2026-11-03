@@ -203,6 +203,7 @@ const ICONOS_ROW = {
   lock: '<rect x="5.5" y="10.3" width="13" height="9.2" rx="1.6"/><path d="M8.3 10.3V7.3a3.7 3.7 0 0 1 7.4 0v3"/>',
   secretaria: '<rect x="5.5" y="3" width="13" height="18" rx="1.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/>',
   auditoria: '<path d="M12 3.5 5 6v5.5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-2.5z"/><path d="M9.3 12l1.9 1.9 3.5-3.8"/>',
+  libroGuardia: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5v-15z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 8h6M9 11.5h4"/>',
 };
 function renderIco(ico){
   return ICONOS_ROW[ico]
@@ -215,6 +216,8 @@ const FILAS_ADMIN = [
     cargos:['Secretario/a','Director'], roles:[], href:'solicitudes_alta.html' },
   { ico:'dotacion', nombre:'Dotación de Unidades', desc:'Asignar bomberos a carros',
     cargos:['Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Capitán','Director'], roles:[], href:'asignacion_dotacion_celular.html' },
+  { ico:'libroGuardia', nombre:'Libro de Guardia', desc:'Dotación, material, novedades y entrega de cada guardia',
+    cargos:['Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante de Compañía','Ayudante Cía.'], roles:[], href:'libro_guardia.html' },
   { ico:'hojaDeVida', nombre:'Registro de Bomberos', desc:'Editar historial, dar de baja o reactivar',
     cargos:['Secretario/a','Director'], roles:[], href:'usuarios_sistema.html' },
   { ico:'estadisticas', nombre:'Estadísticas', desc:'KPIs y reportes de la Compañía',
