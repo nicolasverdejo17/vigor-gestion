@@ -25,12 +25,16 @@ input:focus, select:focus, textarea:focus{ border-color:#2DD3DB !important; }
   display:flex; align-items:center; padding:0 18px;
   background:linear-gradient(180deg,#0A2234,#06141F); border-bottom:1px solid var(--line);
 }
-#vigor-banner img{ height:38px; width:auto; display:block; }
+#vigor-banner img{ height:38px; width:auto; display:block; flex-shrink:0; }
+#vigor-banner .vg-sep{ width:1.5px; height:24px; background:var(--line-strong); margin:0 14px; flex-shrink:0; }
+#vigor-banner-titulo{ font-size:16px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+h1.vg-h1-oculto{ display:none !important; }
 body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !important; }
 @media (min-width:900px){
   :root{ --banner-h:62px; }
   #vigor-banner{ padding:0 28px; }
   #vigor-banner img{ height:42px; }
+  #vigor-banner-titulo{ font-size:19px; }
 }
 @media print{ #vigor-banner{ display:none !important; } body.vg-banner{ padding-top:0 !important; } }
 
