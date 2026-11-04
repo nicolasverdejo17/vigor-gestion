@@ -126,22 +126,76 @@
     transition:all .25s; z-index:70; max-width:90vw; text-align:center;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* ---- Nuevo diseño del acceso: panel con el formulario + foto (PC) / foto arriba (celular) ---- */
+  body{ display:block; padding:0; min-height:100vh; background:#06141F;}
+  .login-shell{ display:flex; min-height:100vh; position:relative;}
+  .login-panel{ flex:0 0 560px; display:flex; align-items:center; justify-content:center; padding:120px 64px 48px; background:#06141F; position:relative; z-index:2;}
+  .card{ background:transparent; border:none; max-width:420px; padding:0;}
+  .card::before{ display:none;}
+  .login-logo{ position:absolute; left:56px; top:38px; height:54px; z-index:6;}
+  .login-hero{ position:relative; flex:1; min-height:100vh; overflow:hidden;}
+  .hero-foto{ position:absolute; inset:0; background:url(img/hero-foto.jpg) center 14%/cover no-repeat; filter:grayscale(1) contrast(1.05);}
+  .hero-shade{ position:absolute; inset:0; background:linear-gradient(90deg,#06141F 0,rgba(6,20,31,.55) 28%,rgba(6,20,31,.1) 100%),linear-gradient(0deg,rgba(6,20,31,.78),transparent 55%);}
+  .hero-icono{ position:absolute; right:44px; top:44px; width:86px; height:86px; border-radius:20px; box-shadow:0 8px 26px rgba(0,0,0,.45);}
+  .hero-texto{ position:absolute; left:64px; bottom:96px; right:64px; color:#fff;}
+  .hero-texto h2{ font-size:78px; line-height:.98; font-weight:800; letter-spacing:-.02em !important; margin:0;}
+  .hero-texto p{ font-size:22px; line-height:1.4; margin:20px 0 0; font-weight:500;}
+  .brand-block{ align-items:flex-start; padding-bottom:24px;}
+  .brand-mark{ display:none;}
+  .brand-name{ font-size:30px; font-weight:800; letter-spacing:0; line-height:1.1;}
+  .brand-sub{ text-align:left; font-size:14px; text-transform:none; letter-spacing:0; color:var(--text-muted); margin-top:8px;}
+  .brand-sub.grande{ font-size:30px; font-weight:800; color:#fff; margin-top:0; line-height:1.1;}
+  .tabs{ border-radius:12px; padding:4px;}
+  .tab-btn{ border-radius:9px; padding:12px; font-size:13.5px;}
+  .field input, .field select{ border-radius:12px; padding:14px 16px; font-size:15px;}
+  .field label{ font-size:11px; letter-spacing:.12em; color:var(--text-muted);}
+  .btn-primary{ border:none; border-radius:12px; padding:16px; font-size:16px; box-shadow:0 8px 24px rgba(45,211,219,.28);}
+  @media (max-width:899px){
+    .login-shell{ flex-direction:column;}
+    .login-hero{ order:-1; flex:none; height:340px; min-height:0;}
+    .hero-foto{ background-position:center 18%;}
+    .hero-shade{ background:linear-gradient(180deg,rgba(6,20,31,.72) 0,rgba(6,20,31,.12) 42%,#06141F 100%);}
+    .hero-texto{ left:26px; right:26px; bottom:30px;}
+    .hero-texto h2{ font-size:42px;}
+    .hero-texto p{ font-size:15px; margin-top:10px;}
+    .hero-icono{ width:46px; height:46px; right:20px; top:24px; border-radius:11px;}
+    .login-logo{ left:20px; top:22px; height:40px;}
+    .login-panel{ flex:none; padding:8px 26px 44px; align-items:flex-start;}
+    .card{ max-width:none;}
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="theme-color" content="#060A0F">
+<meta name="theme-color" content="#06141F">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Vigor">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<link rel="stylesheet" href="vigor-tema.css">
+<script src="vigor-tema.js" defer></script>
 </head>
-<body>
+<body data-sin-banner>
 
-  <div class="card">
-    <div class="content" id="content"></div>
+  <div class="login-shell">
+    <img class="login-logo" src="img/logo.png" alt="Vigor">
+    <section class="login-panel">
+      <div class="card">
+        <div class="content" id="content"></div>
+      </div>
+    </section>
+    <section class="login-hero">
+      <div class="hero-foto"></div>
+      <div class="hero-shade"></div>
+      <img class="hero-icono" src="img/icono.png" alt="">
+      <div class="hero-texto">
+        <h2>Siempre listos.</h2>
+        <p>Gestiona tu compañía de forma eficiente.</p>
+      </div>
+    </section>
   </div>
 
   <div class="modal-overlay" id="recoveryModal">
@@ -228,8 +282,8 @@ function screens(){
     login: `
       <div class="brand-block">
         <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
-        <div class="brand-name">VIGOR</div>
-        <div class="brand-sub">Accede a tu cuenta</div>
+        <div class="brand-name" style="display:none">VIGOR</div>
+        <div class="brand-sub grande">Accede a tu cuenta</div>
       </div>
 
       <div class="tabs">
