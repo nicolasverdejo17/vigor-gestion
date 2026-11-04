@@ -127,7 +127,7 @@ let miCuerpoId = null, miCompaniaId = null, miPersonalId = null;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ bloquear('Necesitás loguearte primero.'); return; }
+  if(!session){ bloquear('Debes iniciar sesión primero.'); return; }
   const { data: perfil } = await sb.from('personal')
     .select('id, cargo, cuerpo_id, compania_id').eq('auth_user_id', session.user.id).single();
   if(!perfil){ bloquear('No se encontró tu perfil.'); return; }
@@ -152,7 +152,7 @@ async function crearActividad(){
   const hora = document.getElementById('fHora').value || null;
   const lugar = document.getElementById('fLugar').value.trim() || null;
   const descripcion = document.getElementById('fDescripcion').value.trim() || null;
-  if(!tipo || !nombre || !fecha){ toast('Completá al menos el tipo, nombre y fecha (dd/mm/aaaa)'); return; }
+  if(!tipo || !nombre || !fecha){ toast('Completa al menos el tipo, nombre y fecha (dd/mm/aaaa)'); return; }
 
   const { error } = await sb.from('actividades').insert({
     cuerpo_id: miCuerpoId, compania_id: miCompaniaId, tipo, nombre, fecha, hora, lugar, descripcion,

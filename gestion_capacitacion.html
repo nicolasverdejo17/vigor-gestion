@@ -256,7 +256,7 @@ const soloMios = new URLSearchParams(window.location.search).get('mios') === '1'
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal')
     .select('id, cargo, cuerpo_id, compania_id, companias(nombre), personal_roles_funcionales(rol_funcional)')
     .eq('auth_user_id', session.user.id).single();
@@ -399,7 +399,7 @@ function renderExterno(){ document.getElementById('externoBox').classList.toggle
 async function guardarCurso(){
   const nombre = document.getElementById('mNombre').value.trim();
   const fecha = fechaAIso(document.getElementById('mFecha').value);
-  if(!nombre || !fecha){ toast('Completá nombre y fecha del curso (dd/mm/aaaa)'); return; }
+  if(!nombre || !fecha){ toast('Completa nombre y fecha del curso (dd/mm/aaaa)'); return; }
   const b = BOMBEROS[bomberoActivo];
 
   let certificadoUrl = null;

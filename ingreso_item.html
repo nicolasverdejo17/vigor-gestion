@@ -192,7 +192,7 @@
             <input type="text" class="mono" id="codigoField" placeholder="Ej. TER-001, o el que quieras">
             <button class="btn-generar-codigo" onclick="generarCodigoAuto()" title="Generar el siguiente código de este prefijo">↻ Auto</button>
           </div>
-          <div class="codigo-hint" id="codigoHint">Escribí un prefijo (ej. TER) y tocá "Auto" para que el sistema le asigne el siguiente número — 001, 002… al llegar a 999 sigue en 1000 sin volver a empezar.</div>
+          <div class="codigo-hint" id="codigoHint">Escribe un prefijo (ej. TER) y toca "Auto" para que el sistema le asigne el siguiente número — 001, 002… al llegar a 999 sigue en 1000 sin volver a empezar.</div>
         </div>
         <div class="form-field">
           <label>Nombre</label>
@@ -272,7 +272,7 @@ async function cargarDatos(){
   if(!session){
     document.getElementById('formBody').style.display = 'none';
     document.getElementById('accesoDenegado').style.display = 'block';
-    document.querySelector('#accesoDenegado .locked-note').textContent = '🔒 Necesitás loguearte primero.';
+    document.querySelector('#accesoDenegado .locked-note').textContent = '🔒 Debes iniciar sesión primero.';
     return;
   }
   const { data: perfil } = await sb.from('personal')
@@ -344,7 +344,7 @@ function setCat(key){ catSel = key; subcatSel = null; creandoCat=false; creandoS
 function setSubcat(key){ subcatSel = key; renderCats(); }
 async function confirmarCat(){
   const val = document.getElementById('newCatInput').value.trim();
-  if(!val){ toast('Escribí el nombre de la categoría'); return; }
+  if(!val){ toast('Escribe el nombre de la categoría'); return; }
   const { data, error } = await sb.from('inventario_categorias').insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, nombre: val }).select().single();
   if(error){ toast('No se pudo crear la categor\u00eda \u2014 ' + error.message); return; }
   CATS[data.id] = { label: val };
@@ -357,7 +357,7 @@ async function confirmarCat(){
 function cancelarCat(){ creandoCat = false; renderCats(); }
 async function confirmarSubcat(){
   const val = document.getElementById('newSubcatInput').value.trim();
-  if(!val){ toast('Escribí el nombre de la subcategoría'); return; }
+  if(!val){ toast('Escribe el nombre de la subcategoría'); return; }
   const { data, error } = await sb.from('inventario_categorias').insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, parent_id: catSel, nombre: val }).select().single();
   if(error){ toast('No se pudo crear la subcategoría — ' + error.message); return; }
   const arr = SUBCATS[catSel] || (SUBCATS[catSel] = []);
@@ -411,8 +411,8 @@ async function guardarIngreso(){
     el.style.borderColor = vacio ? 'var(--burdeo-bright)' : '';
     if(vacio) faltantes = true;
   });
-  if(!catSel){ toast('Elegí o creá una categoría'); return; }
-  if(faltantes){ toast('Completá todos los campos antes de guardar'); return; }
+  if(!catSel){ toast('Elige o crea una categoría'); return; }
+  if(faltantes){ toast('Completa todos los campos antes de guardar'); return; }
   const codigo = document.getElementById('codigoField').value.trim();
   const nombre = document.getElementById('nombreField').value.trim();
   const estado = document.getElementById('estadoField').value;

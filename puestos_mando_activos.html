@@ -182,7 +182,7 @@ function ajustarTabsSegunSesion(esCentral){
 
 async function cargarDatosInterno(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
 
   // Sesión institucional de Central primero (sin fila en "personal"),
   // igual que en consola_despacho.html.

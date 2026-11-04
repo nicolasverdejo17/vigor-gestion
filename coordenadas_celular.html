@@ -177,7 +177,7 @@ let miPersonalId = null, miCuerpoId = null, miCompaniaId = null;
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero', true); return; }
+  if(!session){ toast('Debes iniciar sesión primero', true); return; }
   const { data: perfil } = await sb.from('personal')
     .select('id, cuerpo_id, compania_id, companias(nombre)')
     .eq('auth_user_id', session.user.id).single();
@@ -251,8 +251,8 @@ function actualizarUbicacion(){
     pos => aplicarUbicacion(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy),
     err => {
       const motivo = err.code === 1
-        ? 'Permiso de ubicación denegado — activalo en Ajustes'
-        : 'No se pudo obtener tu ubicación real — reintentá';
+        ? 'Permiso de ubicación denegado — actívalo en Ajustes'
+        : 'No se pudo obtener tu ubicación real — reintenta';
       mostrarError(motivo);
     },
     { timeout: 8000, enableHighAccuracy: true }
@@ -274,7 +274,7 @@ function copiarCoordenadas(){
 // obtenida por GPS — no es un aviso de mentira, navega de verdad.
 function verEnMapa(){
   if(miLat === null || miLng === null){
-    toast('Primero obtené tu ubicación', true);
+    toast('Primero obtén tu ubicación', true);
     return;
   }
   window.open(`https://www.google.com/maps?q=${miLat},${miLng}`, '_blank');
@@ -285,7 +285,7 @@ function verEnMapa(){
 // — nunca un aviso de mentira sin ninguna acción real detrás.
 function compartirUbicacion(){
   if(miLat === null || miLng === null){
-    toast('Primero obtené tu ubicación', true);
+    toast('Primero obtén tu ubicación', true);
     return;
   }
   const texto = `Mi ubicación: https://www.google.com/maps?q=${miLat},${miLng}`;
@@ -293,7 +293,7 @@ function compartirUbicacion(){
     navigator.share({ title: 'Mi ubicación — Vigor', text: texto }).catch(()=>{});
   } else if(navigator.clipboard){
     navigator.clipboard.writeText(texto)
-      .then(()=>toast('Enlace copiado — pegalo donde quieras compartirlo'))
+      .then(()=>toast('Enlace copiado — pégalo donde quieras compartirlo'))
       .catch(()=>toast('Ubicación: ' + texto));
   } else {
     toast('Ubicación: ' + texto);
@@ -304,7 +304,7 @@ function compartirUbicacion(){
 // agrega el reporte de verdad al historial — igual que aparecería en la
 // Terminal de Coordenadas de Central.
 async function reportarUbicacion(){
-  if(!miPersonalId){ toast('Necesitás loguearte primero', true); return; }
+  if(!miPersonalId){ toast('Debes iniciar sesión primero', true); return; }
   const btn = document.getElementById('btnReportar');
   const confirmado = document.getElementById('envioConfirmado');
   confirmado.classList.remove('show');

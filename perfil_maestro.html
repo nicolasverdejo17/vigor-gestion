@@ -285,7 +285,7 @@
       </div>
 
       <div class="footer-note">
-        <b>Nota comercial:</b> Perfil Maestro es un componente ESTÁNDAR del producto Vigor, no algo hecho a medida para un cliente en particular. Cada institución que compre e implemente Vigor queda registrada acá, en la pestaña "Cuerpos de Bomberos" — este panel es la identidad visual del propio producto (marca del proveedor, verde nuclear #39FF14), independiente de la identidad institucional de cada cliente.
+        <b>Nota comercial:</b> Perfil Maestro es un componente ESTÁNDAR del producto Vigor, no algo hecho a medida para un cliente en particular. Cada institución que compre e implemente Vigor queda registrada aquí, en la pestaña "Cuerpos de Bomberos" — este panel es la identidad visual del propio producto (marca del proveedor, verde nuclear #39FF14), independiente de la identidad institucional de cada cliente.
       </div>
     </div>
 
@@ -343,7 +343,7 @@ async function iniciarSesion(){
   const msg = document.getElementById('loginMsg');
   msg.textContent = '';
   if(!email || !password){
-    msg.textContent = 'Completá email y contraseña.';
+    msg.textContent = 'Completa email y contraseña.';
     return;
   }
   const btn = document.getElementById('btnLogin');
@@ -414,7 +414,7 @@ async function mostrarListaCuerpos(){
       <div class="cuerpo-card-meta">📍 ${c.comuna}, ${c.region}</div>
       <div class="cuerpo-card-foot"><span class="mono">${c.codigo_cuerpo || '—'}</span><span>Instalado ${fecha}</span></div>
     </div>`;
-  }).join('') : `<div style="color:var(--text-dim); font-size:12.5px; grid-column:1/-1;">Todavía no hay ningún Cuerpo real creado en esta base de datos. Andá a la pestaña "Licencias e Instalación" para generar una licencia, activarla, y correr el Asistente de Configuración Inicial.</div>`;
+  }).join('') : `<div style="color:var(--text-dim); font-size:12.5px; grid-column:1/-1;">Todavía no hay ningún Cuerpo real creado en esta base de datos. Ve a la pestaña "Licencias e Instalación" para generar una licencia, activarla, y correr el Asistente de Configuración Inicial.</div>`;
 }
 
 function volverAListaCuerpos(){
@@ -451,10 +451,10 @@ async function abrirDetalleCuerpo(id){
 
 async function eliminarCuerpo(cuerpoId, nombre){
   if(!confirm(`¿Eliminar definitivamente "${nombre}"? Se borran todas sus Compañías, personal, carros, PC del Cuartel y datos. Esta acción NO se puede deshacer.`)) return;
-  if(!confirm('Confirmá de nuevo: esto borra TODO lo de este Cuerpo para siempre. ¿Continuar?')) return;
+  if(!confirm('Confirma de nuevo: esto borra TODO lo de este Cuerpo para siempre. ¿Continuar?')) return;
   const { error } = await sb.rpc('eliminar_cuerpo', { p_cuerpo_id: cuerpoId });
   if(error){
-    const mensajes = { CUERPO_NO_SUSPENDIDO: 'Solo se pueden eliminar Cuerpos suspendidos — suspendelo primero.' };
+    const mensajes = { CUERPO_NO_SUSPENDIDO: 'Solo se pueden eliminar Cuerpos suspendidos — suspéndelo primero.' };
     toast(mensajes[error.message] || ('No se pudo eliminar — ' + error.message));
     return;
   }

@@ -148,7 +148,7 @@
     <div class="modal-box">
       <div class="modal-icon">🔑</div>
       <h3>Recuperación manual</h3>
-      <p>Vigor no envía correos ni SMS de recuperación. El restablecimiento de contraseñas es exclusivo del <b>soporte técnico de Vigor</b> — contactalos directamente para que te generen una nueva contraseña temporal.</p>
+      <p>Vigor no envía correos ni SMS de recuperación. El restablecimiento de contraseñas es exclusivo del <b>soporte técnico de Vigor</b> — contáctalos directamente para que te generen una nueva contraseña temporal.</p>
       <button class="modal-close" onclick="hideRecoveryInfo()">Entendido</button>
     </div>
   </div>
@@ -201,7 +201,7 @@ async function verificarCodigoCuerpo(silencioso){
   const input = document.getElementById('regCodigoCuerpo');
   const codigo = (input ? input.value : codigoCuerpoTexto).trim();
   if(!codigo){
-    if(!silencioso) toast('Escribí el Código de Cuerpo');
+    if(!silencioso) toast('Escribe el Código de Cuerpo');
     return;
   }
   const { data } = await sb.rpc('resolver_cuerpo_por_codigo', { p_codigo: codigo });
@@ -229,7 +229,7 @@ function screens(){
       <div class="brand-block">
         <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#49E9FF" stroke-width="1.6"/></svg></div>
         <div class="brand-name">VIGOR</div>
-        <div class="brand-sub">Accedé a tu cuenta</div>
+        <div class="brand-sub">Accede a tu cuenta</div>
       </div>
 
       <div class="tabs">
@@ -368,7 +368,7 @@ async function intentarLogin(){
   const codigoCuerpo = document.getElementById('loginCodigoCuerpo').value.trim();
   const password = document.getElementById('loginPassword').value.trim();
   if(!usuario || !password){
-    toast('Ingresá tu usuario y contraseña');
+    toast('Ingresa tu usuario y contraseña');
     return;
   }
   const esTemporal = /^[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(password);
@@ -389,7 +389,7 @@ async function intentarLogin(){
         .eq('auth_user_id', authData.user.id).single();
       if(!perfil || (perfil.cuerpos && perfil.cuerpos.estado !== 'activo')){
         await sb.auth.signOut();
-        toast('Este Cuerpo tiene el servicio suspendido — contactá a soporte de Vigor');
+        toast('Este Cuerpo tiene el servicio suspendido — contacta a soporte de Vigor');
         return;
       }
       if(perfil.estado !== 'activo'){
@@ -420,7 +420,7 @@ async function intentarLogin(){
         const { error: authError } = await sb.auth.signInWithPassword({ email: emailCentral, password });
         if(authError){ toast('Contraseña incorrecta'); return; }
         if(esTemporal){
-          toast('Central de Alarmas identificada — definí tu contraseña…');
+          toast('Central de Alarmas identificada — define tu contraseña…');
           setTimeout(() => { window.location.href = 'definir_nueva_password.html?destino=consola_despacho.html'; }, 500);
           return;
         }
@@ -437,7 +437,7 @@ async function intentarLogin(){
         const { error: authError } = await sb.auth.signInWithPassword({ email: emailPc, password });
         if(authError){ toast('Contraseña incorrecta'); return; }
         if(esTemporal){
-          toast('PC del Cuartel identificado — definí tu contraseña…');
+          toast('PC del Cuartel identificado — define tu contraseña…');
           setTimeout(() => { window.location.href = 'definir_nueva_password.html?destino=pc_compania.html'; }, 500);
           return;
         }
@@ -451,7 +451,7 @@ async function intentarLogin(){
       const { error: authError } = await sb.auth.signInWithPassword({ email: emailCarro, password });
       if(authError){ toast('Contraseña incorrecta'); return; }
       if(esTemporal){
-        toast('Carro identificado — definí tu contraseña…');
+        toast('Carro identificado — define tu contraseña…');
         setTimeout(() => { window.location.href = 'definir_nueva_password.html?destino=tablet_carro.html'; }, 500);
         return;
       }
@@ -535,7 +535,7 @@ async function enviarSolicitud(btn){
     if(vacio) faltantes = true;
   });
   if(faltantes){
-    toast('Completá todos los campos antes de enviar');
+    toast('Completa todos los campos antes de enviar');
     return;
   }
   if(!cuerpoActivo){

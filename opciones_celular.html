@@ -144,7 +144,7 @@
 
       <div class="section-label">Preferencias</div>
       <div class="row" onclick="window.location.href='notificaciones_celular.html'">
-        <div class="row-l"><div class="row-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.7 2.7H4.3L6 16z"/><path d="M10 19.7a2 2 0 0 0 4 0"/></svg></div><div><b>Notificaciones</b><span>Qué avisos querés recibir</span></div></div>
+        <div class="row-l"><div class="row-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.7 2.7H4.3L6 16z"/><path d="M10 19.7a2 2 0 0 0 4 0"/></svg></div><div><b>Notificaciones</b><span>Qué avisos quieres recibir</span></div></div>
         <span class="row-arrow">›</span>
       </div>
 
@@ -172,7 +172,7 @@ let miNombre = null, miIniciales = null, miCiaLabel = null, miFotoUrl = null;
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal')
     .select('nombre_completo, cargo, foto_url, companias(nombre), cuerpos(nombre_oficial), personal_roles_funcionales(rol_funcional)')
     .eq('auth_user_id', session.user.id).single();
@@ -280,7 +280,7 @@ async function ir(msg){
   await sb.auth.signOut();
   setTimeout(()=>window.location.href = 'login_registro.html', 700);
 }
-function denegado(){ toast('No tenés permiso para acceder a esta sección', true); }
+function denegado(){ toast('No tienes permiso para acceder a esta sección', true); }
 
 function toast(msg, esDenegado){
   const t = document.getElementById('toast');

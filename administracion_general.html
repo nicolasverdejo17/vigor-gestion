@@ -296,7 +296,7 @@ async function cargarCompaniasExistentes(cuerpoId){
           <div style="font-size:13.5px; font-weight:600;">${c.nombre}</div>
           <div style="font-size:11px; color:var(--text-dim);">${bomberos} bombero${bomberos!==1?'s':''} · ${carros} carro${carros!==1?'s':''}</div>
         </div>
-        <button ${vacia ? '' : 'disabled title="Tiene personal o carros asignados — trasladalos antes de eliminar"'}
+        <button ${vacia ? '' : 'disabled title="Tiene personal o carros asignados — trasládalos antes de eliminar"'}
           onclick="eliminarCompania('${c.id}','${c.nombre.replace(/'/g,"\\'")}', ${cuerpoId ? `'${cuerpoId}'` : null})"
           style="background:${vacia ? 'var(--burdeo)' : 'var(--line)'}; border:1.5px solid ${vacia ? 'var(--burdeo-bright)' : 'var(--line-strong)'}; color:${vacia ? '#fff' : 'var(--text-dim)'}; font-family:'Rajdhani'; font-weight:700; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:7px 12px; border-radius:5px; cursor:${vacia ? 'pointer' : 'not-allowed'}; flex-shrink:0;">🗑 Eliminar</button>
       </div>
@@ -308,7 +308,7 @@ async function eliminarCompania(id, nombre, cuerpoId){
   if(!confirm(`¿Eliminar ${nombre}? Esta acción no se puede deshacer.`)) return;
   const { error } = await sb.rpc('eliminar_compania_vacia', { p_compania_id: id });
   if(error){
-    const mensajes = { COMPANIA_NO_ESTA_VACIA: 'Esta Compañía ya no está vacía — trasladá su personal y carros antes de eliminarla.' };
+    const mensajes = { COMPANIA_NO_ESTA_VACIA: 'Esta Compañía ya no está vacía — traslada su personal y carros antes de eliminarla.' };
     toast(mensajes[error.message] || ('No se pudo eliminar — ' + error.message));
     return;
   }

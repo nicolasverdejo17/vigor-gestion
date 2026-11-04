@@ -281,12 +281,12 @@ function detectarPaquete(modulosIds){
 
 async function generarLicencia(){
   if(!sesionActual){
-    toast('Tenés que iniciar sesión con una cuenta Super Admin primero', true);
+    toast('Debes iniciar sesión con una cuenta Super Admin primero', true);
     return;
   }
   const nombre = document.getElementById('fNombre').value.trim();
   if(!nombre){
-    toast('Ingresá el nombre del Cuerpo cliente', true);
+    toast('Ingresa el nombre del Cuerpo cliente', true);
     return;
   }
   const codigo = `VGR-${generarSegmento()}-${generarSegmento()}-${generarSegmento()}`;
@@ -415,7 +415,7 @@ async function iniciarSesion(){
   const msg = document.getElementById('loginMsg');
   msg.textContent = '';
   if(!email || !password){
-    msg.textContent = 'Completá email y contraseña.';
+    msg.textContent = 'Completa email y contraseña.';
     return;
   }
   const btn = document.getElementById('btnLogin');

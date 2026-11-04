@@ -185,7 +185,7 @@ let miCompaniaId = null;
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('cuerpo_id, compania_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
   if(perfil && perfil.cuerpo_id){
     cuerpoActivo = perfil.cuerpo_id;

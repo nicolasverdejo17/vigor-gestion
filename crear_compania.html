@@ -238,7 +238,7 @@ let cuerpoActivo = null;
 const ROLES_CON_ACCESO = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
   if(perfil && perfil.cuerpo_id){
     if(!ROLES_CON_ACCESO.includes(perfil.cargo)){
@@ -289,7 +289,7 @@ function actualizarPreview(){
 
 async function crearCompania(){
   const numTxt = document.getElementById('numeroField').value.trim();
-  if(!numTxt){ toast('Ingresá el N° de la Compañía'); return; }
+  if(!numTxt){ toast('Ingresa el N° de la Compañía'); return; }
   const num = parseInt(numTxt.replace(/\D/g, ''), 10);
   if(!num){ toast('El N° de Compañía debe incluir un número'); return; }
   if(!cuerpoActivo){ toast('No se pudo determinar el Cuerpo de esta instalación'); return; }
@@ -298,7 +298,7 @@ async function crearCompania(){
   const directorNumTxt = document.getElementById('directorNumeroField').value.trim();
   const directorNumero = parseInt(directorNumTxt.replace(/\D/g, ''), 10);
   if(!directorNombre || !directorNumTxt || !directorNumero){
-    toast('Completá el nombre y N° de Registro del Director — se crea junto con la Compañía');
+    toast('Completa el nombre y N° de Registro del Director — se crea junto con la Compañía');
     return;
   }
 
@@ -335,15 +335,15 @@ function mostrarCredencialesNuevaCompania(nombreCompania, numeroCompania, direct
   modal.innerHTML = `
     <div style="background:var(--panel);border:1.5px solid var(--brass-dim);border-radius:12px;padding:26px 24px;max-width:420px;width:100%;">
       <h3 style="font-size:16px;margin-bottom:12px;">✅ ${nombreCompania} creada</h3>
-      <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Guardá estas dos contraseñas ahora — no se vuelven a mostrar.</p>
+      <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Guarda estas dos contraseñas ahora — no se vuelven a mostrar.</p>
 
       <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">👤 Director — ${directorNombre} (N° ${directorNumero})</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:18px;text-align:center;color:var(--cyan);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin-bottom:14px;">${passwordDirector}</div>
-      <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Entra en login_registro.html con Usuario N° ${directorNumero} — no hace falta el Código de Cuerpo. Se la cambia él mismo al entrar.</p>
+      <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Ingresa desde la pantalla de inicio de sesión con Usuario N° ${directorNumero} — no hace falta el Código de Cuerpo. Se la cambia él mismo al entrar.</p>
 
       <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">🖥️ PC del Cuartel — N° de Compañía ${numeroCompania}</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:18px;text-align:center;color:var(--brass-bright);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin-bottom:16px;">${passwordPc}</div>
-      <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Entra en login_registro.html con Usuario ${numeroCompania} (el N° de Compañía) + el Código de Cuerpo.</p>
+      <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Ingresa desde la pantalla de inicio de sesión con Usuario ${numeroCompania} (el N° de Compañía) + el Código de Cuerpo.</p>
 
       <button onclick="this.closest('div[style*=fixed]').remove();" style="width:100%;background:var(--cyan-dim);border:2px solid var(--cyan);color:#fff;font-family:'Rajdhani';font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px;padding:11px;border-radius:7px;cursor:pointer;">Entendido</button>
     </div>`;

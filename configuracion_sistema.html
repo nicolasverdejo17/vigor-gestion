@@ -110,7 +110,7 @@
     <div class="panel" id="panelSelectorCuerpo" style="display:none;">
       <h3>Cuerpo a configurar</h3>
       <div class="setting-row">
-        <div class="setting-info"><b>Cuerpo de Bomberos</b><span>La configuración es por Cuerpo, no global — elegí cuál editar</span></div>
+        <div class="setting-info"><b>Cuerpo de Bomberos</b><span>La configuración es por Cuerpo, no global — elige cuál editar</span></div>
         <select id="selectCuerpo" class="mono" style="background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:8px 10px; color:var(--text); min-width:220px;"></select>
       </div>
     </div>
@@ -118,7 +118,7 @@
     <div class="panel">
       <h3>Central de Alarmas</h3>
       <div class="setting-row">
-        <div class="setting-info"><b>Credencial institucional</b><span>Cuenta propia de la Central — se entra desde login_registro.html escribiendo "CENTRAL" en Usuario + el Código de Cuerpo</span></div>
+        <div class="setting-info"><b>Credencial institucional</b><span>Cuenta propia de la Central — se ingresa desde la pantalla de inicio de sesión escribiendo "CENTRAL" en Usuario e indicando el Código de Cuerpo</span></div>
         <button onclick="regenerarCredencialCentral()" style="background:var(--panel-alt); border:1.5px solid var(--master); color:var(--master); font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:8px 14px; border-radius:5px; cursor:pointer; flex-shrink:0; margin-left:16px;">🔑 Generar / Regenerar</button>
       </div>
     </div>
@@ -146,7 +146,7 @@ let esSuperAdmin = false;
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
   if(perfil && perfil.cuerpo_id){
     if(!ROLES_CON_ACCESO.includes(perfil.cargo)){
@@ -193,7 +193,7 @@ async function toggleSetting(id){
 // Misma lógica que "🔑 Credencial PC" en crear_compania.html, pero para la
 // cuenta institucional de Central (una por Cuerpo, no por Compañía).
 async function regenerarCredencialCentral(){
-  if(!cuerpoActivo){ toast('Elegí primero un Cuerpo'); return; }
+  if(!cuerpoActivo){ toast('Elige primero un Cuerpo'); return; }
   if(!confirm('¿Generar una contraseña nueva para la Central de Alarmas? Si ya había una, deja de funcionar.')) return;
   const { data, error } = await sb.rpc('crear_login_central', { p_cuerpo_id: cuerpoActivo });
   if(error){ toast('No se pudo generar — ' + error.message); return; }
@@ -208,7 +208,7 @@ function mostrarCredencialCentral(nombreCuerpo, codigoCuerpo, passwordTemporal){
     <div style="background:var(--panel);border:1.5px solid var(--master-dim);border-radius:12px;padding:26px 24px;max-width:380px;width:100%;">
       <h3 style="font-size:16px;margin-bottom:12px;">📻 Central de Alarmas — ${nombreCuerpo}</h3>
       <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">
-        En el PC de la Central, andá a <b>login_registro.html</b> → en Usuario escribí <b>CENTRAL</b>, completá el Código de Cuerpo (<b>${codigoCuerpo || '—'}</b>) y esta contraseña. Guardala ahora, no se vuelve a mostrar.
+        En el PC de la Central, ve a la pantalla de <b>inicio de sesión</b>, escribe <b>CENTRAL</b> en Usuario, completa el Código de Cuerpo (<b>${codigoCuerpo || '—'}</b>) y esta contraseña. Guárdala ahora, no se vuelve a mostrar.
       </p>
       <div style="font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center;color:var(--master);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:12px;margin-bottom:16px;">${passwordTemporal}</div>
       <button onclick="this.closest('div[style*=fixed]').remove();" style="width:100%;background:var(--master-dim);border:2px solid var(--master);color:#fff;font-family:'Rajdhani';font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px;padding:11px;border-radius:7px;cursor:pointer;">Entendido</button>
@@ -224,7 +224,7 @@ function toast(msg){
 
 document.getElementById('expDias').addEventListener('change', async function(){
   const dias = parseInt(this.value, 10);
-  if(!dias || dias <= 0){ toast('Ingresá un número de días válido'); return; }
+  if(!dias || dias <= 0){ toast('Ingresa un número de días válido'); return; }
   const { error } = await sb.from('configuracion_cuerpo').update({ password_temporal_dias: dias, actualizado_en: new Date().toISOString() }).eq('cuerpo_id', cuerpoActivo);
   if(error){ toast('No se pudo guardar — ' + error.message); return; }
   toast('Expiración de contraseña temporal actualizada a ' + dias + ' días');

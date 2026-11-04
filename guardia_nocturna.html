@@ -263,7 +263,7 @@
 <body>
 
   <div id="sinSesion" style="display:none; padding:40vh 16px 40px; color:var(--text-muted); text-align:center;">
-    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+    Debes iniciar sesión primero. <a href="login_registro.html" style="color:var(--cyan);">Ir a iniciar sesión</a>
   </div>
 
   <div id="wrap">
@@ -416,11 +416,11 @@ const ERRORES = {
   MES_NO_HABILITADO: 'El mes siguiente se habilita para anotarse desde el día 20.',
   FECHA_PASADA: 'Esa noche ya pasó, no se puede modificar.',
   YA_INSCRITO: 'Ya estás anotado esa noche.',
-  SOLO_TU_COMPANIA: 'Solo podés anotarte en la guardia de tu propia Compañía.',
+  SOLO_TU_COMPANIA: 'Solo puedes anotarte en la guardia de tu propia Compañía.',
   FUNCION_INVALIDA: 'Función no válida.',
   NO_ES_MAQUINISTA: 'Solo quien tiene asignado el rol de Maquinista puede anotarse como maquinista.',
-  SIN_PERMISO: 'No tenés permiso para hacer esto.',
-  SIN_SESION: 'Tu sesión expiró — volvé a iniciar sesión.',
+  SIN_PERMISO: 'No tienes permiso para hacer esto.',
+  SIN_SESION: 'Tu sesión expiró — vuelve a iniciar sesión.',
   VOLUNTARIO_NO_ES_DE_LA_COMPANIA: 'Ese voluntario no pertenece a esta Compañía.',
 };
 function msgError(e){
@@ -451,7 +451,7 @@ async function iniciar(){
   compId = perfil.compania_id;
   if(!compId){
     document.getElementById('sinSesion').style.display = 'block';
-    document.getElementById('sinSesion').textContent = 'No pertenecés a ninguna Compañía.';
+    document.getElementById('sinSesion').textContent = 'No perteneces a ninguna Compañía.';
     return;
   }
   const [{ data: cia }, { data: esp }] = await Promise.all([
@@ -621,7 +621,7 @@ function renderMisNoches(){
   p.innerHTML = `<h3>Mis noches · ${MESES[mes - 1]}</h3>
     <div class="mis-num">${c.completa}<small> / ${cuota} completas</small></div>
     <div class="progreso ${cumple ? 'cumplida' : ''}"><div style="width:${pct}%"></div></div>
-    <div class="nota">${cumple ? 'Cuota del mes cumplida.' : `Te faltan ${faltan} noche${faltan === 1 ? '' : 's'} completa${faltan === 1 ? '' : 's'} para la cuota${c.pendiente ? ` (tenés ${c.pendiente} anotada${c.pendiente === 1 ? '' : 's'} por cumplir)` : ''}.`}</div>
+    <div class="nota">${cumple ? 'Cuota del mes cumplida.' : `Te faltan ${faltan} noche${faltan === 1 ? '' : 's'} completa${faltan === 1 ? '' : 's'} para la cuota${c.pendiente ? ` (tienes ${c.pendiente} anotada${c.pendiente === 1 ? '' : 's'} por cumplir)` : ''}.`}</div>
     <div class="stats-noches">
       <span class="stat-pill pendiente"><b>${c.pendiente}</b>por cumplir</span>
       <span class="stat-pill completa"><b>${c.completa}</b>completas</span>
@@ -742,7 +742,7 @@ function renderDiaLista(){
     const ea = estadoAsist(i.id);
     const asistHtml = `<div class="asist-det"><span class="asist ${ea}">${ASIST_LABEL[ea]}</span>${ea === 'pendiente' ? '' : ' ' + esc(detalleAsist(ASIST[i.id]))}</div>`;
     return `<div class="insc">${avatar({ nombre_completo: v.nombre_completo, foto_url: v.foto_url })}
-      <div class="info"><div class="nom">${esc(nombreCorto(v.nombre_completo))}${i.voluntario_id === PERFIL.id ? ' <span style="color:var(--cyan); font-size:10px;">(vos)</span>' : ''}</div><div class="reg">N° ${esc(v.numero_registro)}</div>${asistHtml}</div>
+      <div class="info"><div class="nom">${esc(nombreCorto(v.nombre_completo))}${i.voluntario_id === PERFIL.id ? ' <span style="color:var(--cyan); font-size:10px;">(tú)</span>' : ''}</div><div class="reg">N° ${esc(v.numero_registro)}</div>${asistHtml}</div>
       ${funcHtml}${luna}
       ${oficial ? `<button class="mini-x" title="Quitar de la guardia" onclick="quitarInscripcion('${i.id}')">✕</button>` : ''}
     </div>`;
@@ -774,7 +774,7 @@ function renderDiaAcciones(){
       h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: solo un oficial puede cambiar tu inscripción.'}</div></div>`;
     }
   } else if(!pasada && mesAbierto()){
-    // La opción "maquinista" solo aparece si tenés ese rol asignado en el sistema
+    // La opción "maquinista" solo aparece si tienes ese rol asignado en el sistema
     const selFuncion = MI_ES_MAQ
       ? `<select class="sel" id="miFuncion"><option value="bombero">Como bombero</option><option value="maquinista">Como maquinista</option></select>`
       : `<input type="hidden" id="miFuncion" value="bombero">`;
@@ -783,7 +783,7 @@ function renderDiaAcciones(){
       <label class="chk"><input type="checkbox" id="miPernocta"> Pernocto</label></div>
       <button class="btn-pri" style="width:100%" id="btnAnotarme" onclick="anotarme()">Anotarme</button></div>`;
   } else {
-    h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: pedile a un oficial que te anote.'}</div></div>`;
+    h += `<div class="bloque"><div class="aviso">${pasada ? 'Esta noche ya pasó.' : 'El mes está cerrado: pídele a un oficial que te anote.'}</div></div>`;
   }
   if(k <= hoy){
     const lib = LIBROS[k];
@@ -865,7 +865,7 @@ function cerrarConfig(){ document.getElementById('configModal').classList.remove
 async function guardarConfig(){
   const v = (id) => document.getElementById(id).value;
   const total = parseInt(v('cfgTotal'), 10), maq = parseInt(v('cfgMaq'), 10), cuota = parseInt(v('cfgCuota'), 10), tol = parseInt(v('cfgTol'), 10);
-  if(!v('cfgInicio') || !v('cfgFin') || [total, maq, cuota, tol].some(isNaN) || total < 1 || tol < 0 || tol > 120){ toast('Completá todos los campos (el mínimo de personas debe ser al menos 1).', true); return; }
+  if(!v('cfgInicio') || !v('cfgFin') || [total, maq, cuota, tol].some(isNaN) || total < 1 || tol < 0 || tol > 120){ toast('Completa todos los campos (el mínimo de personas debe ser al menos 1).', true); return; }
   const ok = await ejecutar(document.getElementById('btnGuardarConfig'),
     () => sb.rpc('guardia_guardar_config', { p_compania_id: compId, p_hora_inicio: v('cfgInicio'), p_hora_fin: v('cfgFin'), p_minimo_total: total, p_minimo_maquinista: maq, p_cuota: cuota, p_tolerancia: tol }),
     'Configuración guardada', false);

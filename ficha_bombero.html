@@ -284,7 +284,7 @@
   <div class="modal-overlay" id="exportModal">
     <div class="modal-box">
       <h3>Exportar Hoja de Vida</h3>
-      <div class="modal-sub">Elegí qué tipos de entrada incluir en el PDF.</div>
+      <div class="modal-sub">Elige qué tipos de entrada incluir en el PDF.</div>
       <div id="exportCheckList"></div>
       <div class="modal-actions">
         <button class="modal-cancel" onclick="cerrarExportModal()">Cancelar</button>
@@ -296,7 +296,7 @@
   <div class="modal-overlay" id="agregarModal">
     <div class="modal-box wide">
       <h3>Agregar Entrada a la Hoja de Vida</h3>
-      <div class="modal-sub" id="modalHvSub">Registrá un nuevo hecho en el historial.</div>
+      <div class="modal-sub" id="modalHvSub">Registra un nuevo hecho en el historial.</div>
       <div class="m-field">
         <label>Tipo de entrada</label>
         <div class="tipo-select-row" id="tipoEntradaRow"></div>
@@ -365,7 +365,7 @@
           </optgroup>
           <option value="__manual__">✎ Escribir manualmente…</option>
         </select>
-        <input type="text" id="cargoModalCargoManual" placeholder="Escribí el cargo exacto" style="display:none; margin-top:8px;">
+        <input type="text" id="cargoModalCargoManual" placeholder="Escribe el cargo exacto" style="display:none; margin-top:8px;">
       </div>
       <div class="m-field">
         <label>Roles Funcionales (adicionales al Cargo)</label>
@@ -420,7 +420,7 @@ function volverDesdeFicha(){
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ document.getElementById('sinSesion').textContent = 'Necesitás loguearte primero.'; document.getElementById('sinSesion').style.display = 'block'; return; }
+  if(!session){ document.getElementById('sinSesion').textContent = 'Debes iniciar sesión primero.'; document.getElementById('sinSesion').style.display = 'block'; return; }
   const { data: perfil } = await sb.from('personal').select('id, cargo').eq('auth_user_id', session.user.id).single();
   if(!perfil){ document.getElementById('sinSesion').textContent = 'No se encontró tu perfil.'; document.getElementById('sinSesion').style.display = 'block'; return; }
   miPersonalId = perfil.id;
@@ -469,7 +469,7 @@ async function cargarDatos(){
   document.getElementById('btnEditarCargo').style.display = puedeEditarCargo ? '' : 'none';
   document.getElementById('btnDarBaja').style.display = (puedeAdministrar && !esViendoAMiPropiaFicha) ? '' : 'none';
   document.getElementById('btnAgregarHv').style.display = puedeAdministrar ? '' : 'none';
-  document.getElementById('modalHvSub').textContent = `Registrá un nuevo hecho en el historial de ${b.nombre_completo}.`;
+  document.getElementById('modalHvSub').textContent = `Registra un nuevo hecho en el historial de ${b.nombre_completo}.`;
 
   await renderHojaDeVida();
 }
@@ -569,7 +569,7 @@ async function guardarCargoModal(){
   const select = document.getElementById('cargoModalCargo');
   const esManual = select.value === '__manual__';
   const cargoFinal = esManual ? document.getElementById('cargoModalCargoManual').value.trim() : select.value;
-  if(!cargoFinal){ toast('Escribí el Cargo antes de guardar'); return; }
+  if(!cargoFinal){ toast('Escribe el Cargo antes de guardar'); return; }
 
   const { error } = await sb.rpc('actualizar_cargo_y_roles', {
     p_personal_id: bomberoId, p_cargo: cargoFinal, p_roles_funcionales: [...rolesSelModal]
@@ -620,7 +620,7 @@ async function guardarEntradaHV(){
   const fecha = fechaAIso(document.getElementById('entradaFecha').value);
   const detalle = document.getElementById('entradaDetalle').value.trim() || null;
   if(!titulo || !fecha){
-    toast('Completá al menos el título y la fecha (dd/mm/aaaa)');
+    toast('Completa al menos el título y la fecha (dd/mm/aaaa)');
     return;
   }
   const { data: { session } } = await sb.auth.getSession();
@@ -650,7 +650,7 @@ function toggleExportTipo(key){
   renderExportCheckList();
 }
 function generarPDF(){
-  if(exportSel.size===0){ toast('Elegí al menos un tipo de entrada'); return; }
+  if(exportSel.size===0){ toast('Elige al menos un tipo de entrada'); return; }
   document.querySelectorAll('.hv-item').forEach(item=>{
     const tipo = item.getAttribute('data-tipo');
     item.classList.toggle('print-hidden', !exportSel.has(tipo));

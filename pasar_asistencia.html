@@ -154,15 +154,15 @@ let BOMBEROS = [];
 
 async function cargarDatos(){
   if(!actividadId){
-    document.write('<p style="color:#E7F5FA; font-family:sans-serif; padding:40px;">Falta la actividad. Volvé a <a href="actividades_celular.html" style="color:#49E9FF;">Actividades</a> y elegí una de la lista.</p>');
+    document.write('<p style="color:#E7F5FA; font-family:sans-serif; padding:40px;">Falta la actividad. Vuelve a <a href="actividades_celular.html" style="color:#49E9FF;">Actividades</a> y elige una de la lista.</p>');
     return;
   }
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
 
   const { data: act, error } = await sb.from('actividades').select('*, companias(nombre)').eq('id', actividadId).single();
   if(error || !act){
-    document.write('<p style="color:#E7F5FA; font-family:sans-serif; padding:40px;">No se encontró la actividad. Volvé a <a href="actividades_celular.html" style="color:#49E9FF;">Actividades</a> y elegí una de la lista.</p>');
+    document.write('<p style="color:#E7F5FA; font-family:sans-serif; padding:40px;">No se encontró la actividad. Vuelve a <a href="actividades_celular.html" style="color:#49E9FF;">Actividades</a> y elige una de la lista.</p>');
     return;
   }
   actividad = act;

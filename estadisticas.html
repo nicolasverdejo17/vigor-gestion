@@ -222,7 +222,7 @@
     <button class="nivel-tab on" id="tabCompania" onclick="setNivel('compania')">Compañía</button>
     <button class="nivel-tab" id="tabCuerpo" onclick="setNivel('cuerpo')">Cuerpo de Bomberos</button>
     <select id="selCompaniaVista" onchange="onCompaniaVistaChange()" style="display:none; margin:8px 0 8px 10px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:6px 10px; font-size:12.5px; color:var(--text);">
-      <option value="">— Elegí una Compañía —</option>
+      <option value="">— Elige una Compañía —</option>
     </select>
   </div>
 
@@ -330,7 +330,7 @@ let CLAVES = []; // [{id, codigo, nombre}] — catálogo real y configurable del
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal')
     .select('cargo, cuerpo_id, compania_id, companias(nombre), cuerpos(nombre_oficial)')
     .eq('auth_user_id', session.user.id).maybeSingle();
@@ -370,7 +370,7 @@ async function cargarSesion(){
   if(esInstitucional){
     const { data: cias } = await sb.from('companias').select('id, nombre').eq('cuerpo_id', miCuerpoId).order('numero');
     const sel = document.getElementById('selCompaniaVista');
-    sel.innerHTML = '<option value="">— Elegí una Compañía —</option>' + (cias || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+    sel.innerHTML = '<option value="">— Elige una Compañía —</option>' + (cias || []).map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
     sel.style.display = '';
     miCompaniaId = null;
     await setNivel('cuerpo');
@@ -684,7 +684,7 @@ async function setNivel(n){
   // no hay que cargar/mostrar nada hasta que elija una (nunca la propia
   // precargada).
   if(n === 'compania' && esInstitucional && !miCompaniaId){
-    document.getElementById('tituloEstadisticas').textContent = 'Elegí una Compañía arriba para ver sus estadísticas';
+    document.getElementById('tituloEstadisticas').textContent = 'Elige una Compañía arriba para ver sus estadísticas';
     return;
   }
 

@@ -271,7 +271,7 @@ let elapsedRefPerf = 0;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
 
   // Modo Crisis se abre exclusivamente desde el botón del PC del Cuartel
   // (pc_compania.html) — esa es una identidad institucional (companias.auth_user_id),
@@ -280,7 +280,7 @@ async function cargarDatos(){
   const { data: pc } = await sb.rpc('pc_obtener_compania');
   const pcRow = Array.isArray(pc) ? pc[0] : pc;
   if(!pcRow){
-    toast('Esta sesión no es un PC de Cuartel identificado — entrá desde el botón "Modo Crisis" del PC del Cuartel');
+    toast('Esta sesión no es un PC de Cuartel identificado — entra desde el botón "Modo Crisis" del PC del Cuartel');
     return;
   }
   const companiaId = pcRow.p_compania_id;
@@ -357,7 +357,7 @@ async function setMeta(id, campo, val){
 async function addCarro(id){
   const nom = document.getElementById(`carro-nom-${id}`).value.trim();
   const proc = document.getElementById(`carro-proc-${id}`).value.trim();
-  if(!nom){ toast('Ingresá al menos la nomenclatura del carro'); return; }
+  if(!nom){ toast('Ingresa al menos la nomenclatura del carro'); return; }
   const { error } = await sb.from('batallon_carros').insert({ batallon_id: id, nomenclatura: nom, procedencia: proc || 'Base' });
   if(error){ toast('No se pudo agregar el carro — ' + error.message); return; }
   await cargarBatallones();
@@ -369,7 +369,7 @@ async function delCarro(id, carroId){
 async function addBombero(id){
   const nombre = document.getElementById(`bomb-nombre-${id}`).value.trim();
   const rol = document.getElementById(`bomb-rol-${id}`).value;
-  if(!nombre){ toast('Ingresá el nombre del bombero'); return; }
+  if(!nombre){ toast('Ingresa el nombre del bombero'); return; }
   const { error } = await sb.from('batallon_bomberos').insert({ batallon_id: id, nombre, rol });
   if(error){ toast('No se pudo agregar el bombero — ' + error.message); return; }
   await cargarBatallones();
@@ -387,7 +387,7 @@ function toggleAbierto(id){
 function render(){
   const el = document.getElementById('batallones');
   if(batallones.length===0){
-    el.innerHTML = '<div class="empty-state">Sin Batallones creados todavía. Tocá "+ Crear Batallón" para empezar a organizar los recursos del evento.</div>';
+    el.innerHTML = '<div class="empty-state">Sin Batallones creados todavía. Toca "+ Crear Batallón" para empezar a organizar los recursos del evento.</div>';
     return;
   }
   el.innerHTML = batallones.map(b => `
@@ -463,7 +463,7 @@ function confirmarDesactivarCrisis(){
 document.getElementById('btnConfirmarDesactivar').addEventListener('click', async () => {
   const { error } = await sb.rpc('desactivar_puesto_mando', { p_puesto_mando_id: miPuestoMandoId });
   document.getElementById('desactivarModal').classList.remove('show');
-  if(error){ toast('No se pudo desactivar — hay Batallones en "En Emergencia", cambiá su estado primero'); return; }
+  if(error){ toast('No se pudo desactivar — hay Batallones en "En Emergencia", cambia su estado primero'); return; }
   toast('Modo Crisis desactivado — volviendo al PC del Cuartel');
   setTimeout(() => { window.location.href = 'pc_compania.html'; }, 700);
 });

@@ -389,7 +389,7 @@
   <div class="modal-overlay" id="configClavesModal">
     <div class="modal-box-claves">
       <h3>Configurar Claves</h3>
-      <div class="modal-sub">Ajustá el código y el nombre de cada clave a la nomenclatura real de tu Cuerpo. Algunas pueden tener subcategorías propias (ej. 10-0-1, 10-0-2…).</div>
+      <div class="modal-sub">Ajusta el código y el nombre de cada clave a la nomenclatura real de tu Cuerpo. Algunas pueden tener subcategorías propias (ej. 10-0-1, 10-0-2…).</div>
       <div id="listaConfigClaves"></div>
       <button class="btn-nueva-clave" onclick="agregarNuevaClave()">+ Nueva Clave</button>
       <div class="modal-actions">
@@ -455,7 +455,7 @@ function reproducirTono(url){
 // "persona" (compatibilidad con roles que llegaban acá por default).
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
 
   const { data: cuerpoCentral } = await sb.rpc('central_obtener_cuerpo');
   const filaCentral = cuerpoCentral && cuerpoCentral[0];
@@ -564,7 +564,7 @@ async function marcarOperador(){
     input.style.borderColor = 'var(--burdeo-bright)';
     setTimeout(()=>{ input.style.borderColor = ''; }, 900);
     const sinSesion = (error.message || '').includes('SIN_SESION');
-    toast(sinSesion ? 'Tu sesión de Central expiró — cerrá sesión y volvé a entrar' : 'N° de operador no reconocido');
+    toast(sinSesion ? 'Tu sesión de Central expiró — cierra sesión y vuelve a entrar' : 'N° de operador no reconocido');
     return;
   }
   const fila = data && data[0];
@@ -759,7 +759,7 @@ function toggleCarro(id){
   renderCarroSelect();
 }
 function addSeleccion(){
-  if(!ciaActiva || carrosSel.length===0){ toast('Elegí una Compañía y al menos un carro'); return; }
+  if(!ciaActiva || carrosSel.length===0){ toast('Elige una Compañía y al menos un carro'); return; }
   const cia = CIAS_DATA.find(c => c.id === ciaActiva);
   const carros = carrosSel.map(id => ({ id, nom: cia.carros.find(c=>c.id===id).nomenclatura }));
   despachoActual.push({ compania_id: ciaActiva, ciaNombre: cia.nombre, carros });
@@ -884,7 +884,7 @@ function guardarConfigClaves(){
 // (bombero/oficial) no se ve afectada, siempre tiene su propio personal_id.
 function mensajeErrorOperador(error){
   if(error && error.message && error.message.includes('SIN_OPERADOR_EN_TURNO')){
-    return 'Marcá al menos un Operador en turno (arriba, N° de Registro) antes de confirmar';
+    return 'Marca al menos un Operador en turno (arriba, N° de Registro) antes de confirmar';
   }
   return null;
 }
@@ -893,7 +893,7 @@ async function confirmarDespacho(){
   marcarAccionLocal();
   const dir = document.getElementById('direccion').value.trim();
   if(!dir || despachoActual.length===0 || !tipoSel){
-    toast('Completá dirección, al menos una Compañía/carro y el tipo de emergencia');
+    toast('Completa dirección, al menos una Compañía/carro y el tipo de emergencia');
     return;
   }
   const unidades = despachoActual.flatMap(d => d.carros.map(c => ({ compania_id: d.compania_id, carro_id: c.id })));
@@ -964,7 +964,7 @@ function toggleAlertaTodas(id){
 async function confirmarAlerta(id){
   const a = ALERTAS.find(x=>x.id===id);
   const sel = alertaCiasSel[id];
-  if(sel.length===0){ toast('Elegí al menos una Compañía destino'); return; }
+  if(sel.length===0){ toast('Elige al menos una Compañía destino'); return; }
   const todas = sel.length === CIAS_DATA.length;
   const { error } = await sb.rpc('confirmar_alerta_especial', {
     p_tipo: id, p_companias_destino: todas ? null : sel

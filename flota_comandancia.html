@@ -201,7 +201,7 @@ let FLOTA_COMANDANCIA = [];
 async function cargarFlota(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
-    document.getElementById('roleTag').textContent = 'Sin sesión — andá a login_registro.html';
+    document.getElementById('roleTag').textContent = 'Sin sesión — inicia sesión primero';
     return;
   }
   const { data: perfil } = await sb.from('personal')
@@ -428,8 +428,8 @@ async function guardarNuevaMantencion(i){
   const tipo = document.getElementById('ft_mant_tipo').value;
   const fecha = fechaAIso(document.getElementById('ft_mant_fecha').value);
   const desc = document.getElementById('ft_mant_desc').value.trim();
-  if(!fecha){ toast('Elegí una fecha (dd/mm/aaaa)'); return; }
-  if(!desc){ toast('Escribí una descripción'); return; }
+  if(!fecha){ toast('Elige una fecha (dd/mm/aaaa)'); return; }
+  if(!desc){ toast('Escribe una descripción'); return; }
   const c = FLOTA_COMANDANCIA[i];
   const { data, error } = await sb.from('mantenciones')
     .insert({ carro_id: c.id, fecha, tipo, descripcion: desc, estado:'pendiente' })

@@ -405,7 +405,7 @@ label {
       </div>
     </div>
     <div id="suspenderActivoOculto" class="hidden" style="text-align:center; color:var(--text-muted); padding:20px 0;">
-      Esta acción es para personal actualmente en servicio. Este bombero ya está dado de baja — usá la pestaña Reactivar.
+      Esta acción es para personal actualmente en servicio. Este bombero ya está dado de baja — usa la pestaña Reactivar.
     </div>
     <div id="suspendidoWrap" class="hidden">
       <div class="section-title">Esta persona está suspendida</div>
@@ -480,7 +480,7 @@ async function cargarDatos(){
   };
 
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('nombre_completo, cargo').eq('auth_user_id', session.user.id).single();
   if(!perfil) return;
   miNombre = perfil.nombre_completo;

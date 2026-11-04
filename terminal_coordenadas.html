@@ -180,7 +180,7 @@ let miCuerpoId = null;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
 
   // La Central de Alarmas (sesión institucional, sin fila en "personal")
   // también usa esta pestaña — se prueba primero, igual que en

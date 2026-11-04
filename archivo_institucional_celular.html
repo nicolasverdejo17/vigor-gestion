@@ -135,7 +135,7 @@ let ambitoArchivo = 'cia';
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('cuerpo_id, compania_id, cuerpos(nombre_oficial)').eq('auth_user_id', session.user.id).maybeSingle();
   if(!perfil || !perfil.cuerpo_id) return;
   document.getElementById('nombreCuerpoCel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';

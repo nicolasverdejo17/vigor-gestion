@@ -137,7 +137,7 @@
 <body>
 
   <div id="sinSesion" style="display:none; padding:40vh 16px 40px; color:var(--text-muted); text-align:center;">
-    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+    Debes iniciar sesión primero. <a href="login_registro.html" style="color:var(--cyan);">Ir a iniciar sesión</a>
   </div>
 
   <div id="phoneWrap" style="display:none;">
@@ -146,7 +146,7 @@
       <h1>Inicio</h1>
       <div class="role-strip"><span class="dot"></span><span>Sesión:</span> <b id="roleLabel">—</b></div>
       <a id="institucionalBanner" href="#" style="display:none; margin-top:10px; align-items:center; justify-content:space-between; gap:10px; background:var(--panel-alt); border:1.5px solid var(--cyan); border-radius:10px; padding:10px 14px; text-decoration:none; color:var(--text);">
-        <span style="font-size:12.5px; font-weight:600;">Tenés acceso institucional — <span id="institucionalCargo" class="mono" style="color:var(--cyan);">—</span></span>
+        <span style="font-size:12.5px; font-weight:600;">Tienes acceso institucional — <span id="institucionalCargo" class="mono" style="color:var(--cyan);">—</span></span>
         <span style="color:var(--cyan); font-size:16px;">→</span>
       </a>
     </div>
@@ -416,7 +416,7 @@ function suscribirAlertaDespacho(perfil){
       const { data: prefs } = await sb.from('notificaciones_preferencias').select('alertas_despacho').eq('personal_id', perfil.id).maybeSingle();
       if(prefs && prefs.alertas_despacho === false) return;
       reproducirTonoDespacho();
-      toast('Despacho para tu Compañía — revisá la Pizarra');
+      toast('Despacho para tu Compañía — revisa la Pizarra');
     })
     .subscribe();
 }
@@ -436,7 +436,7 @@ function suscribirAlertaEspecial(perfil){
       const { data: prefs } = await sb.from('notificaciones_preferencias').select('alertas_despacho').eq('personal_id', perfil.id).maybeSingle();
       if(prefs && prefs.alertas_despacho === false) return;
       reproducirTonoDespacho();
-      toast(`${ETIQUETA_ALERTA_ESPECIAL[payload.new.tipo] || 'Alerta de Central'} — revisá la app`);
+      toast(`${ETIQUETA_ALERTA_ESPECIAL[payload.new.tipo] || 'Alerta de Central'} — revisa la app`);
     })
     .subscribe();
 }

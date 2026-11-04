@@ -167,7 +167,7 @@
     </div>
   </div>
   <div id="sinSesion" style="display:none; padding:26px;">
-    <p style="color:var(--text-muted);">Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a></p>
+    <p style="color:var(--text-muted);">Debes iniciar sesión primero. <a href="login_registro.html" style="color:var(--cyan);">Ir a iniciar sesión</a></p>
   </div>
   <div id="sinPermiso" style="display:none; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">
     🔒 Esta pantalla es exclusiva del Depto. de Especialidad.
@@ -194,7 +194,7 @@
   <div class="modal-overlay" id="espModal">
     <div class="modal-box">
       <h3 id="modalNombre">R. Salinas</h3>
-      <div class="modal-sub">Marcá las especialidades habilitadas para este bombero</div>
+      <div class="modal-sub">Marca las especialidades habilitadas para este bombero</div>
       <div id="modalEspList"></div>
       <div class="modal-actions">
         <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
@@ -220,7 +220,7 @@
         <div class="color-picker" id="nuevaEspColores"></div>
         <div class="color-hex-row">
           <span class="color-hex-preview" id="colorHexPreview"></span>
-          <input type="text" class="mono" id="nuevaEspColorHex" placeholder="O escribí un código propio — Ej. #E67E22" maxlength="7" oninput="setColorPorCodigo(this.value)">
+          <input type="text" class="mono" id="nuevaEspColorHex" placeholder="O escribe un código propio — Ej. #E67E22" maxlength="7" oninput="setColorPorCodigo(this.value)">
         </div>
       </div>
       <div class="modal-actions">
@@ -364,7 +364,7 @@ async function crearEspecialidad(){
   const nombre = document.getElementById('nuevaEspNombre').value.trim();
 
   if(!codigo || !nombre){
-    toast('Completá el código y el nombre antes de crear');
+    toast('Completa el código y el nombre antes de crear');
     return;
   }
   if(ESPECIALIDADES[codigo]){

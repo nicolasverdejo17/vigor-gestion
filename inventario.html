@@ -230,7 +230,7 @@
     </div>
   </div>
   <div id="sinSesion" style="display:none; padding:40px; text-align:center; color:var(--text-muted);">
-    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+    Debes iniciar sesión primero. <a href="login_registro.html" style="color:var(--cyan);">Ir a iniciar sesión</a>
   </div>
 
   <div class="sync-note">
@@ -266,7 +266,7 @@
   <div class="modal-overlay" id="exportModal">
     <div class="modal-box">
       <h3>Exportar a PDF</h3>
-      <div class="modal-sub">Elegí qué categorías incluir en el documento.</div>
+      <div class="modal-sub">Elige qué categorías incluir en el documento.</div>
       <div id="exportCheckList"></div>
       <div class="modal-actions">
         <button class="modal-cancel" onclick="cerrarExportModal()">Cancelar</button>
@@ -402,7 +402,7 @@ function renderTabs(){
 }
 async function confirmarCategoria(){
   const val = document.getElementById('newCatInput').value.trim();
-  if(!val){ toast('Escribí el nombre de la categoría antes de confirmar'); return; }
+  if(!val){ toast('Escribe el nombre de la categoría antes de confirmar'); return; }
   const { data, error } = await sb.from('inventario_categorias')
     .insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, nombre: val })
     .select().single();
@@ -490,7 +490,7 @@ async function eliminarCategoria(key){
   // categoría que ya no tiene ítems ACTIVOS adentro.
   const enUsoActivos = ITEMS.some(i => i.cat === key && i.estado !== 'baja');
   if(enUsoActivos){
-    toast('No se puede eliminar — todavía tiene ítems activos adentro, movelos primero');
+    toast('No se puede eliminar — todavía tiene ítems activos adentro, muévelos primero');
     return;
   }
   const tieneSubcats = (SUBCATS[key] || []).length > 0;
@@ -540,7 +540,7 @@ async function eliminarSubcat(key){
   const enUsoActivos = ITEMS.some(i => i.subcat === key && i.estado !== 'baja');
   const nombreSubcat = (SUBCATS[catActiva] || []).find(x => x.key === key)?.label || '—';
   if(enUsoActivos){
-    toast('No se puede eliminar — todavía tiene ítems activos adentro, movelos primero');
+    toast('No se puede eliminar — todavía tiene ítems activos adentro, muévelos primero');
     return;
   }
   if(!confirm('¿Eliminar esta subcategoría? Esta acción no se puede deshacer.')) return;
@@ -650,7 +650,7 @@ function toggleExportCat(key){
   renderExportCheckList();
 }
 function generarPDF(){
-  if(exportSel.size===0){ toast('Elegí al menos una categoría'); return; }
+  if(exportSel.size===0){ toast('Elige al menos una categoría'); return; }
   document.querySelectorAll('#tablaBody tr').forEach(tr=>{
     const catLabel = tr.querySelector('.cat-badge');
     if(!catLabel){ return; }

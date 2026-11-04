@@ -182,7 +182,7 @@
   </div>
 
   <div id="sinSesion" style="display:none; padding:40px; text-align:center; color:var(--text-muted);">
-    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+    Debes iniciar sesión primero. <a href="login_registro.html" style="color:var(--cyan);">Ir a iniciar sesión</a>
   </div>
   <div class="content-wrap" id="grid"></div>
 
@@ -247,7 +247,7 @@ async function cargarDatos(){
 
   if(!cias){
     document.getElementById('sinSesion').style.display = 'block';
-    document.getElementById('sinSesion').textContent = 'No se pudo cargar — revisá tu sesión.';
+    document.getElementById('sinSesion').textContent = 'No se pudo cargar — revisa tu sesión.';
     return;
   }
 

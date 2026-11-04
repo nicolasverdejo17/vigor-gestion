@@ -125,7 +125,7 @@
 
       <div class="estado-aviso" id="pushAviso" style="display:none; border-color:var(--cyan); cursor:pointer;" onclick="activarPush()">
         <span class="estado-aviso-ico">🔔</span>
-        <div class="estado-aviso-texto"><b>Activar notificaciones push</b> — <span id="pushAvisoTexto">tocá acá para recibir el despacho aunque tengas la app cerrada o el celular bloqueado.</span></div>
+        <div class="estado-aviso-texto"><b>Activar notificaciones push</b> — <span id="pushAvisoTexto">toca aquí para recibir el despacho aunque tengas la app cerrada o el celular bloqueado.</span></div>
       </div>
 
       <div class="section-label">Despacho</div>
@@ -169,7 +169,7 @@ let miPersonalId = null;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal')
     .select('id, nombre_completo, cargo, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
     .eq('auth_user_id', session.user.id).single();
@@ -216,7 +216,7 @@ async function actualizarAvisoPush(){
   const aviso = document.getElementById('pushAviso');
   if(!soportaPush()){ aviso.style.display = 'none'; return; }
   if(Notification.permission === 'denied'){
-    document.getElementById('pushAvisoTexto').textContent = 'Bloqueaste las notificaciones en el navegador — activalas desde los ajustes del sitio para recibir despachos con la app cerrada.';
+    document.getElementById('pushAvisoTexto').textContent = 'Bloqueaste las notificaciones en el navegador — actívalas desde los ajustes del sitio para recibir despachos con la app cerrada.';
     aviso.style.display = 'flex';
     return;
   }

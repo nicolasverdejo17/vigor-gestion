@@ -344,11 +344,11 @@ async function guardarBitacora(){
     if(vacio) faltantes = true;
   });
   if(faltantes){
-    toast('Completá todos los campos antes de guardar');
+    toast('Completa todos los campos antes de guardar');
     return;
   }
   if(!conductorSelId){
-    toast('Asigná un Conductor (Maquinista) antes de guardar');
+    toast('Asigna un Conductor (Maquinista) antes de guardar');
     return;
   }
   const kmInicial = parseInt(document.getElementById('kmInicial').value.trim(), 10);

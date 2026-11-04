@@ -385,7 +385,7 @@ label {
   const ROLES_CON_ACCESO = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
   async function cargarSesion(){
     const { data: { session } } = await sb.auth.getSession();
-    if(!session){ toast('Necesitás loguearte primero'); return; }
+    if(!session){ toast('Debes iniciar sesión primero'); return; }
     const { data: perfil } = await sb.from('personal').select('cuerpo_id, cargo').eq('auth_user_id', session.user.id).maybeSingle();
     if(!perfil || !perfil.cuerpo_id){ toast('No se pudo determinar tu Cuerpo'); return; }
     if(!ROLES_CON_ACCESO.includes(perfil.cargo)){
@@ -484,7 +484,7 @@ label {
     const regVal = regManual.value.trim();
     regManual.closest('.field').classList.toggle('field-error', !regVal);
     if(!regVal){
-      toast('Escribí el N° de Registro antes de continuar');
+      toast('Escribe el N° de Registro antes de continuar');
       return;
     }
     if (!nombres || !apellidos) {

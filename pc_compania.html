@@ -839,7 +839,7 @@
   </div>
 
   <div id="sinSesion" style="display:none; padding:40px; text-align:center; color:var(--text-muted);">
-    Necesitás loguearte primero. <a href="login_registro.html" style="color:var(--cyan);">Ir al login</a>
+    Debes iniciar sesión primero. <a href="login_registro.html" style="color:var(--cyan);">Ir a iniciar sesión</a>
   </div>
 
   <div id="viewPC">
@@ -913,7 +913,7 @@
 <div id="viewPhone" style="display:none;">
 
 
-  <div class="caption"><b>Vista simulada — Celular</b><br>Sesión de J. Iturra, Capitán de la Tercera Compañía. Navegación por pestañas inferiores (sección 20). Tocá los botones y pestañas — es interactivo.</div>
+  <div class="caption"><b>Vista simulada — Celular</b><br>Sesión de J. Iturra, Capitán de la Tercera Compañía. Navegación por pestañas inferiores (sección 20). Toca los botones y pestañas — es interactivo.</div>
 
   <div class="phone">
     <div class="screen-outer">
@@ -1036,7 +1036,7 @@
       const companiaUrl = new URLSearchParams(location.search).get('compania');
       if(!soyAdmin || !companiaUrl){
         document.getElementById('sinSesion').style.display = 'block';
-        document.getElementById('sinSesion').textContent = 'Esta sesión no es un PC de Cuartel identificado. Identificalo desde login_registro.html con el Código de Cuerpo y el N° de Compañía.';
+        document.getElementById('sinSesion').textContent = 'Esta sesión no es un PC de Cuartel identificado. Identifícalo desde la pantalla de inicio de sesión con el Código de Cuerpo y el N° de Compañía.';
         document.getElementById('viewPC').style.display = 'none';
         return;
       }

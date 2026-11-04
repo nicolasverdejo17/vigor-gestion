@@ -444,7 +444,7 @@
   <div class="modal-overlay" id="dotacionModal">
     <div class="modal-box-dotacion">
       <h3>Dotación de esta salida</h3>
-      <div class="modal-sub">Tocá un bombero y asignalo al rol que corresponda en esta emergencia.</div>
+      <div class="modal-sub">Toca un bombero y asígnalo al rol que corresponda en esta emergencia.</div>
 
       <div class="rol-section">
         <div class="rol-title">Oficial a cargo <span class="rol-hint">(uno)</span></div>
@@ -666,11 +666,11 @@ function validarParte(){
 
 async function guardarParte(){
   if(!validarParte()){
-    toast('Completá los campos obligatorios antes de guardar');
+    toast('Completa los campos obligatorios antes de guardar');
     return;
   }
   if(!dotacionSel.oficial && !dotacionSel.maquinista && dotacionSel.asistentes.length === 0){
-    toast('Asigná al menos un bombero a la dotación de esta salida');
+    toast('Asigna al menos un bombero a la dotación de esta salida');
     return;
   }
   const tipoAfectadoBtn = document.querySelector('#afectadoTipoRow button.on');
@@ -704,7 +704,7 @@ async function guardarParte(){
 
 function exportarParte(){
   if(!validarParte()){
-    toast('Completá los campos obligatorios antes de exportar');
+    toast('Completa los campos obligatorios antes de exportar');
     return;
   }
   setTimeout(()=>window.print(), 150);

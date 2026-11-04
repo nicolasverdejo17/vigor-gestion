@@ -110,7 +110,7 @@
   <div class="content-wrap">
     <div class="content-inner">
       <div class="concepto-nota">
-        <b>Qué es esto:</b> un resumen de la participación real de servicio — guardias, emergencias, capacitaciones y horas acumuladas. Es distinto de la <b>Hoja de Vida</b> (cargos, ascensos, reconocimientos) y del <b>Parte de Emergencia</b> (el detalle de un incidente puntual). Acá se junta todo eso en un solo documento, listo para imprimir.
+        <b>Qué es esto:</b> un resumen de la participación real de servicio — guardias, emergencias, capacitaciones y horas acumuladas. Es distinto de la <b>Hoja de Vida</b> (cargos, ascensos, reconocimientos) y del <b>Parte de Emergencia</b> (el detalle de un incidente puntual). Aquí se junta todo eso en un solo documento, listo para imprimir.
       </div>
 
       <div class="header-doc">
@@ -172,7 +172,7 @@ let bombero = null;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('id, cargo').eq('auth_user_id', session.user.id).single();
   if(!perfil) return;
   if(!bomberoId) bomberoId = perfil.id;

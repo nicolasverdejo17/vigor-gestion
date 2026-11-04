@@ -132,7 +132,7 @@ async function cargarDatos(){
     .select('ocurrido_en, usuario_label, tipo, detalle, ambito_label, companias(nombre), cuerpos(nombre_oficial)')
     .order('ocurrido_en', { ascending:false })
     .limit(200);
-  if(error){ toast('No se pudo cargar — ¿tenés sesión de Super Admin?'); return; }
+  if(error){ toast('No se pudo cargar — ¿tienes sesión de Super Admin?'); return; }
   EVENTOS = (data || []).map(e => ({
     fecha: new Date(e.ocurrido_en).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}),
     usuario: e.usuario_label, tipo: e.tipo, detalle: e.detalle,

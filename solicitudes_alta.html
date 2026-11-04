@@ -212,7 +212,7 @@
   <div class="modal-overlay" id="rechazoModal">
     <div class="modal-box">
       <h3>Rechazar solicitud</h3>
-      <p>Indicá el motivo — quedará registrado y podrá comunicarse al postulante.</p>
+      <p>Indica el motivo — quedará registrado y podrá comunicarse al postulante.</p>
       <textarea id="motivoRechazo" placeholder="Ej. Falta documentación / no reside en zona de cobertura de la Compañía."></textarea>
       <div class="modal-actions">
         <button class="modal-cancel" onclick="cerrarRechazoModal()">Cancelar</button>
@@ -231,7 +231,7 @@
         <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">Contraseña Temporal</div>
         <div class="mono" id="credencialesPassword" style="font-size:20px; font-weight:700; color:var(--cyan);">—</div>
       </div>
-      <p style="font-size:11.5px;">Entregaselos en persona — expira al primer uso o en 7 días. No se van a poder ver de nuevo.</p>
+      <p style="font-size:11.5px;">Entrégaselos en persona — expira al primer uso o en 7 días. No se podrán ver de nuevo.</p>
       <div class="modal-actions">
         <button class="modal-confirmar" onclick="cerrarCredencialesModal()">Entendido</button>
       </div>
@@ -322,7 +322,7 @@ async function aprobar(id){
   }
   document.getElementById(`card-${id}`).classList.add('resuelto');
   const r = Array.isArray(data) ? data[0] : data;
-  document.getElementById('credencialesNombre').textContent = `${s.nombre_completo} fue aprobado/a — anotá estos datos antes de cerrar:`;
+  document.getElementById('credencialesNombre').textContent = `${s.nombre_completo} fue aprobado/a — anota estos datos antes de cerrar:`;
   document.getElementById('credencialesNumero').textContent = r.r_numero_registro;
   document.getElementById('credencialesPassword').textContent = r.r_password_temporal;
   document.getElementById('credencialesModal').classList.add('show');
@@ -371,7 +371,7 @@ async function cargarDatos(){
     document.getElementById('roleTag').textContent = 'Sin sesión';
     document.getElementById('accesoOk').style.display = 'none';
     document.getElementById('accesoDenegado').style.display = 'block';
-    document.getElementById('accesoDenegado').querySelector('.locked-note').textContent = '🔒 Necesitás loguearte primero (login_registro.html).';
+    document.getElementById('accesoDenegado').querySelector('.locked-note').textContent = '🔒 Debes iniciar sesión primero (login_registro.html).';
     return;
   }
 

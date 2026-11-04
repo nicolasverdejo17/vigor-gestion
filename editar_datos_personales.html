@@ -244,7 +244,7 @@ function iniciales(n){ return n.split(' ').filter(Boolean).map(p=>p[0]).join('')
 
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   miEmail = session.user.email;
   const { data: p } = await sb.from('personal')
     .select('id, cuerpo_id, numero_registro, nombre_completo, rut, fecha_nacimiento, telefono, cargo, fecha_ingreso, foto_url, companias(nombre)')
@@ -311,7 +311,7 @@ async function guardarCambios(){
     if(vacio) faltantes = true;
   });
   if(faltantes){
-    toast('Completá todos los campos antes de guardar');
+    toast('Completa todos los campos antes de guardar');
     return;
   }
   const fechaNac = ddmmyyyyAIso(fechaNacTxt);

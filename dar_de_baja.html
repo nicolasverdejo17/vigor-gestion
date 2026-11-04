@@ -164,7 +164,7 @@
         <label>Fotos del ítem<span class="req">*</span></label>
         <div class="foto-upload" onclick="document.getElementById('fotoInput').click()">
           <div class="circle">📷</div>
-          <div class="txt"><b>Adjuntar fotos — podés elegir varias a la vez</b><span>Evidencia del estado que justifica la baja</span></div>
+          <div class="txt"><b>Adjuntar fotos — puedes elegir varias a la vez</b><span>Evidencia del estado que justifica la baja</span></div>
         </div>
         <input type="file" id="fotoInput" accept="image/*" multiple style="display:none;" onchange="agregarFotos(this)">
         <div class="fotos-grid" id="fotosGrid"></div>
@@ -200,7 +200,7 @@ const MODIFY_ROLES_FUNCIONALES = ['Depto. Material Menor','Depto. Material Mayor
 async function cargarDatos(){
   if(!itemId){ toast('Falta el ítem a dar de baja'); return; }
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal')
     .select('id, cuerpo_id, cargo, personal_roles_funcionales(rol_funcional)').eq('auth_user_id', session.user.id).single();
   if(!perfil) return;

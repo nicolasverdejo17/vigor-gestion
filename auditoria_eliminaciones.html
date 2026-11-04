@@ -122,7 +122,7 @@ function volver(){
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('cargo').eq('auth_user_id', session.user.id).maybeSingle();
   if(!perfil || !ROLES_CON_ACCESO.includes(perfil.cargo)){
     document.getElementById('tablaBody').innerHTML = `<tr><td colspan="4" class="empty-state">🔒 Esta pantalla es exclusiva del Superintendente (Cuerpo General) y el Director de cada Compañía.</td></tr>`;

@@ -316,13 +316,13 @@ label {
       <div class="field">
         <label for="regionSelect">Región</label>
         <select id="regionSelect" onchange="onRegionChange()">
-          <option value="">Seleccioná la región…</option>
+          <option value="">Selecciona la región…</option>
         </select>
       </div>
       <div class="field">
         <label for="comuna">Comuna</label>
         <select id="comuna" disabled>
-          <option value="">Elegí primero la región…</option>
+          <option value="">Elige primero la región…</option>
         </select>
       </div>
       <div class="field full" id="manualUbicacionWrap" style="display:none;">
@@ -351,7 +351,7 @@ label {
         <label for="comandanteNumero">N° de Registro del Comandante</label>
         <input type="text" class="mono" id="comandanteNumero" placeholder="Ej. 2">
       </div>
-      <div class="hint full" style="font-size:11px; color:var(--text-dim); margin-top:-8px;">Con esto se crea su cuenta real de acceso a Comandancia. Si lo dejás vacío, se puede cargar después.</div>
+      <div class="hint full" style="font-size:11px; color:var(--text-dim); margin-top:-8px;">Con esto se crea su cuenta real de acceso a Comandancia. Si lo dejas vacío, se puede cargar después.</div>
     </div>
   </div>
 
@@ -403,10 +403,10 @@ label {
     <div class="codigo-cuerpo-box hidden" id="codigoCuerpoBox">
       <div class="lbl">Código de Cuerpo</div>
       <div class="valor mono" id="codigoCuerpoValor">—</div>
-      <div class="nota">Entregale este código a cada bombero — lo van a necesitar una sola vez, al registrarse por primera vez en la app desde su celular.</div>
+      <div class="nota">Entrega este código a cada bombero — lo van a necesitar una sola vez, al registrarse por primera vez en la app desde su celular.</div>
     </div>
     <div class="credenciales-wrap hidden" id="credencialesWrap">
-      <div class="credenciales-titulo">Credenciales generadas — anotalas, no se van a poder ver de nuevo</div>
+      <div class="credenciales-titulo">Credenciales generadas — anótalas, no se podrán ver de nuevo</div>
       <div id="credencialesList"></div>
     </div>
     <button class="btn btn-primary full hidden" id="btnIrPanelMaestro">Ir al Panel Maestro →</button>
@@ -428,7 +428,7 @@ label {
 
   // Este asistente solo tiene sentido después de activar_licencia.html,
   // que pasa el código real por la URL. Sin él no hay a qué Cuerpo vincular
-  // lo que se cree acá — mismo criterio de "no podés continuar sin
+  // lo que se cree acá — mismo criterio de "no puedes continuar sin
   // licencia válida" ya aplicado en activar_licencia.html.
   const licenciaCodigo = new URLSearchParams(location.search).get('licencia');
   let licenciaInfo = null;
@@ -444,17 +444,17 @@ label {
 
   async function verificarLicenciaWizard() {
     if (!licenciaCodigo) {
-      bloquearWizard('Este asistente solo se puede abrir después de activar una licencia real. Volvé a la pantalla de Activar Licencia.');
+      bloquearWizard('Este asistente solo se puede abrir después de activar una licencia real. Vuelve a la pantalla de Activar Licencia.');
       return false;
     }
     const { data, error } = await sb.rpc('validar_licencia', { p_codigo: licenciaCodigo });
     if (error) {
-      bloquearWizard('No se pudo verificar la licencia — ' + error.message + '. Volvé a la pantalla de Activar Licencia.');
+      bloquearWizard('No se pudo verificar la licencia — ' + error.message + '. Vuelve a la pantalla de Activar Licencia.');
       return false;
     }
     const row = Array.isArray(data) ? data[0] : data;
     if (!row) {
-      bloquearWizard('El código de licencia de esta sesión no es válido. Volvé a la pantalla de Activar Licencia.');
+      bloquearWizard('El código de licencia de esta sesión no es válido. Vuelve a la pantalla de Activar Licencia.');
       return false;
     }
     if (row.v_cuerpo_id) {
@@ -462,7 +462,7 @@ label {
       return false;
     }
     if (row.v_estado !== 'activada') {
-      bloquearWizard('Esta licencia todavía no está activada (estado: ' + row.v_estado + '). Volvé a la pantalla de Activar Licencia.');
+      bloquearWizard('Esta licencia todavía no está activada (estado: ' + row.v_estado + '). Vuelve a la pantalla de Activar Licencia.');
       return false;
     }
     licenciaInfo = row;
@@ -507,7 +507,7 @@ label {
 
   const selectRegion = document.getElementById('regionSelect');
   const selectComuna = document.getElementById('comuna');
-  selectRegion.innerHTML = '<option value="">Seleccioná la región…</option>' +
+  selectRegion.innerHTML = '<option value="">Selecciona la región…</option>' +
     Object.keys(REGIONES_COMUNAS).map(r => `<option value="${r}">${r}</option>`).join('') +
     `<option value="${EXTRANJERO}">Otro país / Extranjero</option>`;
 
@@ -524,8 +524,8 @@ label {
     const comunas = REGIONES_COMUNAS[val] || [];
     selectComuna.disabled = comunas.length === 0;
     selectComuna.innerHTML = comunas.length
-      ? '<option value="">Seleccioná la comuna…</option>' + comunas.map(c => `<option value="${c}">${c}</option>`).join('')
-      : '<option value="">Elegí primero la región…</option>';
+      ? '<option value="">Selecciona la comuna…</option>' + comunas.map(c => `<option value="${c}">${c}</option>`).join('')
+      : '<option value="">Elige primero la región…</option>';
   }
 
   // Guarda lo escrito en Directores por índice de Compañía, para que ir y volver
@@ -656,7 +656,7 @@ label {
       const comandanteEl = document.getElementById('comandante');
       const comandanteNumeroEl = document.getElementById('comandanteNumero');
       if((comandanteEl.value.trim() && !comandanteNumeroEl.value.trim()) || (!comandanteEl.value.trim() && comandanteNumeroEl.value.trim())){
-        document.getElementById('wizardError').textContent = 'Si cargás un Comandante, completá su nombre Y su N° de Registro (o dejá ambos vacíos).';
+        document.getElementById('wizardError').textContent = 'Si cargas un Comandante, completa su nombre Y su N° de Registro (o deja ambos vacíos).';
         comandanteEl.style.borderColor = '#D8394E';
         comandanteNumeroEl.style.borderColor = '#D8394E';
         faltantes = true;
@@ -677,7 +677,7 @@ label {
         if (vacio) faltantes = true;
       });
       if (faltantes) {
-        document.getElementById('wizardError').textContent = 'Completá el nombre de cada Compañía (o quitá las que no vayas a usar) — necesitás al menos una.';
+        document.getElementById('wizardError').textContent = 'Completa el nombre de cada Compañía (o quita las que no vayas a usar) — necesitas al menos una.';
         return;
       }
     }

@@ -293,7 +293,7 @@ const TIPO_DOT = { ingreso:'ingreso', traslado:'traslado', cambio_estado:'estado
 async function cargarDatos(){
   if(!itemId){ toast('Falta el ítem a mostrar'); return; }
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){ toast('Necesitás loguearte primero'); return; }
+  if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal')
     .select('id, nombre_completo, cargo, personal_roles_funcionales(rol_funcional)').eq('auth_user_id', session.user.id).single();
   if(!perfil) return;
@@ -423,7 +423,7 @@ function cerrarModalMovimiento(){
 async function guardarMovimiento(){
   const detalle = document.getElementById('detalleMov').value.trim();
   if(!detalle){
-    toast('Describí el motivo del movimiento');
+    toast('Describe el motivo del movimiento');
     return;
   }
 
@@ -438,7 +438,7 @@ async function guardarMovimiento(){
     const lugarAnterior = itemActual.lugar_actual;
     const lugarNuevo = document.getElementById('lugarNuevo').value.trim();
     if(!lugarNuevo){
-      toast('Escribí el nuevo lugar');
+      toast('Escribe el nuevo lugar');
       return;
     }
     payload.lugar_anterior = lugarAnterior;
@@ -448,7 +448,7 @@ async function guardarMovimiento(){
   } else {
     const catIdNueva = document.getElementById('categoriaNueva').value;
     const subcatIdNueva = document.getElementById('subcategoriaNueva').value || null;
-    if(!catIdNueva){ toast('Elegí una categoría'); return; }
+    if(!catIdNueva){ toast('Elige una categoría'); return; }
     const nombreCatAnterior = CATS_MOV[itemActual.categoria_id] || null;
     const nombreSubAnterior = (SUBCATS_MOV[itemActual.categoria_id] || []).find(s => s.id === itemActual.subcategoria_id)?.nombre || null;
     const catAnteriorTexto = [nombreCatAnterior, nombreSubAnterior].filter(Boolean).join(' · ') || '—';

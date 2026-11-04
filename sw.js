@@ -67,7 +67,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification('Vigor — Alerta de Central', {
-      body: 'Central emitió una alerta para tu Compañía — abrí la app para ver los detalles.',
+      body: 'Central emitió una alerta para tu Compañía — abre la app para ver los detalles.',
       icon: 'icons/apple-touch-icon.png',
       badge: 'icons/favicon-32.png',
       vibrate: [600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 900],

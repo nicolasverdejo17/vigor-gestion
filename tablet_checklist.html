@@ -250,7 +250,7 @@
           <input type="text" class="mono" id="kmChecklist" inputmode="numeric" placeholder="Ej. 48320">
         </div>
         <div class="form-field">
-          <label>Responsable<span class="auto-tag">✎ elegí de la lista o escribí</span></label>
+          <label>Responsable<span class="auto-tag">✎ elige de la lista o escribe</span></label>
           <div class="auto-field-wrap" id="responsableWrap">
             <input type="text" id="responsableChecklist" placeholder="Nombre de quien completa el checklist" autocomplete="off" oninput="onResponsableInput()" onfocus="onResponsableInput()">
           </div>
@@ -379,7 +379,7 @@ function renderChecklist(){
               ${ESTADOS.map(e => `<button class="chk-opt ${e} ${est.estado===e?'on':''}" onclick="setEstadoItem('${item}','${e}')">${ESTADO_LABEL[e]}</button>`).join('')}
             </div>
             ${est.estado==='falla' ? `
-              <input type="text" class="chk-comentario" placeholder="Describí la falla…" value="${est.comentario}" onchange="setComentarioItem('${item}', this.value)">
+              <input type="text" class="chk-comentario" placeholder="Describe la falla…" value="${est.comentario}" onchange="setComentarioItem('${item}', this.value)">
             ` : ''}
           </div>
         `;
@@ -399,7 +399,7 @@ function setComentarioItem(item, val){
 async function guardarChecklist(){
   const fallasSinComentario = Object.entries(estadoItems).filter(([item,e]) => e.estado==='falla' && !e.comentario.trim());
   if(fallasSinComentario.length > 0){
-    toast(`Describí la falla en: ${fallasSinComentario[0][0]}`);
+    toast(`Describe la falla en: ${fallasSinComentario[0][0]}`);
     const inputs = document.querySelectorAll('.chk-comentario');
     inputs.forEach(inp => { if(!inp.value.trim()) inp.style.borderColor = 'var(--burdeo-bright)'; });
     return;
@@ -413,7 +413,7 @@ async function guardarChecklist(){
     if(vacio) faltantes = true;
   });
   if(faltantes){
-    toast('Completá el kilometraje y el responsable antes de guardar');
+    toast('Completa el kilometraje y el responsable antes de guardar');
     return;
   }
 
