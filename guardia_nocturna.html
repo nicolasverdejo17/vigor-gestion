@@ -346,7 +346,6 @@
         <div><label>Cuota mensual (noches)</label><input class="inp mono" type="number" min="0" id="cfgCuota"></div>
         <div><label>Tolerancia (minutos)</label><input class="inp mono" type="number" min="0" max="120" id="cfgTol"></div>
       </div>
-      <div class="nota">El mínimo de personas incluye a los maquinistas. No hay cupo máximo por noche. El cumplimiento se calcula solo con la hora de puesta en servicio: <b>Completa</b> si estuvo todo el horario (con esa tolerancia), <b>Parcial</b> si llegó tarde o se retiró antes, <b>Ausente</b> si no estuvo.</div>
       <div class="modal-actions">
         <button class="btn-sec" onclick="cerrarConfig()">Cancelar</button>
         <button class="btn-pri" id="btnGuardarConfig" onclick="guardarConfig()">Guardar</button>
@@ -658,8 +657,7 @@ function renderVoluntarios(){
   p.innerHTML = `<h3>Cumplimiento del mes</h3>
     <div class="scroll-max"><table class="tabla-vol"><thead><tr><th>Voluntario</th><th style="text-align:center" title="Completas">Comp.</th><th style="text-align:center" title="Parciales">Parc.</th><th style="text-align:center" title="Ausentes">Aus.</th><th style="text-align:center" title="Anotadas por cumplir">Pend.</th><th>Cuota</th></tr></thead><tbody>
     ${filas.map(({ v, c }) => `<tr><td>${esc(nombreCorto(v.nombre_completo))}</td><td class="num tag-ok">${c.completa}</td><td class="num" style="color:var(--alerta)">${c.parcial}</td><td class="num" style="color:var(--emergencia)">${c.ausente}</td><td class="num" style="color:var(--cyan)">${c.pendiente}</td><td>${c.completa >= cuota ? '<span class="tag-ok">Cumple</span>' : `<span class="tag-falta">Faltan ${cuota - c.completa}</span>`}</td></tr>`).join('')}
-    </tbody></table></div>
-    <div class="nota" style="margin-top:8px;">Se calcula solo, con la puesta en servicio real de cada voluntario dentro del horario de la guardia. La cuota cuenta noches completas.</div>`;
+    </tbody></table></div>`;
 }
 
 // ---- Navegación de mes ----

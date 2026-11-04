@@ -194,7 +194,6 @@
       <div class="modal-head"><h3>Abrir libro de guardia</h3><button class="modal-x" onclick="cerrarAbrir()">✕</button></div>
       <div class="campo"><label class="t">Fecha en que empezó la guardia</label>
         <input class="inp mono" id="abrirFecha" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="this.value = formatearFecha(this.value)"></div>
-      <div class="nota">Una guardia nocturna empieza un día y termina al siguiente: pon la fecha del día en que empezó. Si ya existe el libro de esa guardia, se abre ese mismo.</div>
       <div class="modal-actions"><button class="btn-sec" onclick="cerrarAbrir()">Cancelar</button><button class="btn-pri" id="btnAbrir" onclick="confirmarAbrir()">Abrir libro</button></div>
     </div>
   </div>
@@ -451,7 +450,6 @@ function renderDetalle(){
           <td class="sub">${d.minutos_presente > 0 ? `${hhmm(d.entrada)} → ${hhmm(d.salida)} · ${durTxt(d.minutos_presente)}` : '—'}</td>
           <td>${d.pernocta ? `<span class="moon" title="Pernocta">${MOON}</span>` : ''}</td></tr>`).join('')}
       </tbody></table></div>` : `<div class="vacio">Nadie anotado ni en servicio en este horario.</div>`}
-      <div class="nota" style="margin-top:8px;">${abierto ? 'Se calcula solo con la puesta en servicio real de cada persona dentro del horario. Al cerrar el libro queda guardada tal cual.' : 'Dotación guardada al cerrar el libro.'} "Reemplazo" = estuvo en servicio sin estar anotado.</div>
     </div>
 
     <div class="panel"><h3>2 · Estado del material ${abierto && MATERIAL.length ? '<button class="btn-sec no-print" id="btnMaterial" onclick="guardarMaterial()">Guardar material</button>' : ''}</h3>
@@ -483,8 +481,7 @@ function renderDetalle(){
     </div>
 
     <div class="panel"><h3>5 · Cierre</h3>
-      ${abierto ? `<div class="aviso info">Cerrar el libro lo deja en solo lectura (con nombre, fecha y hora) y guarda la dotación tal cual está. Después solo se pueden agregar anotaciones posteriores de un oficial. ${new Date() < v.fin ? `Se podrá cerrar cuando termine la guardia (${hhmm(v.fin.toISOString())} del ${isoAFecha(claveFecha(v.fin))}).` : ''}</div>
-        <button class="btn-peligro no-print" id="btnCerrar" onclick="cerrarLibro()">Cerrar libro de guardia</button>`
+      ${abierto ? `<button class="btn-peligro no-print" id="btnCerrar" onclick="cerrarLibro()">Cerrar libro de guardia</button>`
       : `<div class="aviso info">Cerrado por <b>${esc(nombreCorto(L.cerr && L.cerr.nombre_completo) || '—')}</b> el ${esc(fechaHora(L.hora_cierre))}. Este libro es de solo lectura.</div>`}
     </div>
 

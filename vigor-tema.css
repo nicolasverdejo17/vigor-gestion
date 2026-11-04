@@ -57,3 +57,8 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
 
 /* Tarjetas y paneles */
 .panel, .card, .resumen-card, .mi-estado-card{ border-radius:16px; }
+
+/* ---- Pantallas más despejadas: sin textos de ayuda ni explicaciones ---- */
+.intro, .intro-nota, .concepto-nota, .sync-note, .note-box, .offline-nota, .codigo-hint, .mi-estado-hint,
+.info-nota, .pending-note, .demo-tag, .login-hint, .footer-note,
+.foot-note:not(:has(a)), .hint:not(#codigoCuerpoHint){ display:none !important; }
