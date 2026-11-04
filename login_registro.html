@@ -130,6 +130,7 @@
   /* ---- Nuevo diseño del acceso: panel con el formulario + foto (PC) / foto arriba (celular) ---- */
   body{ display:block; padding:0; min-height:100vh; background:#06141F;}
   .login-shell{ display:flex; min-height:100vh; position:relative;}
+  body.verificando .login-shell{ visibility:hidden;}
   .login-panel{ flex:0 0 560px; display:flex; align-items:center; justify-content:center; padding:120px 64px 48px; background:#06141F; position:relative; z-index:2;}
   .card{ background:transparent; border:none; max-width:420px; padding:0;}
   .card::before{ display:none;}
@@ -178,7 +179,7 @@
 <link rel="stylesheet" href="vigor-tema.css">
 <script src="vigor-tema.js" defer></script>
 </head>
-<body data-sin-banner>
+<body data-sin-banner class="verificando">
 
   <div class="login-shell">
     <img class="login-logo" src="img/logo.png" alt="Vigor">
@@ -642,6 +643,32 @@ function toast(msg){
 
 resolverCuerpoActivo().then(render);
 render();
+
+// La sesión queda abierta hasta que la persona toque "Cerrar sesión": si al abrir la app
+// ya hay una sesión válida, se entra directo a su pantalla en vez de pedir el acceso de nuevo.
+async function entrarSiHaySesion(){
+  try{
+    const { data: { session } } = await sb.auth.getSession();
+    if(!session) return;
+    const { data: perfil } = await sb.from('personal')
+      .select('estado, debe_cambiar_password, numero_registro, cargo, compania_id, cuerpos(estado)')
+      .eq('auth_user_id', session.user.id).maybeSingle();
+    if(perfil){
+      if(perfil.estado !== 'activo' || perfil.debe_cambiar_password) return;
+      if(perfil.cuerpos && perfil.cuerpos.estado !== 'activo') return;
+      location.replace(destinoPropio(perfil));
+      return;
+    }
+    const primero = (r) => Array.isArray(r.data) ? r.data[0] : r.data;
+    if(primero(await sb.rpc('tablet_obtener_carro'))){ location.replace('tablet_carro.html'); return; }
+    if(primero(await sb.rpc('pc_obtener_compania'))){ location.replace('pc_compania.html'); return; }
+    if(primero(await sb.rpc('central_obtener_cuerpo'))){ location.replace('consola_despacho.html'); return; }
+  } catch(e){ /* si algo falla, se muestra el acceso normal */ }
+}
+// Mientras se comprueba la sesión no se muestra el formulario (evita el parpadeo); tope de 3 s.
+const mostrarAcceso = () => document.body.classList.remove('verificando');
+setTimeout(mostrarAcceso, 3000);
+entrarSiHaySesion().finally(mostrarAcceso);
 </script>
 </body>
 </html>
