@@ -2,6 +2,23 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
+<style>html{background:#06141F;}</style>
+<script>
+// Si ya hay una sesión guardada, se salta el acceso antes de que se dibuje la pantalla (sin parpadeo).
+(function(){ try{
+  var d = localStorage.getItem('vigor_destino');
+  if(!d || !/^[a-z_]+\.html$/.test(d)) return;
+  var hay = false;
+  for(var i = 0; i < localStorage.length; i++){
+    var k = localStorage.key(i);
+    if(/^sb-.*-auth-token$/.test(k)){ var v = JSON.parse(localStorage.getItem(k) || 'null'); if(v && v.refresh_token){ hay = true; break; } }
+  }
+  if(!hay) return;
+  if(Date.now() - Number(sessionStorage.getItem('vigor_redir') || 0) < 15000) return;
+  sessionStorage.setItem('vigor_redir', String(Date.now()));
+  location.replace(d);
+}catch(e){} })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>VIGOR - Gestiona tu compañía de forma eficiente</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -658,26 +675,26 @@ async function entrarSiHaySesion(){
     if(!session) return;
     sessionStorage.setItem('vigor_redir', String(Date.now()));
     const guardado = localStorage.getItem('vigor_destino');
-    if(guardado && /^[a-z_]+\.html$/.test(guardado)){ location.replace(guardado); return; }
+    if(guardado && /^[a-z_]+\.html$/.test(guardado)){ location.replace(guardado); return true; }
     const { data: perfil } = await sb.from('personal')
       .select('estado, debe_cambiar_password, numero_registro, cargo, compania_id, cuerpos(estado)')
       .eq('auth_user_id', session.user.id).maybeSingle();
     if(perfil){
       if(perfil.estado !== 'activo' || perfil.debe_cambiar_password) return;
       if(perfil.cuerpos && perfil.cuerpos.estado !== 'activo') return;
-      location.replace(destinoPropio(perfil));
-      return;
+      { const d = destinoPropio(perfil); recordarDestino(d); location.replace(d); }
+      return true;
     }
     const primero = (r) => Array.isArray(r.data) ? r.data[0] : r.data;
-    if(primero(await sb.rpc('tablet_obtener_carro'))){ location.replace('tablet_carro.html'); return; }
-    if(primero(await sb.rpc('pc_obtener_compania'))){ location.replace('pc_compania.html'); return; }
-    if(primero(await sb.rpc('central_obtener_cuerpo'))){ location.replace('consola_despacho.html'); return; }
+    if(primero(await sb.rpc('tablet_obtener_carro'))){ recordarDestino('tablet_carro.html'); location.replace('tablet_carro.html'); return true; }
+    if(primero(await sb.rpc('pc_obtener_compania'))){ recordarDestino('pc_compania.html'); location.replace('pc_compania.html'); return true; }
+    if(primero(await sb.rpc('central_obtener_cuerpo'))){ recordarDestino('consola_despacho.html'); location.replace('consola_despacho.html'); return true; }
   } catch(e){ /* si algo falla, se muestra el acceso normal */ }
 }
 // Mientras se comprueba la sesión no se muestra el formulario (evita el parpadeo); tope de 3 s.
 const mostrarAcceso = () => document.body.classList.remove('verificando');
 setTimeout(mostrarAcceso, 3000);
-entrarSiHaySesion().finally(mostrarAcceso);
+entrarSiHaySesion().then(redirigiendo => { if(!redirigiendo) mostrarAcceso(); }, mostrarAcceso);
 </script>
 </body>
 </html>
