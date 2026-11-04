@@ -326,12 +326,12 @@ label {
         </select>
       </div>
       <div class="field full" id="manualUbicacionWrap" style="display:none;">
-        <label for="regionManual">País / Región o Provincia</label>
-        <input type="text" id="regionManual" placeholder="Ej. Provincia de Buenos Aires, Argentina">
+        <label for="regionManual">Región</label>
+        <input type="text" id="regionManual" placeholder="Ej. Región del Biobío">
       </div>
       <div class="field full" id="comunaManualWrap" style="display:none;">
-        <label for="comunaManual">Ciudad / Comuna</label>
-        <input type="text" id="comunaManual" placeholder="Ej. Bahía Blanca">
+        <label for="comunaManual">Comuna</label>
+        <input type="text" id="comunaManual" placeholder="Ej. Los Ángeles">
       </div>
       <div class="field">
         <label for="superintendente">Superintendente actual</label>
@@ -576,7 +576,7 @@ label {
           <div class="field" style="margin-bottom:0;"><label>RUT</label><input type="text" placeholder="12.345.678-9" value="${saved.rut}"></div>
         </div>
         <div class="director-registro">
-          <label>N° de Registro (para loguearse en la PC del Cuartel)</label>
+          <label>N° de Registro (para iniciar sesión en el PC del Cuartel)</label>
           <input type="text" class="mono" placeholder="Ej. 301" value="${saved.registro}">
         </div>`;
       companyList.appendChild(div);
@@ -692,7 +692,7 @@ label {
         if (tieneNombre && !tieneRegistro) faltantes = true;
       });
       if (faltantes) {
-        document.getElementById('wizardError').textContent = 'Si le pusiste nombre a un Director, también necesita su N° de Registro para poder loguearse.';
+        document.getElementById('wizardError').textContent = 'Si le pusiste nombre a un Director, también necesita su N° de Registro para poder iniciar sesión.';
         return;
       }
     }
@@ -706,7 +706,7 @@ label {
         if (tieneNombre && !tieneRegistro) faltantes = true;
       });
       if (faltantes) {
-        document.getElementById('wizardError').textContent = 'Si le pusiste nombre a un Operador, también necesita su N° de Registro para poder loguearse.';
+        document.getElementById('wizardError').textContent = 'Si le pusiste nombre a un Operador, también necesita su N° de Registro para poder iniciar sesión.';
         return;
       }
     }
