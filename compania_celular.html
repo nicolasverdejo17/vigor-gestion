@@ -386,7 +386,7 @@ function renderGuardia(){
       <div class="foto"${fotoEstilo}>${b.foto ? '' : iniciales(b.n)}</div>
       <div class="info"><div class="nom">${b.n}</div><div class="cargo">${b.c} · N° ${b.reg}</div></div>
       ${editable
-        ? `<button class="mini-btn" style="background:${COLOR_ESTADO[b.estado]}" onclick="ciclarEstado('${b.reg}')">${PILL_LABEL[b.estado]}</button>`
+        ? `<button class="mini-btn" style="background:${COLOR_ESTADO[b.estado]}" onclick="abrirSelectorEstadoBombero(event, '${b.reg}')">${PILL_LABEL[b.estado]}</button>`
         : `<span class="estado-pill" style="background:${COLOR_ESTADO[b.estado]}">${PILL_LABEL[b.estado]}</span>`
       }
     </div>
@@ -396,11 +396,31 @@ function renderGuardia(){
   document.getElementById('guardiaCount').textContent = totalVisible;
 }
 
-async function ciclarEstado(reg){
-  marcarAccionLocal();
+// Al tocar el estado de un bombero se despliegan las opciones (igual que con los carros);
+// el estado no cambia solo con el toque.
+function abrirSelectorEstadoBombero(ev, reg){
+  ev.stopPropagation();
   const b = GUARDIA.find(x => String(x.reg) === String(reg));
-  const idx = ESTADOS.indexOf(b.estado);
-  const nuevo = ESTADOS[(idx + 1) % ESTADOS.length];
+  if(!b) return;
+  const sel = document.getElementById('selCarroCel');
+  const rect = ev.currentTarget.getBoundingClientRect();
+  const anchoPopover = 165;
+  const altoPopoverEstimado = ESTADOS.length * 38 + 12;
+  const left = Math.min(Math.max(8, rect.right - anchoPopover), window.innerWidth - anchoPopover - 8);
+  const cabeAbajo = (rect.bottom + 6 + altoPopoverEstimado) <= window.innerHeight;
+  const top = cabeAbajo ? (rect.bottom + 6) : Math.max(8, rect.top - 6 - altoPopoverEstimado);
+  sel.style.left = left + 'px';
+  sel.style.top = top + 'px';
+  sel.innerHTML = ESTADOS.map(e =>
+    `<div class="estado-opt-carro" onclick="setEstadoBombero('${b.reg}', '${e}')"><span class="dot" style="background:${COLOR_ESTADO[e]}"></span>${PILL_LABEL[e]}${b.estado === e ? ' ✓' : ''}</div>`
+  ).join('');
+  sel.classList.add('open');
+}
+async function setEstadoBombero(reg, nuevo){
+  document.getElementById('selCarroCel').classList.remove('open');
+  const b = GUARDIA.find(x => String(x.reg) === String(reg));
+  if(!b || b.estado === nuevo) return;
+  marcarAccionLocal();
   const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: nuevo });
   if(error){ toast('No se pudo cambiar: ' + error.message); return; }
   b.estado = nuevo;
