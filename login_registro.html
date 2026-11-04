@@ -458,7 +458,7 @@ async function intentarLogin(){
           window.location.href = 'definir_nueva_password.html?numero=' + encodeURIComponent(perfil.numero_registro);
           return;
         }
-        window.location.href = destinoPropio(perfil);
+        { const d = destinoPropio(perfil); recordarDestino(d); window.location.href = d; }
       }, 500);
       return;
     }
@@ -480,7 +480,7 @@ async function intentarLogin(){
           return;
         }
         toast('Central de Alarmas identificada — abriendo Consola de Despacho…');
-        setTimeout(() => { window.location.href = 'consola_despacho.html'; }, 500);
+        recordarDestino('consola_despacho.html'); setTimeout(() => { window.location.href = 'consola_despacho.html'; }, 500);
         return;
       }
       toast('No se encontró una Central configurada para ese Código de Cuerpo');
@@ -497,7 +497,7 @@ async function intentarLogin(){
           return;
         }
         toast('PC del Cuartel identificado — abriendo Terminal…');
-        setTimeout(() => { window.location.href = 'pc_compania.html'; }, 500);
+        recordarDestino('pc_compania.html'); setTimeout(() => { window.location.href = 'pc_compania.html'; }, 500);
         return;
       }
     }
@@ -511,7 +511,7 @@ async function intentarLogin(){
         return;
       }
       toast('Carro identificado — abriendo Tablet…');
-      setTimeout(() => { window.location.href = 'tablet_carro.html'; }, 500);
+      recordarDestino('tablet_carro.html'); setTimeout(() => { window.location.href = 'tablet_carro.html'; }, 500);
       return;
     }
   }
@@ -646,10 +646,19 @@ render();
 
 // La sesión queda abierta hasta que la persona toque "Cerrar sesión": si al abrir la app
 // ya hay una sesión válida, se entra directo a su pantalla en vez de pedir el acceso de nuevo.
+// Última pantalla a la que se entró con éxito en este dispositivo: permite abrir la app directo,
+// sin esperar consultas de red. Si la sesión no existe, no se usa.
+function recordarDestino(url){ try{ localStorage.setItem('vigor_destino', url); }catch(e){} }
 async function entrarSiHaySesion(){
   try{
+    // Freno anti-bucle: si hace menos de 15 s ya se redirigió desde aquí, se muestra el acceso normal.
+    const ultimo = Number(sessionStorage.getItem('vigor_redir') || 0);
+    if(Date.now() - ultimo < 15000) return;
     const { data: { session } } = await sb.auth.getSession();
     if(!session) return;
+    sessionStorage.setItem('vigor_redir', String(Date.now()));
+    const guardado = localStorage.getItem('vigor_destino');
+    if(guardado && /^[a-z_]+\.html$/.test(guardado)){ location.replace(guardado); return; }
     const { data: perfil } = await sb.from('personal')
       .select('estado, debe_cambiar_password, numero_registro, cargo, compania_id, cuerpos(estado)')
       .eq('auth_user_id', session.user.id).maybeSingle();

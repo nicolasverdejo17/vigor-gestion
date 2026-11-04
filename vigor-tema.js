@@ -5,6 +5,8 @@
   var d = document;
   function iniciar(){
     var b = d.body; if(!b) return;
+    // Pide al navegador que no borre los datos guardados de Vigor (la sesión) cuando falta espacio.
+    try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){}); }catch(e){}
     // Banner con el logo (se omite en el inicio de sesión, que tiene su propio diseño)
     if(!b.hasAttribute('data-sin-banner') && !d.getElementById('vigor-banner')){
       var h = d.createElement('header'); h.id = 'vigor-banner';
