@@ -36,7 +36,9 @@
 
   // El nombre de la pantalla va en el banner, a continuación del logo.
   var ESPECIALES = { 'pc_compania.html':'PC de Compañía', 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual' };
+  var TITULO_PESTANA = 'VIGOR - Gestiona tu compañía de forma eficiente';
   function sincronizarTitulo(){
+    if(d.title !== TITULO_PESTANA) d.title = TITULO_PESTANA;
     var t = d.getElementById('vigor-banner-titulo'); if(!t) return;
     var archivo = (location.pathname.split('/').pop() || '').toLowerCase();
     var h1 = d.querySelector('h1');
@@ -46,10 +48,10 @@
       var raw = (h1.textContent || '').replace(/\s+/g, ' ').trim();
       var partes = raw.split(' — ');
       texto = partes[0].trim();
-      ocultar = partes.length === 1;   // si el título lleva más datos (compañía, carro…), se deja visible
+      if(/^administraci[oó]n$/i.test(texto) && partes[1]) texto = partes[1].trim();   // «Administración — Crear Carro» → «Crear Carro»
+      ocultar = true;                  // solo el título: los datos extra (compañía, carro…) ya no se repiten
       if(!texto || /^cargando/i.test(texto) || /^sin asignar/i.test(texto)){ texto = ''; ocultar = false; }
     }
-    if(!texto) texto = (d.title || '').replace(/^\s*vigor\s*[—-]\s*/i, '').replace(/\s*\((celular)\)\s*$/i, '').trim();
     if(t.textContent !== texto) t.textContent = texto;
     if(h1) h1.classList.toggle('vg-h1-oculto', ocultar);
   }
