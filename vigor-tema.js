@@ -14,6 +14,7 @@
       b.insertBefore(h, b.firstChild); b.classList.add('vg-banner');
       moverVolver(h);
       adaptarPC(h);
+      adaptarCrisis(h);
     }
     // Botones primarios (color de acento antiguo) pasan al degradado
     var ACENTOS = ['rgb(30, 110, 125)', 'rgb(73, 233, 255)', 'rgb(18, 131, 155)', 'rgb(45, 211, 219)'];
@@ -80,6 +81,17 @@
     if(der){ der.classList.add('vg-pc-der'); banner.appendChild(der); }
     if(franja) franja.classList.add('vg-franja-oculta');
     banner.classList.add('vg-pc');
+  }
+
+  // Modo Crisis: reloj, cronómetro y «Desactivar» suben al banner; la franja roja de abajo se quita
+  function adaptarCrisis(banner){
+    var archivo = (location.pathname.split('/').pop() || '').toLowerCase();
+    if(archivo !== 'modo_crisis.html') return;
+    var der = d.querySelector('.crisis-right'), franja = d.querySelector('.crisis-banner'), marca = d.querySelector('.wordmark');
+    if(der){ der.classList.add('vg-pc-der', 'vg-crisis-der'); banner.appendChild(der); }
+    if(franja) franja.classList.add('vg-franja-oculta');
+    if(marca) marca.classList.add('vg-franja-oculta');
+    banner.classList.add('vg-crisis');
   }
 
   // El nombre de la pantalla va en el banner, a continuación del logo.

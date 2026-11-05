@@ -212,6 +212,107 @@
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
 <script src="vigor-tema.js" defer></script>
+<style>
+  html{ background:#06141F;}
+  /* Tablero de batallones con el diseño de Vigor */
+  .wrap{ padding-top:20px;}
+  .toolbar h2{ font-family:'Montserrat',sans-serif; text-transform:none; letter-spacing:0; font-size:22px;}
+  .resumen-crisis{ font-size:12px; color:var(--text-muted); margin-top:4px;}
+  .btn-reporte, .btn-crear{ font-family:'Montserrat',sans-serif !important; text-transform:none !important; letter-spacing:0 !important; font-size:13px !important; font-weight:700; padding:11px 18px !important; border-radius:12px !important;}
+  .btn-crear{ background:var(--vg-grad) !important; color:#06141F !important; font-weight:800;}
+  .batallones{ grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px;}
+  .bcard{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:16px; padding:16px 16px 12px 20px; cursor:pointer; position:relative; overflow:hidden; transition:border-color .15s, transform .15s;}
+  .bcard::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--servicio);}
+  .bcard.emergencia::before{ background:var(--emergencia);}
+  .bcard.rancho::before{ background:var(--alerta);}
+  .bcard:hover{ border-color:var(--cyan); transform:translateY(-2px);}
+  .bc-top{ display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .bc-top h3{ font-family:'Montserrat',sans-serif; text-transform:none; letter-spacing:0; font-size:17px; margin:0; overflow-wrap:anywhere;}
+  .estado-pill{ font-family:'Montserrat',sans-serif !important; border-radius:999px !important; font-size:10px !important; padding:4px 11px !important; letter-spacing:.03em;}
+  .estado-pill.disponible{ color:#06141F;}
+  .bc-meta{ font-size:12px; color:var(--text-muted); margin-top:8px; min-height:16px;}
+  .bc-meta i{ color:var(--text-dim);}
+  .bc-nums{ display:flex; gap:22px; margin-top:12px;}
+  .bc-nums b{ display:block; font-size:26px; font-weight:800; line-height:1;}
+  .bc-nums span{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em;}
+  .bc-carros{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
+  .bc-carro{ font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--cyan); border:1px solid var(--cyan-dim); border-radius:8px; padding:3px 9px;}
+  .bc-mas{ font-size:11px; color:var(--text-dim); align-self:center;}
+  .bc-abrir{ text-align:right; font-size:11.5px; color:var(--cyan); font-weight:700; margin-top:8px;}
+  .vacio-crisis{ grid-column:1 / -1; text-align:center; padding:48px 20px; background:var(--panel); border:1.5px dashed var(--line-strong); border-radius:16px; color:var(--text-muted); font-size:13px; line-height:1.6;}
+  .vacio-crisis b{ display:block; color:var(--text); font-size:15px; margin-bottom:4px;}
+  .vc-ico{ font-size:34px; color:var(--line-strong); margin-bottom:8px;}
+
+  /* Detalle del batallón */
+  .bm-overlay{ position:fixed; inset:0; background:rgba(5,10,15,.78); z-index:70; display:none; align-items:center; justify-content:center; padding:18px;}
+  .bm-overlay.show{ display:flex;}
+  .bm-box{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:18px; padding:20px; width:100%; max-width:660px; max-height:92vh; overflow-y:auto;}
+  .bm-head{ display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .bm-nombre{ flex:1; min-width:0; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text); font-family:'Montserrat',sans-serif; font-weight:800; font-size:22px; padding:4px 0;}
+  .bm-nombre:hover{ border-bottom-color:var(--line-strong);}
+  .bm-nombre:focus{ outline:none; border-bottom-color:var(--cyan);}
+  .bm-x{ background:none; border:none; color:var(--text-dim); font-size:20px; cursor:pointer; padding:4px 8px;}
+  .bm-x:hover{ color:var(--text);}
+  .bm-estados{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px;}
+  .bm-est{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; padding:12px 8px; border-radius:12px; cursor:pointer; background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted);}
+  .bm-est:hover{ border-color:var(--cyan); color:var(--text);}
+  .bm-est.emergencia.on{ background:var(--emergencia); border-color:var(--emergencia); color:#fff;}
+  .bm-est.disponible.on{ background:var(--servicio); border-color:var(--servicio); color:#06141F;}
+  .bm-est.rancho.on{ background:var(--alerta); border-color:var(--alerta); color:#241505;}
+  .bm-campos{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px;}
+  .bm-campo label{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; font-weight:700;}
+  .bm-campo input, .bm-add input{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:12px; padding:11px 13px; color:var(--text); font-size:13.5px; font-family:inherit;}
+  .bm-campo input:focus, .bm-add input:focus{ outline:none; border-color:var(--cyan);}
+  .bm-sec{ background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:14px; padding:14px; margin-bottom:12px;}
+  .bm-sec-t{ font-size:11px; color:var(--cyan); text-transform:uppercase; letter-spacing:.1em; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .bm-sec-t span, .bm-grupo-t span{ font-size:10px; border:1px solid currentColor; border-radius:9px; padding:1px 8px;}
+  .bm-vacio{ font-size:12.5px; color:var(--text-dim); margin-bottom:10px;}
+  .bm-grupo{ margin-bottom:10px;}
+  .bm-grupo-t{ font-size:10.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.07em; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+  .bm-chips{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px;}
+  .bm-chip{ display:inline-flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line-strong); border-radius:999px; padding:4px 6px 4px 4px; font-size:12.5px; font-weight:600;}
+  .bm-chip button{ background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:12px; padding:2px 4px;}
+  .bm-chip button:hover{ color:var(--emergencia);}
+  .bm-av{ width:24px; height:24px; border-radius:50%; background:var(--vg-grad); color:#06141F; display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:800;}
+  .bm-chip.carro{ padding:5px 6px 5px 12px; border-color:var(--cyan-dim);}
+  .bm-chip.carro b{ font-family:'JetBrains Mono',monospace; color:var(--cyan);}
+  .bm-chip.carro i{ font-style:normal; font-size:11px; color:var(--text-muted); font-weight:500;}
+  .bm-add{ display:grid; grid-template-columns:1fr 1.4fr auto; gap:8px; align-items:center;}
+  .bm-add.col{ grid-template-columns:1fr; }
+  .bm-add input.mono{ font-family:'JetBrains Mono',monospace;}
+  .bm-roles{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
+  .bm-rol{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; padding:10px 6px; border-radius:10px; cursor:pointer; background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);}
+  .bm-rol.on{ background:var(--vg-grad); border-color:transparent; color:#06141F;}
+  .bm-mas{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:12.5px; padding:11px 16px; border-radius:12px; cursor:pointer; border:none; color:#06141F; background:var(--vg-grad); white-space:nowrap;}
+  .bm-mas:hover{ filter:brightness(1.08);}
+  .bm-pie{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  .bm-conf{ flex:1; min-width:200px; font-size:12.5px; color:#FFC9CE;}
+  .bm-peligro, .bm-sec-btn, .bm-listo{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:12.5px; padding:11px 18px; border-radius:12px; cursor:pointer;}
+  .bm-peligro{ background:var(--burdeo); border:1.5px solid var(--burdeo-bright); color:#fff;}
+  .bm-peligro.suave{ background:transparent; color:var(--burdeo-bright);}
+  .bm-peligro:hover{ background:var(--burdeo-bright); color:#fff;}
+  .bm-sec-btn{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);}
+  .bm-listo{ border:none; color:#06141F; font-weight:800; background:var(--vg-grad); padding:11px 30px;}
+  @media (max-width:640px){
+    .bm-overlay{ align-items:flex-end; padding:0;}
+    .bm-box{ border-radius:18px 18px 0 0; max-height:94vh;}
+    .bm-campos{ grid-template-columns:1fr;}
+    .bm-add{ grid-template-columns:1fr;}
+  }
+
+  /* Reporte */
+  #reporteImp{ display:none;}
+  @media print{
+    body{ background:#fff !important; color:#000 !important; padding:0 !important;}
+    #vigor-banner, .wrap, .toast, .bm-overlay, .modal-overlay, .crisis-banner, .wordmark{ display:none !important;}
+    #reporteImp{ display:block !important; padding:0; color:#000; font-family:'Montserrat',sans-serif;}
+    #reporteImp h2{ font-size:20px; margin:0 0 4px; text-transform:none; letter-spacing:0; color:#000;}
+    .rp-sub{ font-size:11px; color:#333; margin-bottom:16px;}
+    .rp-bat{ border:1px solid #999; border-radius:8px; padding:10px 12px; margin-bottom:10px; break-inside:avoid;}
+    .rp-bat h3{ font-size:14px; margin:0 0 6px; text-transform:none; letter-spacing:0; color:#000;}
+    .rp-linea{ font-size:12px; margin:3px 0; color:#000;}
+  }
+</style>
 </head>
 <body>
 
@@ -235,9 +336,9 @@
 
   <div class="wrap">
     <div class="toolbar">
-      <h2>Batallones</h2>
+      <div><h2>Batallones</h2><div class="resumen-crisis" id="resumenCrisis"></div></div>
       <div class="toolbar-actions">
-        <button class="btn-reporte" onclick="window.print()">Generar reporte</button>
+        <button class="btn-reporte" onclick="generarReporte()">Generar reporte</button>
         <button class="btn-crear" onclick="crearBatallon()">+ Crear Batallón</button>
       </div>
     </div>
@@ -245,6 +346,10 @@
     <div class="batallones" id="batallones"></div>
 
   </div>
+
+  <datalist id="listaPersonas"></datalist>
+  <div class="bm-overlay" id="bmOverlay" onclick="cerrarBatallon()"></div>
+  <div id="reporteImp"></div>
 
   <div class="toast" id="toast"></div>
 
@@ -306,6 +411,7 @@ async function cargarDatos(){
   elapsedRefPerf = performance.now();
 
   await cargarBatallones();
+  cargarSugerencias();
   suscribirRealtime();
 }
 
@@ -322,7 +428,7 @@ function suscribirRealtime(){
     .subscribe();
 }
 
-async function cargarBatallones(){
+async function cargarBatallones(forzar){
   const { data } = await sb.from('batallones')
     .select('id, nombre, estado, frente_zona, responsable, batallon_carros(id, nomenclatura, procedencia), batallon_bomberos(id, nombre, rol)')
     .eq('puesto_mando_id', miPuestoMandoId).order('creado_en');
@@ -330,129 +436,204 @@ async function cargarBatallones(){
     id: b.id, nombre: b.nombre, estado: b.estado, frente: b.frente_zona || '', responsable: b.responsable || '',
     carros: b.batallon_carros || [], bomberos: b.batallon_bomberos || []
   }));
-  render();
+  render(forzar);
 }
+
+// Nombres del Cuerpo para sugerir al escribir (opcional: si falla, se escribe a mano como antes)
+let PERSONAS = [];
+async function cargarSugerencias(){
+  try{
+    const { data } = await sb.from('personal').select('nombre_completo, cargo').neq('estado', 'dado_de_baja').order('nombre_completo').limit(1500);
+    PERSONAS = data || [];
+    const dl = document.getElementById('listaPersonas');
+    if(dl) dl.innerHTML = PERSONAS.map(p => `<option value="${esc(p.nombre_completo)}">${esc(p.cargo || '')}</option>`).join('');
+  }catch(e){ PERSONAS = []; }
+}
+function rolSugerido(cargo){
+  if(/maquinista/i.test(cargo || '')) return 'Maquinista';
+  if(/^(Director|Capit|Teniente|Ayudante)/i.test(cargo || '')) return 'Oficial';
+  return 'Tripulante';
+}
+
+const ROLES = ['Oficial', 'Maquinista', 'Tripulante'];
+const ROL_PLURAL = { Oficial:'Oficiales', Maquinista:'Maquinistas', Tripulante:'Tripulantes' };
+const ESTADO_TXT = { emergencia:'En Emergencia', disponible:'Disponible', rancho:'Rancho' };
+let abiertoId = null;
+let rolSel = 'Tripulante';
+let confirmandoEliminar = false;
+const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inicialesDe = (n) => (n || '?').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
 
 async function crearBatallon(){
   const { data, error } = await sb.from('batallones').insert({ puesto_mando_id: miPuestoMandoId, nombre: `Batallón ${batallones.length+1}` }).select().single();
   if(error){ toast('No se pudo crear el batallón — ' + error.message); return; }
-  await cargarBatallones();
-  abiertos.add(data.id);
-  render();
+  abiertoId = data.id; confirmandoEliminar = false;
+  await cargarBatallones(true);
 }
 async function eliminarBatallon(id){
   await sb.from('batallones').delete().eq('id', id);
-  await cargarBatallones();
+  abiertoId = null; confirmandoEliminar = false;
+  await cargarBatallones(true);
+  toast('Batallón eliminado');
 }
 async function setEstado(id, estado){
   await sb.from('batallones').update({ estado }).eq('id', id);
   batallones.find(b=>b.id===id).estado = estado;
-  render();
+  render(true);
 }
 async function setNombre(id, val){
+  val = (val || '').trim() || 'Batallón';
   await sb.from('batallones').update({ nombre: val }).eq('id', id);
   batallones.find(b=>b.id===id).nombre = val;
+  renderTarjetas();
 }
 async function setMeta(id, campo, val){
   const columna = campo === 'frente' ? 'frente_zona' : 'responsable';
   await sb.from('batallones').update({ [columna]: val }).eq('id', id);
   batallones.find(b=>b.id===id)[campo] = val;
+  renderTarjetas();
 }
 async function addCarro(id){
-  const nom = document.getElementById(`carro-nom-${id}`).value.trim();
-  const proc = document.getElementById(`carro-proc-${id}`).value.trim();
-  if(!nom){ toast('Ingresa al menos la nomenclatura del carro'); return; }
+  const nomEl = document.getElementById('bm-carro-nom'), procEl = document.getElementById('bm-carro-proc');
+  const nom = nomEl.value.trim(), proc = procEl.value.trim();
+  if(!nom){ toast('Ingresa al menos la nomenclatura del carro'); nomEl.focus(); return; }
   const { error } = await sb.from('batallon_carros').insert({ batallon_id: id, nomenclatura: nom, procedencia: proc || 'Base' });
   if(error){ toast('No se pudo agregar el carro — ' + error.message); return; }
-  await cargarBatallones();
+  await cargarBatallones(true);
+  const n = document.getElementById('bm-carro-nom'); if(n) n.focus();
 }
 async function delCarro(id, carroId){
   await sb.from('batallon_carros').delete().eq('id', carroId);
-  await cargarBatallones();
+  await cargarBatallones(true);
 }
 async function addBombero(id){
-  const nombre = document.getElementById(`bomb-nombre-${id}`).value.trim();
-  const rol = document.getElementById(`bomb-rol-${id}`).value;
-  if(!nombre){ toast('Ingresa el nombre del bombero'); return; }
-  const { error } = await sb.from('batallon_bomberos').insert({ batallon_id: id, nombre, rol });
+  const nomEl = document.getElementById('bm-bomb-nombre');
+  const nombre = nomEl.value.trim();
+  if(!nombre){ toast('Ingresa el nombre del bombero'); nomEl.focus(); return; }
+  const { error } = await sb.from('batallon_bomberos').insert({ batallon_id: id, nombre, rol: rolSel });
   if(error){ toast('No se pudo agregar el bombero — ' + error.message); return; }
-  await cargarBatallones();
+  await cargarBatallones(true);
+  const n = document.getElementById('bm-bomb-nombre'); if(n) n.focus();
 }
 async function delBombero(id, bomberoId){
   await sb.from('batallon_bomberos').delete().eq('id', bomberoId);
-  await cargarBatallones();
+  await cargarBatallones(true);
 }
-
-function toggleAbierto(id){
-  if(abiertos.has(id)) abiertos.delete(id); else abiertos.add(id);
-  render();
+function elegirRol(rol){
+  rolSel = rol; document.querySelectorAll('.bm-rol').forEach(b => b.classList.toggle('on', b.dataset.rol === rol));
+  const n = document.getElementById('bm-bomb-nombre'); if(n) n.focus();   // para seguir escribiendo y agregar con Enter
 }
+function alEscribirNombre(el){
+  const p = PERSONAS.find(x => x.nombre_completo === el.value.trim());
+  if(p) elegirRol(rolSugerido(p.cargo));   // si es una persona del Cuerpo, propone su rol
+}
+function enter(ev, fn){ if(ev.key === 'Enter'){ ev.preventDefault(); fn(); } }
 
-function render(){
+function abrirBatallon(id){ abiertoId = id; confirmandoEliminar = false; renderModal(true); }
+function cerrarBatallon(){
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  abiertoId = null; confirmandoEliminar = false;
+  document.getElementById('bmOverlay').classList.remove('show');
+}
+function pedirEliminar(){ confirmandoEliminar = true; renderModal(true); }
+function cancelarEliminar(){ confirmandoEliminar = false; renderModal(true); }
+
+// ---- Tarjetas ----
+function render(forzar){
+  renderTarjetas();
+  if(abiertoId) renderModal(!!forzar);
+}
+function renderTarjetas(){
   const el = document.getElementById('batallones');
-  if(batallones.length===0){
-    el.innerHTML = '<div class="empty-state">Sin Batallones creados todavía. Toca "+ Crear Batallón" para empezar a organizar los recursos del evento.</div>';
+  const nC = batallones.reduce((s, b) => s + b.carros.length, 0), nB = batallones.reduce((s, b) => s + b.bomberos.length, 0);
+  document.getElementById('resumenCrisis').textContent = batallones.length
+    ? `${batallones.length} ${batallones.length === 1 ? 'batallón' : 'batallones'} · ${nC} carro${nC === 1 ? '' : 's'} · ${nB} bombero${nB === 1 ? '' : 's'}` : '';
+  if(batallones.length === 0){
+    el.innerHTML = `<div class="vacio-crisis"><div class="vc-ico">⚑</div><b>Todavía no hay batallones</b>Toca «+ Crear Batallón» para empezar a organizar los carros y el personal del evento.</div>`;
     return;
   }
   el.innerHTML = batallones.map(b => `
-    <div class="batallon ${abiertos.has(b.id)?'open':''}">
-      <div class="batallon-summary" onclick="toggleAbierto('${b.id}')">
-        <div class="batallon-summary-top">
-          <h3>${b.nombre}</h3>
-          <span class="estado-pill ${b.estado}">${ {emergencia:'En Emergencia', disponible:'Disponible', rancho:'Rancho'}[b.estado] }</span>
-        </div>
-        <div class="batallon-summary-meta">${b.frente || 'Sin frente asignado'} ${b.responsable ? '· ' + b.responsable : ''}</div>
-        <div class="batallon-summary-counts"><span><b>${b.carros.length}</b> carros</span><span><b>${b.bomberos.length}</b> bomberos</span></div>
-        <div class="expand-hint">Tocar para ${abiertos.has(b.id)?'cerrar':'ver detalle'} ▾</div>
-      </div>
-      <div class="batallon-head">
-        <input class="batallon-nombre" value="${b.nombre}" onchange="setNombre('${b.id}', this.value)">
-        <div class="batallon-head-right">
-          <div class="estado-select">
-            <button class="estado-btn emergencia ${b.estado==='emergencia'?'on':''}" onclick="setEstado('${b.id}','emergencia')">En Emergencia</button>
-            <button class="estado-btn disponible ${b.estado==='disponible'?'on':''}" onclick="setEstado('${b.id}','disponible')">Disponible</button>
-            <button class="estado-btn rancho ${b.estado==='rancho'?'on':''}" onclick="setEstado('${b.id}','rancho')">Rancho</button>
-          </div>
-          <button class="del-batallon" onclick="eliminarBatallon('${b.id}')">Eliminar ✕</button>
-        </div>
-      </div>
-      <div class="batallon-body">
-        <button class="btn-cerrar-batallon" onclick="toggleAbierto('${b.id}')">▲ Cerrar</button>
-        <div class="meta-row">
-          <div class="meta-field"><label>Frente / Zona</label><input value="${b.frente}" placeholder="Ej. Sector Norte" onchange="setMeta('${b.id}','frente',this.value)"></div>
-          <div class="meta-field"><label>Responsable</label><input value="${b.responsable}" placeholder="Ej. Cap. R. Salinas" onchange="setMeta('${b.id}','responsable',this.value)"></div>
-        </div>
+    <div class="bcard ${b.estado}" onclick="abrirBatallon('${b.id}')">
+      <div class="bc-top"><h3>${esc(b.nombre)}</h3><span class="estado-pill ${b.estado}">${ESTADO_TXT[b.estado] || b.estado}</span></div>
+      <div class="bc-meta">${b.frente ? esc(b.frente) : '<i>Sin frente asignado</i>'}${b.responsable ? ' · ' + esc(b.responsable) : ''}</div>
+      <div class="bc-nums"><div><b>${b.carros.length}</b><span>carros</span></div><div><b>${b.bomberos.length}</b><span>bomberos</span></div></div>
+      ${b.carros.length ? `<div class="bc-carros">${b.carros.slice(0, 6).map(c => `<span class="bc-carro">${esc(c.nomenclatura)}</span>`).join('')}${b.carros.length > 6 ? `<span class="bc-mas">+${b.carros.length - 6}</span>` : ''}</div>` : ''}
+      <div class="bc-abrir">Abrir ›</div>
+    </div>`).join('');
+}
 
-        <div class="sub-block">
-          <div class="sub-label">Carros</div>
-          <div class="chip-list">
-            ${b.carros.map((c)=>`<span class="chip carro">${c.nomenclatura} — ${c.procedencia} <button onclick="delCarro('${b.id}','${c.id}')">✕</button></span>`).join('') || ''}
-          </div>
-          <div class="add-row">
-            <input class="i-nom" id="carro-nom-${b.id}" placeholder="Ej. F-3">
-            <input class="i-proc" id="carro-proc-${b.id}" placeholder="Procedencia">
-            <button class="add-btn-mini" onclick="addCarro('${b.id}')">+ Agregar carro</button>
-          </div>
-        </div>
+// ---- Detalle del batallón ----
+function renderModal(forzar){
+  const b = batallones.find(x => x.id === abiertoId);
+  const ov = document.getElementById('bmOverlay');
+  if(!b){ ov.classList.remove('show'); abiertoId = null; return; }
+  // Si alguien está escribiendo en el detalle, un cambio de otra persona no le borra lo que lleva escrito
+  const foco = document.activeElement;
+  if(!forzar && ov.classList.contains('show') && foco && ov.contains(foco) && /INPUT/.test(foco.tagName)) return;
+  const porRol = (rol) => b.bomberos.filter(p => p.rol === rol);
+  const otros = b.bomberos.filter(p => !ROLES.includes(p.rol));
+  const grupo = (titulo, lista) => lista.length ? `
+    <div class="bm-grupo"><div class="bm-grupo-t">${titulo} <span>${lista.length}</span></div>
+    <div class="bm-chips">${lista.map(p => `<span class="bm-chip"><span class="bm-av">${esc(inicialesDe(p.nombre))}</span>${esc(p.nombre)}<button onclick="delBombero('${b.id}','${p.id}')" title="Quitar">✕</button></span>`).join('')}</div></div>` : '';
+  ov.innerHTML = `
+    <div class="bm-box" onclick="event.stopPropagation()">
+      <div class="bm-head">
+        <input class="bm-nombre" value="${esc(b.nombre)}" onchange="setNombre('${b.id}', this.value)" onkeydown="enter(event, () => this.blur())" title="Toca para cambiar el nombre">
+        <button class="bm-x" onclick="cerrarBatallon()" title="Cerrar">✕</button>
+      </div>
+      <div class="bm-estados">
+        ${['emergencia', 'disponible', 'rancho'].map(e => `<button class="bm-est ${e} ${b.estado === e ? 'on' : ''}" onclick="setEstado('${b.id}','${e}')">${ESTADO_TXT[e]}</button>`).join('')}
+      </div>
+      <div class="bm-campos">
+        <div class="bm-campo"><label>Frente / Zona</label><input value="${esc(b.frente)}" placeholder="Ej. Sector Norte" onchange="setMeta('${b.id}','frente',this.value)" onkeydown="enter(event, () => this.blur())"></div>
+        <div class="bm-campo"><label>Responsable</label><input value="${esc(b.responsable)}" placeholder="Ej. Cap. R. Salinas" onchange="setMeta('${b.id}','responsable',this.value)" onkeydown="enter(event, () => this.blur())"></div>
+      </div>
 
-        <div class="sub-block">
-          <div class="sub-label">Bomberos</div>
-          <div class="chip-list">
-            ${b.bomberos.map((p)=>`<span class="chip bombero">${p.nombre} <span class="rol">${p.rol}</span> <button onclick="delBombero('${b.id}','${p.id}')">✕</button></span>`).join('') || ''}
-          </div>
-          <div class="add-row">
-            <input class="i-nombre" id="bomb-nombre-${b.id}" placeholder="Nombre">
-            <select id="bomb-rol-${b.id}">
-              <option>Oficial</option>
-              <option>Maquinista</option>
-              <option>Tripulante</option>
-            </select>
-            <button class="add-btn-mini" onclick="addBombero('${b.id}')">+ Agregar bombero</button>
-          </div>
+      <div class="bm-sec">
+        <div class="bm-sec-t">Carros <span>${b.carros.length}</span></div>
+        ${b.carros.length ? `<div class="bm-chips">${b.carros.map(c => `<span class="bm-chip carro"><b>${esc(c.nomenclatura)}</b><i>${esc(c.procedencia)}</i><button onclick="delCarro('${b.id}','${c.id}')" title="Quitar">✕</button></span>`).join('')}</div>` : '<div class="bm-vacio">Aún no hay carros en este batallón.</div>'}
+        <div class="bm-add">
+          <input id="bm-carro-nom" class="mono" placeholder="Carro (Ej. F-3)" onkeydown="enter(event, () => addCarro('${b.id}'))">
+          <input id="bm-carro-proc" placeholder="Procedencia (Ej. 1ª Compañía)" onkeydown="enter(event, () => addCarro('${b.id}'))">
+          <button class="bm-mas" onclick="addCarro('${b.id}')">+ Agregar carro</button>
         </div>
       </div>
-    </div>
-  `).join('');
+
+      <div class="bm-sec">
+        <div class="bm-sec-t">Bomberos <span>${b.bomberos.length}</span></div>
+        ${b.bomberos.length ? grupo('Oficiales', porRol('Oficial')) + grupo('Maquinistas', porRol('Maquinista')) + grupo('Tripulantes', porRol('Tripulante')) + grupo('Otros', otros) : '<div class="bm-vacio">Aún no hay bomberos en este batallón.</div>'}
+        <div class="bm-add col">
+          <input id="bm-bomb-nombre" list="listaPersonas" placeholder="Nombre del bombero" autocomplete="off" oninput="alEscribirNombre(this)" onkeydown="enter(event, () => addBombero('${b.id}'))">
+          <div class="bm-roles">${ROLES.map(r => `<button class="bm-rol ${rolSel === r ? 'on' : ''}" data-rol="${r}" onclick="elegirRol('${r}')">${r}</button>`).join('')}</div>
+          <button class="bm-mas" onclick="addBombero('${b.id}')">+ Agregar bombero</button>
+        </div>
+      </div>
+
+      <div class="bm-pie">
+        ${confirmandoEliminar
+          ? `<span class="bm-conf">¿Eliminar «${esc(b.nombre)}» con sus carros y bomberos?</span><button class="bm-sec-btn" onclick="cancelarEliminar()">No</button><button class="bm-peligro" onclick="eliminarBatallon('${b.id}')">Sí, eliminar</button>`
+          : `<button class="bm-peligro suave" onclick="pedirEliminar()">Eliminar batallón</button><button class="bm-listo" onclick="cerrarBatallon()">Listo</button>`}
+      </div>
+    </div>`;
+  ov.classList.add('show');
+}
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && abiertoId) cerrarBatallon(); });
+
+// ---- Reporte (se imprime o se guarda como PDF) ----
+function generarReporte(){
+  const hora = new Date().toLocaleString('es-CL');
+  document.getElementById('reporteImp').innerHTML = `
+    <h2>Reporte de Modo Crisis — Puesto de Mando</h2>
+    <div class="rp-sub">${esc(document.getElementById('ciaLabel').textContent)} · Emitido el ${esc(hora)} · Activo hace ${esc(document.getElementById('timer').textContent)}</div>
+    ${batallones.map(b => `
+      <div class="rp-bat">
+        <h3>${esc(b.nombre)} — ${ESTADO_TXT[b.estado] || b.estado}</h3>
+        <div class="rp-linea"><b>Frente / Zona:</b> ${esc(b.frente || '—')} &nbsp;·&nbsp; <b>Responsable:</b> ${esc(b.responsable || '—')}</div>
+        <div class="rp-linea"><b>Carros (${b.carros.length}):</b> ${b.carros.length ? b.carros.map(c => esc(c.nomenclatura) + ' (' + esc(c.procedencia) + ')').join(', ') : '—'}</div>
+        ${ROLES.map(r => { const l = b.bomberos.filter(p => p.rol === r); return l.length ? `<div class="rp-linea"><b>${ROL_PLURAL[r]} (${l.length}):</b> ${l.map(p => esc(p.nombre)).join(', ')}</div>` : ''; }).join('')}
+        ${(() => { const l = b.bomberos.filter(p => !ROLES.includes(p.rol)); return l.length ? `<div class="rp-linea"><b>Otros (${l.length}):</b> ${l.map(p => esc(p.nombre) + ' (' + esc(p.rol) + ')').join(', ')}</div>` : ''; })()}
+      </div>`).join('') || '<p>Sin batallones.</p>'}`;
+  window.print();
 }
 
 function toast(msg){
