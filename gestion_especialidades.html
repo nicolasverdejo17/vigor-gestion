@@ -132,7 +132,7 @@
     .nameplate-inner{ padding:12px 14px;}
     .brand-text h1{ font-size:15px;}
     .leyenda-row{ padding:10px 14px; flex-direction:column; align-items:stretch;}
-    .btn-nueva-esp{ width:100%;}
+    .btn-nueva-esp, .btn-elim-esp{ width:100%;}
     .tabla-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px;}
     table{ min-width:560px;}
     .modal-box{ width:calc(100vw - 32px); max-width:380px;}
@@ -160,6 +160,20 @@
     .toolbar{ padding:12px 14px; flex-wrap:wrap;}
     .search-input{ min-width:0;}
   }
+
+  .btn-peligro{ background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright); font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; padding:10px; border-radius:6px; cursor:pointer;}
+  .btn-peligro:hover{ background:var(--burdeo); color:#fff;}
+  .btn-elim-esp{
+    background:transparent; border:1.5px dashed var(--burdeo-bright); color:var(--burdeo-bright);
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:11px; padding:8px 14px; border-radius:6px; cursor:pointer; flex-shrink:0; white-space:nowrap;
+  }
+  .btn-elim-esp:hover{ background:rgba(216,57,78,0.12);}
+  .elim-row{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .elim-row:last-of-type{ border-bottom:none;}
+  .elim-conf{ flex-basis:100%; font-size:12px; color:#FFC9CE; background:rgba(255,75,92,.08); border:1px solid rgba(255,75,92,.4); border-radius:8px; padding:9px 11px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .elim-conf .acc{ display:flex; gap:8px;}
+  .elim-conf button{ font-size:11.5px; padding:7px 12px;}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -196,6 +210,7 @@
     <div class="toolbar">
       <input type="text" class="search-input" id="buscador" placeholder="Buscar por nombre o N° de Registro…" oninput="renderTabla()">
       <button class="btn-nueva-esp" onclick="abrirModalNueva()">+ Nueva Especialidad</button>
+      <button class="btn-elim-esp" onclick="abrirModalEliminar()">Eliminar Especialidad</button>
     </div>
 
     <div class="content-wrap">
@@ -247,6 +262,15 @@
         <button class="modal-cancel" onclick="cerrarModalNueva()">Cancelar</button>
         <button class="modal-guardar" onclick="crearEspecialidad()">Crear Especialidad</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="elimEspModal" onclick="if(event.target===this) cerrarModalEliminar()">
+    <div class="modal-box">
+      <h3>Eliminar Especialidad</h3>
+      <div class="modal-sub">Se quita del catálogo y de todos los bomberos que la tengan.</div>
+      <div id="elimEspList"></div>
+      <div class="modal-actions"><button class="modal-cancel" onclick="cerrarModalEliminar()">Cerrar</button></div>
     </div>
   </div>
 
@@ -491,6 +515,43 @@ async function guardarEspecialidades(){
   renderTabla();
   cerrarModal();
   toast(`Especialidades de ${bombero.nombre} actualizadas`);
+}
+
+let elimPendiente = null;   // { codigo, n } mientras se pide confirmación
+function abrirModalEliminar(){ elimPendiente = null; renderElimLista(); document.getElementById('elimEspModal').classList.add('show'); }
+function cerrarModalEliminar(){ document.getElementById('elimEspModal').classList.remove('show'); elimPendiente = null; }
+function renderElimLista(){
+  const entradas = Object.entries(ESPECIALIDADES);
+  document.getElementById('elimEspList').innerHTML = entradas.length ? entradas.map(([k, e]) => {
+    const conf = elimPendiente && elimPendiente.codigo === k;
+    return `<div class="elim-row">
+      <div class="modal-esp-badge" style="background:${e.hex}; color:${contraste(e.hex)};">${k}</div>
+      <div class="modal-esp-label">${e.nombre}</div>
+      ${conf ? '' : `<button class="btn-peligro" style="padding:7px 12px; font-size:11px;" onclick="pedirEliminarEsp('${k}')">Eliminar</button>`}
+      ${conf ? `<div class="elim-conf"><span>${elimPendiente.n ? 'La tienen ' + elimPendiente.n + ' bombero(s). Se les quitará. ' : ''}No se puede deshacer.</span>
+        <span class="acc"><button class="modal-cancel" style="flex:none;" onclick="elimPendiente = null; renderElimLista()">No</button><button class="btn-peligro" id="btnConfElim" onclick="confirmarEliminarEsp('${k}')">Sí, eliminar</button></span></div>` : ''}
+    </div>`;
+  }).join('') : '<div style="padding:18px 0; text-align:center; color:var(--text-dim); font-size:12.5px;">No hay especialidades.</div>';
+}
+async function pedirEliminarEsp(k){
+  const { count } = await sb.from('personal_especialidades').select('personal_id', { count:'exact', head:true }).eq('especialidad_id', ESPECIALIDADES[k].id);
+  elimPendiente = { codigo: k, n: count || 0 };
+  renderElimLista();
+}
+async function confirmarEliminarEsp(k){
+  const e = ESPECIALIDADES[k];
+  const btn = document.getElementById('btnConfElim'); if(btn) btn.disabled = true;
+  const { error } = await sb.rpc('eliminar_especialidad', { p_especialidad_id: e.id });
+  if(error){
+    if(btn) btn.disabled = false;
+    toast((error.message || '').includes('SIN_PERMISO') ? 'No tienes permiso para eliminar especialidades' : 'No se pudo eliminar — ' + error.message);
+    return;
+  }
+  delete ESPECIALIDADES[k];
+  BOMBEROS.forEach(b => { b.esp = b.esp.filter(x => x !== k); });
+  elimPendiente = null;
+  renderElimLista(); renderLeyenda(); renderTabla();
+  toast(`Especialidad «${e.nombre}» eliminada`);
 }
 
 function toast(msg){

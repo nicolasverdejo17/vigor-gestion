@@ -137,7 +137,7 @@
 
   @media print{
     body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
-    .nameplate, .leyenda, .toolbar, #vistaLista, .detalle-actions, .modal-overlay, .toast{ display:none !important;}
+    .nameplate, .leyenda, .toolbar, #vistaLista, .detalle-actions, .modal-overlay, .toast, .curso-del{ display:none !important;}
     .detalle-panel{ display:block !important;}
     .content-wrap{ display:block !important;}
     .curso-row{ border-color:#ccc !important;}
@@ -194,6 +194,12 @@
     .tabla-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px;}
     table{ min-width:620px;}
   }
+
+  .btn-peligro{ background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright); font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12px; padding:10px; border-radius:6px; cursor:pointer;}
+  .btn-peligro:hover{ background:var(--burdeo); color:#fff;}
+  .curso-del{ background:none; border:1px solid transparent; color:var(--text-dim); cursor:pointer; padding:5px; border-radius:6px; display:flex; flex-shrink:0;}
+  .curso-del svg{ width:17px; height:17px;}
+  .curso-del:hover{ color:var(--emergencia); border-color:rgba(255,75,92,.5);}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -256,6 +262,17 @@
       <div class="modal-actions">
         <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
         <button class="modal-guardar" onclick="guardarCurso()">Guardar Curso</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="elimCursoModal" onclick="if(event.target===this) cerrarElimCurso()">
+    <div class="modal-box">
+      <h3>Eliminar curso</h3>
+      <div class="modal-sub" id="elimCursoTxt"></div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="cerrarElimCurso()">Cancelar</button>
+        <button class="btn-peligro" style="flex:1.4;" id="btnElimCurso" onclick="confirmarEliminarCurso()">Eliminar curso</button>
       </div>
     </div>
   </div>
@@ -367,6 +384,7 @@ function renderDetalle(){
           <span class="curso-nombre">${c.nombre_curso}</span>
           ${c.es_externo ? '<span class="curso-tag-externo">Externo</span>' : ''}
           ${c.nivel ? `<span class="nivel-pill ${c.nivel}">${NIVEL_LABEL[c.nivel]}</span>` : ''}
+          ${puedoEditar ? `<button class="curso-del" onclick="pedirEliminarCurso('${c.id}')" title="Eliminar curso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg></button>` : ''}
           ${c.certificado_url ? `<a href="${c.certificado_url}" target="_blank" rel="noopener" class="curso-cert-link" title="Ver certificado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4"/><path d="M9 13.5l2 2 4-4.2"/></svg></a>` : ''}
         </div>
       `).join('')
@@ -394,6 +412,29 @@ function renderDetalle(){
     <div class="cursos-title">Historial de Cursos</div>
     ${rows}
   `;
+}
+
+let cursoPorEliminar = null;
+function pedirEliminarCurso(id){
+  const b = BOMBEROS[bomberoActivo];
+  const c = b && b.cursos.find(x => x.id === id);
+  if(!c) return;
+  cursoPorEliminar = c;
+  document.getElementById('elimCursoTxt').textContent = `«${c.nombre_curso}» (${new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-CL')}) de ${b.nombre}. También se quita de su Hoja de Vida.`;
+  document.getElementById('elimCursoModal').classList.add('show');
+}
+function cerrarElimCurso(){ document.getElementById('elimCursoModal').classList.remove('show'); cursoPorEliminar = null; }
+async function confirmarEliminarCurso(){
+  if(!cursoPorEliminar) return;
+  const c = cursoPorEliminar, b = BOMBEROS[bomberoActivo];
+  const btn = document.getElementById('btnElimCurso'); btn.disabled = true;
+  const { error } = await sb.rpc('eliminar_curso', { p_curso_id: c.id });
+  btn.disabled = false;
+  if(error){ toast((error.message || '').includes('SIN_PERMISO') ? 'No tienes permiso para eliminar cursos' : 'No se pudo eliminar — ' + error.message); return; }
+  b.cursos = b.cursos.filter(x => x.id !== c.id);
+  cerrarElimCurso();
+  renderDetalle();
+  toast('Curso eliminado');
 }
 
 async function setNivelBombero(n){
