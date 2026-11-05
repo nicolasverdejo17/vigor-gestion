@@ -303,9 +303,11 @@ function toast(msg, error){ const t = document.getElementById('toast'); t.textCo
   if(f && f !== 'libro_guardia.html' && /^[a-z_]+\.html$/.test(f)) sessionStorage.setItem('libro_origen', f);
   else if(!f) sessionStorage.removeItem('libro_origen');
 }catch(e){} })();
+let enLista = false;   // true cuando se está viendo el listado de todos los libros
 function volver(){
+  // Desde el listado siempre se sale a Opciones; desde un libro, a la pantalla donde se entró.
   let destino = 'opciones_celular.html';
-  try{ destino = sessionStorage.getItem('libro_origen') || destino; }catch(e){}
+  if(!enLista){ try{ destino = sessionStorage.getItem('libro_origen') || destino; }catch(e){} }
   window.location.href = destino;
 }
 
@@ -342,6 +344,7 @@ async function iniciar(){
 
 // ---- Lista ----
 async function mostrarLista(){
+  enLista = true;
   history.replaceState(null, '', 'libro_guardia.html');
   LIBRO = null;
   const { data, error } = await sb.from('libro_guardia')
@@ -425,6 +428,7 @@ async function abrirDirecto(iso){
 
 // ---- Detalle ----
 async function abrirDetalle(id){
+  enLista = false;
   const [lib, mat, nov, ano, dot] = await Promise.all([
     sb.from('libro_guardia').select('*, abierto:personal!libro_guardia_abierto_por_fkey(nombre_completo), cerr:personal!libro_guardia_cerrado_por_fkey(nombre_completo)').eq('id', id).maybeSingle(),
     sb.from('libro_guardia_material').select('*').eq('libro_id', id).order('carro_nombre'),
