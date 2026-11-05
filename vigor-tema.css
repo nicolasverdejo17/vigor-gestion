@@ -131,3 +131,10 @@ body.vg-crisis-body{ --banner-h:88px;}
 /* ---- Ángulos rectos: sin ninguna esquina redondeada (se activa con <body data-rectos>) ---- */
 body[data-rectos] *, body[data-rectos] *::before, body[data-rectos] *::after{ border-radius:0 !important;}
 body[data-rectos] #vigor-banner *, body[data-rectos] #vigor-banner *::before, body[data-rectos] #vigor-banner *::after{ border-radius:0 !important;}
+
+/* ---- Relojes con números de segmentos (tipo display digital), en el color que ya tenía cada reloj ---- */
+@font-face{ font-family:'DSEG7'; src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2'); font-weight:700; font-style:normal; font-display:swap;}
+html body .clock strong, html body .nameplate__clock strong, html body #vigor-banner .nameplate__clock strong,
+html body .crisis-clock strong, html body .crisis-timer strong, html body #vigor-banner .crisis-clock strong, html body #vigor-banner .crisis-timer strong{
+  font-family:'DSEG7','JetBrains Mono',monospace !important; font-weight:700 !important; letter-spacing:.06em; font-variant-numeric:tabular-nums;
+}
