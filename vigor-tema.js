@@ -13,6 +13,7 @@
       h.innerHTML = '<img src="img/logo.png" alt="Vigor"><span class="vg-sep"></span><span id="vigor-banner-titulo"></span>';
       b.insertBefore(h, b.firstChild); b.classList.add('vg-banner');
       moverVolver(h);
+      adaptarPC(h);
     }
     // Botones primarios (color de acento antiguo) pasan al degradado
     var ACENTOS = ['rgb(30, 110, 125)', 'rgb(73, 233, 255)', 'rgb(18, 131, 155)', 'rgb(45, 211, 219)'];
@@ -71,8 +72,18 @@
     var marca = d.querySelector('.wordmark'); if(marca) marca.classList.add('vg-franja-oculta');   // «VIGOR» suelto: ya está en el banner
   }
 
+  // PC de Compañía: el reloj y los botones (Modo Crisis, Cerrar sesión) suben al banner; la franja de abajo se quita
+  function adaptarPC(banner){
+    var archivo = (location.pathname.split('/').pop() || '').toLowerCase();
+    if(archivo !== 'pc_compania.html') return;
+    var der = d.querySelector('.nameplate__right'), franja = d.querySelector('.nameplate');
+    if(der){ der.classList.add('vg-pc-der'); banner.appendChild(der); }
+    if(franja) franja.classList.add('vg-franja-oculta');
+    banner.classList.add('vg-pc');
+  }
+
   // El nombre de la pantalla va en el banner, a continuación del logo.
-  var ESPECIALES = { 'pc_compania.html':'PC de Compañía', 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual',
+  var ESPECIALES = { 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual',
     'tablet_parte.html':'Parte de Emergencia', 'tablet_bitacora.html':'Bitácora', 'tablet_checklist.html':'Checklist', 'tablet_checklist_historial.html':'Historial de Checklist', 'tablet_dotacion.html':'Dotación Asignada' };
   // Las pantallas del menú Opciones se titulan exactamente como su botón en Opciones.
   var TITULOS_OPCIONES = {
@@ -95,7 +106,14 @@
     var archivo = (location.pathname.split('/').pop() || '').toLowerCase();
     var h1 = d.querySelector('h1');
     var texto = '', ocultar = false;
-    var propio = tituloDeOpciones(archivo.replace(/.html$/, ''));
+    if(archivo === 'pc_compania.html'){
+      // En el PC el banner lleva el nombre de la Compañía (sin «PC de Compañía»)
+      var nc = d.getElementById('nombreCompania'), nom = nc ? (nc.textContent || '').trim() : '';
+      texto = (nom && nom !== '—') ? nom : '';
+      if(t.textContent !== texto) t.textContent = texto;
+      return;
+    }
+    var propio = tituloDeOpciones(archivo.replace(/\.html$/, ''));
     if(propio){ texto = propio; ocultar = !!h1; }
     else if(ESPECIALES[archivo]) texto = ESPECIALES[archivo];
     else if(h1){

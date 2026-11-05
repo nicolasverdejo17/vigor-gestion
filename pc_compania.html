@@ -818,6 +818,23 @@
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
 <script src="vigor-tema.js" defer></script>
+<style>
+  /* Adaptación al diseño de Vigor: solo esquinas, bordes y colores. Las medidas no cambian. */
+  .section-frame{ border-radius:16px; border-color:var(--line-strong);}
+  .section-frame::before, .card::after, .panel::before, .dot-panel::before{ display:none;}
+  .section-head{ position:relative;}
+  .section-head::after{ content:""; position:absolute; left:16px; bottom:-1px; width:56px; height:2px; background:var(--vg-grad);}
+  .section-head h2{ color:#fff;}
+  .bomb-card{ border-radius:14px;}
+  .bomb-card--empty{ border-radius:14px; border-color:var(--line-strong);}
+  .bomb-card__estado-pill{ border-radius:999px;}
+  .carro-btn{ border-radius:14px;}
+  .carro-btn::before{ border-radius:10px;}
+  .chip{ border-radius:999px;}
+  .resumen__item--reg input, .mini-reg-entry input{ border-radius:10px;}
+  .estado-selector, .dot-panel, .panel{ border-radius:14px;}
+  .close-btn, .dot-panel-close{ border-radius:10px;}
+</style>
 </head>
 <body>
 
