@@ -61,6 +61,7 @@
   .nivel-pill.inicial{ background:var(--fuera); color:#241505;}
   .nivel-pill.operativo{ background:var(--cyan-dim); color:#fff;}
   .nivel-pill.profesional{ background:var(--brass-bright); color:#241505;}
+  .nivel-pill.especialidad{ background:var(--esp-m,#B77CFF); color:#1a0b2e;}
   .nivel-pill.ninguno{ background:var(--nodisp); color:#fff;}
 
   .detalle-panel{ padding:6px 0 20px;}
@@ -104,6 +105,7 @@
   .nivel-opt{ flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:9px 4px; text-align:center; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer;}
   .nivel-opt.inicial.on{ background:var(--fuera); border-color:var(--fuera); color:#241505;}
   .nivel-opt.operativo.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
+  .nivel-opt.especialidad.on{ background:#B77CFF; border-color:#B77CFF; color:#1a0b2e;}
   .nivel-opt.profesional.on{ background:var(--brass-bright); border-color:var(--brass-bright); color:#241505;}
   .nivel-opt-externo{
     flex:1; background:var(--panel-alt); border:1.5px dashed var(--line-strong); border-radius:6px;
@@ -277,7 +279,9 @@ function volverCuartel(){
 
 const EDIT_ROLES = ['Director','Capitán','Ayudante Cía.'];
 const NIVELES = ['inicial','operativo','profesional'];
-const NIVEL_LABEL = { inicial:'Inicial', operativo:'Operativo', profesional:'Profesional', ninguno:'Sin nivel' };
+const NIVEL_LABEL = { inicial:'Inicial', operativo:'Operativo', profesional:'Profesional', especialidad:'Especialidad', ninguno:'Sin nivel' };
+// Un curso puede ser de nivel Especialidad; el nivel de una persona sigue siendo solo uno de los tres anteriores.
+const NIVELES_CURSO = [...NIVELES, 'especialidad'];
 
 let BOMBEROS = [];
 let miCuerpoId = null, miCompaniaId = null, miPersonalId = null, puedoEditar = false;
@@ -430,7 +434,7 @@ function renderNivelSelect(){
     row.innerHTML = `<div class="nivel-opt-externo">Externo — sin nivel interno del Cuerpo</div>`;
     return;
   }
-  row.innerHTML = NIVELES.map(n =>
+  row.innerHTML = NIVELES_CURSO.map(n =>
     `<div class="nivel-opt ${n} ${nivelSel===n?'on':''}" onclick="setNivelSel('${n}')">${NIVEL_LABEL[n]}</div>`
   ).join('');
 }
