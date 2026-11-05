@@ -295,7 +295,19 @@ function fechaHora(iso){ return iso ? new Date(iso).toLocaleString('es-CL', { da
 function durTxt(min){ const h = Math.floor(min / 60), m = min % 60; return h ? `${h} h${m ? ' ' + m + ' min' : ''}` : `${m} min`; }
 function nombreCorto(n){ return (n || '').split(' ').filter(Boolean).slice(0, 2).join(' '); }
 function toast(msg, error){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.toggle('error', !!error); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
-function volver(){ if(window.history.length > 1){ history.back(); return; } window.location.href = 'opciones_celular.html'; }
+// «Volver» sale directo del libro, a la pantalla desde la que se entró (Opciones o Guardia Nocturna),
+// sin recorrer uno por uno los libros que se hayan abierto en medio.
+(function(){ try{
+  const r = document.referrer ? new URL(document.referrer) : null;
+  const f = r && r.origin === location.origin ? r.pathname.split('/').pop() : '';
+  if(f && f !== 'libro_guardia.html' && /^[a-z_]+\.html$/.test(f)) sessionStorage.setItem('libro_origen', f);
+  else if(!f) sessionStorage.removeItem('libro_origen');
+}catch(e){} })();
+function volver(){
+  let destino = 'opciones_celular.html';
+  try{ destino = sessionStorage.getItem('libro_origen') || destino; }catch(e){}
+  window.location.href = destino;
+}
 
 // Ventana horaria de la guardia (hora_inicio -> hora_fin, puede cruzar medianoche)
 function ventana(iso){
@@ -373,7 +385,7 @@ function renderLista(){
     </div>`;
   }).join('') : `<div class="vacio">${LISTA.length ? 'Ningún libro coincide con los filtros.' : 'Todavía no hay libros de guardia. Abre el de la guardia de hoy con "Abrir libro".'}</div>`;
 }
-function irALibro(id){ window.location.href = 'libro_guardia.html?id=' + encodeURIComponent(id); }
+function irALibro(id){ window.location.replace('libro_guardia.html?id=' + encodeURIComponent(id)); }   // replace: no se acumulan pasos en el historial
 
 // ---- Abrir libro ----
 function guardiaActualFecha(){
