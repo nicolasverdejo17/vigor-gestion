@@ -44,37 +44,76 @@
   .content{ flex:1; overflow-y:auto; padding:6px 18px 18px;}
   .content::-webkit-scrollbar{ display:none;}
 
-  .section-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:14px 4px 8px;}
+  /* ---- Dotación de Unidades: tablero por carro con selector ---- */
+  .content{ max-width:1180px; width:100%; margin:0 auto;}
+  .resumen-dot{ display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 14px;}
+  .res-chip{ display:flex; align-items:baseline; gap:8px; background:var(--panel); border:1px solid var(--line-strong); border-radius:12px; padding:9px 14px; font-size:11.5px; color:var(--text-muted);}
+  .res-chip b{ font-size:20px; font-weight:800; color:var(--text); line-height:1;}
+  .res-chip.ok b{ color:var(--servicio);}
+  @media (max-width:430px){ .resumen-dot{ gap:6px; flex-wrap:nowrap;} .res-chip{ padding:8px 9px; font-size:10.5px; gap:5px; flex:1; justify-content:center; white-space:nowrap;} .res-chip b{ font-size:17px;} }
+  .carros-grid{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(330px, 1fr)); align-items:start;}
 
-  .carro-card{
-    background:var(--panel); border:1.5px solid var(--line-strong); border-radius:12px;
-    padding:14px 15px; margin-bottom:12px; position:relative; overflow:hidden;
-  }
-  .carro-card::before{ content:""; position:absolute; inset:5px; border:1px solid var(--brass-dim); border-radius:8px; pointer-events:none; opacity:.3;}
-  .carro-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; position:relative; z-index:1;}
-  .carro-nom{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; color:var(--brass-bright);}
-  .carro-tipo{ font-size:11px; color:var(--text-muted); margin-top:1px;}
+  .carro-card{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:16px; padding:16px; position:relative;}
+  .carro-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:14px;}
+  .carro-nom{ font-weight:800; font-size:24px; line-height:1; letter-spacing:.01em; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .carro-tipo{ font-size:11.5px; color:var(--text-muted); margin-top:5px;}
+  .carro-lado{ display:flex; flex-direction:column; align-items:flex-end; gap:6px;}
   .carro-estado-pill{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:4px 10px; border-radius:10px; color:#fff; flex-shrink:0;}
+  .carro-cuenta{ font-size:11px; color:var(--text-dim);}
+  .carro-cuenta b{ color:var(--text); font-weight:700;}
 
-  .dot-field{ margin-bottom:10px; position:relative; z-index:1;}
-  .dot-field label{ display:block; font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px; font-weight:600;}
-  .dot-field select{
-    width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:7px;
-    padding:9px 11px; font-size:13px; color:var(--text); font-family:'Inter';
-  }
-  .dot-field select:focus{ outline:none; border-color:var(--cyan);}
-  .dot-trip-chips{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:7px;}
-  .dot-trip-chip{
-    display:inline-flex; align-items:center; gap:6px; background:var(--panel-alt); border:1px solid var(--cyan-dim);
-    color:var(--cyan); font-size:11px; padding:5px 6px 5px 10px; border-radius:12px;
-  }
-  .dot-trip-chip button{ background:none; border:none; color:var(--cyan); cursor:pointer; font-size:12px; padding:2px;}
-  .dot-trip-add{ display:flex; gap:6px;}
-  .dot-trip-add select{ flex:1;}
-  .dot-trip-add button{
-    background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; font-family:'Rajdhani'; font-weight:700;
-    font-size:11px; letter-spacing:.03em; text-transform:uppercase; padding:0 12px; border-radius:7px; cursor:pointer; flex-shrink:0;
-  }
+  .slot{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:12px; padding:10px 12px; margin-bottom:8px; cursor:pointer; color:var(--text); font-family:inherit;}
+  .slot:hover{ border-color:var(--cyan);}
+  .av{ width:38px; height:38px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:var(--text-dim); background:var(--panel); border:1.5px dashed var(--line-strong);}
+  .slot.lleno .av{ color:#06141F; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); border:none;}
+  .slot-txt{ min-width:0; flex:1;}
+  .slot-rol{ display:block; font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; font-weight:700;}
+  .slot-nom{ display:block; font-size:14px; font-weight:700; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .slot-nom.vacio{ color:var(--text-dim); font-weight:500;}
+  .slot-acc{ font-size:11px; color:var(--cyan); font-weight:700; flex-shrink:0;}
+
+  .trip-box{ background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:12px; padding:10px 12px;}
+  .trip-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;}
+  .trip-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;}
+  .trip-chip{ display:inline-flex; align-items:center; gap:7px; background:var(--panel); border:1px solid var(--line-strong); border-radius:999px; padding:4px 6px 4px 5px; font-size:12px;}
+  .trip-chip .av{ width:24px; height:24px; font-size:9.5px; color:#06141F; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); border:none;}
+  .trip-chip button{ background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:12px; padding:2px 4px;}
+  .trip-chip button:hover{ color:var(--emergencia);}
+  .trip-vacio{ font-size:12px; color:var(--text-dim); margin-bottom:10px;}
+  .btn-trip{ width:100%; font-weight:700; font-size:12.5px; padding:10px; border-radius:10px; cursor:pointer; border:1.5px solid var(--cyan); background:transparent; color:var(--cyan); font-family:inherit;}
+  .btn-trip:hover{ background:rgba(73,233,255,.1);}
+
+  .empty-state-spacer{ display:none;}
+
+  /* Ventana de selección */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.78); z-index:60; display:none; align-items:center; justify-content:center; padding:18px;}
+  .modal-overlay.show{ display:flex;}
+  .modal-box{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:16px; padding:18px; width:100%; max-width:460px; max-height:88vh; display:flex; flex-direction:column;}
+  @media (max-width:560px){ .modal-overlay{ align-items:flex-end; padding:0;} .modal-box{ border-radius:18px 18px 0 0; max-height:90vh; max-width:none;} }
+  .modal-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:12px;}
+  .modal-head h3{ font-size:16px; margin:0; text-transform:none; letter-spacing:0;}
+  .modal-sub{ font-size:11.5px; color:var(--text-muted); margin-top:3px;}
+  .modal-x{ background:none; border:none; color:var(--text-dim); font-size:18px; cursor:pointer; padding:2px 4px; line-height:1;}
+  .pk-buscar{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:10px; padding:10px 12px; font-size:13px; color:var(--text); margin-bottom:10px; font-family:inherit;}
+  .pk-buscar:focus{ outline:none; border-color:var(--cyan);}
+  .pk-lista{ overflow-y:auto; flex:1; min-height:120px; margin:0 -4px; padding:0 4px;}
+  .pk-row{ display:flex; align-items:center; gap:12px; padding:9px 10px; border:1.5px solid transparent; border-radius:12px; cursor:pointer;}
+  .pk-row:hover{ background:var(--panel-alt);}
+  .pk-row.on{ background:rgba(73,233,255,.08); border-color:var(--cyan-dim);}
+  .pk-row .av{ width:34px; height:34px; font-size:12px; color:#06141F; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); border:none;}
+  .pk-nom{ flex:1; min-width:0; font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .pk-reg{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); display:block; font-weight:400; margin-top:1px;}
+  .pk-marca{ width:22px; height:22px; border-radius:7px; border:1.5px solid var(--line-strong); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:#06141F;}
+  .pk-row.on .pk-marca{ background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); border-color:transparent;}
+  .pk-vacio{ text-align:center; padding:30px 10px; color:var(--text-dim); font-size:12.5px;}
+  .modal-actions{ display:flex; gap:10px; margin-top:14px;}
+  .modal-actions > *{ flex:1;}
+  .btn-sec{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-weight:700; font-size:12.5px; padding:11px; border-radius:12px; cursor:pointer; font-family:inherit;}
+  .btn-sec:hover{ border-color:var(--cyan); color:var(--text);}
+  .btn-peligro{ background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright); font-weight:700; font-size:12.5px; padding:11px; border-radius:12px; cursor:pointer; font-family:inherit;}
+  .btn-peligro:hover{ background:var(--burdeo); color:#fff;}
+  .btn-guardar-dot{ border:none; color:#06141F; font-weight:800; font-size:12.5px; padding:11px; border-radius:12px; cursor:pointer; font-family:inherit; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454));}
+  .btn-guardar-dot:hover{ filter:brightness(1.1);}
 
   .empty-state{ text-align:center; padding:40px 20px; color:var(--text-dim); font-size:12.5px; line-height:1.6;}
 
@@ -121,10 +160,22 @@
     </div>
 
     <div class="content">
-      <div class="section-label">Carros de mi Compañía</div>
-      <div id="carrosList"></div>
+      <div class="resumen-dot" id="resumenDot"></div>
+      <div class="carros-grid" id="carrosList"></div>
     </div>
     <div class="tabbar-real" id="tabbarReal"></div>
+
+    <div class="modal-overlay" id="pickerModal" onclick="if(event.target===this) cerrarPicker()">
+      <div class="modal-box">
+        <div class="modal-head">
+          <div><h3 id="pkTitulo">—</h3><div class="modal-sub" id="pkSub"></div></div>
+          <button class="modal-x" onclick="cerrarPicker()">✕</button>
+        </div>
+        <input type="text" class="pk-buscar" id="pkBuscar" placeholder="Buscar por nombre o N° de Registro…" oninput="renderPicker()">
+        <div class="pk-lista" id="pkLista"></div>
+        <div class="modal-actions" id="pkAcciones"></div>
+      </div>
+    </div>
 
     <div class="toast" id="toast"></div>
   </div>
@@ -217,60 +268,137 @@ function idsOcupadosEnOtrosCarros(carroIndex){
   });
   return ids;
 }
-function opcionesDisponibles(seleccionadoId, ocupados){
-  return DISPONIBLES
-    .filter(p => p.id === seleccionadoId || !ocupados.has(p.id))
-    .map(p => `<option value="${p.id}" ${p.id===seleccionadoId?'selected':''}>${p.nombre} (N° ${p.reg})</option>`).join('');
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function iniciales(nombre){ return (nombre || '?').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase(); }
+
+function renderResumen(){
+  const asignados = new Set();
+  CARROS.forEach(c => { if(c.conductorId) asignados.add(c.conductorId); if(c.oficialId) asignados.add(c.oficialId); c.tripulantesIds.forEach(id => asignados.add(id)); });
+  const libres = DISPONIBLES.filter(p => !asignados.has(p.id)).length;
+  document.getElementById('resumenDot').innerHTML =
+    `<div class="res-chip"><b>${DISPONIBLES.length}</b> disponibles</div>` +
+    `<div class="res-chip ok"><b>${asignados.size}</b> en dotación</div>` +
+    `<div class="res-chip"><b>${libres}</b> sin asignar</div>`;
+}
+
+function slotHtml(i, rol, etiqueta, personaId){
+  const lleno = !!personaId;
+  const nombre = lleno ? nombrePorId(personaId) : '';
+  return `<button class="slot ${lleno ? 'lleno' : ''}" onclick="abrirPicker(${i}, '${rol}')">
+    <span class="av">${lleno ? esc(iniciales(nombre)) : '+'}</span>
+    <span class="slot-txt"><span class="slot-rol">${etiqueta}</span><span class="slot-nom ${lleno ? '' : 'vacio'}">${lleno ? esc(nombre) : 'Sin asignar'}</span></span>
+    <span class="slot-acc">${lleno ? 'Cambiar' : 'Asignar'}</span>
+  </button>`;
 }
 
 function renderCarros(){
   const el = document.getElementById('carrosList');
+  renderResumen();
   if(CARROS.length === 0){
     el.innerHTML = '<div class="empty-state">Esta Compañía todavía no tiene Carros registrados.</div>';
     return;
   }
   el.innerHTML = CARROS.map((c, i) => {
-    const tripChips = c.tripulantesIds.map((pid, ti) =>
-      `<span class="dot-trip-chip">${nombrePorId(pid)} <button onclick="quitarTripulante(${i},${ti})">✕</button></span>`
+    const total = (c.conductorId ? 1 : 0) + (c.oficialId ? 1 : 0) + c.tripulantesIds.length;
+    const chips = c.tripulantesIds.map((pid, ti) =>
+      `<span class="trip-chip"><span class="av">${esc(iniciales(nombrePorId(pid)))}</span>${esc(nombrePorId(pid))}<button onclick="quitarTripulante(${i},${ti})" title="Quitar">✕</button></span>`
     ).join('');
-    const ocupOtros = idsOcupadosEnOtrosCarros(i);
-    const ocupConductor = new Set([...ocupOtros, c.oficialId, ...c.tripulantesIds].filter(Boolean));
-    const ocupOficial = new Set([...ocupOtros, c.conductorId, ...c.tripulantesIds].filter(Boolean));
-    const ocupTrip = new Set([...ocupOtros, c.conductorId, c.oficialId, ...c.tripulantesIds].filter(Boolean));
     return `
       <div class="carro-card">
         <div class="carro-top">
-          <div><div class="carro-nom">${c.nom}</div><div class="carro-tipo">${c.tipo}</div></div>
-          <div class="carro-estado-pill" style="background:${COLOR_ESTADO_CARRO[c.estado]}; color:${c.estado==='mant'?'#241505':'#fff'};">${ESTADO_LABEL_CARRO[c.estado]}</div>
-        </div>
-        <div class="dot-field">
-          <label>Conductor (Maquinista)</label>
-          <select onchange="setConductor(${i}, this.value)">
-            <option value="">— Sin asignar —</option>
-            ${opcionesDisponibles(c.conductorId, ocupConductor)}
-          </select>
-        </div>
-        <div class="dot-field">
-          <label>Oficial a cargo (Mando)</label>
-          <select onchange="setOficial(${i}, this.value)">
-            <option value="">— Sin asignar —</option>
-            ${opcionesDisponibles(c.oficialId, ocupOficial)}
-          </select>
-        </div>
-        <div class="dot-field" style="margin-bottom:0;">
-          <label>Tripulantes</label>
-          <div class="dot-trip-chips">${tripChips}</div>
-          <div class="dot-trip-add">
-            <select id="tripSelect-${i}">
-              <option value="">— Elegir disponible —</option>
-              ${opcionesDisponibles(null, ocupTrip)}
-            </select>
-            <button onclick="agregarTripulante(${i})">+ Agregar</button>
+          <div><div class="carro-nom">${esc(c.nom)}</div><div class="carro-tipo">${esc(c.tipo)}</div></div>
+          <div class="carro-lado">
+            <div class="carro-estado-pill" style="background:${COLOR_ESTADO_CARRO[c.estado]}; color:${c.estado==='mant'?'#241505':'#fff'};">${ESTADO_LABEL_CARRO[c.estado]}</div>
+            <div class="carro-cuenta"><b>${total}</b> en dotación</div>
           </div>
+        </div>
+        ${slotHtml(i, 'conductor', 'Conductor (Maquinista)', c.conductorId)}
+        ${slotHtml(i, 'oficial', 'Oficial a cargo (Mando)', c.oficialId)}
+        <div class="trip-box">
+          <div class="trip-head"><span class="slot-rol">Tripulantes</span><span class="carro-cuenta"><b>${c.tripulantesIds.length}</b></span></div>
+          ${chips ? `<div class="trip-chips">${chips}</div>` : `<div class="trip-vacio">Sin tripulantes asignados</div>`}
+          <button class="btn-trip" onclick="abrirPicker(${i}, 'tripulantes')">${c.tripulantesIds.length ? 'Editar tripulantes' : 'Elegir tripulantes'}</button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+// ---- Ventana de selección (Conductor / Oficial: se elige uno · Tripulantes: se eligen varios a la vez) ----
+let PK = null;   // { i, rol, sel:Set }
+const PK_TITULO = { conductor:'Conductor (Maquinista)', oficial:'Oficial a cargo (Mando)', tripulantes:'Tripulantes' };
+
+function candidatosPicker(){
+  const c = CARROS[PK.i];
+  const ocupados = idsOcupadosEnOtrosCarros(PK.i);
+  const otrosRoles = new Set();
+  if(PK.rol !== 'conductor' && c.conductorId) otrosRoles.add(c.conductorId);
+  if(PK.rol !== 'oficial' && c.oficialId) otrosRoles.add(c.oficialId);
+  if(PK.rol !== 'tripulantes') c.tripulantesIds.forEach(id => otrosRoles.add(id));
+  return DISPONIBLES.filter(p => !ocupados.has(p.id) && !otrosRoles.has(p.id)).sort((a, b) => a.reg - b.reg);
+}
+
+function abrirPicker(i, rol){
+  const c = CARROS[i];
+  PK = { i, rol, sel: new Set(rol === 'tripulantes' ? c.tripulantesIds : [rol === 'conductor' ? c.conductorId : c.oficialId].filter(Boolean)) };
+  document.getElementById('pkTitulo').textContent = PK_TITULO[rol];
+  document.getElementById('pkSub').textContent = `${c.nom} · ${c.tipo}` + (rol === 'tripulantes' ? ' — marca todos los que necesites' : '');
+  document.getElementById('pkBuscar').value = '';
+  document.getElementById('pickerModal').classList.add('show');
+  renderPicker();
+}
+function cerrarPicker(){ document.getElementById('pickerModal').classList.remove('show'); PK = null; }
+
+function renderPicker(){
+  if(!PK) return;
+  const q = document.getElementById('pkBuscar').value.trim().toLowerCase();
+  const multi = PK.rol === 'tripulantes';
+  // Los que ya estaban elegidos siempre se ven, aunque dejen de figurar como disponibles
+  const base = candidatosPicker();
+  const extra = [...PK.sel].filter(id => !base.some(p => p.id === id)).map(id => ({ id, reg: '', nombre: nombrePorId(id) }));
+  const lista = [...extra, ...base].filter(p => !q || p.nombre.toLowerCase().includes(q) || String(p.reg).includes(q));
+  document.getElementById('pkLista').innerHTML = lista.length ? lista.map(p => `
+    <div class="pk-row ${PK.sel.has(p.id) ? 'on' : ''}" onclick="tocarPersona('${p.id}')">
+      <span class="av">${esc(iniciales(p.nombre))}</span>
+      <span class="pk-nom">${esc(p.nombre)}<span class="pk-reg">${p.reg !== '' ? 'N° ' + p.reg : ''}</span></span>
+      ${multi ? `<span class="pk-marca">${PK.sel.has(p.id) ? '✓' : ''}</span>` : ''}
+    </div>`).join('') : `<div class="pk-vacio">${q ? 'Nadie coincide con la búsqueda.' : 'No hay bomberos disponibles para asignar.'}</div>`;
+  document.getElementById('pkAcciones').innerHTML = multi
+    ? `<button class="btn-sec" onclick="cerrarPicker()">Cancelar</button><button class="btn-guardar-dot" onclick="guardarTripulantes()">Guardar (${PK.sel.size})</button>`
+    : (PK.sel.size ? `<button class="btn-peligro" onclick="quitarRolActual()">Quitar asignación</button>` : '') + `<button class="btn-sec" onclick="cerrarPicker()">Cancelar</button>`;
+}
+
+function tocarPersona(id){
+  if(!PK) return;
+  if(PK.rol === 'tripulantes'){
+    if(PK.sel.has(id)) PK.sel.delete(id); else PK.sel.add(id);
+    renderPicker();
+    return;
+  }
+  const i = PK.i, rol = PK.rol;
+  cerrarPicker();
+  aplicarRol(i, rol, id);
+}
+
+async function aplicarRol(i, rol, valor){
+  const campo = rol === 'conductor' ? 'conductorId' : 'oficialId';
+  const anterior = CARROS[i][campo];
+  CARROS[i][campo] = valor || null;
+  if(await persistirDotacion(i)){ renderCarros(); toast('Dotación actualizada'); }
+  else { CARROS[i][campo] = anterior; renderCarros(); }
+}
+function quitarRolActual(){ if(!PK) return; const i = PK.i, rol = PK.rol; cerrarPicker(); aplicarRol(i, rol, null); }
+
+async function guardarTripulantes(){
+  if(!PK) return;
+  const i = PK.i;
+  const anteriores = [...CARROS[i].tripulantesIds];
+  // Se conserva el orden en que ya estaban y los nuevos van al final
+  const nuevos = [...PK.sel];
+  CARROS[i].tripulantesIds = [...anteriores.filter(id => PK.sel.has(id)), ...nuevos.filter(id => !anteriores.includes(id))];
+  cerrarPicker();
+  if(await persistirDotacion(i)){ renderCarros(); toast('Tripulantes actualizados'); }
+  else { CARROS[i].tripulantesIds = anteriores; renderCarros(); }
 }
 
 async function persistirDotacion(i){
@@ -286,26 +414,6 @@ async function persistirDotacion(i){
   return true;
 }
 
-async function setConductor(i, val){
-  const anterior = CARROS[i].conductorId;
-  CARROS[i].conductorId = val || null;
-  if(await persistirDotacion(i)){ renderCarros(); toast('Dotación actualizada'); }
-  else { CARROS[i].conductorId = anterior; renderCarros(); }
-}
-async function setOficial(i, val){
-  const anterior = CARROS[i].oficialId;
-  CARROS[i].oficialId = val || null;
-  if(await persistirDotacion(i)){ renderCarros(); toast('Dotación actualizada'); }
-  else { CARROS[i].oficialId = anterior; renderCarros(); }
-}
-async function agregarTripulante(i){
-  const sel = document.getElementById(`tripSelect-${i}`);
-  const val = sel.value;
-  if(!val) return;
-  if(!CARROS[i].tripulantesIds.includes(val)) CARROS[i].tripulantesIds.push(val);
-  if(await persistirDotacion(i)){ renderCarros(); toast('Tripulante agregado'); }
-  else { CARROS[i].tripulantesIds = CARROS[i].tripulantesIds.filter(x => x !== val); renderCarros(); }
-}
 async function quitarTripulante(i, ti){
   const quitado = CARROS[i].tripulantesIds[ti];
   CARROS[i].tripulantesIds.splice(ti, 1);
