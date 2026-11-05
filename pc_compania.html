@@ -834,6 +834,60 @@
   .resumen__item--reg input, .mini-reg-entry input{ border-radius:10px;}
   .estado-selector, .dot-panel, .panel{ border-radius:14px;}
   .close-btn, .dot-panel-close{ border-radius:10px;}
+  .dot-panel{ border-color:var(--line-strong);}
+
+  /* Panel «Asignar Dotación» con el diseño de Vigor */
+  .pcs-slot{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:12px; padding:8px 10px; margin-bottom:8px; cursor:pointer; color:var(--text); font-family:inherit; position:relative; z-index:1;}
+  .pcs-slot:hover{ border-color:var(--cyan);}
+  .pcs-av{ width:34px; height:34px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; color:var(--text-dim); background:var(--panel) center/cover; border:1.5px dashed var(--line-strong);}
+  .pcs-slot.lleno .pcs-av, .pcs-chip .pcs-av, .pcp-fila .pcs-av{ color:#06141F; background-image:var(--vg-grad); border:none;}
+  .pcs-av[style*="background-image"]{ background-size:cover !important; background-position:center !important;}
+  .pcs-av.mini{ width:22px; height:22px; font-size:8.5px;}
+  .pcs-av.grande{ width:38px; height:38px; font-size:13px;}
+  .pcs-txt{ min-width:0; flex:1; display:flex; flex-direction:column;}
+  .pcs-rol{ font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; font-weight:700;}
+  .pcs-nom{ font-size:13px; font-weight:700; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .pcs-nom.vacio{ color:var(--text-dim); font-weight:500;}
+  .pcs-acc{ font-size:10.5px; color:var(--cyan); font-weight:700; flex-shrink:0;}
+  .pcs-trip{ background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:12px; padding:9px 10px; position:relative; z-index:1;}
+  .pcs-trip-h{ display:flex; align-items:center; justify-content:space-between; margin-bottom:7px;}
+  .pcs-trip-h b{ font-size:12px;}
+  .pcs-chips{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px;}
+  .pcs-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line-strong); border-radius:999px; padding:3px 5px 3px 3px; font-size:11px; font-weight:600;}
+  .pcs-chip button{ background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:11px; padding:1px 3px;}
+  .pcs-chip button:hover{ color:var(--emergencia);}
+  .pcs-btn-trip{ width:100%; font-weight:700; font-size:12px; padding:9px; border-radius:10px; cursor:pointer; border:1.5px solid var(--cyan); background:transparent; color:var(--cyan); font-family:inherit;}
+  .pcs-btn-trip:hover{ background:rgba(73,233,255,.1);}
+
+  /* Ventana de selección */
+  .pcp-overlay{ position:fixed; inset:0; background:rgba(5,10,15,.78); z-index:300; display:none; align-items:center; justify-content:center; padding:18px;}
+  .pcp-overlay.show{ display:flex;}
+  .pcp-box{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:16px; padding:18px; width:100%; max-width:460px; max-height:84vh; display:flex; flex-direction:column;}
+  .pcp-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:12px;}
+  .pcp-head h3{ font-size:16px; margin:0; text-transform:none; letter-spacing:0; font-family:'Montserrat',sans-serif;}
+  .pcp-sub{ font-size:11.5px; color:var(--text-muted); margin-top:3px;}
+  .pcp-x{ background:none; border:none; color:var(--text-dim); font-size:18px; cursor:pointer; padding:2px 4px; line-height:1;}
+  .pcp-x:hover{ color:var(--text);}
+  .pcp-buscar{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:10px; padding:10px 12px; font-size:13px; color:var(--text); margin-bottom:10px; font-family:inherit;}
+  .pcp-buscar:focus{ outline:none; border-color:var(--cyan);}
+  .pcp-lista{ overflow-y:auto; flex:1; min-height:120px; margin:0 -4px; padding:0 4px;}
+  .pcp-fila{ display:flex; align-items:center; gap:12px; padding:8px 10px; border:1.5px solid transparent; border-radius:12px; cursor:pointer;}
+  .pcp-fila:hover{ background:var(--panel-alt);}
+  .pcp-fila.on{ background:rgba(73,233,255,.08); border-color:var(--cyan-dim);}
+  .pcp-nom{ flex:1; min-width:0; font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .pcp-reg{ display:block; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); font-weight:400; margin-top:1px;}
+  .pcp-marca{ width:22px; height:22px; border-radius:7px; border:1.5px solid var(--line-strong); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:#06141F;}
+  .pcp-fila.on .pcp-marca{ background:var(--vg-grad); border-color:transparent;}
+  .pcp-vacio{ text-align:center; padding:30px 10px; color:var(--text-dim); font-size:12.5px;}
+  .pcp-acc{ display:flex; gap:10px; margin-top:14px;}
+  .pcp-acc > *{ flex:1;}
+  .pcp-sec, .pcp-peligro, .pcp-ok{ font-weight:700; font-size:12.5px; padding:11px; border-radius:12px; cursor:pointer; font-family:inherit;}
+  .pcp-sec{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);}
+  .pcp-sec:hover{ border-color:var(--cyan); color:var(--text);}
+  .pcp-peligro{ background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright);}
+  .pcp-peligro:hover{ background:var(--burdeo); color:#fff;}
+  .pcp-ok{ border:none; color:#06141F; font-weight:800; background:var(--vg-grad);}
+  .pcp-ok:hover{ filter:brightness(1.1);}
 </style>
 </head>
 <body>
@@ -855,6 +909,15 @@
         <button class="crisis-btn" onclick="window.location.href='modo_crisis.html'">Modo Crisis</button>
         <button class="crisis-btn" style="background:transparent; border-color:var(--line-strong); color:var(--text-muted);" onclick="vigorCerrarSesion()">Cerrar sesión</button>
       </div>
+    </div>
+  </div>
+
+  <div class="pcp-overlay" id="pcPicker" onclick="if(event.target===this) cerrarPickerPC()">
+    <div class="pcp-box">
+      <div class="pcp-head"><div><h3 id="pcpTitulo">—</h3><div class="pcp-sub" id="pcpSub"></div></div><button class="pcp-x" onclick="cerrarPickerPC()">✕</button></div>
+      <input type="text" class="pcp-buscar" id="pcpBuscar" placeholder="Buscar por nombre o N° de Registro…" oninput="renderPickerPC()">
+      <div class="pcp-lista" id="pcpLista"></div>
+      <div class="pcp-acc" id="pcpAcc"></div>
     </div>
   </div>
 
@@ -1077,7 +1140,8 @@
       document.getElementById('nombreCuerpo').textContent = cia.cuerpos.nombre_oficial;
     }
 
-    await Promise.all([cargarBomberos(), cargarCarros(), cargarPizarra()]);
+    await cargarBomberos();   // primero las personas: los carros las necesitan para armar la dotación
+    await Promise.all([cargarCarros(), cargarPizarra()]);
 
     renderBombGrid();
     renderCarrosGrid();
@@ -1492,7 +1556,7 @@
   }
   document.addEventListener('click', (e) => {
     if(!e.target.isConnected) return;
-    if(e.target.closest('.estado-selector') || e.target.closest('.bomb-card__estado-pill') || e.target.closest('.carro-btn')) return;
+    if(e.target.closest('.estado-selector') || e.target.closest('.bomb-card__estado-pill') || e.target.closest('.carro-btn') || e.target.closest('#pcPicker')) return;
     document.querySelectorAll('.estado-selector').forEach(el => el.classList.remove('open'));
     document.querySelectorAll('.dot-panel.open').forEach(el => el.classList.remove('open'));
     carros.forEach(c => { c.dotAbierto = false; });
@@ -1515,19 +1579,28 @@
     });
     return regs;
   }
+  const escPC = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const iniPC = (n) => (n || '?').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+  const cortoPC = (n) => (n || '').split(' ').filter(Boolean).slice(0, 2).join(' ');
+  function bombPorReg(reg){ return bomberos.find(x => x.reg === reg) || null; }
+  function avPC(b, cls){
+    return b && b.foto ? `<span class="pcs-av ${cls || ''}" style="background-image:url('${escPC(b.foto)}')"></span>`
+                       : `<span class="pcs-av ${cls || ''}">${escPC(iniPC(b ? b.n : '?'))}</span>`;
+  }
+  function slotPC(i, rol, etiqueta, reg){
+    const b = reg ? bombPorReg(reg) : null;
+    return `<button class="pcs-slot ${reg ? 'lleno' : ''}" onclick="abrirPickerPC(${i}, '${rol}')">
+      ${reg ? avPC(b) : '<span class="pcs-av">+</span>'}
+      <span class="pcs-txt"><span class="pcs-rol">${etiqueta}</span><span class="pcs-nom ${reg ? '' : 'vacio'}">${reg ? escPC(b ? b.n : '—') : 'Sin asignar'}</span></span>
+      <span class="pcs-acc">${reg ? 'Cambiar' : 'Asignar'}</span>
+    </button>`;
+  }
   function dotPanelContenidoHTML(i){
     const c = carros[i];
-    const disp = disponibles();
-    const ocupOtros = regsOcupadosEnOtrosCarros(i);
-    const ocupConductor = new Set([...ocupOtros, c.mandoReg, ...c.tripulantesReg].filter(Boolean));
-    const ocupMando = new Set([...ocupOtros, c.conductorReg, ...c.tripulantesReg].filter(Boolean));
-    const ocupTrip = new Set([...ocupOtros, c.conductorReg, c.mandoReg, ...c.tripulantesReg].filter(Boolean));
-    const dispConductor = disp.filter(b => b.reg === c.conductorReg || !ocupConductor.has(b.reg));
-    const dispMando = disp.filter(b => b.reg === c.mandoReg || !ocupMando.has(b.reg));
-    const dispOptions = disp.filter(b => !ocupTrip.has(b.reg)).map(b=>`<option value="${b.reg}">${b.n} (N° ${b.reg})</option>`).join('');
-    const tripChips = c.tripulantesReg.map((reg,ti)=>
-      `<span class="dot-trip-chip">${nombrePorReg(reg)} <button onclick="quitarTripulante(${i},${ti})">✕</button></span>`
-    ).join('');
+    const chips = c.tripulantesReg.map((reg, ti) => {
+      const b = bombPorReg(reg);
+      return `<span class="pcs-chip">${avPC(b, 'mini')}${escPC(cortoPC(b ? b.n : '—'))}<button onclick="quitarTripulante(${i},${ti})" title="Quitar">✕</button></span>`;
+    }).join('');
     return `
       <div class="dot-panel-head">
         <div>
@@ -1536,39 +1609,93 @@
         </div>
         <button class="dot-panel-close" onclick="cerrarDotPanel(${i})" title="Cerrar">✕</button>
       </div>
-      <div class="dot-field">
-        <label>Conductor (Maquinista)</label>
-        <select onchange="setConductor(${i}, this.value)">
-          <option value="">— Sin asignar —</option>
-          ${dispConductor.map(b=>`<option value="${b.reg}" ${c.conductorReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
-        </select>
+      ${slotPC(i, 'conductor', 'Conductor (Maquinista)', c.conductorReg)}
+      ${slotPC(i, 'oficial', 'Oficial a cargo (Mando)', c.mandoReg)}
+      <div class="pcs-trip">
+        <div class="pcs-trip-h"><span class="pcs-rol">Tripulantes</span><b>${c.tripulantesReg.length}</b></div>
+        ${chips ? `<div class="pcs-chips">${chips}</div>` : ''}
+        <button class="pcs-btn-trip" onclick="abrirPickerPC(${i}, 'tripulantes')">${c.tripulantesReg.length ? 'Editar tripulantes' : 'Elegir tripulantes'}</button>
       </div>
-      <div class="dot-field">
-        <label>Oficial a cargo (Mando)</label>
-        <select onchange="setMando(${i}, this.value)">
-          <option value="">— Sin asignar —</option>
-          ${dispMando.map(b=>`<option value="${b.reg}" ${c.mandoReg==b.reg?'selected':''}>${b.n} (N° ${b.reg})</option>`).join('')}
-        </select>
-      </div>
-      <div class="dot-field">
-        <label>Tripulantes</label>
-        <div class="dot-trip-chips">${tripChips || ''}</div>
-        <div class="dot-trip-add">
-          <select id="tripSelect-${i}">
-            <option value="">— Elegir disponible —</option>
-            ${dispOptions}
-          </select>
-          <button onclick="agregarTripulante(${i})">+ Agregar</button>
-        </div>
-      </div>
-      <div class="dot-field" style="margin-bottom:0;">
+      <div class="dot-field" style="margin:12px 0 0;">
         <button class="btn-marcar-emergencia" onclick="marcarDotacionEnEmergencia(${i})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 2.5 20h19L12 3.5z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.5" r=".6" fill="currentColor" stroke="none"/></svg>
           Marcar dotación como En Emergencia
         </button>
       </div>
+
     `;
   }
+
+  // ---- Ventana de selección: Conductor y Oficial se elige uno; Tripulantes se marcan varios a la vez ----
+  let PKP = null;   // { i, rol, sel:Set de N° de registro }
+  const PKP_TITULO = { conductor:'Conductor (Maquinista)', oficial:'Oficial a cargo (Mando)', tripulantes:'Tripulantes' };
+  function candidatosPC(){
+    const c = carros[PKP.i];
+    const ocupados = regsOcupadosEnOtrosCarros(PKP.i);
+    const otros = new Set();
+    if(PKP.rol !== 'conductor' && c.conductorReg) otros.add(c.conductorReg);
+    if(PKP.rol !== 'oficial' && c.mandoReg) otros.add(c.mandoReg);
+    if(PKP.rol !== 'tripulantes') c.tripulantesReg.forEach(r => otros.add(r));
+    return disponibles().filter(b => !ocupados.has(b.reg) && !otros.has(b.reg)).sort((x, y) => x.reg - y.reg);
+  }
+  function abrirPickerPC(i, rol){
+    const c = carros[i];
+    const actual = rol === 'tripulantes' ? c.tripulantesReg : [rol === 'conductor' ? c.conductorReg : c.mandoReg].filter(Boolean);
+    PKP = { i, rol, sel: new Set(actual) };
+    document.getElementById('pcpTitulo').textContent = PKP_TITULO[rol];
+    document.getElementById('pcpSub').textContent = `${c.nom} · ${c.tipo}` + (rol === 'tripulantes' ? ' — marca todos los que necesites' : '');
+    const bus = document.getElementById('pcpBuscar'); bus.value = '';
+    document.getElementById('pcPicker').classList.add('show');
+    renderPickerPC();
+    setTimeout(() => bus.focus(), 50);
+  }
+  function cerrarPickerPC(){ document.getElementById('pcPicker').classList.remove('show'); PKP = null; }
+  function renderPickerPC(){
+    if(!PKP) return;
+    const q = document.getElementById('pcpBuscar').value.trim().toLowerCase();
+    const multi = PKP.rol === 'tripulantes';
+    const base = candidatosPC();
+    // Los que ya estaban elegidos siempre se ven, aunque hayan dejado de figurar como disponibles
+    const extra = [...PKP.sel].filter(r => !base.some(b => b.reg === r)).map(r => bombPorReg(r)).filter(Boolean);
+    const lista = [...extra, ...base].filter(b => !q || b.n.toLowerCase().includes(q) || String(b.reg).includes(q));
+    document.getElementById('pcpLista').innerHTML = lista.length ? lista.map(b => `
+      <div class="pcp-fila ${PKP.sel.has(b.reg) ? 'on' : ''}" onclick="tocarPersonaPC(${b.reg})">
+        ${avPC(b, 'grande')}
+        <span class="pcp-nom">${escPC(b.n)}<span class="pcp-reg">N° ${b.reg}</span></span>
+        ${multi ? `<span class="pcp-marca">${PKP.sel.has(b.reg) ? '✓' : ''}</span>` : ''}
+      </div>`).join('') : `<div class="pcp-vacio">${q ? 'Nadie coincide con la búsqueda.' : 'No hay bomberos disponibles para asignar.'}</div>`;
+    document.getElementById('pcpAcc').innerHTML = multi
+      ? `<button class="pcp-sec" onclick="cerrarPickerPC()">Cancelar</button><button class="pcp-ok" onclick="guardarTripPC()">Guardar (${PKP.sel.size})</button>`
+      : (PKP.sel.size ? `<button class="pcp-peligro" onclick="quitarRolPC()">Quitar asignación</button>` : '') + `<button class="pcp-sec" onclick="cerrarPickerPC()">Cancelar</button>`;
+  }
+  function tocarPersonaPC(reg){
+    if(!PKP) return;
+    if(PKP.rol === 'tripulantes'){
+      if(PKP.sel.has(reg)) PKP.sel.delete(reg); else PKP.sel.add(reg);
+      renderPickerPC();
+      return;
+    }
+    const i = PKP.i, rol = PKP.rol;
+    cerrarPickerPC();
+    if(rol === 'conductor') setConductor(i, reg); else setMando(i, reg);
+  }
+  function quitarRolPC(){
+    if(!PKP) return;
+    const i = PKP.i, rol = PKP.rol;
+    cerrarPickerPC();
+    if(rol === 'conductor') setConductor(i, ''); else setMando(i, '');
+  }
+  async function guardarTripPC(){
+    if(!PKP) return;
+    const i = PKP.i;
+    const anteriores = [...carros[i].tripulantesReg];
+    carros[i].tripulantesReg = [...anteriores.filter(r => PKP.sel.has(r)), ...[...PKP.sel].filter(r => !anteriores.includes(r))];
+    cerrarPickerPC();
+    if(!(await persistirDotacion(i))) carros[i].tripulantesReg = anteriores;
+    refreshDotPanel(i);
+  }
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && PKP) cerrarPickerPC(); });
+
   // Actualiza SOLO ese panel puntual — no reconstruye la grilla de carros,
   // por eso ya no salta ni se descuadra al asignar dotación.
   function refreshDotPanel(i){
@@ -1846,6 +1973,12 @@
   window.setMando = setMando;
   window.agregarTripulante = agregarTripulante;
   window.quitarTripulante = quitarTripulante;
+  window.abrirPickerPC = abrirPickerPC;
+  window.cerrarPickerPC = cerrarPickerPC;
+  window.renderPickerPC = renderPickerPC;
+  window.tocarPersonaPC = tocarPersonaPC;
+  window.quitarRolPC = quitarRolPC;
+  window.guardarTripPC = guardarTripPC;
   window.marcarPorRegistro = marcarPorRegistro;
 
   window.vigorCerrarSesion = async function(){
