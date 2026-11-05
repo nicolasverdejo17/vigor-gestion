@@ -137,7 +137,7 @@ async function cargarDatos(){
   document.getElementById('eyebrowCia').textContent = perfil.companias ? perfil.companias.nombre : 'Cuerpo General';
   document.getElementById('roleStripTxt').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
   document.getElementById('btnNuevaWrap').innerHTML = esOficial
-    ? `<button class="tab2-btn on" style="width:100%;" onclick="window.location.href='crear_actividad_celular.html'">+ Nueva Actividad</button>` : '';
+    ? `<div style="display:flex; gap:6px;"><button class="tab2-btn on" onclick="window.location.href='crear_actividad_celular.html'">+ Nueva Actividad</button><button class="tab2-btn" onclick="window.location.href='registro_asistencia.html'">Registro de Asistencia</button></div>` : '';
 
   let q = sb.from('actividades').select('*').eq('cuerpo_id', miCuerpoId);
   if(miCompaniaId) q = q.or(`compania_id.eq.${miCompaniaId},compania_id.is.null`);
