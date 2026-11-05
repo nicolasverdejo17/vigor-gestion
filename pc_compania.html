@@ -827,6 +827,9 @@
   /* Adaptación al diseño de Vigor: solo esquinas, bordes y colores. Las medidas no cambian. */
   .section-frame{ border-radius:16px; border-color:var(--line-strong);}
   .section-frame::before, .card::after, .panel::before, .dot-panel::before{ display:none;}
+  .resumen__item--titulo{ padding-right:26px !important;}
+  .resumen__item--titulo h2{ position:relative; font-size:19px; color:#fff; white-space:nowrap; padding-bottom:5px;}
+  .resumen__item--titulo h2::after{ content:""; position:absolute; left:0; bottom:0; width:56px; height:2px; background:var(--vg-grad);}
   .section-head{ position:relative;}
   .section-head::after{ content:""; position:absolute; left:16px; bottom:-1px; width:56px; height:2px; background:var(--vg-grad);}
   .section-head h2{ color:#fff;}
@@ -936,11 +939,10 @@
     <div class="dash-grid">
       <!-- ===================== GUARDIA ACTIVA (protagonista) ===================== -->
       <div class="section-frame section-guardia">
-        <div class="section-head">
-          <h2>Guardia Activa</h2>
-        </div>
-
         <div class="resumen">
+          <div class="resumen__item resumen__item--titulo">
+            <h2>Guardia Activa</h2>
+          </div>
           <div class="resumen__item">
             <div class="resumen__label">Al mando</div>
             <div class="resumen__value big" id="resumenAlMando">—</div>
@@ -1886,7 +1888,7 @@
         return (pa===-1?999:pa) - (pb===-1?999:pb);
       });
       const jefe = oficialesPresentes[0];
-      return (CARGO_ABREV[jefe.cargo] || jefe.cargo) + ' ' + nombreCorto(jefe.n);
+      return nombreCorto(jefe.n);
     }
 
     if(presentes.length > 0){
@@ -1895,7 +1897,7 @@
       // Pedido explícito: mismo formato que el caso de arriba (Cargo +
       // Nombre y un apellido) -- sin la etiqueta "(Comando Situacional)".
       const masAntiguo = presentes.reduce((a,b) => a.reg < b.reg ? a : b);
-      return (CARGO_ABREV[masAntiguo.cargo] || masAntiguo.cargo) + ' ' + nombreCorto(masAntiguo.n);
+      return nombreCorto(masAntiguo.n);
     }
 
     return '— Sin personal en el Cuartel —';
