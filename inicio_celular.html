@@ -359,7 +359,13 @@ async function cargarDatos(){
   const { data: perfil } = await sb.from('personal')
     .select('id, numero_registro, nombre_completo, cargo, compania_id, cuerpo_id, foto_url, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
     .eq('auth_user_id', session.user.id).single();
-  if(!perfil || !perfil.compania_id){
+  if(!perfil){
+    // La sesión es de una cuenta institucional (PC del Cuartel, carro, Central): se limpia lo recordado y el acceso la lleva a su pantalla
+    try{ localStorage.removeItem('vigor_destino'); localStorage.removeItem('vigor_destino_uid'); sessionStorage.removeItem('vigor_redir'); }catch(e){}
+    location.replace('login_registro.html');
+    return;
+  }
+  if(!perfil.compania_id){
     document.getElementById('sinSesion').style.display = 'block';
     document.getElementById('sinSesion').textContent = 'Esta sesión no pertenece a ninguna Compañía.';
     return;

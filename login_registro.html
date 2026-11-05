@@ -9,12 +9,13 @@
 (function(){ try{
   var d = localStorage.getItem('vigor_destino');
   if(!d || !/^[a-z_]+\.html$/.test(d)) return;
-  var hay = false;
+  var hay = false, uid = '';
   for(var i = 0; i < localStorage.length; i++){
     var k = localStorage.key(i);
-    if(/^sb-.*-auth-token$/.test(k)){ var v = JSON.parse(localStorage.getItem(k) || 'null'); if(v && v.refresh_token){ hay = true; break; } }
+    if(/^sb-.*-auth-token$/.test(k)){ var v = JSON.parse(localStorage.getItem(k) || 'null'); if(v && v.refresh_token){ hay = true; uid = (v.user && v.user.id) || ''; break; } }
   }
   if(!hay) return;
+  if(!uid || localStorage.getItem('vigor_destino_uid') !== uid) return;   // la pantalla recordada es de otra cuenta: se decide más abajo
   if(Date.now() - Number(sessionStorage.getItem('vigor_redir') || 0) < 15000) return;
   sessionStorage.setItem('vigor_redir', String(Date.now()));
   location.replace(d);
@@ -667,7 +668,16 @@ render();
 // ya hay una sesión válida, se entra directo a su pantalla en vez de pedir el acceso de nuevo.
 // Última pantalla a la que se entró con éxito en este dispositivo: permite abrir la app directo,
 // sin esperar consultas de red. Si la sesión no existe, no se usa.
-function recordarDestino(url){ try{ localStorage.setItem('vigor_destino', url); }catch(e){} }
+function uidSesionGuardada(){
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(/^sb-.*-auth-token$/.test(k)){ const v = JSON.parse(localStorage.getItem(k) || 'null'); if(v && v.user && v.user.id) return v.user.id; }
+    }
+  }catch(e){}
+  return '';
+}
+function recordarDestino(url){ try{ localStorage.setItem('vigor_destino', url); localStorage.setItem('vigor_destino_uid', uidSesionGuardada()); }catch(e){} }
 async function entrarSiHaySesion(){
   try{
     // Freno anti-bucle: si hace menos de 15 s ya se redirigió desde aquí, se muestra el acceso normal.
@@ -677,7 +687,8 @@ async function entrarSiHaySesion(){
     if(!session) return;
     sessionStorage.setItem('vigor_redir', String(Date.now()));
     const guardado = localStorage.getItem('vigor_destino');
-    if(guardado && /^[a-z_]+\.html$/.test(guardado)){ location.replace(guardado); return true; }
+    // Solo se usa la pantalla recordada si es de esta misma cuenta (si no, se averigua según el tipo de cuenta)
+    if(guardado && /^[a-z_]+\.html$/.test(guardado) && localStorage.getItem('vigor_destino_uid') === session.user.id){ location.replace(guardado); return true; }
     const { data: perfil } = await sb.from('personal')
       .select('estado, debe_cambiar_password, numero_registro, cargo, compania_id, cuerpos(estado)')
       .eq('auth_user_id', session.user.id).maybeSingle();
