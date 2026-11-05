@@ -107,9 +107,19 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
 #vigor-banner .crisis-btn + .crisis-btn:hover{ border-color:var(--cyan) !important; color:var(--text) !important;}
 
 /* ---- Modo Crisis: banner con aviso rojo, reloj y cronómetro ---- */
-#vigor-banner.vg-crisis{ border-bottom:2px solid var(--burdeo-bright, #D8394E);}
-#vigor-banner.vg-crisis #vigor-banner-titulo::before{ content:""; display:inline-block; width:11px; height:11px; border-radius:50%; background:#FF4B5C; margin-right:11px; vertical-align:middle; animation:vg-pulso 1.8s infinite;}
-@keyframes vg-pulso{ 0%{ box-shadow:0 0 0 0 rgba(255,75,92,.55);} 70%{ box-shadow:0 0 0 10px rgba(255,75,92,0);} 100%{ box-shadow:0 0 0 0 rgba(255,75,92,0);} }
+/* Banner de emergencia: más grueso, rojo, con la esfera de alerta */
+body.vg-crisis-body{ --banner-h:88px;}
+#vigor-banner.vg-crisis{ background:linear-gradient(180deg,#6B1220 0%,#3A0B14 62%,#2A080F 100%); border-bottom:3px solid #FF4B5C; box-shadow:0 8px 34px rgba(255,75,92,.30);}
+#vigor-banner.vg-crisis img{ height:46px;}
+#vigor-banner.vg-crisis .vg-sep{ background:rgba(255,194,200,.35); height:34px;}
+#vigor-banner.vg-crisis #vigor-banner-titulo{ font-size:24px; font-weight:800; color:#fff; text-shadow:0 0 18px rgba(255,75,92,.55);}
+.vg-esfera{ position:relative; width:58px; height:58px; margin:0 14px 0 0; flex-shrink:0;}
+.vg-esfera i{ position:absolute; display:block; border-radius:50%;}
+.vg-esfera .vg-haces{ inset:-16px; background:conic-gradient(from 0deg, rgba(255,75,92,.55) 0deg, transparent 50deg, transparent 180deg, rgba(255,75,92,.55) 180deg, transparent 230deg); -webkit-mask:radial-gradient(circle, transparent 18%, #000 19%, transparent 72%); mask:radial-gradient(circle, transparent 18%, #000 19%, transparent 72%); animation:vg-gira 3s linear infinite;}
+.vg-esfera .vg-nucleo{ inset:8px; background:radial-gradient(circle at 38% 32%, #FFC2C8, #FF4B5C 52%, #8A1522); box-shadow:0 0 26px rgba(255,75,92,.75); animation:vg-late 1.5s ease-in-out infinite;}
+@keyframes vg-gira{ to{ transform:rotate(360deg);} }
+@keyframes vg-late{ 0%,100%{ filter:brightness(.88);} 50%{ filter:brightness(1.18);} }
+@media (max-width:640px){ body.vg-crisis-body{ --banner-h:112px;} #vigor-banner.vg-crisis{ flex-wrap:wrap; align-content:center; row-gap:8px; padding:8px 14px;} #vigor-banner.vg-crisis .vg-crisis-der{ width:100%; margin-left:0; justify-content:space-between;} #vigor-banner.vg-crisis .crisis-timer{ flex-direction:row; align-items:center; gap:8px;} #vigor-banner.vg-crisis .crisis-timer strong{ font-size:18px;} #vigor-banner .btn-desactivar{ padding:8px 12px; font-size:12px;} .vg-esfera{ width:44px; height:44px; margin-right:10px;} .vg-esfera .vg-haces{ inset:-12px;} .vg-esfera .vg-nucleo{ inset:6px;} #vigor-banner.vg-crisis #vigor-banner-titulo{ font-size:17px;} #vigor-banner.vg-crisis img{ height:34px;} }
 #vigor-banner .vg-crisis-der{ gap:18px;}
 #vigor-banner .crisis-clock, #vigor-banner .crisis-timer{ display:flex; flex-direction:column; align-items:flex-end; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); line-height:1.2; border:none; padding:0;}
 #vigor-banner .crisis-clock strong{ color:var(--cyan); text-shadow:0 0 12px var(--cyan-glow); font-size:22px; letter-spacing:.02em; font-family:'JetBrains Mono',monospace !important;}
@@ -117,4 +127,3 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
 #vigor-banner .btn-desactivar{ background:transparent; border:1.5px solid #C99BA3; color:#F6DCE0; font-family:'Montserrat',sans-serif !important; text-transform:none !important; letter-spacing:.01em !important; font-size:13px; font-weight:700; padding:9px 16px; border-radius:12px; cursor:pointer;}
 #vigor-banner .btn-desactivar:hover{ background:rgba(255,75,92,.12); border-color:#FF4B5C;}
 @media (max-width:900px){ #vigor-banner .crisis-clock{ display:none;} #vigor-banner .vg-crisis-der{ gap:12px;} }
-@media (max-width:560px){ #vigor-banner .crisis-timer{ display:none;} }

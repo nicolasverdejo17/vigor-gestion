@@ -92,6 +92,12 @@
     if(franja) franja.classList.add('vg-franja-oculta');
     if(marca) marca.classList.add('vg-franja-oculta');
     banner.classList.add('vg-crisis');
+    d.body.classList.add('vg-crisis-body');
+    // Esfera roja de emergencia (la misma del Inicio del celular), antes del título
+    var esf = d.createElement('span'); esf.className = 'vg-esfera';
+    esf.innerHTML = '<i class="vg-haces"></i><i class="vg-nucleo"></i>';
+    var tit = d.getElementById('vigor-banner-titulo');
+    banner.insertBefore(esf, tit);
   }
 
   // El nombre de la pantalla va en el banner, a continuación del logo.
