@@ -4,26 +4,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 :root{
-  --bg:#06141F; --panel:#0B2030; --panel-alt:#0F2A3F; --line:#17384F; --line-strong:#1F4A66;
+  --bg:#030B13; --panel:#061520; --panel-alt:#091D2C; --line:#0F2A3B; --line-strong:#153A52;
   --text:#EAF6FB; --text-muted:#8FB0C2; --text-dim:#6C8FA3;
-  --brass:#12A7B0; --brass-bright:#2DD3DB; --brass-dim:#1F4A66;
+  --brass:#12A7B0; --brass-bright:#2DD3DB; --brass-dim:#153A52;
   --cyan:#2DD3DB; --cyan-dim:#12839B; --cyan-glow:rgba(45,211,219,.35); --amber-glow:rgba(45,211,219,.25);
   --vg-grad:linear-gradient(90deg,#34B8FF,#2DD3DB 35%,#3DEBC0 60%,#35F454);
   --banner-h:56px;
 }
 html, body, *{ font-family:'Montserrat','Segoe UI',sans-serif !important; }
-body{ background-color:#06141F !important; }
+body{ background-color:#030B13 !important; }
 h1,h2,h3{ text-transform:none !important; letter-spacing:0 !important; font-weight:700; }
 button, .btn, [class*="btn-"]{ text-transform:none !important; letter-spacing:.01em !important; }
 input, select, textarea{ font-family:'Montserrat',sans-serif !important; }
 input:focus, select:focus, textarea:focus{ border-color:#2DD3DB !important; }
-::-webkit-scrollbar-thumb{ background:#1F4A66 !important; }
+::-webkit-scrollbar-thumb{ background:#153A52 !important; }
 
 /* ---- Banner con el logo, arriba a la izquierda en todas las pantallas ---- */
 #vigor-banner{
   position:fixed; top:0; left:0; right:0; height:var(--banner-h); z-index:40;
   display:flex; align-items:center; padding:0 18px;
-  background:linear-gradient(180deg,#0A2234,#06141F); border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#07192A,#030B13); border-bottom:1px solid var(--line);
 }
 #vigor-banner img{ height:38px; width:auto; display:block; flex-shrink:0; }
 #vigor-banner .vg-sep{ width:1.5px; height:24px; background:var(--line-strong); margin:0 14px; flex-shrink:0; }
@@ -43,7 +43,7 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
   margin:0 0 0 auto !important; flex-shrink:0; width:auto !important; position:static !important;
   display:inline-flex; align-items:center; gap:6px; white-space:nowrap; cursor:pointer; text-decoration:none;
   padding:8px 16px !important; border-radius:12px !important; font-size:13px !important; font-weight:600 !important;
-  color:#EAF6FB !important; background:rgba(45,211,219,.08) !important; border:1px solid #1F4A66 !important; line-height:1.2;
+  color:#EAF6FB !important; background:rgba(45,211,219,.08) !important; border:1px solid #153A52 !important; line-height:1.2;
 }
 #vigor-banner .vg-volver:hover{ border-color:#2DD3DB !important; background:rgba(45,211,219,.16) !important; }
 #vigor-banner-titulo{ flex:0 1 auto; }
@@ -70,7 +70,7 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
 .btn-pri, .btn-primary, .btn-guardar, .modal-guardar, .vg-grad{ border-radius:12px !important; }
 
 /* Barra inferior del celular: la pestaña activa como píldora con degradado */
-.tabbar-real{ background:#081A28 !important; border-top:1px solid var(--line) !important; }
+.tabbar-real{ background:#04101A !important; border-top:1px solid var(--line) !important; }
 .tabbar-real a{ border-radius:12px; margin:6px 3px; padding-top:7px !important; padding-bottom:5px !important; }
 .tabbar-real a.active svg{ color:#fff; }
 

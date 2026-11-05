@@ -204,7 +204,7 @@
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/favicon-16.png?v=2" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
-<meta name="theme-color" content="#06141F">
+<meta name="theme-color" content="#030B13">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -213,13 +213,13 @@
 <link rel="stylesheet" href="vigor-tema.css">
 <script src="vigor-tema.js" defer></script>
 <style>
-  html{ background:#06141F;}
+  html{ background:#030B13;}
   /* Tablero de batallones con el diseño de Vigor */
   .wrap{ padding-top:20px;}
   .toolbar h2{ font-family:'Montserrat',sans-serif; text-transform:none; letter-spacing:0; font-size:22px;}
   .resumen-crisis{ font-size:12px; color:var(--text-muted); margin-top:4px;}
   .btn-reporte, .btn-crear{ font-family:'Montserrat',sans-serif !important; text-transform:none !important; letter-spacing:0 !important; font-size:13px !important; font-weight:700; padding:11px 18px !important; border-radius:12px !important;}
-  .btn-crear{ background:var(--vg-grad) !important; color:#06141F !important; font-weight:800;}
+  .btn-crear{ background:var(--vg-grad) !important; color:#030B13 !important; font-weight:800;}
   .batallones{ grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px;}
   .bcard{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:16px; padding:16px 16px 12px 20px; cursor:pointer; position:relative; overflow:hidden; transition:border-color .15s, transform .15s;}
   .bcard::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--servicio);}
@@ -229,7 +229,7 @@
   .bc-top{ display:flex; justify-content:space-between; align-items:center; gap:10px;}
   .bc-top h3{ font-family:'Montserrat',sans-serif; text-transform:none; letter-spacing:0; font-size:17px; margin:0; overflow-wrap:anywhere;}
   .estado-pill{ font-family:'Montserrat',sans-serif !important; border-radius:999px !important; font-size:10px !important; padding:4px 11px !important; letter-spacing:.03em;}
-  .estado-pill.disponible{ color:#06141F;}
+  .estado-pill.disponible{ color:#030B13;}
   .bc-meta{ font-size:12px; color:var(--text-muted); margin-top:8px; min-height:16px;}
   .bc-meta i{ color:var(--text-dim);}
   .bc-nums{ display:flex; gap:22px; margin-top:12px;}
@@ -257,7 +257,7 @@
   .bm-est{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; padding:12px 8px; border-radius:12px; cursor:pointer; background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted);}
   .bm-est:hover{ border-color:var(--cyan); color:var(--text);}
   .bm-est.emergencia.on{ background:var(--emergencia); border-color:var(--emergencia); color:#fff;}
-  .bm-est.disponible.on{ background:var(--servicio); border-color:var(--servicio); color:#06141F;}
+  .bm-est.disponible.on{ background:var(--servicio); border-color:var(--servicio); color:#030B13;}
   .bm-est.rancho.on{ background:var(--alerta); border-color:var(--alerta); color:#241505;}
   .bm-campos{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px;}
   .bm-campo label{ display:block; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; font-weight:700;}
@@ -273,7 +273,7 @@
   .bm-chip{ display:inline-flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line-strong); border-radius:999px; padding:4px 6px 4px 4px; font-size:12.5px; font-weight:600;}
   .bm-chip button{ background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:12px; padding:2px 4px;}
   .bm-chip button:hover{ color:var(--emergencia);}
-  .bm-av{ width:24px; height:24px; border-radius:50%; background:var(--vg-grad); color:#06141F; display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:800;}
+  .bm-av{ width:24px; height:24px; border-radius:50%; background:var(--vg-grad); color:#030B13; display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:800;}
   .bm-chip.carro{ padding:5px 6px 5px 12px; border-color:var(--cyan-dim);}
   .bm-chip.carro b{ font-family:'JetBrains Mono',monospace; color:var(--cyan);}
   .bm-chip.carro i{ font-style:normal; font-size:11px; color:var(--text-muted); font-weight:500;}
@@ -282,8 +282,8 @@
   .bm-add input.mono{ font-family:'JetBrains Mono',monospace;}
   .bm-roles{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
   .bm-rol{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; padding:10px 6px; border-radius:10px; cursor:pointer; background:var(--panel); border:1.5px solid var(--line-strong); color:var(--text-muted);}
-  .bm-rol.on{ background:var(--vg-grad); border-color:transparent; color:#06141F;}
-  .bm-mas{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:12.5px; padding:11px 16px; border-radius:12px; cursor:pointer; border:none; color:#06141F; background:var(--vg-grad); white-space:nowrap;}
+  .bm-rol.on{ background:var(--vg-grad); border-color:transparent; color:#030B13;}
+  .bm-mas{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:12.5px; padding:11px 16px; border-radius:12px; cursor:pointer; border:none; color:#030B13; background:var(--vg-grad); white-space:nowrap;}
   .bm-mas:hover{ filter:brightness(1.08);}
   .bm-pie{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:16px; flex-wrap:wrap;}
   .bm-conf{ flex:1; min-width:200px; font-size:12.5px; color:#FFC9CE;}
@@ -292,7 +292,7 @@
   .bm-peligro.suave{ background:transparent; color:var(--burdeo-bright);}
   .bm-peligro:hover{ background:var(--burdeo-bright); color:#fff;}
   .bm-sec-btn{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);}
-  .bm-listo{ border:none; color:#06141F; font-weight:800; background:var(--vg-grad); padding:11px 30px;}
+  .bm-listo{ border:none; color:#030B13; font-weight:800; background:var(--vg-grad); padding:11px 30px;}
   @media (max-width:640px){
     .bm-overlay{ align-items:flex-end; padding:0;}
     .bm-box{ border-radius:18px 18px 0 0; max-height:94vh;}

@@ -39,21 +39,21 @@
   .dos{ display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 
   .cia-locked-card{ display:flex; align-items:center; gap:14px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:12px; padding:12px 14px;}
-  .cia-locked-badge{ width:44px; height:44px; border-radius:50%; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); color:#06141F; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;}
+  .cia-locked-badge{ width:44px; height:44px; border-radius:50%; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); color:#030B13; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0;}
   .cia-locked-nombre{ font-size:14px; font-weight:700;}
   .cia-locked-sub{ font-size:11px; color:var(--text-dim); margin-top:3px;}
 
   .tipos{ display:flex; flex-wrap:wrap; gap:8px;}
   .tipo-chip{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted); border-radius:999px; padding:8px 14px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit;}
   .tipo-chip:hover{ border-color:var(--cyan); color:var(--text);}
-  .tipo-chip.on{ background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); border-color:transparent; color:#06141F; font-weight:800;}
+  .tipo-chip.on{ background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); border-color:transparent; color:#030B13; font-weight:800;}
 
   .foto-upload{ display:flex; align-items:center; gap:14px; background:var(--panel-alt); border:1.5px dashed var(--line-strong); border-radius:12px; padding:14px 16px; cursor:pointer;}
   .foto-upload:hover{ border-color:var(--cyan);}
   .foto-upload svg{ width:26px; height:26px; color:var(--cyan); flex-shrink:0;}
   .foto-upload span{ font-size:13px; color:var(--text-muted); overflow-wrap:anywhere;}
 
-  .btn-guardar{ width:100%; border:none; color:#06141F; font-weight:800; font-size:15px; padding:15px; border-radius:14px; cursor:pointer; font-family:inherit; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454));}
+  .btn-guardar{ width:100%; border:none; color:#030B13; font-weight:800; font-size:15px; padding:15px; border-radius:14px; cursor:pointer; font-family:inherit; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454));}
   .btn-guardar:hover{ filter:brightness(1.08);}
   .btn-guardar:disabled{ opacity:.5; cursor:not-allowed;}
 
@@ -67,7 +67,7 @@
   .carro-fila{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
   .carro-nom{ font-weight:800; font-size:28px; line-height:1; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); -webkit-background-clip:text; background-clip:text; color:transparent;}
   .carro-tipo{ font-size:12px; color:var(--text-muted); margin-top:6px;}
-  .carro-estado-pill{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:4px 10px; border-radius:10px; background:#3CF29A; color:#06141F; flex-shrink:0;}
+  .carro-estado-pill{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:4px 10px; border-radius:10px; background:#3CF29A; color:#030B13; flex-shrink:0;}
   .carro-datos{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
   .dato{ font-size:11px; color:var(--text-muted); background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:999px; padding:5px 11px;}
   .dato b{ color:var(--text); font-weight:700;}
@@ -89,7 +89,7 @@
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/favicon-16.png?v=2" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
-<meta name="theme-color" content="#06141F">
+<meta name="theme-color" content="#030B13">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -342,7 +342,7 @@ function mostrarCredencialCarro(nomenclatura, passwordTemporal){
         Para instalar la Tablet de este carro, ve a la pantalla de <b>inicio de sesión</b>, escribe en Usuario la Nomenclatura (${nomenclatura}), completa el Código de Cuerpo y esta contraseña. Guárdala ahora, no se vuelve a mostrar.
       </p>
       <div style="font-family:'JetBrains Mono',monospace;font-size:20px;text-align:center;color:var(--cyan);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:12px;padding:14px;margin-bottom:16px;">${passwordTemporal}</div>
-      <button onclick="this.closest('div[style*=fixed]').remove(); location.reload();" style="width:100%;border:none;color:#06141F;font-weight:800;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;font-family:inherit;background:var(--vg-grad,linear-gradient(90deg,#34B8FF,#35F454));">Entendido</button>
+      <button onclick="this.closest('div[style*=fixed]').remove(); location.reload();" style="width:100%;border:none;color:#030B13;font-weight:800;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;font-family:inherit;background:var(--vg-grad,linear-gradient(90deg,#34B8FF,#35F454));">Entendido</button>
     </div>`;
   document.body.appendChild(modal);
 }
