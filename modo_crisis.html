@@ -13,12 +13,12 @@
     --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
     --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
     --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
-    --burdeo:#7A1620; --burdeo-bright:#D8394E;
-    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+    --burdeo:#F13746; --burdeo-bright:#F13746;
+    --servicio:#3CF29A; --emergencia:#F13746; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   body{margin:0;background:
-      radial-gradient(1100px 500px at 15% -10%, rgba(216,57,78,0.08), transparent 60%),
+      radial-gradient(1100px 500px at 15% -10%, rgba(241,55,70,0.08), transparent 60%),
       var(--bg);
     color:var(--text); font-family:'Inter',sans-serif; padding-bottom:60px;}
   .mono{font-family:'JetBrains Mono',monospace;}
@@ -43,12 +43,12 @@
   .crisis-left{ display:flex; align-items:center; gap:14px;}
   .crisis-pulse{
     width:12px;height:12px;border-radius:50%; background:var(--burdeo-bright);
-    box-shadow:0 0 0 0 rgba(216,57,78,0.6); animation:pulse 1.8s infinite; flex-shrink:0;
+    box-shadow:0 0 0 0 rgba(241,55,70,0.6); animation:pulse 1.8s infinite; flex-shrink:0;
   }
   @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(216,57,78,0.55);}
-    70%{box-shadow:0 0 0 10px rgba(216,57,78,0);}
-    100%{box-shadow:0 0 0 0 rgba(216,57,78,0);}
+    0%{box-shadow:0 0 0 0 rgba(241,55,70,0.55);}
+    70%{box-shadow:0 0 0 10px rgba(241,55,70,0);}
+    100%{box-shadow:0 0 0 0 rgba(241,55,70,0);}
   }
   .crisis-title h1{ font-size:20px; color:#F6DCE0; letter-spacing:.06em;}
   .crisis-title span{ font-size:11px; color:#C99BA3; letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
@@ -177,7 +177,7 @@
     font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
     font-size:11px; padding:7px 14px; border-radius:4px; cursor:pointer; white-space:nowrap;
   }
-  .del-batallon:hover{ background:rgba(255,75,92,0.1);}
+  .del-batallon:hover{ background:rgba(241,55,70,0.1);}
 
   .empty-state{ text-align:center; padding:50px 20px; color:var(--text-dim); font-size:13.5px;}
 

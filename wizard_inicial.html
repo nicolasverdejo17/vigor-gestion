@@ -36,12 +36,12 @@
   --amber-glow: rgba(255,154,68,0.32);
 
   /* Burdeo (severidad / crisis / acciones críticas) */
-  --burdeo: #7A1620;
-  --burdeo-bright: #D8394E;
+  --burdeo: #F13746;
+  --burdeo-bright: #F13746;
 
   /* Estados operativos */
   --servicio: #3CF29A;
-  --emergencia: #FF4B5C;
+  --emergencia: #F13746;
   --alerta: #FFC94D;
   --fuera: #C9A63B;
   --nodisp: #42555C;
@@ -634,12 +634,12 @@ label {
       let faltantes = false;
       [nombreCuerpoEl, superintendenteEl, superintendenteNumeroEl].forEach(el => {
         const vacio = !el.value.trim();
-        el.style.borderColor = vacio ? '#D8394E' : '';
+        el.style.borderColor = vacio ? '#F13746' : '';
         if(vacio) faltantes = true;
       });
       const esExtranjero = selectRegion.value === EXTRANJERO;
       if(!selectRegion.value){
-        selectRegion.style.borderColor = '#D8394E';
+        selectRegion.style.borderColor = '#F13746';
         faltantes = true;
       } else {
         selectRegion.style.borderColor = '';
@@ -649,19 +649,19 @@ label {
         const comunaManualEl = document.getElementById('comunaManual');
         [regionManualEl, comunaManualEl].forEach(el => {
           const vacio = !el.value.trim();
-          el.style.borderColor = vacio ? '#D8394E' : '';
+          el.style.borderColor = vacio ? '#F13746' : '';
           if(vacio) faltantes = true;
         });
       } else if(selectRegion.value && !selectComuna.value){
-        selectComuna.style.borderColor = '#D8394E';
+        selectComuna.style.borderColor = '#F13746';
         faltantes = true;
       }
       const comandanteEl = document.getElementById('comandante');
       const comandanteNumeroEl = document.getElementById('comandanteNumero');
       if((comandanteEl.value.trim() && !comandanteNumeroEl.value.trim()) || (!comandanteEl.value.trim() && comandanteNumeroEl.value.trim())){
         document.getElementById('wizardError').textContent = 'Si cargas un Comandante, completa su nombre Y su N° de Registro (o deja ambos vacíos).';
-        comandanteEl.style.borderColor = '#D8394E';
-        comandanteNumeroEl.style.borderColor = '#D8394E';
+        comandanteEl.style.borderColor = '#F13746';
+        comandanteNumeroEl.style.borderColor = '#F13746';
         faltantes = true;
       } else {
         comandanteEl.style.borderColor = '';
@@ -676,7 +676,7 @@ label {
       filas.forEach(row => {
         const inp = row.querySelector('input');
         const vacio = !inp.value.trim();
-        inp.style.borderColor = vacio ? '#D8394E' : '';
+        inp.style.borderColor = vacio ? '#F13746' : '';
         if (vacio) faltantes = true;
       });
       if (faltantes) {
@@ -691,7 +691,7 @@ label {
         const registroEl = inputs[2];
         const tieneNombre = !!inputs[0].value.trim();
         const tieneRegistro = !!registroEl.value.trim();
-        registroEl.style.borderColor = (tieneNombre && !tieneRegistro) ? '#D8394E' : '';
+        registroEl.style.borderColor = (tieneNombre && !tieneRegistro) ? '#F13746' : '';
         if (tieneNombre && !tieneRegistro) faltantes = true;
       });
       if (faltantes) {
@@ -705,7 +705,7 @@ label {
         const registroEl = row.querySelector('.op-registro');
         const tieneNombre = !!row.querySelector('.op-nombre').value.trim();
         const tieneRegistro = !!registroEl.value.trim();
-        registroEl.style.borderColor = (tieneNombre && !tieneRegistro) ? '#D8394E' : '';
+        registroEl.style.borderColor = (tieneNombre && !tieneRegistro) ? '#F13746' : '';
         if (tieneNombre && !tieneRegistro) faltantes = true;
       });
       if (faltantes) {

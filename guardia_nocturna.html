@@ -14,8 +14,8 @@
     --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
     --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
     --cyan:#49E9FF; --cyan-dim:#1E6E7D;
-    --burdeo:#7A1620; --burdeo-bright:#D8394E;
-    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --nodisp:#42555C;
+    --burdeo:#F13746; --burdeo-bright:#F13746;
+    --servicio:#3CF29A; --emergencia:#F13746; --alerta:#FFC94D; --nodisp:#42555C;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;}
@@ -108,7 +108,7 @@
   }
   .dia:hover{ border-color:var(--brass-bright);}
   .dia.vacio{ background:transparent; border:none; cursor:default; min-height:0;}
-  .dia.roja{ border-color:rgba(255,75,92,.55); background:linear-gradient(180deg, rgba(255,75,92,.13), var(--panel-alt) 70%);}
+  .dia.roja{ border-color:rgba(241,55,70,.55); background:linear-gradient(180deg, rgba(241,55,70,.13), var(--panel-alt) 70%);}
   .dia.amarilla{ border-color:rgba(255,201,77,.6); background:linear-gradient(180deg, rgba(255,201,77,.13), var(--panel-alt) 70%);}
   .dia.verde{ border-color:rgba(60,242,154,.55); background:linear-gradient(180deg, rgba(60,242,154,.13), var(--panel-alt) 70%);}
   .dia.pasado{ opacity:.55;}
@@ -120,16 +120,16 @@
   /* Cumplimiento automático de mis noches */
   .dia.neutro.mio.completa{ border-color:var(--servicio); background:linear-gradient(180deg, rgba(60,242,154,.16), var(--panel-alt) 75%);}
   .dia.neutro.mio.parcial{ border-color:var(--alerta); background:linear-gradient(180deg, rgba(255,201,77,.16), var(--panel-alt) 75%);}
-  .dia.neutro.mio.ausente{ border-color:var(--emergencia); background:linear-gradient(180deg, rgba(255,75,92,.16), var(--panel-alt) 75%);}
+  .dia.neutro.mio.ausente{ border-color:var(--emergencia); background:linear-gradient(180deg, rgba(241,55,70,.16), var(--panel-alt) 75%);}
   .completa .dia-check, .dia-check.completa{ color:var(--servicio);}
   .dia-check.parcial{ color:var(--alerta);} .dia-check.ausente{ color:var(--emergencia);}
   .dia-mio.completa{ background:var(--servicio); box-shadow:0 0 0 2px rgba(60,242,154,.25);}
   .dia-mio.parcial{ background:var(--alerta); box-shadow:0 0 0 2px rgba(255,201,77,.25);}
-  .dia-mio.ausente{ background:var(--emergencia); box-shadow:0 0 0 2px rgba(255,75,92,.25);}
+  .dia-mio.ausente{ background:var(--emergencia); box-shadow:0 0 0 2px rgba(241,55,70,.25);}
   .asist{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 7px; border-radius:8px; border:1px solid var(--line-strong); color:var(--text-muted); display:inline-block;}
   .asist.completa{ color:var(--servicio); border-color:rgba(60,242,154,.5);}
   .asist.parcial{ color:var(--alerta); border-color:rgba(255,201,77,.55);}
-  .asist.ausente{ color:var(--emergencia); border-color:rgba(255,75,92,.55);}
+  .asist.ausente{ color:var(--emergencia); border-color:rgba(241,55,70,.55);}
   .asist-det{ font-size:10px; color:var(--text-dim); margin-top:2px; font-family:'JetBrains Mono',monospace;}
   .stats-noches{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
   .stat-pill{ font-size:10.5px; padding:3px 9px; border-radius:9px; border:1px solid var(--line-strong); color:var(--text-muted);}
@@ -172,7 +172,7 @@
   .tag-ok{ color:var(--servicio); font-weight:700;} .tag-falta{ color:var(--emergencia); font-weight:700;}
   .scroll-max{ max-height:240px; overflow-y:auto;}
   .scroll-max::-webkit-scrollbar{ width:6px;} .scroll-max::-webkit-scrollbar-thumb{ background:var(--brass-dim); border-radius:4px;}
-  .sin-cob-item{ display:flex; justify-content:space-between; gap:8px; padding:7px 8px; border:1px solid rgba(255,75,92,.4); border-radius:7px; margin-bottom:5px; cursor:pointer; background:rgba(255,75,92,.07); font-size:12px;}
+  .sin-cob-item{ display:flex; justify-content:space-between; gap:8px; padding:7px 8px; border:1px solid rgba(241,55,70,.4); border-radius:7px; margin-bottom:5px; cursor:pointer; background:rgba(241,55,70,.07); font-size:12px;}
   .sin-cob-item b{ font-family:'Rajdhani'; font-size:13px; letter-spacing:.03em; text-transform:uppercase;}
   .sin-cob-item span{ color:var(--text-muted); font-size:11px; text-align:right;}
 
@@ -193,7 +193,7 @@
   .modal-x{ background:none; border:none; color:var(--text-dim); font-size:17px; cursor:pointer; padding:2px; line-height:1;}
   .modal-x:hover{ color:var(--text);}
   .cob-line{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:9px 11px; border-radius:8px; border:1px solid var(--line-strong); background:var(--panel-alt); margin-bottom:12px; font-size:12px;}
-  .cob-line.roja{ border-color:rgba(255,75,92,.55);} .cob-line.amarilla{ border-color:rgba(255,201,77,.6);} .cob-line.verde{ border-color:rgba(60,242,154,.55);}
+  .cob-line.roja{ border-color:rgba(241,55,70,.55);} .cob-line.amarilla{ border-color:rgba(255,201,77,.6);} .cob-line.verde{ border-color:rgba(60,242,154,.55);}
   .cob-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
   .roja .cob-dot{ background:var(--emergencia);} .amarilla .cob-dot{ background:var(--alerta);} .verde .cob-dot{ background:var(--servicio);}
   .cob-line b{ font-family:'Rajdhani'; font-size:14px; letter-spacing:.03em; text-transform:uppercase;}
@@ -631,7 +631,7 @@ function renderMisNoches(){
       <span class="stat-pill parcial"><b>${c.parcial}</b>parciales</span>
       <span class="stat-pill ausente"><b>${c.ausente}</b>ausentes</span>
     </div>
-    ${mis.length ? `<div class="lista-fechas">${mis.map(i => `<span class="fecha-chip" style="${{ completa:'color:var(--servicio);border-color:rgba(60,242,154,.5)', parcial:'color:var(--alerta);border-color:rgba(255,201,77,.55)', ausente:'color:var(--emergencia);border-color:rgba(255,75,92,.55)' }[estadoAsist(i.id)] || ''}" onclick="abrirDia('${i.fecha}')">${fechaCorta(i.fecha)}</span>`).join('')}</div>` : ''}`;
+    ${mis.length ? `<div class="lista-fechas">${mis.map(i => `<span class="fecha-chip" style="${{ completa:'color:var(--servicio);border-color:rgba(60,242,154,.5)', parcial:'color:var(--alerta);border-color:rgba(255,201,77,.55)', ausente:'color:var(--emergencia);border-color:rgba(241,55,70,.55)' }[estadoAsist(i.id)] || ''}" onclick="abrirDia('${i.fecha}')">${fechaCorta(i.fecha)}</span>`).join('')}</div>` : ''}`;
 }
 
 function renderSinCobertura(){

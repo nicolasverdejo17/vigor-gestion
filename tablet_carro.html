@@ -13,9 +13,9 @@
     --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
     --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
     --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
-    --burdeo:#7A1620; --burdeo-bright:#D8394E;
-    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
-    --esp-r:#FF4B5C; --esp-t:#4FA3FF; --esp-h:#FFC94D; --esp-f:#3CF29A; --esp-m:#B77CFF; --esp-c:#E08A5C;
+    --burdeo:#F13746; --burdeo-bright:#F13746;
+    --servicio:#3CF29A; --emergencia:#F13746; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+    --esp-r:#F13746; --esp-t:#4FA3FF; --esp-h:#FFC94D; --esp-f:#3CF29A; --esp-m:#B77CFF; --esp-c:#E08A5C;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;}
@@ -156,7 +156,7 @@
           <div class="estado-opt" onclick="setEstadoCarro('servicio')"><span class="dot" style="background:#3CF29A"></span>En Servicio</div>
           <div class="estado-opt" onclick="setEstadoCarro('mant')"><span class="dot" style="background:#FFC94D"></span>En Mantención</div>
           <div class="estado-opt" onclick="setEstadoCarro('fuera')"><span class="dot" style="background:#42555C"></span>Fuera de Servicio</div>
-          <div class="estado-opt" onclick="setEstadoCarro('emergencia')"><span class="dot" style="background:#FF4B5C"></span>En Emergencia</div>
+          <div class="estado-opt" onclick="setEstadoCarro('emergencia')"><span class="dot" style="background:#F13746"></span>En Emergencia</div>
         </div>
         <div class="clock"><strong id="clk">—</strong><span id="fechaHoy">—</span></div>
       </div>
@@ -184,7 +184,7 @@
     <div class="ops-grid">
       <div class="ops-btn parte" onclick="window.location.href='tablet_parte.html'">
         <div class="ops-icon">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#D8394E" stroke-width="1.6"/><path d="M14 3v5h5M9 13h6M9 17h6M9 9h2" stroke="#D8394E" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#F13746" stroke-width="1.6"/><path d="M14 3v5h5M9 13h6M9 17h6M9 9h2" stroke="#F13746" stroke-width="1.6" stroke-linecap="round"/></svg>
         </div>
         <h2>Parte de Emergencia</h2>
         <p>Llenar el registro de la emergencia en curso o recién finalizada.</p>
@@ -239,7 +239,7 @@ tick(); setInterval(tick,1000);
 // del Cuartel — pedido explícito. Mismo popover position:fixed y misma
 // paleta de 4 estados (verde/ámbar/gris/rojo) usada en todo el sistema.
 const ESTADO_LABEL_CARRO = { servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
-const ESTADO_COLOR_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const ESTADO_COLOR_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#F13746' };
 
 // La Tablet es la identidad fija de un Carro, no de una persona logueada
 // (sección 20) — pero ahora esa identidad es una sesión real de Supabase

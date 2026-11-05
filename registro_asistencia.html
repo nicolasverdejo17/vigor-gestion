@@ -14,8 +14,8 @@
     --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
     --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
     --cyan:#49E9FF; --cyan-dim:#1E6E7D;
-    --burdeo:#7A1620; --burdeo-bright:#D8394E;
-    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --nodisp:#42555C;
+    --burdeo:#F13746; --burdeo-bright:#F13746;
+    --servicio:#3CF29A; --emergencia:#F13746; --alerta:#FFC94D; --nodisp:#42555C;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;}
@@ -71,7 +71,7 @@
   .asist{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 7px; border-radius:8px; border:1px solid var(--line-strong); color:var(--text-muted); display:inline-block; white-space:nowrap;}
   .asist.completa{ color:var(--servicio); border-color:rgba(60,242,154,.5);}
   .asist.parcial{ color:var(--alerta); border-color:rgba(255,201,77,.55);}
-  .asist.ausente{ color:var(--emergencia); border-color:rgba(255,75,92,.55);}
+  .asist.ausente{ color:var(--emergencia); border-color:rgba(241,55,70,.55);}
   .asist.en_curso{ color:var(--cyan); border-color:rgba(73,233,255,.5);}
   .tag-reemplazo{ display:inline-block; margin-top:3px; font-family:'Inter',sans-serif; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 7px; border-radius:8px; background:var(--cyan-dim); color:#fff; border:1px solid var(--cyan);}
 
@@ -82,7 +82,7 @@
   .libro-card .fecha{ font-family:'Rajdhani'; font-weight:800; font-size:16px; text-transform:uppercase; letter-spacing:.03em;}
   .libro-card .meta{ font-size:11px; color:var(--text-muted); margin-top:2px;}
   .libro-card .info{ flex:1; min-width:0;}
-  .emerg-badge{ font-size:10px; color:var(--emergencia); border:1px solid rgba(255,75,92,.5); border-radius:8px; padding:2px 8px; font-weight:700;}
+  .emerg-badge{ font-size:10px; color:var(--emergencia); border:1px solid rgba(241,55,70,.5); border-radius:8px; padding:2px 8px; font-weight:700;}
   .vacio{ text-align:center; padding:26px 12px; color:var(--text-dim); font-size:12.5px; line-height:1.6;}
 
   /* ---- Detalle ---- */
@@ -90,7 +90,7 @@
   .cabecera .grow{ flex:1; min-width:200px;}
   .cabecera h2{ font-size:19px;}
   .aviso{ font-size:12px; padding:9px 12px; border-radius:8px; margin-bottom:10px; line-height:1.5;}
-  .aviso.mal{ background:rgba(255,75,92,.1); border:1px solid rgba(255,75,92,.5); color:#FFC9CE;}
+  .aviso.mal{ background:rgba(241,55,70,.1); border:1px solid rgba(241,55,70,.5); color:#FFC9CE;}
   .aviso.bien{ background:rgba(60,242,154,.08); border:1px solid rgba(60,242,154,.4); color:#BDF7DC;}
   .aviso.info{ background:var(--panel-alt); border:1px dashed var(--line-strong); color:var(--text-muted);}
   .tabla{ width:100%; border-collapse:collapse; font-size:12.5px;}
@@ -109,7 +109,7 @@
   .nov .cuerpo{ flex:1; min-width:0;}
   .nov .tipo{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim);}
   .nov.emergencia .tipo{ color:var(--emergencia);}
-  .nov.emergencia{ background:rgba(255,75,92,.06); border-left:3px solid var(--emergencia); padding-left:10px; margin:2px 0;}
+  .nov.emergencia{ background:rgba(241,55,70,.06); border-left:3px solid var(--emergencia); padding-left:10px; margin:2px 0;}
   .nov .desc{ font-size:13px; line-height:1.45; margin-top:2px; white-space:pre-wrap;}
   .nov .datos{ font-size:11px; color:var(--text-muted); margin-top:4px; font-family:'JetBrains Mono',monospace; line-height:1.5;}
   .mini-x{ background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:14px; padding:3px; align-self:flex-start;}
@@ -175,7 +175,7 @@
   .cnt{ font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:10px; border:1px solid var(--line-strong); color:var(--text-muted); white-space:nowrap;}
   .cnt.p{ color:var(--servicio); border-color:rgba(60,242,154,.5);}
   .cnt.j{ color:var(--alerta); border-color:rgba(255,201,77,.55);}
-  .cnt.a{ color:var(--emergencia); border-color:rgba(255,75,92,.55);}
+  .cnt.a{ color:var(--emergencia); border-color:rgba(241,55,70,.55);}
   .pct{ text-align:right; flex-shrink:0;}
   .pct b{ font-size:22px; font-weight:800; display:block; line-height:1;}
   .pct span{ font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em;}

@@ -17,8 +17,8 @@
     --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
     --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
     --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
-    --burdeo:#7A1620; --burdeo-bright:#D8394E;
-    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+    --burdeo:#F13746; --burdeo-bright:#F13746;
+    --servicio:#3CF29A; --emergencia:#F13746; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;}
@@ -61,7 +61,7 @@
   }
   .estado-btn.on.disponible{ background:#3CF29A; border-color:#3CF29A; color:#fff;}
   .estado-btn.on.no_disponible{ background:#FFC94D; border-color:#FFC94D; color:#241505;}
-  .estado-btn.on.emergencia{ background:#FF4B5C; border-color:#FF4B5C; color:#fff;}
+  .estado-btn.on.emergencia{ background:#F13746; border-color:#F13746; color:#fff;}
   .estado-btn.on.fuera{ background:#42555C; border-color:#42555C; color:#fff;}
 
   .section-label{ display:flex; justify-content:space-between; align-items:baseline; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:16px 4px 8px;}
@@ -188,7 +188,7 @@ const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2�
 
 // Mismo modelo de 4 estados que el PC del Cuartel — coherencia en TODO
 // el sistema (Disponible/No Disponible/Fuera de Servicio/En Emergencia).
-const COLOR_ESTADO = { disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const COLOR_ESTADO = { disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#F13746' };
 const PILL_LABEL = { disponible:'Disponible', no_disponible:'No Disponible', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
 const ESTADOS = ['disponible','no_disponible','emergencia','fuera'];
 
@@ -199,7 +199,7 @@ let miPersonalId = null, miCompaniaId = null;
 
 let CARROS_CEL = [];
 const ESTADO_LABEL_CARRO = { servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
-const COLOR_ESTADO_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const COLOR_ESTADO_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#F13746' };
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();

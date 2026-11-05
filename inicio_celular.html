@@ -17,8 +17,8 @@
     --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
     --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
     --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
-    --burdeo:#7A1620; --burdeo-bright:#D8394E;
-    --servicio:#3CF29A; --emergencia:#FF4B5C; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
+    --burdeo:#F13746; --burdeo-bright:#F13746;
+    --servicio:#3CF29A; --emergencia:#F13746; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;overflow:hidden;}
@@ -60,7 +60,7 @@
   .faro{ position:relative; width:224px; height:224px; max-width:100%; margin:0 auto 4px; z-index:1;
     --f-color:#42555C; --f-light:#8CA0A8; --f-dark:#26343A; --f-glow:rgba(66,85,92,0);}
   .faro.ok{ --f-color:#49E9FF; --f-light:#CFF8FF; --f-dark:#1E6E7D; --f-glow:rgba(73,233,255,0.5);}
-  .faro.emerg{ --f-color:#FF4B5C; --f-light:#FFC2C8; --f-dark:#8A1522; --f-glow:rgba(255,75,92,0.55);}
+  .faro.emerg{ --f-color:#F13746; --f-light:#FFC2C8; --f-dark:#8A1522; --f-glow:rgba(241,55,70,0.55);}
   .faro-haces{ position:absolute; inset:0; border-radius:50%;
     background:conic-gradient(from 0deg, var(--f-glow) 0deg, transparent 50deg, transparent 180deg, var(--f-glow) 180deg, transparent 230deg);
     -webkit-mask:radial-gradient(circle, transparent 18%, #000 19%, transparent 72%); mask:radial-gradient(circle, transparent 18%, #000 19%, transparent 72%);
@@ -227,7 +227,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 // Mismo modelo de 4 estados que el PC del Cuartel y Compañía (Celular).
 // Acá es SOLO LECTURA — el único lugar donde se cambia de verdad es en
 // Compañía, junto a la lista de Guardia Activa que depende de este estado.
-const COLOR_ESTADO = { disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#FF4B5C' };
+const COLOR_ESTADO = { disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#F13746' };
 const PILL_LABEL = { disponible:'Disponible', no_disponible:'No Disponible', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
 const PRIORIDAD_CARGO_MANDO = ['Director','Capitán','Teniente 1°','Teniente 2°','Teniente 3°','Teniente 4°','Ayudante Cía.'];
 
