@@ -12,6 +12,7 @@
       var h = d.createElement('header'); h.id = 'vigor-banner';
       h.innerHTML = '<img src="img/logo.png" alt="Vigor"><span class="vg-sep"></span><span id="vigor-banner-titulo"></span>';
       b.insertBefore(h, b.firstChild); b.classList.add('vg-banner');
+      moverVolver(h);
     }
     // Botones primarios (color de acento antiguo) pasan al degradado
     var ACENTOS = ['rgb(30, 110, 125)', 'rgb(73, 233, 255)', 'rgb(18, 131, 155)', 'rgb(45, 211, 219)'];
@@ -34,6 +35,35 @@
     }
     sincronizarTitulo();
     escanear();
+  }
+
+  // Pantallas de «Opciones»: el botón Volver pasa al extremo derecho del banner y se quita la franja
+  // de título/sesión que había debajo. Los demás botones de función quedan en una fila arriba.
+  var PANTALLAS_VOLVER = ['editar_datos_personales','hoja_servicio','gestion_capacitacion','archivo_institucional_celular','guardia_nocturna','libro_guardia','notificaciones_celular','solicitudes_alta','asignacion_dotacion_celular','usuarios_sistema','estadisticas','inventario','auditoria_eliminaciones','gestion_especialidades','crear_carro'];
+  function moverVolver(banner){
+    var archivo = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+    if(PANTALLAS_VOLVER.indexOf(archivo) < 0) return;
+    var volver = d.querySelector('.back-cuartel, .back-btn, #volverFichaBtn');
+    if(!volver){
+      var links = d.querySelectorAll('.app-head a');
+      for(var i = 0; i < links.length; i++) if(/^\s*←/.test(links[i].textContent)){ volver = links[i]; break; }
+    }
+    var franja = d.querySelector('.nameplate, .app-head');
+    if(volver){
+      volver.removeAttribute('style'); volver.classList.add('vg-volver');
+      banner.appendChild(volver);
+    }
+    if(franja){
+      // Botones de función que había en la franja (exportar, configurar…) → fila de acciones bajo el banner
+      var extras = franja.querySelectorAll('button, a[class*="btn"], select');
+      if(extras.length){
+        var fila = d.createElement('div'); fila.id = 'vigor-acciones';
+        for(var j = 0; j < extras.length; j++) fila.appendChild(extras[j]);
+        banner.insertAdjacentElement('afterend', fila);
+      }
+      franja.classList.add('vg-franja-oculta');
+    }
+    var marca = d.querySelector('.wordmark'); if(marca) marca.classList.add('vg-franja-oculta');   // «VIGOR» suelto: ya está en el banner
   }
 
   // El nombre de la pantalla va en el banner, a continuación del logo.
