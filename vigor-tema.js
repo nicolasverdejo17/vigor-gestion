@@ -39,7 +39,11 @@
 
   // Pantallas de «Opciones»: el botón Volver pasa al extremo derecho del banner y se quita la franja
   // de título/sesión que había debajo. Los demás botones de función quedan en una fila arriba.
-  var PANTALLAS_VOLVER = ['registro_asistencia','ficha_bombero','editar_datos_personales','hoja_servicio','gestion_capacitacion','archivo_institucional_celular','guardia_nocturna','libro_guardia','notificaciones_celular','solicitudes_alta','asignacion_dotacion_celular','usuarios_sistema','estadisticas','inventario','auditoria_eliminaciones','gestion_especialidades','crear_carro'];
+  var PANTALLAS_VOLVER = ['registro_asistencia','ficha_bombero','editar_datos_personales','hoja_servicio','gestion_capacitacion','archivo_institucional_celular','guardia_nocturna','libro_guardia','notificaciones_celular','solicitudes_alta','asignacion_dotacion_celular','usuarios_sistema','estadisticas','inventario','auditoria_eliminaciones','gestion_especialidades','crear_carro',
+    'alta_personal_rentado','configuracion_sistema','crear_actividad_celular','crear_compania','dar_de_baja','dar_de_baja_reactivar_personal','flota_comandancia','historial_movimientos','ingreso_item','pasar_asistencia','registro_auditoria','restablecer_passwords_global','secretaria',
+    'tablet_bitacora','tablet_checklist','tablet_checklist_historial','tablet_dotacion','tablet_parte'];
+  // En las tablets la franja de arriba muestra el carro, su estado y la hora: se queda; solo el «Volver» sube al banner
+  var CONSERVAN_FRANJA = ['tablet_bitacora','tablet_checklist','tablet_checklist_historial','tablet_dotacion','tablet_parte'];
   function moverVolver(banner){
     var archivo = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
     if(PANTALLAS_VOLVER.indexOf(archivo) < 0) return;
@@ -51,11 +55,12 @@
     var franja = d.querySelector('.nameplate, .app-head');
     if(volver){
       volver.removeAttribute('style'); volver.classList.add('vg-volver');
+      if(/^\s*←/.test(volver.textContent)) volver.textContent = '← Volver';   // todos dicen igual, vaya a donde vaya
       banner.appendChild(volver);
     }
-    if(franja){
+    if(franja && CONSERVAN_FRANJA.indexOf(archivo) < 0){
       // Botones de función que había en la franja (exportar, configurar…) → fila de acciones bajo el banner
-      var extras = franja.querySelectorAll('button, a[class*="btn"], select');
+      var extras = franja.querySelectorAll('button, a[class*="btn"], select, .status-badge');
       if(extras.length){
         var fila = d.createElement('div'); fila.id = 'vigor-acciones';
         for(var j = 0; j < extras.length; j++) fila.appendChild(extras[j]);
@@ -67,7 +72,8 @@
   }
 
   // El nombre de la pantalla va en el banner, a continuación del logo.
-  var ESPECIALES = { 'pc_compania.html':'PC de Compañía', 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual' };
+  var ESPECIALES = { 'pc_compania.html':'PC de Compañía', 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual',
+    'tablet_parte.html':'Parte de Emergencia', 'tablet_bitacora.html':'Bitácora', 'tablet_checklist.html':'Checklist', 'tablet_checklist_historial.html':'Historial de Checklist', 'tablet_dotacion.html':'Dotación Asignada' };
   // Las pantallas del menú Opciones se titulan exactamente como su botón en Opciones.
   var TITULOS_OPCIONES = {
     'editar_datos_personales':'Mi Perfil', 'archivo_institucional_celular':'Archivo Institucional',
