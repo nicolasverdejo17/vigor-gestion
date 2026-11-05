@@ -200,6 +200,55 @@
   .curso-del{ background:none; border:1px solid transparent; color:var(--text-dim); cursor:pointer; padding:5px; border-radius:6px; display:flex; flex-shrink:0;}
   .curso-del svg{ width:17px; height:17px;}
   .curso-del:hover{ color:var(--emergencia); border-color:rgba(255,75,92,.5);}
+
+  /* ---- Detalle de una persona (Mis Cursos / ficha de cursos) ---- */
+  .detalle-panel{ max-width:960px; margin:0 auto; padding-top:16px;}
+  .perfil-card{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; background:var(--panel); border:1.5px solid var(--line-strong); border-radius:16px; padding:18px;}
+  .pc-av{ width:64px; height:64px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:21px; color:#06141F; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)) center/cover; overflow:hidden;}
+  .pc-av img{ width:100%; height:100%; object-fit:cover; display:block;}
+  .pc-info{ flex:1; min-width:200px;}
+  .pc-nom{ font-size:20px; font-weight:800; line-height:1.15;}
+  .pc-sub{ font-size:12px; color:var(--text-muted); margin-top:4px;}
+  .pc-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center;}
+  .dato{ font-size:11px; color:var(--text-muted); background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:999px; padding:5px 11px;}
+  .dato b{ color:var(--text); font-weight:700;}
+  .detalle-actions{ display:flex; gap:8px; align-items:center;}
+  .btn-exportar, .btn-agregar{ border-radius:12px !important; padding:11px 16px !important; font-size:12px !important;}
+  .btn-agregar{ background:var(--alerta) !important;}
+  .tarjeta-nivel{ background:var(--panel); border:1.5px solid var(--line-strong); border-radius:16px; padding:16px 18px; margin-top:14px;}
+  .seccion-t{ font-size:11px; color:var(--cyan); text-transform:uppercase; letter-spacing:.1em; font-weight:700; margin:0 0 12px;}
+  .historial-t{ font-size:11px; color:var(--cyan); text-transform:uppercase; letter-spacing:.1em; font-weight:700; margin:22px 4px 10px;}
+
+  .curso-card{ display:flex; align-items:center; gap:14px; background:var(--panel); border:1.5px solid var(--line-strong); border-radius:14px; padding:12px 14px; margin-bottom:8px;}
+  .cc-fecha{ width:50px; flex-shrink:0; text-align:center; border-right:1px solid var(--line-strong); padding-right:14px;}
+  .cc-fecha .d{ font-weight:800; font-size:20px; line-height:1;}
+  .cc-fecha .m{ font-size:9.5px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em; margin-top:3px;}
+  .cc-fecha .a{ font-size:9px; color:var(--text-dim); margin-top:1px;}
+  .cc-info{ flex:1; min-width:0;}
+  .cc-nombre{ font-size:14px; font-weight:700; overflow-wrap:anywhere;}
+  .cc-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:7px;}
+  .cc-tags .nivel-pill{ padding:3px 10px;}
+  .tag-ext{ font-size:9px; font-weight:700; text-transform:uppercase; color:var(--text-muted); border:1px solid var(--line-strong); padding:3px 9px; border-radius:10px;}
+  .cc-cert{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--cyan); border:1.5px solid var(--cyan-dim); border-radius:10px; padding:7px 11px; text-decoration:none; flex-shrink:0;}
+  .cc-cert svg{ width:15px; height:15px;}
+  .cc-cert:hover{ background:rgba(73,233,255,.1);}
+  .vacio-cursos{ text-align:center; padding:34px 16px; background:var(--panel); border:1.5px dashed var(--line-strong); border-radius:16px; color:var(--text-dim); font-size:13px;}
+  .vacio-cursos svg{ width:38px; height:38px; display:block; margin:0 auto 10px; color:var(--line-strong);}
+  @media (max-width:760px){
+    .perfil-card{ padding:14px;}
+    .pc-av{ width:54px; height:54px; font-size:18px;}
+    .detalle-actions{ width:100%;}
+    .detalle-actions > button{ flex:1;}
+    .curso-card{ flex-wrap:wrap;}
+    .cc-cert{ margin-left:64px;}
+  }
+  @media print{
+    .perfil-card, .curso-card, .tarjeta-nivel, .vacio-cursos{ background:#fff !important; border:1px solid #999 !important; color:#000 !important; break-inside:avoid;}
+    .pc-av{ background:#ddd !important; color:#000 !important;}
+    .pc-sub, .cc-fecha .m, .cc-fecha .a, .dato, .tag-ext{ color:#333 !important; background:#fff !important; border-color:#999 !important;}
+    .cc-cert{ color:#000 !important; border-color:#999 !important;}
+    .seccion-t, .historial-t{ color:#000 !important;}
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -327,7 +376,7 @@ async function cargarDatos(){
   document.getElementById('roleTag').textContent = soloMios ? 'Mis Cursos' : perfil.cargo;
   document.getElementById('subtituloInv').textContent = (perfil.companias ? perfil.companias.nombre : 'Cuerpo General') + ' · Vigor';
   
-  let q = sb.from('personal').select('id, nombre_completo, numero_registro, cargo, nivel_capacitacion')
+  let q = sb.from('personal').select('id, nombre_completo, numero_registro, cargo, foto_url, nivel_capacitacion')
     .eq('cuerpo_id', miCuerpoId).neq('estado','dado_de_baja').order('numero_registro');
   q = soloMios ? q.eq('id', miPersonalId) : (miCompaniaId ? q.eq('compania_id', miCompaniaId) : q.is('compania_id', null));
   const { data: personal } = await q;
@@ -336,7 +385,7 @@ async function cargarDatos(){
     .select('*').eq('cuerpo_id', miCuerpoId).order('fecha', { ascending:false });
 
   BOMBEROS = (personal || []).map(p => ({
-    id: p.id, nombre: p.nombre_completo, reg: p.numero_registro, cargo: p.cargo, nivelActual: p.nivel_capacitacion,
+    id: p.id, nombre: p.nombre_completo, reg: p.numero_registro, cargo: p.cargo, foto: p.foto_url, nivelActual: p.nivel_capacitacion,
     cursos: (cursos || []).filter(c => c.personal_id === p.id)
   }));
   bomberoActivo = 0;
@@ -374,43 +423,59 @@ function renderTabla(){
   }).join('') || `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim); font-style:italic;">Sin resultados.</td></tr>`;
 }
 
+const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const ICO_DOC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4"/><path d="M9 13.5l2 2 4-4.2"/></svg>';
+const ICO_BASURA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg>';
+const iniciales = (n) => (n || '?').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+const escH = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
 function renderDetalle(){
   if(BOMBEROS.length===0){ document.getElementById('detallePanel').innerHTML = `<div class="curso-empty">Sin personal para mostrar.</div>`; return; }
   const b = BOMBEROS[bomberoActivo];
-  const rows = b.cursos.length
-    ? b.cursos.map(c => `
-        <div class="curso-row">
-          <span class="curso-fecha">${new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-CL')}</span>
-          <span class="curso-nombre">${c.nombre_curso}</span>
-          ${c.es_externo ? '<span class="curso-tag-externo">Externo</span>' : ''}
-          ${c.nivel ? `<span class="nivel-pill ${c.nivel}">${NIVEL_LABEL[c.nivel]}</span>` : ''}
-          ${puedoEditar ? `<button class="curso-del" onclick="pedirEliminarCurso('${c.id}')" title="Eliminar curso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg></button>` : ''}
-          ${c.certificado_url ? `<a href="${c.certificado_url}" target="_blank" rel="noopener" class="curso-cert-link" title="Ver certificado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4"/><path d="M9 13.5l2 2 4-4.2"/></svg></a>` : ''}
-        </div>
-      `).join('')
-    : `<div class="curso-empty">Sin cursos ingresados todavía.</div>`;
+  const nv = b.nivelActual || 'ninguno';
+  const fechaL = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('es-CL');
+  const tarjetas = b.cursos.length
+    ? b.cursos.map(c => {
+        const [y, m, d] = c.fecha.split('-').map(Number);
+        return `<div class="curso-card">
+          <div class="cc-fecha"><div class="d">${String(d).padStart(2,'0')}</div><div class="m">${MESES_CORTO[m-1]}</div><div class="a">${y}</div></div>
+          <div class="cc-info">
+            <div class="cc-nombre">${escH(c.nombre_curso)}</div>
+            <div class="cc-tags">${c.nivel ? `<span class="nivel-pill ${c.nivel}">${NIVEL_LABEL[c.nivel]}</span>` : ''}${c.es_externo ? '<span class="tag-ext">Externo</span>' : ''}</div>
+          </div>
+          ${c.certificado_url ? `<a class="cc-cert" href="${escH(c.certificado_url)}" target="_blank" rel="noopener" title="Ver certificado">${ICO_DOC}Certificado</a>` : ''}
+          ${puedoEditar ? `<button class="curso-del" onclick="pedirEliminarCurso('${c.id}')" title="Eliminar curso">${ICO_BASURA}</button>` : ''}
+        </div>`;
+      }).join('')
+    : `<div class="vacio-cursos">${ICO_DOC}Sin cursos ingresados todavía.</div>`;
 
-  const nivelSelector = NIVELES.map(n =>
-    `<div class="nivel-opt ${n} ${b.nivelActual===n?'on':''}" ${puedoEditar ? `onclick="setNivelBombero('${n}')"` : ''}>${NIVEL_LABEL[n]}</div>`
-  ).join('');
+  // El nivel solo se puede cambiar si tienes permiso; en «Mis Cursos» se ve en la tarjeta de arriba
+  const nivelSelector = puedoEditar ? `<div class="tarjeta-nivel">
+      <div class="seccion-t">Nivel actual</div>
+      <div class="nivel-select-row" style="max-width:460px;">${NIVELES.map(n =>
+        `<div class="nivel-opt ${n} ${b.nivelActual===n?'on':''}" onclick="setNivelBombero('${n}')">${NIVEL_LABEL[n]}</div>`).join('')}</div>
+    </div>` : '';
 
   document.getElementById('detallePanel').innerHTML = `
-    <div class="detalle-head">
-      <div>
-        <div class="detalle-nombre">${b.nombre}</div>
-        <div class="detalle-meta">N° ${b.reg}</div>
+    <div class="perfil-card">
+      <div class="pc-av">${b.foto ? `<img src="${escH(b.foto)}" alt="">` : escH(iniciales(b.nombre))}</div>
+      <div class="pc-info">
+        <div class="pc-nom">${escH(b.nombre)}</div>
+        <div class="pc-sub">N° ${b.reg}${b.cargo ? ' · ' + escH(b.cargo) : ''}</div>
+        <div class="pc-chips">
+          <span class="nivel-pill ${nv}">${nv === 'ninguno' ? NIVEL_LABEL.ninguno : 'Nivel ' + NIVEL_LABEL[nv]}</span>
+          <span class="dato"><b>${b.cursos.length}</b> curso${b.cursos.length === 1 ? '' : 's'}</span>
+          ${b.cursos.length ? `<span class="dato">Último: <b>${fechaL(b.cursos[0].fecha)}</b></span>` : ''}
+        </div>
       </div>
       <div class="detalle-actions">
         <button class="btn-exportar" onclick="window.print()">⬇ Exportar PDF</button>
         ${puedoEditar ? `<button class="btn-agregar" onclick="abrirModal()">+ Agregar Curso</button>` : ''}
       </div>
     </div>
-
-    <div class="cursos-title">Nivel actual</div>
-    <div class="nivel-select-row" style="margin-bottom:22px; max-width:420px;">${nivelSelector}</div>
-
-    <div class="cursos-title">Historial de Cursos</div>
-    ${rows}
+    ${nivelSelector}
+    <div class="historial-t">Historial de cursos</div>
+    ${tarjetas}
   `;
 }
 
