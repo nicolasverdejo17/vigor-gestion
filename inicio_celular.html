@@ -86,6 +86,28 @@
   .carro-chip.mant{ --c:var(--alerta);}
   .carro-chip.fuera{ --c:var(--nodisp);}
   .carro-chip.emergencia{ --c:var(--emergencia);}
+  /* Dotación por unidad: quién va en cada carro */
+  .dot-titulo{ font-size:10.5px; color:var(--brass-bright); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin:4px 2px 10px; position:relative; z-index:1;}
+  .dot-lista{ display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); position:relative; z-index:1; margin-bottom:12px;}
+  .dot-carro{ background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:14px; padding:12px 13px 8px;}
+  .dot-carro.yo{ border-color:var(--cyan); box-shadow:0 0 0 1px rgba(45,211,219,.22), 0 0 18px rgba(45,211,219,.10);}
+  .dc-head{ display:flex; align-items:center; gap:9px; margin-bottom:8px;}
+  .dc-nom{ font-weight:800; font-size:20px; line-height:1; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .dc-tipo{ font-size:11px; color:var(--text-muted); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .dc-estado{ --c:var(--servicio); display:inline-flex; align-items:center; gap:5px; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--c); border:1px solid var(--c); border-radius:10px; padding:3px 9px; flex-shrink:0; white-space:nowrap;}
+  .dc-estado::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--c);}
+  .dc-estado.mant{ --c:var(--alerta);} .dc-estado.fuera{ --c:var(--text-dim);} .dc-estado.emergencia{ --c:var(--emergencia);}
+  .dc-fila{ display:flex; gap:10px; align-items:center; padding:7px 0; border-top:1px solid var(--line);}
+  .dc-rol{ width:84px; flex-shrink:0; font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-dim); font-weight:700; line-height:1.25;}
+  .dc-pers{ display:flex; align-items:center; gap:8px; min-width:0; font-size:12.5px; font-weight:600;}
+  .dc-pers span.nm{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .mini-av{ width:24px; height:24px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#06141F; background:var(--vg-grad, linear-gradient(90deg,#34B8FF,#35F454)) center/cover;}
+  .dc-fila.trip{ flex-direction:column; align-items:flex-start; gap:7px;}
+  .dc-trip{ display:flex; flex-wrap:wrap; gap:6px; min-width:0;}
+  .dc-chip{ display:inline-flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line-strong); border-radius:999px; padding:3px 10px 3px 3px; font-size:11.5px; font-weight:600;}
+  .dc-vacio{ font-size:12px; color:var(--text-dim); font-weight:400;}
+  .tu-tag{ font-size:8.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:#06141F; background:var(--cyan); border-radius:6px; padding:2px 5px; flex-shrink:0;}
+  .dot-sin{ font-size:12px; color:var(--text-dim); padding:4px 0 6px;}
   @keyframes faro-gira{ to{ transform:rotate(360deg);} }
   @keyframes faro-late{ 0%,100%{ filter:brightness(.88);} 50%{ filter:brightness(1.12);} }
 
@@ -164,7 +186,8 @@
           <div class="faro-nucleo"></div>
         </div>
         <div class="faro-estado" id="faroEstado"><b>—</b><span></span></div>
-        <div class="resumen-carros" id="resumenCarrosChips"></div>
+        <div class="dot-titulo" id="dotTitulo" style="display:none;">Dotación por unidad</div>
+        <div class="dot-lista" id="resumenCarrosChips"></div>
         <div class="ring-side">
           <div class="ring-stat">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg>
@@ -289,6 +312,42 @@ function renderFaro(presentes){
   est.innerHTML = `<b>${titulo}</b><span>${presentes.length ? partes.join(' · ') : 'Nadie en servicio por ahora'}</span>`;
 }
 
+const ESTADO_CARRO_TXT = { servicio:'En servicio', mant:'En mantención', fuera:'Fuera de servicio', emergencia:'En emergencia' };
+const escD = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function renderDotaciones(carros, personal, miId){
+  const porId = {}; personal.forEach(p => { porId[p.id] = p; });
+  const av = (p) => p && p.foto_url ? `<span class="mini-av" style="background-image:url('${escD(p.foto_url)}')"></span>` : `<span class="mini-av">${escD((p ? p.nombre_completo : '?').split(' ').filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase())}</span>`;
+  const corto = (n) => (n || '').split(' ').filter(Boolean).slice(0, 2).join(' ');
+  const yo = miId ? `<span class="tu-tag">Tú</span>` : '';
+  const persona = (id) => {
+    const p = porId[id];
+    return `<span class="dc-pers" title="${escD(p ? p.nombre_completo : '')}">${av(p)}<span class="nm">${escD(p ? p.nombre_completo : '(no disponible)')}</span>${id === miId ? yo : ''}</span>`;
+  };
+  // Solo se muestran los carros que tienen alguien asignado; si ninguno tiene dotación, el bloque no aparece
+  const conDotacion = carros.filter(c => {
+    const a = (c.asignacion_dotacion && c.asignacion_dotacion[0]) || null;
+    return a && (a.conductor_id || a.oficial_a_cargo_id || (a.asignacion_dotacion_tripulantes || []).length);
+  });
+  document.getElementById('dotTitulo').style.display = conDotacion.length ? 'block' : 'none';
+  document.getElementById('resumenCarrosChips').innerHTML = conDotacion.map(c => {
+    const a = (c.asignacion_dotacion && c.asignacion_dotacion[0]) || null;
+    const cond = a ? a.conductor_id : null, ofi = a ? a.oficial_a_cargo_id : null;
+    const trip = a ? (a.asignacion_dotacion_tripulantes || []).map(t => t.personal_id) : [];
+    const soy = [cond, ofi, ...trip].includes(miId);
+    const cuerpo = `
+      <div class="dc-fila"><span class="dc-rol">Conductor</span>${cond ? persona(cond) : '<span class="dc-vacio">Sin asignar</span>'}</div>
+      <div class="dc-fila"><span class="dc-rol">Oficial a cargo</span>${ofi ? persona(ofi) : '<span class="dc-vacio">Sin asignar</span>'}</div>
+      <div class="dc-fila trip"><span class="dc-rol">Tripulantes</span>${trip.length
+        ? `<div class="dc-trip">${trip.map(id => { const p = porId[id]; return `<span class="dc-chip" title="${escD(p ? p.nombre_completo : '')}">${av(p)}${escD(corto(p ? p.nombre_completo : '(no disponible)'))}${id === miId ? yo : ''}</span>`; }).join('')}</div>`
+        : '<span class="dc-vacio">Sin asignar</span>'}</div>`;
+    return `<div class="dot-carro ${soy ? 'yo' : ''}">
+      <div class="dc-head"><span class="dc-nom">${escD(c.nomenclatura)}</span><span class="dc-tipo">${escD(c.tipo_descripcion || '')}</span>
+        <span class="dc-estado ${['mant', 'fuera', 'emergencia'].includes(c.estado) ? c.estado : ''}">${ESTADO_CARRO_TXT[c.estado] || ''}</span></div>
+      ${cuerpo}
+    </div>`;
+  }).join('');
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
@@ -315,7 +374,7 @@ async function cargarDatos(){
 
   const [{ data: companeros }, { data: carros }, { data: almando }] = await Promise.all([
     sb.from('personal').select('id, nombre_completo, cargo, foto_url, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)').eq('compania_id', perfil.compania_id),
-    sb.from('carros').select('nomenclatura, estado').eq('compania_id', perfil.compania_id).order('nomenclatura'),
+    sb.from('carros').select('id, nomenclatura, tipo_descripcion, estado, asignacion_dotacion(conductor_id, oficial_a_cargo_id, asignacion_dotacion_tripulantes(personal_id))').eq('compania_id', perfil.compania_id).order('nomenclatura'),
     sb.from('compania_al_mando').select('tipo_mando, personal(nombre_completo, cargo)').eq('compania_id', perfil.compania_id).maybeSingle()
   ]);
 
@@ -324,9 +383,7 @@ async function cargarDatos(){
     return fv && fv.estado !== 'fuera' ? { ...p, estado: fv.estado } : null;
   }).filter(Boolean);
   renderFaro(presentes);
-  document.getElementById('resumenCarrosChips').innerHTML = (carros || []).map(c =>
-    `<span class="carro-chip ${['mant', 'fuera', 'emergencia'].includes(c.estado) ? c.estado : ''}" title="${c.nomenclatura}">${c.nomenclatura}</span>`
-  ).join('');
+  renderDotaciones(carros || [], companeros || [], perfil.id);
 
   const CARGO_ABREV = { 'Director':'Director','Capitán':'Cap.','Teniente 1°':'Tte. 1°','Teniente 2°':'Tte. 2°','Teniente 3°':'Tte. 3°','Teniente 4°':'Tte. 4°','Ayudante Cía.':'Ayte. Cía.' };
   if(almando && almando.personal){
@@ -347,6 +404,8 @@ async function cargarDatos(){
       .on('postgres_changes', { event: '*', schema: 'public', table: 'personal_estado_historial' }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'carros', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compania_al_mando', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion', filter: `compania_id=eq.${perfil.compania_id}` }, () => cargarDatos())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'asignacion_dotacion_tripulantes' }, () => cargarDatos())
       .subscribe();
     suscribirAlertaDespacho(perfil);
     suscribirAlertaEspecial(perfil);
