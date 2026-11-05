@@ -224,12 +224,15 @@ async function cargarDatos(){
   suscribirRealtime();
 }
 
+// La asignación de un carro llega como un objeto (hay una sola por carro) o como lista, según la consulta
+const unaAsignacion = (v) => Array.isArray(v) ? (v[0] || null) : (v || null);
+
 async function cargarCarros(){
   const { data } = await sb.from('carros')
     .select('id, nomenclatura, tipo_descripcion, estado, asignacion_dotacion(conductor_id, oficial_a_cargo_id, asignacion_dotacion_tripulantes(personal_id))')
     .eq('compania_id', miCompaniaId).order('nomenclatura');
   CARROS = (data || []).map(c => {
-    const asign = (c.asignacion_dotacion && c.asignacion_dotacion[0]) || null;
+    const asign = unaAsignacion(c.asignacion_dotacion);
     return {
       id: c.id, nom: c.nomenclatura, tipo: c.tipo_descripcion, estado: c.estado,
       conductorId: asign ? asign.conductor_id : null,

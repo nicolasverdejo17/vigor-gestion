@@ -314,6 +314,8 @@ function renderFaro(presentes){
 
 const ESTADO_CARRO_TXT = { servicio:'En servicio', mant:'En mantención', fuera:'Fuera de servicio', emergencia:'En emergencia' };
 const escD = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// La asignación de un carro llega como un objeto (hay una sola por carro) o como lista, según la consulta
+const unaAsignacion = (v) => Array.isArray(v) ? (v[0] || null) : (v || null);
 function renderDotaciones(carros, personal, miId){
   const porId = {}; personal.forEach(p => { porId[p.id] = p; });
   const av = (p) => p && p.foto_url ? `<span class="mini-av" style="background-image:url('${escD(p.foto_url)}')"></span>` : `<span class="mini-av">${escD((p ? p.nombre_completo : '?').split(' ').filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase())}</span>`;
@@ -325,12 +327,12 @@ function renderDotaciones(carros, personal, miId){
   };
   // Solo se muestran los carros que tienen alguien asignado; si ninguno tiene dotación, el bloque no aparece
   const conDotacion = carros.filter(c => {
-    const a = (c.asignacion_dotacion && c.asignacion_dotacion[0]) || null;
+    const a = unaAsignacion(c.asignacion_dotacion);
     return a && (a.conductor_id || a.oficial_a_cargo_id || (a.asignacion_dotacion_tripulantes || []).length);
   });
   document.getElementById('dotTitulo').style.display = conDotacion.length ? 'block' : 'none';
   document.getElementById('resumenCarrosChips').innerHTML = conDotacion.map(c => {
-    const a = (c.asignacion_dotacion && c.asignacion_dotacion[0]) || null;
+    const a = unaAsignacion(c.asignacion_dotacion);
     const cond = a ? a.conductor_id : null, ofi = a ? a.oficial_a_cargo_id : null;
     const trip = a ? (a.asignacion_dotacion_tripulantes || []).map(t => t.personal_id) : [];
     const soy = [cond, ofi, ...trip].includes(miId);

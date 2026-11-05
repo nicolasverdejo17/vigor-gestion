@@ -1190,6 +1190,8 @@
     .sort((a,b) => a.reg - b.reg);
   }
 
+  const unaAsignacion = (v) => Array.isArray(v) ? (v[0] || null) : (v || null);   // un objeto (una sola asignación por carro) o lista
+
   async function cargarCarros(){
     const { data } = await sb.from('carros')
       .select('id, nomenclatura, tipo_descripcion, estado, asignacion_dotacion(conductor_id, oficial_a_cargo_id, asignacion_dotacion_tripulantes(personal_id))')
@@ -1199,7 +1201,7 @@
     bomberos.forEach(b => { regPorId[b.id] = b.reg; });
 
     carros = (data || []).map(c => {
-      const asign = (c.asignacion_dotacion && c.asignacion_dotacion[0]) || null;
+      const asign = unaAsignacion(c.asignacion_dotacion);
       return {
         id: c.id,
         nom: c.nomenclatura,
