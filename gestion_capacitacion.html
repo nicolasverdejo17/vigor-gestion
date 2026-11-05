@@ -45,7 +45,7 @@
   .leyenda-dot.operativo{ background:var(--cyan);}
   .leyenda-dot.profesional{ background:var(--brass-bright);}
 
-  .content-wrap{ flex:1; min-height:0; display:grid; grid-template-columns:320px 1fr; overflow:hidden;}
+  .content-wrap{ flex:1; min-height:0; padding:0 30px 20px; overflow-y:auto;}
 
   .bomberos-list{ overflow-y:auto; border-right:1px solid var(--line); padding:12px;}
   .bombero-card{
@@ -63,7 +63,7 @@
   .nivel-pill.profesional{ background:var(--brass-bright); color:#241505;}
   .nivel-pill.ninguno{ background:var(--nodisp); color:#fff;}
 
-  .detalle-panel{ overflow-y:auto; padding:20px 24px;}
+  .detalle-panel{ padding:6px 0 20px;}
   .detalle-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--line);}
   .detalle-nombre{ font-size:20px; margin-bottom:6px;}
   .detalle-meta{ font-size:12.5px; color:var(--text-muted);}
@@ -135,7 +135,8 @@
 
   @media print{
     body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
-    .nameplate, .leyenda, .bomberos-list, .detalle-actions, .modal-overlay, .toast{ display:none !important;}
+    .nameplate, .leyenda, .toolbar, #vistaLista, .detalle-actions, .modal-overlay, .toast{ display:none !important;}
+    .detalle-panel{ display:block !important;}
     .content-wrap{ display:block !important;}
     .curso-row{ border-color:#ccc !important;}
   }
@@ -145,9 +146,8 @@
   @media (max-width:760px){
     html,body{ overflow:auto !important; height:auto !important; min-height:100%;}
     body{ height:auto !important;}
-    .content-wrap{ display:block !important; overflow:visible !important;}
-    .bomberos-list{ border-right:none; border-bottom:1px solid var(--line); max-height:none;}
-    .detalle-panel{ padding:16px 14px;}
+    .content-wrap{ display:block !important; overflow:visible !important; padding:0 14px 20px;}
+    .detalle-panel{ padding:6px 0 16px;}
     .nameplate-inner{ padding:12px 14px;}
     .brand-text h1{ font-size:15px;}
     .leyenda{ padding:8px 14px; gap:12px;}
@@ -163,6 +163,35 @@
     font-size:11.5px; padding:7px 13px; border-radius:5px; cursor:pointer; margin-right:12px;
   }
   .back-cuartel:hover{ border-color:var(--brass-bright); color:var(--text);}
+
+  /* ---- Listado con buscador (mismo formato que Registro de Bomberos) ---- */
+  .toolbar{ flex-shrink:0; padding:14px 30px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .search-input{ flex:1; min-width:220px; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:6px; padding:9px 14px; font-size:13px; color:var(--text);}
+  .search-input:focus{ outline:none; border-color:var(--cyan);}
+  .tabla-wrap table{ width:100%;}
+  .btn-ver-ficha{
+    background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff;
+    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    font-size:12px; padding:9px 18px; border-radius:6px; cursor:pointer; white-space:nowrap;
+  }
+  .btn-ver-ficha:hover{ background:var(--cyan); color:#0D2226;}
+  @media (max-width:760px){
+    .toolbar{ padding:12px 14px; flex-wrap:wrap;}
+    .search-input{ min-width:0;}
+  }
+
+  table{ width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; overflow:hidden;}
+  thead th{ text-align:left; font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; padding:11px 16px; border-bottom:2px solid var(--line-strong); background:var(--panel-alt);}
+  tbody tr{ border-bottom:1px solid var(--line);}
+  tbody tr:last-child{ border-bottom:none;}
+  tbody td{ padding:10px 16px; font-size:12.5px; vertical-align:middle;}
+  .td-nombre{ font-weight:600;}
+  .td-reg{ font-family:'JetBrains Mono',monospace; color:var(--text-dim);}
+  .tabla-scroll{ padding:0;}
+  @media (max-width:760px){
+    .tabla-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px;}
+    table{ min-width:620px;}
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -189,15 +218,18 @@
     </div>
   </div>
 
-  <div class="leyenda">
-    <div class="leyenda-item"><span class="leyenda-dot inicial"></span>Bombero Inicial</div>
-    <div class="leyenda-item"><span class="leyenda-dot operativo"></span>Bombero Operativo</div>
-    <div class="leyenda-item"><span class="leyenda-dot profesional"></span>Bombero Profesional</div>
+  <div class="toolbar" id="toolbarLista" style="display:none;">
+    <input type="text" class="search-input" id="buscador" placeholder="Buscar por nombre o N° de Registro…" oninput="renderTabla()">
   </div>
 
   <div class="content-wrap">
-    <div class="bomberos-list" id="bomberosList"></div>
-    <div class="detalle-panel" id="detallePanel"></div>
+    <div class="tabla-scroll" id="vistaLista" style="display:none;">
+      <table>
+        <thead><tr><th>N° Reg.</th><th>Nombre</th><th>Cargo</th><th>Nivel</th><th>Cursos</th><th></th></tr></thead>
+        <tbody id="tablaBody"></tbody>
+      </table>
+    </div>
+    <div class="detalle-panel" id="detallePanel" style="display:none;"></div>
   </div>
 
   <div class="modal-overlay" id="cursoModal">
@@ -237,8 +269,9 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 
 // Pedido explícito: en Celular (ancho angosto) "Volver" va directo a
 // Opciones — en PC se mantiene el historial normal del navegador.
+let detalleAbierto = false;
 function volverCuartel(){
-  if(window.history.length > 1){ history.back(); return; }
+  if(detalleAbierto && !soloMios){ mostrarLista(); return; }
   window.location.href = 'opciones_celular.html';
 }
 
@@ -272,10 +305,9 @@ async function cargarDatos(){
   puedoEditar = !soloMios && (EDIT_ROLES.includes(perfil.cargo) || rolesFuncionalesActivos.has('Depto. Capacitación'));
   document.getElementById('roleTag').textContent = soloMios ? 'Mis Cursos' : perfil.cargo;
   document.getElementById('subtituloInv').textContent = (perfil.companias ? perfil.companias.nombre : 'Cuerpo General') + ' · Vigor';
-  document.getElementById('bomberosList').style.display = soloMios ? 'none' : '';
-
-  let q = sb.from('personal').select('id, nombre_completo, numero_registro, nivel_capacitacion')
-    .eq('cuerpo_id', miCuerpoId).neq('estado','dado_de_baja').order('nombre_completo');
+  
+  let q = sb.from('personal').select('id, nombre_completo, numero_registro, cargo, nivel_capacitacion')
+    .eq('cuerpo_id', miCuerpoId).neq('estado','dado_de_baja').order('numero_registro');
   q = soloMios ? q.eq('id', miPersonalId) : (miCompaniaId ? q.eq('compania_id', miCompaniaId) : q.is('compania_id', null));
   const { data: personal } = await q;
 
@@ -283,24 +315,42 @@ async function cargarDatos(){
     .select('*').eq('cuerpo_id', miCuerpoId).order('fecha', { ascending:false });
 
   BOMBEROS = (personal || []).map(p => ({
-    id: p.id, nombre: p.nombre_completo, reg: p.numero_registro, nivelActual: p.nivel_capacitacion,
+    id: p.id, nombre: p.nombre_completo, reg: p.numero_registro, cargo: p.cargo, nivelActual: p.nivel_capacitacion,
     cursos: (cursos || []).filter(c => c.personal_id === p.id)
   }));
   bomberoActivo = 0;
-  renderBomberos();
-  renderDetalle();
+  if(soloMios) abrirBombero(0); else mostrarLista();
 }
 
-function renderBomberos(){
-  document.getElementById('bomberosList').innerHTML = BOMBEROS.map((b,i)=>{
-    return `
-      <div class="bombero-card ${i===bomberoActivo?'activo':''}" onclick="setBombero(${i})">
-        <div class="bombero-top"><span class="bombero-nombre">${b.nombre}</span></div>
-        <div class="bombero-reg">N° ${b.reg}</div>
-        <span class="nivel-pill ${b.nivelActual}">${NIVEL_LABEL[b.nivelActual]}</span>
-      </div>
-    `;
-  }).join('');
+function mostrarLista(){
+  detalleAbierto = false;
+  document.getElementById('detallePanel').style.display = 'none';
+  document.getElementById('vistaLista').style.display = 'block';
+  document.getElementById('toolbarLista').style.display = 'flex';
+  renderTabla();
+}
+function abrirBombero(i){
+  detalleAbierto = true; bomberoActivo = i;
+  document.getElementById('vistaLista').style.display = 'none';
+  document.getElementById('toolbarLista').style.display = 'none';
+  document.getElementById('detallePanel').style.display = 'block';
+  renderDetalle();
+  window.scrollTo(0, 0);
+}
+function renderTabla(){
+  const q = document.getElementById('buscador').value.trim().toLowerCase();
+  const filas = BOMBEROS.map((b, i) => ({ b, i })).filter(({ b }) => b.nombre.toLowerCase().includes(q) || String(b.reg).includes(q));
+  document.getElementById('tablaBody').innerHTML = filas.map(({ b, i }) => {
+    const nv = b.nivelActual || 'ninguno';
+    return `<tr>
+      <td class="td-reg">N° ${b.reg}</td>
+      <td class="td-nombre">${b.nombre}</td>
+      <td>${b.cargo || '—'}</td>
+      <td><span class="nivel-pill ${nv}">${NIVEL_LABEL[nv]}</span></td>
+      <td class="mono">${b.cursos.length}</td>
+      <td><button class="btn-ver-ficha" onclick="abrirBombero(${i})">Ver Cursos</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim); font-style:italic;">Sin resultados.</td></tr>`;
 }
 
 function renderDetalle(){
@@ -347,12 +397,10 @@ async function setNivelBombero(n){
   const { error } = await sb.rpc('actualizar_nivel_capacitacion', { p_personal_id: b.id, p_nivel: n });
   if(error){ toast('No se pudo actualizar el nivel — ' + error.message); return; }
   b.nivelActual = n;
-  renderBomberos();
   renderDetalle();
   toast(`Nivel de ${b.nombre} actualizado a ${NIVEL_LABEL[n]}`);
 }
 
-function setBombero(i){ bomberoActivo = i; renderBomberos(); renderDetalle(); }
 
 let certificadoFile = null;
 function abrirModal(){
@@ -424,8 +472,7 @@ async function guardarCurso(){
   const idxActivo = bomberoActivo;
   cerrarModal();
   await cargarDatos();
-  bomberoActivo = idxActivo;
-  renderBomberos(); renderDetalle();
+  abrirBombero(idxActivo);
   toast(`Curso "${nombre}" agregado a ${BOMBEROS[bomberoActivo].nombre}`);
 }
 
