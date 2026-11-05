@@ -68,14 +68,30 @@
 
   // El nombre de la pantalla va en el banner, a continuación del logo.
   var ESPECIALES = { 'pc_compania.html':'PC de Compañía', 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual' };
-  var TITULO_PESTANA = 'VIGOR - Gestiona tu compañía de forma eficiente';
+  // Las pantallas del menú Opciones se titulan exactamente como su botón en Opciones.
+  var TITULOS_OPCIONES = {
+    'editar_datos_personales':'Mi Perfil', 'archivo_institucional_celular':'Archivo Institucional',
+    'guardia_nocturna':'Guardia Nocturna', 'libro_guardia':'Libro de Guardia', 'notificaciones_celular':'Notificaciones',
+    'solicitudes_alta':'Solicitudes de Ingreso', 'asignacion_dotacion_celular':'Dotación de Unidades',
+    'usuarios_sistema':'Registro de Bomberos', 'estadisticas':'Estadísticas', 'inventario':'Inventario',
+    'auditoria_eliminaciones':'Registro de Auditoría', 'gestion_especialidades':'Especialidades', 'crear_carro':'Crear Carro'
+  };
+  function tituloDeOpciones(archivo){
+    var q = new URLSearchParams(location.search);
+    if(archivo === 'gestion_capacitacion') return q.get('mios') ? 'Mis Cursos' : 'Cursos y Capacitaciones';
+    if(archivo === 'ficha_bombero') return q.get('bombero') ? '' : 'Mi Hoja de Vida';   // con ?bombero= es la ficha de otra persona
+    return TITULOS_OPCIONES[archivo] || '';
+  }
+  var TITULO_PESTANA ='VIGOR - Gestiona tu compañía de forma eficiente';
   function sincronizarTitulo(){
     if(d.title !== TITULO_PESTANA) d.title = TITULO_PESTANA;
     var t = d.getElementById('vigor-banner-titulo'); if(!t) return;
     var archivo = (location.pathname.split('/').pop() || '').toLowerCase();
     var h1 = d.querySelector('h1');
     var texto = '', ocultar = false;
-    if(ESPECIALES[archivo]) texto = ESPECIALES[archivo];
+    var propio = tituloDeOpciones(archivo.replace(/.html$/, ''));
+    if(propio){ texto = propio; ocultar = !!h1; }
+    else if(ESPECIALES[archivo]) texto = ESPECIALES[archivo];
     else if(h1){
       var raw = (h1.textContent || '').replace(/\s+/g, ' ').trim();
       var partes = raw.split(' — ');
