@@ -127,3 +127,7 @@ body.vg-crisis-body{ --banner-h:88px;}
 #vigor-banner .btn-desactivar{ background:transparent; border:1.5px solid #C99BA3; color:#F6DCE0; font-family:'Montserrat',sans-serif !important; text-transform:none !important; letter-spacing:.01em !important; font-size:13px; font-weight:700; padding:9px 16px; border-radius:12px; cursor:pointer;}
 #vigor-banner .btn-desactivar:hover{ background:rgba(255,75,92,.12); border-color:#FF4B5C;}
 @media (max-width:900px){ #vigor-banner .crisis-clock{ display:none;} #vigor-banner .vg-crisis-der{ gap:12px;} }
+
+/* ---- Ángulos rectos: sin ninguna esquina redondeada (se activa con <body data-rectos>) ---- */
+body[data-rectos] *, body[data-rectos] *::before, body[data-rectos] *::after{ border-radius:0 !important;}
+body[data-rectos] #vigor-banner *, body[data-rectos] #vigor-banner *::before, body[data-rectos] #vigor-banner *::after{ border-radius:0 !important;}
