@@ -211,6 +211,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
 <script src="vigor-mapa.js"></script>
+<script src="vigor-ficha-punto.js"></script>
 <script src="vigor-config.js"></script>
 <script>
 (function(){
@@ -318,7 +319,7 @@ function iniciarMapa(){
     mapa.addLayer({ id:'estelas', type:'line', source:'estelas', layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':['get','color'],'line-width':3,'line-opacity':.55} });
     listo=true; document.dispatchEvent(new Event('vigor-mapa-listo'));
   });
-  mapa.on('click', ev=>{ if(!ev.originalEvent.target.closest('.uM')) seleccionar(null); });
+  mapa.on('click', ev=>{ if(window.vigorFichaPunto) vigorFichaPunto(null); if(!ev.originalEvent.target.closest('.uM')) seleccionar(null); });
   mapa.on('zoom', escalaIconos); mapa.on('moveend', filtrarPuntos); mapa.on('load', escalaIconos);
 }
 let esc_=1, lejos=false;
@@ -382,17 +383,47 @@ const Mon = {
     pintarLista();
   },
   /* puntos propios: [{id,tipo,nombre,lng,lat}] */
-  setPuntos(lista){ D.puntos.forEach(p=>p.mk&&p.mk.remove()); D.puntos=(lista||[]).map(p=>{ const t=tipoDe(p); const mk=new maplibregl.Marker({ element:elem(gota(t.color,t.icono)+'<div class="lb">'+esc(p.nombre||t.nombre)+'</div>'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); return {...p,mk,vis:false}; }); filtrarPuntos(); },
+  setPuntos(lista){ D.puntos.forEach(p=>p.mk&&p.mk.remove()); D.puntos=(lista||[]).map(p=>{ const t=tipoDe(p); const mk=new maplibregl.Marker({ element:elem(gota(t.color,t.icono)+'<div class="lb">'+esc(p.nombre||t.nombre)+'</div>'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); conFicha(p,mk); return {...p,mk,vis:false}; }); filtrarPuntos(); },
   /* cuarteles: [{id,nombre,lng,lat}] */
-  setCuarteles(lista){ D.cuarteles.forEach(p=>p.mk&&p.mk.remove()); D.cuarteles=(lista||[]).map(p=>{ const mk=new maplibregl.Marker({ element:elem(gota('#DCE8F5','building-community')+'<div class="lb">'+esc(p.nombre||'Cuartel')+'</div>','cu'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); return {...p,mk,vis:false}; }); filtrarPuntos(); },
+  setCuarteles(lista){ D.cuarteles.forEach(p=>p.mk&&p.mk.remove()); D.cuarteles=(lista||[]).map(p=>{ const mk=new maplibregl.Marker({ element:elem(gota('#DCE8F5','building-community')+'<div class="lb">'+esc(p.nombre||'Cuartel')+'</div>','cu'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); conFicha(p,mk); return {...p,mk,vis:false}; }); filtrarPuntos(); },
   verTodo, _datos:D, get _mapa(){ return mapa; }
 };
 window.VigorMon = Mon;
 
+function conFicha(p, mk){ if(!p.ficha) return; const g=mk.getElement().querySelector('.g'); if(g) g.addEventListener('click', ev=>{ ev.stopPropagation(); vigorFichaPunto(p.ficha); }); }
 function filtrarPuntos(){
   if(!mapa) return; const b=mapa.getBounds();
   const aplicar=(lista,on)=>{ for(const p of lista){ const v = on && b.contains([p.lng,p.lat]); if(v!==p.vis){ p.vis=v; if(v) p.mk.addTo(mapa); else p.mk.remove(); } } };
-  aplicar(D.puntos, D.capas.puntos); aplicar(D.cuarteles, D.capas.cuarteles);
+  // los grifos del catastro nacional son muchos: solo se dibujan al acercarse (zoom ≥ 14) y dentro de la vista
+  const z=mapa.getZoom();
+  for(const p of D.puntos){ const v = D.capas.puntos && (!p.cat || z>=14) && b.contains([p.lng,p.lat]); if(v!==p.vis){ p.vis=v; if(v) p.mk.addTo(mapa); else p.mk.remove(); } }
+  aplicar(D.cuarteles, D.capas.cuarteles);
+}
+
+/* =====================  Catastro nacional (grifos y cuarteles)  =====================
+   Se muestran solo los de la comuna elegida al crear el Cuerpo: se piden por la caja del contorno y se descartan los que
+   caen fuera del contorno. Fuente: sig.bomberos.cl (grifos 2019) y Junta Nacional de Bomberos (catastro de cuarteles 2025). */
+function dentroDe(lng, lat, geom){
+  const polis = geom.type==='MultiPolygon' ? geom.coordinates : [geom.coordinates];
+  for(const poli of polis){
+    let dentro=false; const a=poli[0];
+    for(let i=0,j=a.length-1;i<a.length;j=i++){ const xi=a[i][0],yi=a[i][1],xj=a[j][0],yj=a[j][1]; if(((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) dentro=!dentro; }
+    if(dentro){ let hueco=false; for(let h=1;h<poli.length&&!hueco;h++){ const b=poli[h]; let d2=false; for(let i=0,j=b.length-1;i<b.length;j=i++){ const xi=b[i][0],yi=b[i][1],xj=b[j][0],yj=b[j][1]; if(((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) d2=!d2; } hueco=d2; } if(!hueco) return true; }
+  }
+  return false;
+}
+async function cargarCatastro(sb, fc){
+  try{
+    const f=(fc.features||[]).find(x=>x.geometry&&/Polygon/.test(x.geometry.type)); if(!f) return;
+    const polis = f.geometry.type==='MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
+    let x0=180,x1=-180,y0=90,y1=-90; polis.forEach(p=>p[0].forEach(c=>{ x0=Math.min(x0,c[0]); x1=Math.max(x1,c[0]); y0=Math.min(y0,c[1]); y1=Math.max(y1,c[1]); }));
+    if(y1-y0>3 || x1-x0>3) return;
+    const r=await sb.rpc('catastro_en_caja',{ p_min_lat:y0, p_min_lng:x0, p_max_lat:y1, p_max_lng:x1, p_limite:8000 });
+    if(r.error || !Array.isArray(r.data)) return;
+    const dentro=r.data.filter(o=>dentroDe(o.lng,o.lat,f.geometry));
+    Mon.setPuntos(dentro.filter(o=>o.t==='grifo').map(vigorPuntoCatastro));
+    Mon.setCuarteles(dentro.filter(o=>o.t==='cuartel').map(vigorPuntoCatastro));
+  }catch(e){ console.warn('catastro:', e&&e.message); }
 }
 
 /* =====================  Pintado  ===================== */
@@ -552,7 +583,7 @@ async function iniciarReal(){
     if(f){
       // el contorno es el de la comuna elegida al crear el Cuerpo; si aún no está guardado, se busca una vez y se guarda
       const fc = await vigorLimiteComunal({ comuna:f.c_comuna, region:f.c_region, limite:f.c_limite }, g => sb.rpc('guardar_limite_comunal', { p_geojson:g }));
-      if(fc){ agregarLimites([fc]); await cargarLimites([fc]); verComuna(); }
+      if(fc){ agregarLimites([fc]); await cargarLimites([fc]); verComuna(); cargarCatastro(sb, fc); }
       else if(f.c_centro_lat!=null && f.c_centro_lng!=null){ mapa.jumpTo({ center:[f.c_centro_lng,f.c_centro_lat], zoom:11 }); }
     }
   }catch(e){}

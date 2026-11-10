@@ -288,6 +288,7 @@ body.abierto #fade{right:var(--pw)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
 <script src="vigor-despacho-tablet.js"></script>
+<script src="vigor-ficha-punto.js"></script>
 <script src="vigor-config.js"></script>
 <script>
 (function(){
@@ -474,6 +475,7 @@ function iniciarMapa(){
   window.addEventListener('pointerup', suelta); window.addEventListener('pointercancel', suelta);
   cont.addEventListener('wheel', () => soltar(), { passive:true });
   mapa.on('error', ev => console.warn('mapa:', ev && ev.error && ev.error.message));
+  mapa.on('click', () => { if(window.vigorFichaPunto) vigorFichaPunto(null); });   // tocar el mapa cierra la ficha de un grifo o cuartel
   mapa.on('load', () => {
     mapa.addSource('ruta', { type:'geojson', data:{ type:'Feature', geometry:{ type:'LineString', coordinates:[] } } });
     mapa.addLayer({ id:'ruta-borde', type:'line', source:'ruta', layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':'#0E7C86','line-width':['interpolate',['linear'],['zoom'],12,4,16,12,19,24]} });
@@ -537,6 +539,7 @@ const Nav = {
       const t=tipoDe(p);
       const mk=new maplibregl.Marker({ element:elem(gota(t.color,t.icono)+'<div class="lb"></div>'), anchor:'bottom' }).setLngLat([p.lng,p.lat]).addTo(mapa);
       E.marcadores.push({ p, t, mk, el:mk.getElement(), tx:null });
+      if(p.ficha){ const g=mk.getElement().querySelector('.g'); if(g) g.addEventListener('click', ev=>{ ev.stopPropagation(); vigorFichaPunto(p.ficha); }); }
     }
     listaAgua();
   },
@@ -763,6 +766,7 @@ function alFix(p){
   if(rum==null) rum=E.rum;
   GPS.ultima = { pos, t, vel, rum, acc:c.accuracy };
   Nav.setPosicion(pos[0], pos[1], vel>3 ? rum : E.rum, vel);
+  catSiHaceFalta(pos);
   document.body.classList.add('con-gps'); $('vlibreN').textContent = Math.round(vel);
   if(!GPS.primera){ GPS.primera=true; estadoGPS(null); E.rumVista=E.rum; if(mapaListo) mapa.jumpTo({ center:pos, zoom:17 }); }
   reportar(false);
@@ -775,6 +779,32 @@ function reportar(forzar){
   GPS.ultEnvio=ahora; GPS.ultEnvioPos=u.pos;
   cliente().rpc('tablet_reportar_posicion', { p_lat:u.pos[1], p_lng:u.pos[0], p_rumbo:Math.round(u.rum), p_velocidad_kmh:Math.round(u.vel*10)/10, p_precision_m:Math.round(u.acc||0) })
     .then(r => { if(r && r.error) console.warn('posición no enviada:', r.error.message); }, e => console.warn('posición no enviada:', e && e.message));
+}
+/* ---- catastro nacional (grifos y cuarteles): solo lo que está alrededor ----
+   Se piden a la base los grifos en ~3,5 km a la redonda del carro y los cuarteles en ~12 km; se renuevan al moverse más de
+   600 m. Al despachar, también los que rodean el siniestro (para saber de dónde sacar agua). El mapa ya muestra solo lo que
+   cae dentro de la vista y achica los íconos al alejar el zoom. Fuente: sig.bomberos.cl (2019) y Junta Nacional de Bomberos (2025). */
+const CAT = { auto:[], dest:[], centro:null, pidiendo:false, propios:[], tk:0 };
+function catCaja(c, km){ const dla = km/111, dlo = km/(111*Math.cos(c[1]*RAD)); return { p_min_lat:c[1]-dla, p_min_lng:c[0]-dlo, p_max_lat:c[1]+dla, p_max_lng:c[0]+dlo, p_centro_lat:c[1], p_centro_lng:c[0] }; }
+async function catPedir(c){
+  const sb = cliente(), out = [];
+  const [g, u] = await Promise.all([
+    sb.rpc('catastro_en_caja', { ...catCaja(c, 3.5), p_tipos:['grifo'], p_limite:700 }),
+    sb.rpc('catastro_en_caja', { ...catCaja(c, 12), p_tipos:['cuartel'], p_limite:30 }) ]);
+  for(const r of [g, u]) if(r && !r.error && Array.isArray(r.data)) for(const o of r.data) out.push(vigorPuntoCatastro(o));
+  return out;
+}
+function catUnir(){ const m = new Map(); for(const p of CAT.propios.concat(CAT.auto, CAT.dest)) m.set(p.id, p); Nav.setPuntos([...m.values()]); }
+async function catSiHaceFalta(pos){
+  if(!GPS.cuerpoId || CAT.pidiendo || (CAT.centro && dist(CAT.centro, pos) < 600)) return;
+  CAT.pidiendo = true;
+  try{ const l = await catPedir(pos); CAT.centro = pos.slice(); CAT.auto = l; catUnir(); }
+  catch(e){ console.warn('catastro:', e && e.message); CAT.centro = pos.slice(); }
+  finally { CAT.pidiendo = false; }
+}
+async function catDestino(d){
+  if(!GPS.cuerpoId || !d) return; const tk = ++CAT.tk;
+  try{ const l = await catPedir([d.lng, d.lat]); if(tk === CAT.tk){ CAT.dest = l; catUnir(); } }catch(e){ console.warn('catastro destino:', e && e.message); }
 }
 function desconectar(){
   if(!GPS.miCarro || !GPS.token) return;
@@ -803,10 +833,11 @@ async function trazarRuta(destino, motivo){
 }
 function reintentar(destino, motivo, tk, ms){ setTimeout(() => { if(tk === DESP.tk && DESP.destino === destino) trazarRuta(destino, motivo); }, ms); }
 function alDespacho(d){
-  if(!d){ DESP.id = null; DESP.destino = null; if(E.activo) Nav.detener(); ocultarAviso(); return; }
+  if(!d){ DESP.id = null; DESP.destino = null; if(E.activo) Nav.detener(); ocultarAviso(); CAT.tk++; if(CAT.dest.length){ CAT.dest = []; catUnir(); } return; }
   DESP.id = d.id;
   if(d.lat != null && d.lng != null && isFinite(d.lat) && isFinite(d.lng)){
     DESP.destino = { lng:d.lng, lat:d.lat, titulo:[d.codigo, d.tipo].filter(Boolean).join(' · ') || 'Siniestro', sub:d.referencia || '', dir:d.direccion || '' };
+    catDestino(DESP.destino);
     trazarRuta(DESP.destino);
   } else {
     DESP.destino = null; if(E.activo) Nav.detener();
