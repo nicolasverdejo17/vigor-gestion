@@ -1060,7 +1060,8 @@ async function ubicInit(){
   // centro y límite de la comuna del Cuerpo
   let centro = (window.VIGOR_CONFIG && window.VIGOR_CONFIG.CENTRO_DEFECTO) || [-72.6636, -36.8236], slug = '';
   try{
-    const { data:cu } = await sb.from('cuerpos').select('comuna,centro_lat,centro_lng').eq('id', miCuerpoId).maybeSingle();
+    const r = await sb.rpc('mi_cuerpo_info'); const f = Array.isArray(r.data) ? r.data[0] : r.data;
+    const cu = f ? { nombre_oficial:f.c_nombre_oficial, comuna:f.c_comuna, centro_lat:f.c_centro_lat, centro_lng:f.c_centro_lng } : null;
     if(cu){ if(cu.centro_lat != null && cu.centro_lng != null) centro = [cu.centro_lng, cu.centro_lat];
       slug = String(cu.comuna || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_'); }
   }catch(e){}
