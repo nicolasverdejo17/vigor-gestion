@@ -54,7 +54,38 @@ function tono(){
   try{ if(navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]); }catch(e){}
 }
 function cerrar(){ clearInterval(DT.cuenta); DT.cuenta = null; if(DT.ovl) DT.ovl.classList.remove('on'); }
-function irANavegar(){ cerrar(); if(!DT.opts.enNavegacion) location.href = 'navegacion_conductor.html'; }
+const pagina = () => location.pathname.split('/').pop() || 'index.html';
+/* Si se interrumpe una pantalla con datos a medio escribir (parte, bitácora, checklist…), se guardan en este dispositivo
+   y se devuelven al volver a esa pantalla (vigen 3 horas). */
+function guardarBorrador(){
+  try{
+    const o = {}; document.querySelectorAll('input,textarea,select').forEach(el => {
+      if(!el.id || el.type === 'password' || el.type === 'file' || el.type === 'button' || el.type === 'submit') return;
+      o[el.id] = (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value; });
+    if(Object.keys(o).length) sessionStorage.setItem('vigor_borrador:' + pagina(), JSON.stringify({ t:Date.now(), o }));
+  }catch(e){}
+}
+function restaurarBorrador(){
+  const k = 'vigor_borrador:' + pagina(); let d = null;
+  try{ d = JSON.parse(sessionStorage.getItem(k) || 'null'); }catch(e){}
+  if(!d || Date.now() - d.t > 3*3600*1000){ try{ sessionStorage.removeItem(k); }catch(e){} return; }
+  let n = 0;
+  (function intento(){
+    let falta = false;
+    for(const id in d.o){
+      const el = document.getElementById(id), v = d.o[id]; if(!el){ falta = true; continue; }
+      if(el.type === 'checkbox' || el.type === 'radio'){ if(el.checked !== v){ el.checked = v; el.dispatchEvent(new Event('change', { bubbles:true })); } }
+      else if(v !== '' && el.value !== v){ el.value = v; el.dispatchEvent(new Event('input', { bubbles:true })); el.dispatchEvent(new Event('change', { bubbles:true })); }
+    }
+    if(falta && n++ < 6) setTimeout(intento, 700); else { try{ sessionStorage.removeItem(k); }catch(e){} }
+  })();
+}
+function irANavegar(){
+  cerrar(); if(DT.opts.enNavegacion) return;
+  const p = pagina();
+  if(p !== 'tablet_carro.html' && p !== 'navegacion_conductor.html'){ guardarBorrador(); try{ sessionStorage.setItem('vigor_volver', p + location.search); }catch(e){} }
+  location.href = 'navegacion_conductor.html';
+}
 
 function mostrar(d){
   estilos();
@@ -109,6 +140,16 @@ window.VigorDespachoTablet = {
     document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') consultar(); });
   },
   actual(){ return DT.actual; },
-  consultar
+  consultar,
+  restaurarBorrador
 };
+
+// Con data-auto la página solo necesita cargar este archivo: espera a que exista el cliente `sb` y se pone a escuchar.
+const cs = document.currentScript;
+if(cs && cs.hasAttribute('data-auto')){
+  window.addEventListener('load', () => {
+    let n = 0;
+    (function esperar(){ if(typeof sb !== 'undefined' && sb && sb.rpc){ window.VigorDespachoTablet.iniciar({ sb }); setTimeout(restaurarBorrador, 1200); } else if(n++ < 40) setTimeout(esperar, 250); })();
+  });
+}
 })();

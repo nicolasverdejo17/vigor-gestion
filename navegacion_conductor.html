@@ -699,7 +699,7 @@ try{ if(localStorage.getItem('vigor_nav_panel')==='1' || PARAMS.get('panel')==='
 const tic=()=>{ $('clock').textContent=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false}); }; tic(); setInterval(tic,10000);
 $('b4').onclick=recentrar;
 $('b5').onclick=()=>{ if(mapa) mapa.jumpTo({ bearing:0 }); };
-$('b1').onclick=()=>{ location.href='tablet_carro.html'; };
+$('b1').onclick=()=>{ let v='tablet_carro.html'; try{ v=sessionStorage.getItem('vigor_volver')||v; sessionStorage.removeItem('vigor_volver'); }catch(e){} location.href=v; };   // si el despacho interrumpió otra pantalla, vuelve a ella
 $('b2').onclick=()=>avisar('Buscar un punto', 'Llega en una próxima parte: buscar entre los puntos del Cuerpo', 3200);
 $('b3').onclick=()=>avisar('Agregar un punto al mapa', 'Llega en una próxima parte: marcar un punto nuevo con su tipo', 3200);
 const SB_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
