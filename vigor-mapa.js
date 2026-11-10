@@ -99,4 +99,51 @@ window.vigorLugarDe = async function(lat, lng, ms){
     const f2 = formatear(f.properties); return f2.principal ? f2 : null;
   }catch(e){ return null; } finally { clearTimeout(tm); }
 };
+
+/* ---------- Contorno de la comuna del Cuerpo ----------
+   El que se eligió al crear el Cuerpo (comuna + región). Orden: 1) el que ya está guardado en el Cuerpo; 2) un archivo
+   limites/<comuna>.geojson, si existe; 3) se busca una sola vez en OpenStreetMap y se guarda en el Cuerpo para siempre.
+   info = { comuna, region, limite }  ·  guardar(fc) es opcional: recibe el contorno encontrado para guardarlo. */
+const sinAcentos = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+function centroide(anillo){
+  let A = 0, cx = 0, cy = 0;
+  for(let i = 0; i < anillo.length - 1; i++){ const c = anillo[i][0]*anillo[i+1][1] - anillo[i+1][0]*anillo[i][1]; A += c; cx += (anillo[i][0] + anillo[i+1][0]) * c; cy += (anillo[i][1] + anillo[i+1][1]) * c; }
+  A /= 2; return A ? [+(cx/(6*A)).toFixed(5), +(cy/(6*A)).toFixed(5)] : anillo[0];
+}
+function armarColeccion(geom, nombre, osm){
+  const poligonos = geom.type === 'MultiPolygon' ? geom.coordinates : [geom.coordinates];
+  const mayor = poligonos.map(p => p[0]).sort((a, b) => b.length - a.length)[0];
+  return { type:'FeatureCollection', features:[
+    { type:'Feature', properties:{ nombre, osm_relation:osm || null, fuente:'© OpenStreetMap contributors (ODbL)' }, geometry:geom },
+    { type:'Feature', properties:{ etiqueta:'COMUNA DE ' + String(nombre).toUpperCase() }, geometry:{ type:'Point', coordinates:centroide(mayor) } } ] };
+}
+async function buscarContornoOSM(comuna, region){
+  const reg = String(region || '').replace(/^regi[oó]n\s+(del?\s+|de\s+la\s+)?/i, '').replace(/^metropolitana.*/i, 'Metropolitana').trim();
+  const consultas = [[comuna, reg, 'Chile'].filter(Boolean).join(', '), [comuna, 'Chile'].join(', ')];
+  for(const q of consultas){
+    for(const umbral of [0.0003, 0.002]){
+      try{
+        const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=cl&polygon_geojson=1&polygon_threshold=' + umbral + '&q=' + encodeURIComponent(q));
+        if(!r.ok) continue; const lista = await r.json();
+        const buenos = lista.filter(x => x.category === 'boundary' && x.geojson && /Polygon/.test(x.geojson.type));
+        const conRegion = buenos.filter(x => reg && sinAcentos(x.display_name).indexOf(sinAcentos(reg)) >= 0);
+        const elegido = (conRegion[0] || (q.indexOf(',') === q.lastIndexOf(',') ? buenos[0] : null));
+        if(!elegido) break;
+        const fc = armarColeccion(elegido.geojson, comuna, elegido.osm_id);
+        if(JSON.stringify(fc).length <= 550000) return fc;
+      }catch(e){}
+    }
+  }
+  return null;
+}
+window.vigorLimiteComunal = async function(info, guardar){
+  info = info || {};
+  if(info.limite && info.limite.type === 'FeatureCollection') return info.limite;
+  if(!info.comuna) return null;
+  let fc = null;
+  try{ const r = await fetch('limites/' + sinAcentos(info.comuna).replace(/[^a-z0-9]+/g, '_') + '.geojson'); if(r.ok) fc = await r.json(); }catch(e){}
+  if(!fc || !fc.features) fc = await buscarContornoOSM(info.comuna, info.region);
+  if(fc && guardar){ try{ await guardar(fc); }catch(e){} }
+  return fc;
+};
 })();

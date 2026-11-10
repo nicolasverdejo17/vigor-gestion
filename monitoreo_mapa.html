@@ -210,6 +210,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-mapa.js"></script>
 <script src="vigor-config.js"></script>
 <script>
 (function(){
@@ -441,7 +442,7 @@ function seleccionar(id, centrar){
 }
 const padCam=()=>({ left: (!vertical() && !document.body.classList.contains('cerrado')) ? 340 : 0, top:0, right:0, bottom: (vertical() && !document.body.classList.contains('cerrado')) ? Math.round(window.innerHeight*.46) : 0 });
 let limBounds=null;
-function cargarLimites(urls){ return Promise.all((urls||[]).map(u=>fetch(u).then(r=>r.json()).then(fc=>{ const b=limBounds||new maplibregl.LngLatBounds(); (fc.features||[]).forEach(f=>{ if(f.geometry&&f.geometry.type==='Polygon') f.geometry.coordinates[0].forEach(c=>b.extend(c)); }); limBounds=b; }).catch(()=>{}))); }
+function cargarLimites(urls){ return Promise.all((urls||[]).map(u=>(typeof u==='string'?fetch(u).then(r=>r.json()):Promise.resolve(u)).then(fc=>{ const b=limBounds||new maplibregl.LngLatBounds(); (fc.features||[]).forEach(f=>{ if(f.geometry&&f.geometry.type==='Polygon') f.geometry.coordinates[0].forEach(c=>b.extend(c)); }); limBounds=b; }).catch(()=>{}))); }
 function verComuna(){ if(!listo||!limBounds) return verTodo(); const pd=padCam(); mapa.fitBounds(limBounds,{ padding:{ left:pd.left+40, right:60, top:60, bottom:pd.bottom+70 }, duration:700 }); }
 function verTodo(){
   if(!listo) return; const b=new maplibregl.LngLatBounds(); let n=0;
@@ -548,12 +549,11 @@ async function iniciarReal(){
   // límite de la comuna del Cuerpo (archivo limites/<comuna>.geojson, si existe) y centro del mapa
   try{
     const r = await sb.rpc('mi_cuerpo_info'); const f = Array.isArray(r.data) ? r.data[0] : r.data;
-    const cu = f ? { nombre_oficial:f.c_nombre_oficial, comuna:f.c_comuna, centro_lat:f.c_centro_lat, centro_lng:f.c_centro_lng } : null;
-    if(cu){
-      const slug=String(cu.comuna||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_');
-      let hay=false; if(slug){ try{ const r=await fetch('limites/'+slug+'.geojson',{method:'HEAD'}); hay=r.ok; }catch(e){} }
-      if(hay){ C.LIMITES=['limites/'+slug+'.geojson']; agregarLimites(C.LIMITES); await cargarLimites(C.LIMITES); verComuna(); }
-      else if(cu.centro_lat!=null && cu.centro_lng!=null){ mapa.jumpTo({ center:[cu.centro_lng,cu.centro_lat], zoom:11 }); }
+    if(f){
+      // el contorno es el de la comuna elegida al crear el Cuerpo; si aún no está guardado, se busca una vez y se guarda
+      const fc = await vigorLimiteComunal({ comuna:f.c_comuna, region:f.c_region, limite:f.c_limite }, g => sb.rpc('guardar_limite_comunal', { p_geojson:g }));
+      if(fc){ agregarLimites([fc]); await cargarLimites([fc]); verComuna(); }
+      else if(f.c_centro_lat!=null && f.c_centro_lng!=null){ mapa.jumpTo({ center:[f.c_centro_lng,f.c_centro_lat], zoom:11 }); }
     }
   }catch(e){}
   let recargaT=null;

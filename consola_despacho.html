@@ -1057,13 +1057,12 @@ async function ubicInit(){
   $u('ubicBuscar').onclick = () => ubicBuscar();
   $u('ubicMapa').onclick = () => { const w = $u('ubicMapWrap'); w.classList.toggle('off'); $u('ubicMapa').classList.toggle('on', !w.classList.contains('off')); if(UBIC.mapa) setTimeout(() => UBIC.mapa.resize(), 30); };
   if(!ubicMapaOk()){ $u('ubicMapWrap').classList.add('off'); $u('ubicMapa').style.display = 'none'; return; }   // sin internet o sin librería: solo texto
-  // centro y límite de la comuna del Cuerpo
-  let centro = (window.VIGOR_CONFIG && window.VIGOR_CONFIG.CENTRO_DEFECTO) || [-72.6636, -36.8236], slug = '';
+  // centro y contorno de la comuna elegida al crear el Cuerpo
+  let centro = (window.VIGOR_CONFIG && window.VIGOR_CONFIG.CENTRO_DEFECTO) || [-72.6636, -36.8236], contorno = null;
   try{
     const r = await sb.rpc('mi_cuerpo_info'); const f = Array.isArray(r.data) ? r.data[0] : r.data;
-    const cu = f ? { nombre_oficial:f.c_nombre_oficial, comuna:f.c_comuna, centro_lat:f.c_centro_lat, centro_lng:f.c_centro_lng } : null;
-    if(cu){ if(cu.centro_lat != null && cu.centro_lng != null) centro = [cu.centro_lng, cu.centro_lat];
-      slug = String(cu.comuna || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_'); }
+    if(f){ if(f.c_centro_lat != null && f.c_centro_lng != null) centro = [f.c_centro_lng, f.c_centro_lat];
+      if(window.vigorLimiteComunal) contorno = await vigorLimiteComunal({ comuna:f.c_comuna, region:f.c_region, limite:f.c_limite }, g => sb.rpc('guardar_limite_comunal', { p_geojson:g })); }
   }catch(e){}
   UBIC.centro = centro;
   UBIC.mapa = new maplibregl.Map({ container:'ubicMap', style:vigorEstiloMapa(), center:centro, zoom:12.5, minZoom:6, maxZoom:19, attributionControl:false, fadeDuration:0, dragRotate:false, pitchWithRotate:false, doubleClickZoom:false });
@@ -1071,10 +1070,10 @@ async function ubicInit(){
   UBIC.mapa.getCanvas().style.cursor = 'crosshair';
   UBIC.mapa.on('click', ev => ubicPoner(ev.lngLat.lat, ev.lngLat.lng, 'mapa'));
   UBIC.mapa.on('load', async () => {
-    if(slug){ try{ const r = await fetch('limites/' + slug + '.geojson', { method:'HEAD' }); if(r.ok){
-      UBIC.mapa.addSource('lim', { type:'geojson', data:'limites/' + slug + '.geojson' });
+    if(contorno){
+      UBIC.mapa.addSource('lim', { type:'geojson', data:contorno });
       UBIC.mapa.addLayer({ id:'lim-linea', type:'line', source:'lim', filter:['==', ['geometry-type'], 'Polygon'], paint:{ 'line-color':'#49E9FF', 'line-width':2, 'line-opacity':.85 } });
-    } }catch(e){} }
+    }
     ubicDesdeUrl();
   });
 }
