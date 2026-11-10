@@ -287,6 +287,7 @@ body.abierto #fade{right:var(--pw)}
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-despacho-tablet.js"></script>
 <script src="vigor-config.js"></script>
 <script>
 (function(){
@@ -737,6 +738,7 @@ async function iniciarReal(){
   if(!GPS.miCarro) avisar('Modo de solo vista', 'Esta sesión no es de un carro: ves el mapa y las unidades, pero no se envía posición', 6000);
   iniciarGPS();
   if(GPS.cuerpoId) cargarUnidades();
+  if(GPS.miCarro) VigorDespachoTablet.iniciar({ sb, enNavegacion:true, alCambiar:alDespacho });   // el despacho de este carro traza la ruta solo
   pedirWake(); document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible') pedirWake(); });
   setInterval(async () => { try{ const { data:{ session:s2 } } = await sb.auth.getSession(); if(s2) GPS.token = s2.access_token; }catch(e){} }, 60000);
   window.addEventListener('pagehide', desconectar);
@@ -779,6 +781,55 @@ function desconectar(){
   try{ fetch(SB_URL+'/rest/v1/rpc/tablet_desconectar', { method:'POST', keepalive:true, headers:{ apikey:SB_KEY, Authorization:'Bearer '+GPS.token, 'Content-Type':'application/json' }, body:'{}' }); }catch(e){}
 }
 async function pedirWake(){ try{ if('wakeLock' in navigator && !GPS.wake){ GPS.wake=await navigator.wakeLock.request('screen'); GPS.wake.addEventListener('release',()=>{ GPS.wake=null; }); } }catch(e){} }
+
+
+/* ---- despacho: la ruta al siniestro se traza sola ---- */
+const DESP = { id:null, destino:null, pidiendo:false, fuera:0, ultRecalculo:0, tk:0 };
+function esperarGPS(ms){ return new Promise(res => { const t0 = Date.now(); (function w(){ if(GPS.ultima || Date.now()-t0 > ms) return res(!!GPS.ultima); setTimeout(w, 400); })(); }); }
+async function trazarRuta(destino, motivo){
+  const tk = ++DESP.tk; DESP.pidiendo = true;
+  const vigente = () => tk === DESP.tk && DESP.destino === destino;
+  try{
+    avisar(motivo || 'Trazando la ruta…', destino.dir || '', 0);
+    if(!(await esperarGPS(90000))){ if(vigente()) avisar('Esperando señal GPS para trazar la ruta…', 'La ruta se traza apenas haya posición', 0); return reintentar(destino, motivo, tk, 3000); }
+    if(!vigente()) return;
+    const o = GPS.ultima.pos.slice();
+    let ruta = null, err = null;
+    for(let i = 0; i < 3 && !ruta; i++){ try{ ruta = await pedirRuta(o, [destino.lng, destino.lat]); }catch(e){ err = e; await new Promise(r => setTimeout(r, 1500)); } }
+    if(!vigente()) return;                                                      // mientras tanto cambió o terminó el despacho
+    if(!ruta){ avisar('No se pudo calcular la ruta', (err && err.message || '') + ' · se reintentará', 6000); return reintentar(destino, motivo, tk, 10000); }
+    Nav.iniciarRuta(ruta, destino); DESP.fuera = 0; DESP.ultRecalculo = Date.now(); ocultarAviso();
+  } finally { if(tk === DESP.tk) DESP.pidiendo = false; }
+}
+function reintentar(destino, motivo, tk, ms){ setTimeout(() => { if(tk === DESP.tk && DESP.destino === destino) trazarRuta(destino, motivo); }, ms); }
+function alDespacho(d){
+  if(!d){ DESP.id = null; DESP.destino = null; if(E.activo) Nav.detener(); ocultarAviso(); return; }
+  DESP.id = d.id;
+  if(d.lat != null && d.lng != null && isFinite(d.lat) && isFinite(d.lng)){
+    DESP.destino = { lng:d.lng, lat:d.lat, titulo:[d.codigo, d.tipo].filter(Boolean).join(' · ') || 'Siniestro', sub:d.referencia || '', dir:d.direccion || '' };
+    trazarRuta(DESP.destino);
+  } else {
+    DESP.destino = null; if(E.activo) Nav.detener();
+    avisar('Despacho: ' + (d.direccion || ''), 'Sin ubicación en el mapa. Busca el lugar para trazar la ruta', 0);
+  }
+}
+// si el vehículo se sale de la ruta (más de 70 m, dos revisiones seguidas), se calcula una ruta nueva desde donde está
+function distARuta(p){
+  const co = E.ruta.coords, i0 = enRuta(E.s).i; let mejor = 1e9;
+  for(let i = Math.max(0, i0-4); i < Math.min(co.length-1, i0+120); i++){
+    const a = co[i], b = co[i+1], kx = Math.cos(p[1]*RAD), ax = (a[0]-p[0])*kx, ay = a[1]-p[1], bx = (b[0]-p[0])*kx, by = b[1]-p[1];
+    const dx = bx-ax, dy = by-ay, l2 = dx*dx+dy*dy, t = l2 ? Math.max(0, Math.min(1, -(ax*dx+ay*dy)/l2)) : 0;
+    const d = Math.hypot((ax+t*dx)*111320, (ay+t*dy)*111320); if(d < mejor) mejor = d;
+  }
+  return mejor;
+}
+setInterval(() => {
+  if(!E.activo || !E.ruta || !DESP.destino || !GPS.ultima || DESP.pidiendo) return;
+  if(E.cum[E.cum.length-1] - E.s < 60) { DESP.fuera = 0; return; }              // ya casi llegó
+  const d = distARuta(GPS.ultima.pos);
+  DESP.fuera = d > 70 ? DESP.fuera + 1 : 0;
+  if(DESP.fuera >= 2 && Date.now() - DESP.ultRecalculo > 15000){ DESP.fuera = 0; trazarRuta(DESP.destino, 'Te saliste de la ruta: calculando una nueva…'); }
+}, 4000);
 
 /* otras unidades del Cuerpo, en vivo */
 function emitirUnidades(){

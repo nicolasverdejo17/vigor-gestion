@@ -235,6 +235,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-despacho-tablet.js"></script>
 <script>
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
@@ -289,6 +290,7 @@ async function cargarCarro(){
   document.getElementById('subCarro').textContent = (row.t_compania_nombre ? row.t_compania_nombre + ' · ' : 'Comandancia · ') + row.t_cuerpo_nombre;
   aplicarEstadoPill(row.t_estado);
   suscribirEstadoCarro();
+  try{ VigorDespachoTablet.iniciar({ sb }); }catch(e){ console.warn('despacho:', e && e.message); }   // alerta + tono + navegación automática al ser despachado
   await cargarDotacion();
 }
 
