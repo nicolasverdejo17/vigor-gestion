@@ -88,6 +88,14 @@
   .ops-hint{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.1em; margin-bottom:14px; flex-shrink:0;}
   .ops-grid{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
 
+  /* Navegación (GPS de la tablet): acceso ancho sobre las demás acciones */
+  .nav-bar{ display:flex; align-items:center; gap:18px; padding:16px 22px; margin:0 0 16px; background:var(--panel); border:1.5px solid var(--cyan); border-radius:8px; cursor:pointer; text-decoration:none; color:inherit;}
+  .nav-bar:hover{ background:var(--panel-alt);}
+  .nav-bar:active{ transform:scale(.995);}
+  .nav-bar .ic{ width:52px; height:52px; border:1.5px solid var(--cyan); border-radius:50%; display:grid; place-items:center; flex:none;}
+  .nav-bar h2{ font-size:22px; letter-spacing:.03em; margin:0;}
+  .nav-bar p{ margin:3px 0 0; font-size:12.5px; color:var(--text-muted);}
+  .nav-bar .go{ margin-left:auto; font-size:26px; color:var(--cyan);}
   .ops-btn{
     background:var(--panel); border:2px solid var(--line-strong); border-radius:10px;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
@@ -181,6 +189,11 @@
 
   <div class="ops-wrap" id="opsWrap">
     <div class="ops-hint">Seleccionar una acción</div>
+    <a class="nav-bar" href="navegacion_conductor.html">
+      <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 17-7-4-7 4 7-17z" stroke="#49E9FF" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+      <div><h2>Navegación</h2><p>Mapa con el GPS de esta tablet: rutas, despachos y las demás unidades en vivo.</p></div>
+      <div class="go">›</div>
+    </a>
     <div class="ops-grid">
       <div class="ops-btn parte" onclick="window.location.href='tablet_parte.html'">
         <div class="ops-icon">

@@ -169,6 +169,11 @@ body.abierto #panel{transform:none}
 body.abierto #tab{right:var(--pw)}
 body.abierto #tab .c{display:none}body:not(.abierto) #tab .o{display:none}
 
+/* ---- velocidad al navegar sin ruta (GPS real, sin despacho) ---- */
+#vlibre{position:absolute;right:24px;bottom:24px;z-index:1000;display:none;align-items:baseline;gap:8px;background:var(--p);padding:12px 18px}
+#vlibre .num{font-size:34px}#vlibre span{font-size:11px;letter-spacing:.14em;color:var(--mu);font-weight:600}
+body.sin-ruta.con-gps #vlibre{display:flex}
+@media (max-aspect-ratio:1/1){#vlibre{right:10px;bottom:10px;padding:9px 14px}#vlibre .num{font-size:26px}}
 /* ---- mensaje ---- */
 #msg{position:absolute;left:50%;top:18px;transform:translateX(-50%);max-width:min(560px,92vw);text-align:center;font-weight:600;font-size:14px;background:rgba(6,21,32,.96);border:1px solid var(--l2);border-top:3px solid var(--cy);padding:11px 18px;display:none;z-index:1300}
 #msg.show{display:block}
@@ -275,6 +280,7 @@ body.abierto #fade{right:var(--pw)}
   </aside>
   <button id="tab" aria-label="Mostrar u ocultar el panel de despacho" aria-expanded="false"><i class="ti ti-chevron-left c"></i><i class="ti ti-chevron-right o"></i><span class="c">DESPACHO</span><span class="o">OCULTAR</span></button>
 
+  <div id="vlibre" aria-label="Velocidad"><b class="num" id="vlibreN">0</b><span>km/h</span></div>
   <div id="msg" role="status"></div>
 </div>
 
@@ -542,7 +548,7 @@ const Nav = {
     for(const u of lista||[]){
       const en = u.enLinea!==false && (!u.ts || Date.now()-u.ts<45000) && isFinite(u.lng) && isFinite(u.lat);
       let e=E.uni[u.id]; if(!e) e=E.uni[u.id]={ id:u.id, mk:null, cur:null, tgt:null, vis:null };
-      e.nombre=u.nombre||u.id; e.min=u.minDetras; e.en=en;
+      e.nombre=u.nombre||u.id; e.min=u.minDetras; e.texto=u.texto||''; e.en=en;
       if(en){
         e.tgt=[u.lng,u.lat]; if(!e.cur) e.cur=[u.lng,u.lat];
         if(!e.mk){ const d=document.createElement('div'); d.className='uMk'; d.innerHTML=UHTML+'<div class="nom">'+esc(e.nombre)+'</div>'; e.mk=new maplibregl.Marker({ element:d, anchor:'center' }).setLngLat(e.cur).addTo(mapa); }
@@ -603,7 +609,7 @@ const UHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="onda" 
 function pintarUnidades(){
   const l=Object.values(E.uni);
   $('uniL').innerHTML = l.length ? l.map(e=>{
-    const t = !e.en ? 'sin señal' : (e.min>0 ? e.min+' min detrás' : (e.min<0 ? Math.abs(e.min)+' min delante' : 'junto a ti'));
+    const t = !e.en ? 'sin señal' : e.texto ? e.texto : (e.min>0 ? e.min+' min detrás' : (e.min<0 ? Math.abs(e.min)+' min delante' : 'junto a ti'));
     return `<button type="button" class="it${e.en?'':' off'}${E.sigue===e.id?' sel':''}" data-u="${esc(e.id)}" ${e.en?'':'disabled'}><span class="rj"></span><b>${esc(e.nombre)}</b><span class="d">${t}</span>${e.en?'<i class="ti ti-current-location ver"></i>':''}</button>`;
   }).join('') : '<div class="vacio">Sin otras unidades en ruta.</div>';
 }
@@ -695,14 +701,110 @@ $('b5').onclick=()=>{ if(mapa) mapa.jumpTo({ bearing:0 }); };
 $('b1').onclick=()=>{ location.href='tablet_carro.html'; };
 $('b2').onclick=()=>avisar('Buscar un punto', 'Llega en una próxima parte: buscar entre los puntos del Cuerpo', 3200);
 $('b3').onclick=()=>avisar('Agregar un punto al mapa', 'Llega en una próxima parte: marcar un punto nuevo con su tipo', 3200);
+const SB_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';   // clave pública (anon): la seguridad la dan los permisos por Cuerpo de la base de datos
+let sbc = null;
+function cliente(){ if(!sbc) sbc = window.supabase.createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true } }); return sbc; }
 (async function nombreUnidad(){
   try{
-    const sb = window.supabase.createClient('https://mcfcfbtiruewlcejionr.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU', { auth:{ persistSession:true, autoRefreshToken:true } });
+    const sb = cliente();
     const { data:{ session } } = await sb.auth.getSession(); if(!session) return;
     const { data } = await sb.rpc('tablet_obtener_carro'); const c = Array.isArray(data) ? data[0] : data;
     if(c && c.t_nomenclatura){ $('pUnit').textContent = c.t_nomenclatura + ' · En ruta'; }
   }catch(e){}
 })();
+
+
+/* =====================  Modo real: la tablet es el GPS del carro  =====================
+   - La posición del teléfono/tablet mueve el vehículo en el mapa.
+   - Mientras la pantalla esté abierta se envía a la base de datos (tablet_reportar_posicion) y la ven la consola y las demás unidades.
+   - Las demás unidades del Cuerpo llegan en tiempo real (Realtime sobre posiciones_unidades). */
+const GPS = { watch:null, ultima:null, ultEnvio:0, ultEnvioPos:null, primera:false, wake:null, token:null, miCarro:null, cuerpoId:null, filas:new Map(), carros:new Map() };
+function estadoGPS(titulo, sub){ if(titulo) avisar(titulo, sub, 0); else ocultarAviso(); }
+
+async function iniciarReal(){
+  E.pos = C.CENTRO_DEFECTO.slice(); E.rum = 0; E.rumVista = 0;
+  const sb = cliente();
+  let session = null; try{ session = (await sb.auth.getSession()).data.session; }catch(e){}
+  if(!session){ estadoGPS('Inicia sesión para usar la navegación', 'Entra desde la pantalla de acceso con la cuenta de tu carro'); $('msg').innerHTML += '<small><a href="login_registro.html" style="color:var(--cy)">Ir a iniciar sesión</a></small>'; return; }
+  GPS.token = session.access_token;
+  try{
+    const { data } = await sb.rpc('tablet_obtener_carro'); const c = Array.isArray(data) ? data[0] : data;
+    if(c && c.t_id) GPS.miCarro = { id:c.t_id, nombre:c.t_nomenclatura };
+    const r = await sb.rpc('mi_cuerpo_id'); GPS.cuerpoId = r.data || null;
+  }catch(e){}
+  if(GPS.miCarro) $('pUnit').textContent = GPS.miCarro.nombre + ' · En ruta';
+  if(!GPS.miCarro) avisar('Modo de solo vista', 'Esta sesión no es de un carro: ves el mapa y las unidades, pero no se envía posición', 6000);
+  iniciarGPS();
+  if(GPS.cuerpoId) cargarUnidades();
+  pedirWake(); document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible') pedirWake(); });
+  setInterval(async () => { try{ const { data:{ session:s2 } } = await sb.auth.getSession(); if(s2) GPS.token = s2.access_token; }catch(e){} }, 60000);
+  window.addEventListener('pagehide', desconectar);
+}
+
+function iniciarGPS(){
+  if(!navigator.geolocation){ estadoGPS('Este dispositivo no tiene GPS', 'Abre la navegación desde la tablet del carro'); return; }
+  estadoGPS('Buscando señal GPS…', 'Acepta el permiso de ubicación si el navegador lo pide');
+  GPS.watch = navigator.geolocation.watchPosition(alFix, alErrorGPS, { enableHighAccuracy:true, maximumAge:1000, timeout:20000 });
+  setInterval(() => { if(GPS.ultima && Date.now()-GPS.ultima.t < 60000) reportar(true); }, 15000);   // latido: la unidad sigue en línea aunque esté detenida
+}
+function alErrorGPS(err){
+  if(err && err.code===1) estadoGPS('Sin permiso de ubicación', 'Activa la ubicación para este sitio en el navegador y recarga la página');
+  else if(!GPS.primera) estadoGPS('Buscando señal GPS…', 'Sal a un lugar despejado si tarda');
+}
+function alFix(p){
+  const c=p.coords, t=p.timestamp||Date.now(), pos=[c.longitude,c.latitude];
+  if(c.accuracy>200 && GPS.primera) return;                                   // lecturas muy imprecisas: se ignoran
+  let vel = (c.speed!=null && isFinite(c.speed)) ? c.speed*3.6 : null, rum = (c.heading!=null && isFinite(c.heading)) ? c.heading : null;
+  if(GPS.ultima){ const d=dist(GPS.ultima.pos,pos), dt=(t-GPS.ultima.t)/1000; if(vel==null && dt>0) vel=d/dt*3.6; if(rum==null && d>4) rum=rumbo(GPS.ultima.pos,pos); }
+  if(vel==null || vel<2) vel=0;                                                // ruido del GPS con el vehículo detenido
+  if(rum==null) rum=E.rum;
+  GPS.ultima = { pos, t, vel, rum, acc:c.accuracy };
+  Nav.setPosicion(pos[0], pos[1], vel>3 ? rum : E.rum, vel);
+  document.body.classList.add('con-gps'); $('vlibreN').textContent = Math.round(vel);
+  if(!GPS.primera){ GPS.primera=true; estadoGPS(null); E.rumVista=E.rum; if(mapaListo) mapa.jumpTo({ center:pos, zoom:17 }); }
+  reportar(false);
+}
+function reportar(forzar){
+  const u=GPS.ultima; if(!u || !GPS.miCarro) return;
+  const ahora=Date.now(), mov = u.vel>3, cada = mov ? 3000 : 20000;
+  const movio = GPS.ultEnvioPos ? dist(GPS.ultEnvioPos,u.pos) > 12 : true;
+  if(!forzar && ahora-GPS.ultEnvio < cada && !(movio && ahora-GPS.ultEnvio > 3000)) return;
+  GPS.ultEnvio=ahora; GPS.ultEnvioPos=u.pos;
+  cliente().rpc('tablet_reportar_posicion', { p_lat:u.pos[1], p_lng:u.pos[0], p_rumbo:Math.round(u.rum), p_velocidad_kmh:Math.round(u.vel*10)/10, p_precision_m:Math.round(u.acc||0) })
+    .then(r => { if(r && r.error) console.warn('posición no enviada:', r.error.message); }, e => console.warn('posición no enviada:', e && e.message));
+}
+function desconectar(){
+  if(!GPS.miCarro || !GPS.token) return;
+  try{ fetch(SB_URL+'/rest/v1/rpc/tablet_desconectar', { method:'POST', keepalive:true, headers:{ apikey:SB_KEY, Authorization:'Bearer '+GPS.token, 'Content-Type':'application/json' }, body:'{}' }); }catch(e){}
+}
+async function pedirWake(){ try{ if('wakeLock' in navigator && !GPS.wake){ GPS.wake=await navigator.wakeLock.request('screen'); GPS.wake.addEventListener('release',()=>{ GPS.wake=null; }); } }catch(e){} }
+
+/* otras unidades del Cuerpo, en vivo */
+function emitirUnidades(){
+  const lista=[];
+  GPS.filas.forEach(r => {
+    if(GPS.miCarro && r.carro_id===GPS.miCarro.id) return;
+    const c=GPS.carros.get(r.carro_id), d = E.pos ? dist(E.pos,[r.lng,r.lat]) : null;
+    lista.push({ id:r.carro_id, nombre:c?c.nomenclatura:'?', lng:r.lng, lat:r.lat, rum:r.rumbo, vel:r.velocidad_kmh, ts:Date.parse(r.actualizado_en), enLinea:r.en_linea, texto: d!=null ? 'a '+(d>=1000?(d/1000).toFixed(1)+' km':Math.round(d/10)*10+' m') : '' });
+  });
+  Nav.setUnidades(lista);
+}
+async function cargarUnidades(){
+  const sb=cliente();
+  try{
+    const [cr, ps] = await Promise.all([ sb.from('carros').select('id,nomenclatura,estado'), sb.from('posiciones_unidades').select('*') ]);
+    (cr.data||[]).forEach(c => GPS.carros.set(c.id,c)); (ps.data||[]).forEach(r => GPS.filas.set(r.carro_id,r));
+    emitirUnidades();
+  }catch(e){ console.warn('unidades:', e && e.message); }
+  sb.channel('nav-flota-'+GPS.cuerpoId)
+    .on('postgres_changes', { event:'*', schema:'public', table:'posiciones_unidades', filter:'cuerpo_id=eq.'+GPS.cuerpoId }, pl => {
+      if(pl.eventType==='DELETE'){ const o=pl.old||{}; GPS.filas.delete(o.carro_id); } else if(pl.new){ GPS.filas.set(pl.new.carro_id, pl.new); }
+      emitirUnidades(); })
+    .on('postgres_changes', { event:'*', schema:'public', table:'carros', filter:'cuerpo_id=eq.'+GPS.cuerpoId }, pl => { if(pl.new) GPS.carros.set(pl.new.id, pl.new); emitirUnidades(); })
+    .subscribe();
+  setInterval(emitirUnidades, 5000);                                           // una unidad sin datos hace más de 45 s pasa a «sin señal»
+}
 
 /* =====================  Arranque  ===================== */
 iniciarMapa(); medir(); objetivos(); V.padR=V.padRObj; V.padB=V.padBObj; requestAnimationFrame(cuadro);
@@ -747,11 +849,7 @@ if(PARAMS.get('sim')){
     requestAnimationFrame(paso);
   });
 } else {
-  // Sin despacho ni GPS: se muestra el mapa de la comuna y un aviso
-  document.addEventListener('vigor-mapa-listo', () => {
-    E.pos = C.CENTRO_DEFECTO.slice(); E.rum = 0; E.rumVista = 0;
-    avisar('Sin despacho activo', 'Cuando se despache esta unidad, aquí verás la ruta', 0);
-  });
+  document.addEventListener('vigor-mapa-listo', () => { iniciarReal(); });
 }
 })();
 </script>

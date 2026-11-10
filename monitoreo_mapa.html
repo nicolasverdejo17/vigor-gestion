@@ -27,7 +27,7 @@
 :root{
   --bg:#030B13;--p:#061520;--c:#091D2C;--l:#0F2A3B;--l2:#153A52;
   --cy:#2DD3DB;--rj:#F13746;--vd:#3CF29A;--az:#34B8FF;--am:#FFC247;--tx:#EAF6FB;--mu:#8FB0C2;
-  --bh:56px;--pw:340px;--tam:1;
+  --bh:56px;--th:0px;--pw:340px;--tam:1;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -50,7 +50,14 @@ button{font-family:inherit;color:inherit}
 #ban .reloj{margin-left:auto;font-size:22px}
 
 /* ---- mapa ---- */
-#stage{position:fixed;left:0;right:0;top:var(--bh);bottom:0;overflow:hidden}
+#stage{position:fixed;left:0;right:0;top:calc(var(--bh) + var(--th));bottom:0;overflow:hidden}
+body.con-tabs{--th:40px}
+#ctabs{position:fixed;left:0;right:0;top:var(--bh);height:var(--th);z-index:39;display:none;align-items:center;gap:6px;padding:0 18px;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--l)}
+body.con-tabs #ctabs{display:flex}
+#ctabs a{flex:none;text-decoration:none;border:1px solid var(--l2);background:var(--p);color:var(--mu);font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:7px 12px;white-space:nowrap}
+#ctabs a:hover{border-color:var(--cy)}
+#ctabs a.on{border-color:var(--cy);background:rgba(45,211,219,.14);color:#fff}
+#ctabs .badge{display:inline-grid;place-items:center;min-width:16px;height:16px;background:var(--rj);color:#fff;font-size:9.5px;font-weight:800;border-radius:8px;padding:0 4px;margin-left:6px}
 #map{position:absolute;inset:0}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
 
@@ -164,6 +171,8 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
   <span class="dseg reloj" id="clock">--:--</span>
 </div>
 
+<div id="ctabs"></div>
+
 <div id="stage">
   <div id="map"></div>
 
@@ -194,6 +203,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
 <script src="vigor-config.js"></script>
 <script>
@@ -274,7 +284,8 @@ function construirEstilo(){
   );
   return { version:8, glyphs:C.MAPA_GLYPHS, sources:{ [src]:{ type:'vector', url:C.MAPA_TILEJSON } }, layers:capas };
 }
-let mapa=null, listo=false;
+let mapa=null, listo=false, agregarLimites=()=>{}, limN=0;
+const MODO_SIM = new URLSearchParams(location.search).get('sim')==='1';
 const vertical=()=>window.innerWidth<window.innerHeight;
 function iniciarMapa(){
   try{
@@ -286,14 +297,14 @@ function iniciarMapa(){
   mapa.on('load', ()=>{
     const vacio={ type:'FeatureCollection', features:[] };
     // límite de la comuna (contorno completo); el archivo viene de OpenStreetMap y está en limites/
-    (C.LIMITES||[]).forEach((url,i)=>{
-      const id='lim'+i; mapa.addSource(id,{type:'geojson',data:url});
+    agregarLimites=(urls)=>{ (urls||[]).forEach((url)=>{
+      const id='lim'+(limN++); mapa.addSource(id,{type:'geojson',data:url});
       mapa.addLayer({ id:id+'-relleno', type:'fill', source:id, filter:['==',['geometry-type'],'Polygon'], paint:{'fill-color':'#2DD3DB','fill-opacity':.035} });
       mapa.addLayer({ id:id+'-halo', type:'line', source:id, filter:['==',['geometry-type'],'Polygon'], layout:{'line-join':'round'}, paint:{'line-color':'#2DD3DB','line-width':8,'line-opacity':.12,'line-blur':4} });
       mapa.addLayer({ id:id+'-linea', type:'line', source:id, filter:['==',['geometry-type'],'Polygon'], layout:{'line-join':'round'}, paint:{'line-color':'#2DD3DB','line-width':['interpolate',['linear'],['zoom'],8,1.5,14,2.5],'line-opacity':.9} });
       mapa.addLayer({ id:id+'-nombre', type:'symbol', source:id, filter:['==',['geometry-type'],'Point'], maxzoom:13, layout:{'text-field':['get','etiqueta'],'text-font':[C.MAPA_FUENTE_TEXTO],'text-size':13,'text-letter-spacing':.3}, paint:{'text-color':'#2DD3DB','text-opacity':.8,'text-halo-color':'#030B13','text-halo-width':1.5} });
-    });
-    limiteVisible();
+    }); limiteVisible(); };
+    if(MODO_SIM) agregarLimites(C.LIMITES);
     mapa.addSource('rutas',{type:'geojson',data:vacio}); mapa.addSource('estelas',{type:'geojson',data:vacio});
     mapa.addLayer({ id:'rutas-borde', type:'line', source:'rutas', layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':'#030B13','line-width':['case',['get','sel'],8,5],'line-opacity':.8} });
     mapa.addLayer({ id:'rutas-otras', type:'line', source:'rutas', filter:['!=',['get','sel'],true], layout:{'line-cap':'butt','line-join':'round'}, paint:{'line-color':'#F13746','line-width':2.5,'line-opacity':.8,'line-dasharray':[2,1.4]} });
@@ -314,7 +325,7 @@ function escalaIconos(){
 
 /* =====================  Datos en tiempo real  ===================== */
 const D = { uni:{}, sin:{}, puntos:[], cuarteles:[], sel:null, capas:{ puntos:true, cuarteles:true, estelas:true, limites:true } };
-function limiteVisible(){ if(!mapa) return; (C.LIMITES||[]).forEach((u,i)=>{ ['relleno','halo','linea','nombre'].forEach(k=>{ const l='lim'+i+'-'+k; if(mapa.getLayer(l)) mapa.setLayoutProperty(l,'visibility',D.capas.limites?'visible':'none'); }); }); }
+function limiteVisible(){ if(!mapa) return; mapa.getStyle().layers.filter(l=>/^lim\d+-/.test(l.id)).forEach(l=>mapa.setLayoutProperty(l.id,'visibility',D.capas.limites?'visible':'none')); }
 try{ const g=JSON.parse(localStorage.getItem('vigor_mon_capas')||'null'); if(g) Object.assign(D.capas,g); }catch(e){}
 
 const UCLASE = e => e.en ? EST[e.estado] || EST.servicio : SIN_SENAL;
@@ -361,7 +372,7 @@ const Mon = {
   /* siniestros activos: [{id,titulo,dir,lng,lat}] */
   setSiniestros(lista){
     for(const id in D.sin){ if(D.sin[id].mk) D.sin[id].mk.remove(); } D.sin={};
-    for(const s of lista||[]){ const mk=new maplibregl.Marker({ element:elem(`<div class="sp"></div>`+gota('#F13746','flame',true)+`<div class="lb sx">${esc(s.titulo||'Siniestro')}</div>`,'sx'), anchor:'bottom' }).setLngLat([s.lng,s.lat]).addTo(mapa); D.sin[s.id]={...s,mk}; }
+    for(const s of lista||[]){ const ok=isFinite(s.lng)&&isFinite(s.lat); const mk=ok ? new maplibregl.Marker({ element:elem(`<div class="sp"></div>`+gota('#F13746','flame',true)+`<div class="lb sx">${esc(s.titulo||'Siniestro')}</div>`,'sx'), anchor:'bottom' }).setLngLat([s.lng,s.lat]).addTo(mapa) : null; D.sin[s.id]={...s,mk}; }
     pintarLista();
   },
   /* puntos propios: [{id,tipo,nombre,lng,lat}] */
@@ -391,7 +402,7 @@ function estela_geojson(){
 function pintarLista(){
   const us=Object.values(D.uni).sort((a,b)=> (a.en===b.en ? ((EST[a.estado]||EST.servicio).orden-(EST[b.estado]||EST.servicio).orden) : (a.en?-1:1)) || a.nombre.localeCompare(b.nombre,'es',{numeric:true}));
   $('uniL').innerHTML = us.length ? us.map(e=>{ const k=UCLASE(e);
-    const der = e.en ? (e.estado==='emergencia'&&e.destino ? `${e.kmRest!=null?e.kmRest.toFixed(1)+' km':'—'}<small>${e.etaMin!=null?(e.etaMin>0?e.etaMin+' min':'en el lugar'):''}</small>` : (e.vel>2?Math.round(e.vel)+' km/h':'detenida')) : '<small>sin datos</small>';
+    const der = e.en ? (e.estado==='emergencia'&&e.destino ? (e.kmRest!=null ? `${e.kmRest.toFixed(1)} km<small>${e.etaMin!=null?(e.etaMin>0?e.etaMin+' min':'en el lugar'):''}</small>` : '<small>en despacho</small>') : (e.vel>2?Math.round(e.vel)+' km/h':'detenida')) : '<small>sin datos</small>';
     return `<button type="button" class="it${e.en?'':' off'}${D.sel===e.id?' sel':''}" data-u="${esc(e.id)}" style="--k:${k.color}"><span class="pt"></span><div><b>${esc(e.nombre)}</b><div class="st">${esc(e.en?(EST[e.estado]||EST.servicio).nombre:'Sin señal')}</div></div><span class="d">${der}</span></button>`; }).join('') : '<div class="vacio">Sin unidades conectadas.</div>';
   $('nUni').textContent = us.length||'';
   const ss=Object.values(D.sin);
@@ -425,7 +436,7 @@ function seleccionar(id, centrar){
 }
 const padCam=()=>({ left: (!vertical() && !document.body.classList.contains('cerrado')) ? 340 : 0, top:0, right:0, bottom: (vertical() && !document.body.classList.contains('cerrado')) ? Math.round(window.innerHeight*.46) : 0 });
 let limBounds=null;
-function cargarLimites(){ (C.LIMITES||[]).forEach(u=>fetch(u).then(r=>r.json()).then(fc=>{ const b=limBounds||new maplibregl.LngLatBounds(); (fc.features||[]).forEach(f=>{ if(f.geometry&&f.geometry.type==='Polygon') f.geometry.coordinates[0].forEach(c=>b.extend(c)); }); limBounds=b; }).catch(()=>{})); }
+function cargarLimites(urls){ return Promise.all((urls||[]).map(u=>fetch(u).then(r=>r.json()).then(fc=>{ const b=limBounds||new maplibregl.LngLatBounds(); (fc.features||[]).forEach(f=>{ if(f.geometry&&f.geometry.type==='Polygon') f.geometry.coordinates[0].forEach(c=>b.extend(c)); }); limBounds=b; }).catch(()=>{}))); }
 function verComuna(){ if(!listo||!limBounds) return verTodo(); const pd=padCam(); mapa.fitBounds(limBounds,{ padding:{ left:pd.left+40, right:60, top:60, bottom:pd.bottom+70 }, duration:700 }); }
 function verTodo(){
   if(!listo) return; const b=new maplibregl.LngLatBounds(); let n=0;
@@ -435,7 +446,7 @@ function verTodo(){
   if(!n) return; const pd=padCam(); mapa.fitBounds(b,{ padding:{ left:pd.left+70, right:70, top:90, bottom:pd.bottom+90 }, maxZoom:15, duration:700 });
 }
 $('uniL').addEventListener('click', ev=>{ const b=ev.target.closest('[data-u]'); if(b) seleccionar(b.dataset.u, true); });
-$('sinL').addEventListener('click', ev=>{ const b=ev.target.closest('[data-s]'); if(b){ const s=D.sin[b.dataset.s]; if(s) mapa.easeTo({ center:[s.lng,s.lat], zoom:Math.max(mapa.getZoom(),14), duration:600, padding:padCam() }); } });
+$('sinL').addEventListener('click', ev=>{ const b=ev.target.closest('[data-s]'); if(b){ const s=D.sin[b.dataset.s]; if(s && isFinite(s.lng)) mapa.easeTo({ center:[s.lng,s.lat], zoom:Math.max(mapa.getZoom(),14), duration:600, padding:padCam() }); } });
 $('cardX').onclick=()=>seleccionar(null);
 $('tAll').onclick=verTodo;
 function capa(clave, id){ const b=$(id); b.classList.toggle('on', D.capas[clave]); }
@@ -454,10 +465,10 @@ function cuadro(ts){
   }
   requestAnimationFrame(cuadro);
 }
-iniciarMapa(); cargarLimites(); requestAnimationFrame(cuadro);
+iniciarMapa(); if(MODO_SIM) cargarLimites(C.LIMITES); requestAnimationFrame(cuadro);
 
 /* =====================  Simulación (datos de ejemplo hasta tener el GPS real)  ===================== */
-const SIM = PARAMS.get('sim')!=='0';
+const SIM = MODO_SIM;
 if(SIM){
   $('simTag').hidden=false;
   document.addEventListener('vigor-mapa-listo', async ()=>{
@@ -505,8 +516,71 @@ if(SIM){
     setTimeout(()=>{ if(PARAMS.get('vista')==='flota') verTodo(); else verComuna(); if(PARAMS.get('sel')) seleccionar(PARAMS.get('sel'), true); }, 900);
   });
 } else {
-  document.addEventListener('vigor-mapa-listo', ()=>avisar('Esperando datos de las unidades en línea', 0));
+  document.addEventListener('vigor-mapa-listo', ()=>{ iniciarReal(); });
 }
+
+/* =====================  Datos reales (Supabase, en tiempo real)  ===================== */
+const SB_URL='https://mcfcfbtiruewlcejionr.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';   // clave pública (anon): los permisos por Cuerpo los da la base de datos
+const R={ carros:new Map(), pos:new Map(), desp:[], du:[], claves:new Map(), sinJson:'' };
+function armarPestanas(central){
+  const t=$('ctabs');
+  t.innerHTML = central
+    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="monitoreo_mapa.html" class="on">Mapa de Flota</a>'
+    : '<a href="comandancia.html" class="on">← Volver a Comandancia</a>';
+  document.body.classList.add('con-tabs'); setTimeout(()=>mapa&&mapa.resize(),50);
+}
+async function iniciarReal(){
+  const sb=window.supabase.createClient(SB_URL,SB_KEY,{ auth:{ persistSession:true, autoRefreshToken:true } });
+  let session=null; try{ session=(await sb.auth.getSession()).data.session; }catch(e){}
+  if(!session){ avisar('Inicia sesión para ver el mapa de flota',0); $('msg').innerHTML+=' · <a href="login_registro.html" style="color:var(--cy)">Iniciar sesión</a>'; return; }
+  let cuerpoId=null; try{ cuerpoId=(await sb.rpc('mi_cuerpo_id')).data; }catch(e){}
+  if(!cuerpoId){ avisar('Tu cuenta no está asociada a un Cuerpo activo',0); return; }
+  let central=false; try{ const r=await sb.rpc('central_obtener_cuerpo'); central=Array.isArray(r.data)?r.data.length>0:!!r.data; }catch(e){}
+  armarPestanas(central);
+  // límite de la comuna del Cuerpo (archivo limites/<comuna>.geojson, si existe) y centro del mapa
+  try{
+    const { data:cu } = await sb.from('cuerpos').select('nombre_oficial,comuna,centro_lat,centro_lng').eq('id',cuerpoId).maybeSingle();
+    if(cu){
+      const slug=String(cu.comuna||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_');
+      let hay=false; if(slug){ try{ const r=await fetch('limites/'+slug+'.geojson',{method:'HEAD'}); hay=r.ok; }catch(e){} }
+      if(hay){ C.LIMITES=['limites/'+slug+'.geojson']; agregarLimites(C.LIMITES); await cargarLimites(C.LIMITES); verComuna(); }
+      else if(cu.centro_lat!=null && cu.centro_lng!=null){ mapa.jumpTo({ center:[cu.centro_lng,cu.centro_lat], zoom:11 }); }
+    }
+  }catch(e){}
+  let recargaT=null;
+  async function cargarDespachos(){
+    try{
+      const [d,du,cl]=await Promise.all([ sb.from('despachos').select('id,direccion,tipo_emergencia_id,fecha_hora_despacho').eq('estado','activo'), sb.from('despacho_unidades').select('despacho_id,carro_id'), sb.from('claves_emergencia').select('id,codigo,nombre') ]);
+      R.desp=d.data||[]; R.du=du.data||[]; R.claves=new Map((cl.data||[]).map(c=>[c.id,c]));
+    }catch(e){ console.warn('despachos:', e&&e.message); }
+    emitir();
+  }
+  function emitir(){
+    const sins=R.desp.map(d=>({ id:d.id, titulo:(R.claves.get(d.tipo_emergencia_id)||{}).nombre||'Emergencia', dir:d.direccion, lng:d.lng, lat:d.lat }));
+    const j=JSON.stringify(sins); if(j!==R.sinJson){ R.sinJson=j; Mon.setSiniestros(sins); }
+    const porCarro=new Map(); R.du.forEach(x=>{ const d=R.desp.find(y=>y.id===x.despacho_id); if(d) porCarro.set(x.carro_id,d); });
+    const lista=[]; R.carros.forEach(c=>{ const p=R.pos.get(c.id), d=porCarro.get(c.id);
+      lista.push({ id:c.id, nombre:c.nomenclatura, estado:c.estado, lng:p?p.lng:NaN, lat:p?p.lat:NaN, rum:p?(p.rumbo||0):0, vel:p?(p.velocidad_kmh||0):0, ts:p?Date.parse(p.actualizado_en):0, enLinea:p?p.en_linea:false,
+        destino:d?{ id:d.id, titulo:(R.claves.get(d.tipo_emergencia_id)||{}).nombre||'Emergencia' }:null }); });
+    Mon.setUnidades(lista);
+  }
+  try{
+    const [c,ps]=await Promise.all([ sb.from('carros').select('id,nomenclatura,estado,compania_id'), sb.from('posiciones_unidades').select('*') ]);
+    (c.data||[]).forEach(x=>R.carros.set(x.id,x)); (ps.data||[]).forEach(x=>R.pos.set(x.carro_id,x));
+  }catch(e){ avisar('No se pudieron cargar las unidades',4000); }
+  await cargarDespachos();
+  setTimeout(()=>{ if(!limBounds) verTodo(); }, 600);
+  const f='cuerpo_id=eq.'+cuerpoId;
+  sb.channel('mon-flota-'+cuerpoId)
+    .on('postgres_changes',{ event:'*', schema:'public', table:'posiciones_unidades', filter:f }, pl=>{ if(pl.eventType==='DELETE'){ if(pl.old) R.pos.delete(pl.old.carro_id); } else if(pl.new) R.pos.set(pl.new.carro_id,pl.new); emitir(); })
+    .on('postgres_changes',{ event:'*', schema:'public', table:'carros', filter:f }, pl=>{ if(pl.eventType==='DELETE'){ if(pl.old) R.carros.delete(pl.old.id); } else if(pl.new) R.carros.set(pl.new.id,pl.new); emitir(); })
+    .on('postgres_changes',{ event:'*', schema:'public', table:'despachos', filter:f }, ()=>{ clearTimeout(recargaT); recargaT=setTimeout(cargarDespachos,300); })
+    .on('postgres_changes',{ event:'*', schema:'public', table:'despacho_unidades' }, ()=>{ clearTimeout(recargaT); recargaT=setTimeout(cargarDespachos,300); })
+    .subscribe(st=>{ if(st==='SUBSCRIBED') $('msg').classList.remove('show'); else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED') avisar('Sin conexión en vivo: se muestra lo último recibido',0); });
+  setInterval(emitir,5000);                                                     // una unidad sin datos hace más de 45 s pasa a «sin señal»
+}
+
 })();
 </script>
 </body>
