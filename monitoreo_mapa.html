@@ -47,7 +47,10 @@ button{font-family:inherit;color:inherit}
 #ban .cnt{display:flex;gap:8px;margin-left:8px}
 .chip{display:flex;align-items:center;gap:7px;border:1px solid var(--l2);background:var(--p);padding:4px 10px;font-size:12px;font-weight:600;white-space:nowrap}
 .chip i.d{width:9px;height:9px;border-radius:50%;background:var(--k);display:inline-block}
-#ban .reloj{margin-left:auto;font-size:22px}
+#ban .reloj{margin-left:auto;display:flex;align-items:center;gap:14px;flex-shrink:0;color:var(--mu);font-size:13px;line-height:1;text-align:right}
+#ban .reloj span{white-space:nowrap}
+#ban .reloj strong{display:block;font-size:22px;margin:0;letter-spacing:.02em;font-weight:700;text-shadow:0 0 12px rgba(45,211,219,.35)}
+@media (max-width:900px){ #ban .reloj span{display:none} }
 
 /* ---- mapa ---- */
 #stage{position:fixed;left:0;right:0;top:calc(var(--bh) + var(--th));bottom:0;overflow:hidden}
@@ -146,7 +149,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 /* ---- celular en vertical: la lista sube desde abajo ---- */
 @media (max-aspect-ratio:1/1){
   :root{--bh:52px}
-  #ban{padding:0 12px;gap:10px}#ban img{height:30px}#ban .t{font-size:14px}#ban .cnt{display:none}#ban .reloj{display:none}#ban .t{font-size:13px}#ban .sim{margin-left:auto;font-size:8.5px;padding:3px 6px}
+  #ban{padding:0 12px;gap:10px}#ban img{height:30px}#ban .t{font-size:14px}#ban .cnt{display:none}#ban .reloj span{display:none}#ban .reloj strong{font-size:18px}#ban .t{font-size:13px}#ban .sim{margin-left:auto;font-size:8.5px;padding:3px 6px}
   #panel{left:0;right:0;top:auto;bottom:0;width:auto;height:46%;border-right:none;border-top:1px solid var(--l2);transform:translateY(0)}
   body.cerrado #panel{transform:translateY(100%)}
   #ptab{left:50%;top:auto;bottom:46%;transform:translateX(-50%);width:132px;height:32px;flex-direction:row;border:1px solid var(--l2);border-bottom:none;border-top:3px solid var(--cy);transition:bottom .3s}
@@ -170,7 +173,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
   <span class="t">Central de Alarmas</span>
   <span class="sim" id="simTag" hidden>DATOS DE EJEMPLO</span>
   <div class="cnt" id="cnt"></div>
-  <span class="dseg reloj" id="clock">--:--</span>
+  <div class="reloj"><span id="fechaHoy">—</span><strong class="dseg" id="clock">--:--:--</strong></div>
 </div>
 
 <div id="ctabs"></div>
@@ -455,7 +458,7 @@ function capa(clave, id){ const b=$(id); b.classList.toggle('on', D.capas[clave]
 ['tPun:puntos','tCua:cuarteles','tEst:estelas','tLim:limites'].forEach(x=>{ const [id,k]=x.split(':'); capa(k,id); $(id).onclick=()=>{ D.capas[k]=!D.capas[k]; capa(k,id); try{ localStorage.setItem('vigor_mon_capas',JSON.stringify(D.capas)); }catch(e){} filtrarPuntos(); limiteVisible(); pintarTodo(); }; });
 $('ptab').onclick=()=>{ document.body.classList.toggle('cerrado'); try{ localStorage.setItem('vigor_mon_panel', document.body.classList.contains('cerrado')?'0':'1'); }catch(e){} setTimeout(()=>mapa&&mapa.resize(),320); };
 try{ if(localStorage.getItem('vigor_mon_panel')==='0' || (vertical() && localStorage.getItem('vigor_mon_panel')===null)) document.body.classList.add('cerrado'); }catch(e){}
-const tic=()=>{ $('clock').textContent=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false}); }; tic(); setInterval(tic,10000);
+const tic=()=>{ const n=new Date(); $('clock').textContent=n.toLocaleTimeString('es-CL',{hour12:false}); $('fechaHoy').textContent=n.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'}); }; tic(); setInterval(tic,1000);
 
 /* movimiento suave de los carros entre una posición y la siguiente */
 let ult=null;
@@ -528,7 +531,7 @@ const R={ carros:new Map(), pos:new Map(), desp:[], du:[], claves:new Map(), sin
 function armarPestanas(central){
   const t=$('ctabs');
   t.innerHTML = central
-    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="monitoreo_mapa.html" class="on">Mapa de Flota</a>'
+    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="monitoreo_mapa.html" class="on">Mapa Comunal</a>'
     : '<a href="comandancia.html" class="on">← Volver a Comandancia</a>';
   document.body.classList.add('con-tabs'); setTimeout(()=>mapa&&mapa.resize(),50);
 }

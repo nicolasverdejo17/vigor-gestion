@@ -147,7 +147,7 @@ html body .crisis-clock strong, html body .crisis-timer strong, html body #vigor
 #vigor-banner .vg-central-der{ margin-left:auto; display:flex; align-items:center; gap:18px; flex-shrink:0; }
 #vigor-banner .vg-central-der .clock{ display:flex; align-items:center; gap:14px; text-align:right; color:var(--text-muted); font-size:13px; line-height:1; }
 #vigor-banner .vg-central-der .clock span{ order:1; white-space:nowrap; display:block; margin:0; }
-#vigor-banner .vg-central-der .clock strong{ order:2; display:block; margin:0; font-size:22px; }
+#vigor-banner .vg-central-der .clock strong{ order:2; display:block; margin:0; font-size:22px !important; color:var(--cyan) !important; text-shadow:0 0 12px var(--cyan-glow); font-weight:700; letter-spacing:.02em; line-height:1; }
 #vigor-banner .vg-central-der .conexion-indicador{ padding:5px 12px; font-size:11px; margin:0; }
 @media (max-width:900px){ #vigor-banner .vg-central-der .clock span{ display:none; } #vigor-banner .vg-central-der{ gap:10px; } }
 @media (max-width:560px){ #vigor-banner .vg-central-der .conexion-indicador{ display:none; } }

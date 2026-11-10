@@ -353,7 +353,7 @@
     <a href="puestos_mando_activos.html" class="central-tab">Modo Crisis Compañías</a>
     <a href="historial_despacho.html" class="central-tab">Historial de Despacho</a>
     <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge" id="tabBadgeCoords" style="display:none;">0</span></a>
-    <a href="monitoreo_mapa.html" class="central-tab">Mapa de Flota</a>
+    <a href="monitoreo_mapa.html" class="central-tab">Mapa Comunal</a>
   </div>
 
   <div class="wrap">
@@ -1032,7 +1032,7 @@ async function confirmarAlerta(id){
 /* =====================  Ubicación del siniestro  =====================
    Tres formas de ubicar el lugar, todas opcionales (si no hay internet, se despacha escribiendo la dirección como siempre):
    1) tocar el mapa (el pin se puede arrastrar)  2) buscar una calle, referencia o lugar  3) pegar coordenadas.
-   Si hay pin, el despacho guarda las coordenadas y las ven las tablets y el Mapa de Flota. */
+   Si hay pin, el despacho guarda las coordenadas y las ven las tablets y el Mapa Comunal. */
 const UBIC = { pin:null, origen:null, referencia:'', auto:false, mapa:null, marker:null, centro:null, timer:null, sug:[], seq:0 };
 const ORIGEN_TXT = { mapa:'Mapa', busqueda:'Búsqueda', coordenadas:'Coordenadas', terminal:'Terminal de coordenadas' };
 const $u = id => document.getElementById(id);

@@ -94,9 +94,17 @@
     var franja = d.querySelector('.nameplate'); if(!franja) return;
     var der = d.createElement('div'); der.className = 'vg-central-der';
     var con = franja.querySelector('.conexion-indicador'), reloj = franja.querySelector('.clock'), ops = franja.querySelector('.operador-actual');
+    if(!reloj){   // Historial no traía reloj: se crea el mismo que tienen las demás pantallas
+      reloj = d.createElement('div'); reloj.className = 'clock';
+      reloj.innerHTML = '<strong id="clk">—</strong><span id="fechaHoy">—</span>';
+      var tic = function(){ var n = new Date(), c = d.getElementById('clk'), f = d.getElementById('fechaHoy');
+        if(c) c.textContent = n.toLocaleTimeString('es-CL', { hour12:false });
+        if(f) f.textContent = n.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' }); };
+      tic(); setInterval(tic, 1000);
+    }
     if(ops) der.appendChild(ops);
     if(con) der.appendChild(con);
-    if(reloj) der.appendChild(reloj);
+    der.appendChild(reloj);
     banner.appendChild(der);
     franja.classList.add('vg-franja-oculta');
     // si la pantalla se desplaza por dentro (el cuerpo no se mueve), las pestañas ya quedan fijas arriba sin necesidad de «sticky»
