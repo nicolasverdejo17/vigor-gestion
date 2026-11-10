@@ -15,6 +15,7 @@
       moverVolver(h);
       adaptarPC(h);
       adaptarCrisis(h);
+      adaptarCentral(h);
     }
     // Botones primarios (color de acento antiguo) pasan al degradado
     var ACENTOS = ['rgb(30, 110, 125)', 'rgb(73, 233, 255)', 'rgb(18, 131, 155)', 'rgb(45, 211, 219)'];
@@ -83,6 +84,40 @@
     banner.classList.add('vg-pc');
   }
 
+  // Central de Alarmas: las 5 pestañas comparten el mismo encabezado. El banner lleva el logo, «Central de Alarmas»,
+  // el estado de conexión y el reloj; la franja grande de abajo (escudo, título repetido y nombre del Cuerpo) se quita;
+  // las pestañas quedan en una fila fija y, a la derecha, los Operadores en turno (solo en la Consola).
+  var CENTRAL = ['consola_despacho', 'visual_companias', 'puestos_mando_activos', 'historial_despacho', 'terminal_coordenadas'];
+  function adaptarCentral(banner){
+    var archivo = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
+    if(CENTRAL.indexOf(archivo) < 0) return;
+    var franja = d.querySelector('.nameplate'); if(!franja) return;
+    var der = d.createElement('div'); der.className = 'vg-central-der';
+    var con = franja.querySelector('.conexion-indicador'), reloj = franja.querySelector('.clock'), ops = franja.querySelector('.operador-actual');
+    if(ops) der.appendChild(ops);
+    if(con) der.appendChild(con);
+    if(reloj) der.appendChild(reloj);
+    banner.appendChild(der);
+    franja.classList.add('vg-franja-oculta');
+    // si la pantalla se desplaza por dentro (el cuerpo no se mueve), las pestañas ya quedan fijas arriba sin necesidad de «sticky»
+    var ov = getComputedStyle(d.body).overflowY; if(ov === 'hidden' || ov === 'auto' || ov === 'scroll') d.body.classList.add('vg-tabs-fijas');
+    banner.classList.add('vg-central'); d.body.classList.add('vg-central-body');
+    // «Modo Crisis» no tenía el contador rojo de ubicaciones sin leer en la pestaña de Coordenadas: se le suma
+    if(archivo === 'puestos_mando_activos'){
+      var a = d.querySelector('.central-tab[href="terminal_coordenadas.html"]');
+      if(a && !a.querySelector('.tab-badge')){
+        var b = d.createElement('span'); b.className = 'tab-badge'; b.style.display = 'none'; b.textContent = '0'; a.appendChild(b);
+        var n = 0;
+        (function esperar(){
+          if(typeof sb !== 'undefined' && sb && typeof miCuerpoId !== 'undefined' && miCuerpoId){
+            sb.from('reportes_coordenadas').select('id', { count:'exact', head:true }).eq('cuerpo_id', miCuerpoId).eq('leido', false)
+              .then(function(r){ if(r && r.count > 0){ b.textContent = r.count; b.style.display = 'inline-flex'; } });
+          } else if(n++ < 40) setTimeout(esperar, 500);
+        })();
+      }
+    }
+  }
+
   // Modo Crisis: reloj, cronómetro y «Desactivar» suben al banner; la franja roja de abajo se quita
   function adaptarCrisis(banner){
     var archivo = (location.pathname.split('/').pop() || '').toLowerCase();
@@ -101,7 +136,7 @@
   }
 
   // El nombre de la pantalla va en el banner, a continuación del logo.
-  var ESPECIALES = { 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual',
+  var ESPECIALES = { 'consola_despacho.html':'Central de Alarmas', 'visual_companias.html':'Central de Alarmas', 'puestos_mando_activos.html':'Central de Alarmas', 'historial_despacho.html':'Central de Alarmas', 'terminal_coordenadas.html':'Central de Alarmas', 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual',
     'tablet_parte.html':'Parte de Emergencia', 'tablet_bitacora.html':'Bitácora', 'tablet_checklist.html':'Checklist', 'tablet_checklist_historial.html':'Historial de Checklist', 'tablet_dotacion.html':'Dotación Asignada' };
   // Las pantallas del menú Opciones se titulan exactamente como su botón en Opciones.
   var TITULOS_OPCIONES = {

@@ -27,7 +27,7 @@
 :root{
   --bg:#030B13;--p:#061520;--c:#091D2C;--l:#0F2A3B;--l2:#153A52;
   --cy:#2DD3DB;--rj:#F13746;--vd:#3CF29A;--az:#34B8FF;--am:#FFC247;--tx:#EAF6FB;--mu:#8FB0C2;
-  --bh:56px;--th:0px;--pw:340px;--tam:1;
+  --bh:56px;--th:0px;--pw:340px;--tam:1;--vg-grad:linear-gradient(90deg,#34B8FF,#2DD3DB 35%,#3DEBC0 60%,#35F454);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -51,12 +51,14 @@ button{font-family:inherit;color:inherit}
 
 /* ---- mapa ---- */
 #stage{position:fixed;left:0;right:0;top:calc(var(--bh) + var(--th));bottom:0;overflow:hidden}
-body.con-tabs{--th:40px}
-#ctabs{position:fixed;left:0;right:0;top:var(--bh);height:var(--th);z-index:39;display:none;align-items:center;gap:6px;padding:0 18px;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--l)}
+body.con-tabs{--th:55px}
+@media (min-width:900px){ :root{--bh:62px} #ban{padding:0 28px !important} #ban img{height:42px !important} #ban .t{font-size:19px !important} }
+#ctabs{position:fixed;left:0;right:0;top:var(--bh);height:var(--th);z-index:39;display:none;align-items:center;gap:8px;padding:0 18px;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--l)}
+@media (min-width:900px){ #ctabs{padding:0 28px} }
 body.con-tabs #ctabs{display:flex}
-#ctabs a{flex:none;text-decoration:none;border:1px solid var(--l2);background:var(--p);color:var(--mu);font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:7px 12px;white-space:nowrap}
-#ctabs a:hover{border-color:var(--cy)}
-#ctabs a.on{border-color:var(--cy);background:rgba(45,211,219,.14);color:#fff}
+#ctabs a{flex:none;height:34px;display:inline-flex;align-items:center;text-decoration:none;border:1px solid var(--l2);border-radius:8px;background:var(--p);color:var(--mu);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:0 14px;white-space:nowrap}
+#ctabs a:hover{border-color:var(--cy);color:#fff}
+#ctabs a.on{background:var(--vg-grad);border-color:transparent;color:#fff}
 #ctabs .badge{display:inline-grid;place-items:center;min-width:16px;height:16px;background:var(--rj);color:#fff;font-size:9.5px;font-weight:800;border-radius:8px;padding:0 4px;margin-left:6px}
 #map{position:absolute;inset:0}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
@@ -165,7 +167,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 <div id="ban">
   <img src="img/logo.png" alt="Vigor">
   <div class="sep"></div>
-  <span class="t">Monitoreo de flota</span>
+  <span class="t">Central de Alarmas</span>
   <span class="sim" id="simTag" hidden>DATOS DE EJEMPLO</span>
   <div class="cnt" id="cnt"></div>
   <span class="dseg reloj" id="clock">--:--</span>
@@ -538,6 +540,8 @@ async function iniciarReal(){
   if(!cuerpoId){ avisar('Tu cuenta no está asociada a un Cuerpo activo',0); return; }
   let central=false; try{ const r=await sb.rpc('central_obtener_cuerpo'); central=Array.isArray(r.data)?r.data.length>0:!!r.data; }catch(e){}
   armarPestanas(central);
+  if(central){ try{ const rc2=await sb.from('reportes_coordenadas').select('id',{count:'exact',head:true}).eq('cuerpo_id',cuerpoId).eq('leido',false);
+    if(rc2.count>0){ const a=document.querySelector('#ctabs a[href="terminal_coordenadas.html"]'); if(a) a.insertAdjacentHTML('beforeend','<span class="badge">'+rc2.count+'</span>'); } }catch(e){} }
   // límite de la comuna del Cuerpo (archivo limites/<comuna>.geojson, si existe) y centro del mapa
   try{
     const r = await sb.rpc('mi_cuerpo_info'); const f = Array.isArray(r.data) ? r.data[0] : r.data;
