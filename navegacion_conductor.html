@@ -27,7 +27,8 @@
 :root{
   --bg:#030B13;--p:#061520;--c:#091D2C;--l:#0F2A3B;--l2:#153A52;
   --cy:#2DD3DB;--rj:#F13746;--vd:#3CF29A;--az:#34B8FF;--am:#FFC247;--tx:#EAF6FB;--mu:#8FB0C2;--bl:#1C6EE6;
-  --pw:510px;
+  --pw:min(510px,46vw);
+  --tam:1;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -42,8 +43,8 @@ button{font-family:inherit;color:inherit}
 .meMk .onda,.uMk .onda{transform-box:fill-box;transform-origin:center;animation:late 1.6s ease-out infinite;opacity:0}
 .meMk .o2,.uMk .o2{animation-delay:.8s}
 .uMk{width:86px;height:86px;z-index:4;pointer-events:none}
-.uMk svg{width:86px;height:86px;overflow:visible;transform:scale(var(--esc,1))}
-.lejos .uMk svg{transform:scale(.45)}
+.uMk svg{width:86px;height:86px;overflow:visible;transform:scale(calc(var(--esc,1) * var(--tam,1)))}
+.lejos .uMk svg{transform:scale(calc(.45 * var(--tam,1)))}
 .lejos .uMk .nom{top:40px}
 .uMk .nom{position:absolute;left:50%;top:62px;transform:translateX(-50%);font:700 11px 'Montserrat',sans-serif;color:#fff;background:rgba(3,11,19,.92);border:1px solid var(--l2);padding:1px 8px;white-space:nowrap}
 .meMk .punto,.uMk .punto{transform-box:fill-box;transform-origin:center;animation:latido 1.6s ease-in-out infinite}
@@ -64,7 +65,7 @@ button{font-family:inherit;color:inherit}
 .mk .lb{position:absolute;left:50%;top:38px;transform:translateX(-50%);font:600 10px 'Montserrat',sans-serif;color:var(--tx);background:rgba(3,11,19,.88);border:1px solid var(--l2);padding:1px 7px;white-space:nowrap}
 .mk .lb:empty{display:none}
 /* los íconos se achican al alejar el zoom y, muy lejos, quedan como puntos de su color */
-.mk .g{transform:scale(var(--esc,1));transform-origin:50% 100%}
+.mk .g{transform:scale(calc(var(--esc,1) * var(--tam,1)));transform-origin:50% 100%}
 .mk .lb{opacity:calc((var(--esc,1) - .62) * 5)}
 .pt{display:none;position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--k);border:1.5px solid #030B13}
 .pt.gr{width:16px;height:16px;margin-left:-8px;bottom:-8px}
@@ -129,7 +130,7 @@ body.abierto #al{left:18px;top:106px;width:330px}
 .bt[hidden]{display:none}
 .bt.ctr{border-color:var(--cy);color:var(--cy);background:rgba(6,21,32,.98)}
 body:not(.abierto) #btns{left:24px;bottom:24px}
-body.abierto #btns{right:calc(var(--pw) + 14px);bottom:18px}
+body.abierto #btns{right:calc(var(--pw) + 58px);bottom:18px}   /* a la izquierda de la pestaña, para no taparla ni quedar tapados */
 
 /* ---- panel de mando (desplegable) ---- */
 #panel{position:absolute;right:0;top:0;bottom:0;width:var(--pw);z-index:1100;background:var(--p);border-left:1px solid var(--l2);transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;overflow:hidden}
@@ -183,25 +184,46 @@ body.abierto #fade{right:var(--pw)}
 
 /* ---- vertical (celular en vertical) ---- */
 @media (max-aspect-ratio:1/1){
-  :root{--ph:54%}
+  :root{--ph:46%;--tam:.85}
   #ban{height:70px;padding:0 14px;gap:12px}#ban img{height:34px}#ban .t1{font-size:17px}#ban .t2{font-size:11px}#ban .tr .dseg{font-size:20px}
   #grif{display:none}
-  #dock{right:12px;bottom:12px}
+  .bt{width:44px;height:44px}.bt i{font-size:20px}
+  #btns{gap:6px}
+  #dock{right:10px;bottom:10px}
   #dock .m{padding:9px 12px 9px 10px;gap:8px}#dock .m i{font-size:30px}#dock .m .num{font-size:24px}#dock .m .calle{font-size:10px;max-width:100px}
   #dock .v{padding:9px 10px}#dock .v .num{font-size:22px}#dock .e{padding:9px 10px 9px 12px}#dock .e .num{font-size:17px}#dock .e .sub{font-size:10px}#dock .e .sub .dseg{display:none}
-  body:not(.abierto) #al{left:12px;top:82px;width:calc(100% - 24px)}
-  body:not(.abierto) #btns{left:12px;bottom:12px}
+  body:not(.abierto) #al{left:10px;top:80px;width:calc(100% - 20px)}
+  body:not(.abierto) #btns{left:10px;bottom:10px}
+  /* panel recogido: la pestaña queda en el borde derecho, a media altura, igual que en horizontal (no tapa ningún botón) */
+  /* panel desplegado: sube desde abajo; la pestaña queda centrada sobre él y los botones en una fila arriba de ella */
   #panel{top:auto;left:0;width:auto;height:var(--ph);border-left:none;border-top:1px solid var(--l2);transform:translateY(100%)}
   body.abierto #panel{transform:none}
-  body.abierto #btns{right:12px;left:auto;bottom:calc(var(--ph) + 12px)}
-  #man{left:12px;top:12px;width:calc(100% - 24px)}
-  body.abierto #al{left:12px;top:92px;width:calc(100% - 24px)}
-  #vsq{left:12px;bottom:calc(var(--ph) + 12px)}
-  #tab{top:auto;bottom:190px;transform:none;right:auto;left:12px;width:132px;height:36px;flex-direction:row;border:1px solid var(--l2);border-bottom:none;border-top:3px solid var(--cy);transition:bottom .3s}
-  #tab span{writing-mode:horizontal-tb;transform:none}
-  #tab i{transform:rotate(90deg)}
-  body.abierto #tab{left:auto;right:12px;bottom:var(--ph)}
+  body.abierto #btns{flex-direction:row;right:10px;left:auto;bottom:calc(var(--ph) + 48px)}
+  #man{left:10px;top:10px;width:calc(100% - 20px);padding:8px 12px;gap:10px}#man i{font-size:34px}#man .num{font-size:26px}#man .calle{font-size:11px;margin-top:2px}
+  body.abierto #al{left:10px;top:68px;width:calc(100% - 20px);padding:6px 12px;font-size:12px}
+  #vsq{left:10px;bottom:calc(var(--ph) + 48px)}#vsq .box{width:64px;height:64px}#vsq .box .num{font-size:24px}.lim{width:40px;height:40px;font-size:14px;border-width:5px}
+  body.abierto #tab{top:auto;bottom:var(--ph);right:auto;left:50%;transform:translateX(-50%);width:132px;height:34px;flex-direction:row;border:1px solid var(--l2);border-bottom:none;border-top:3px solid var(--cy);transition:bottom .3s}
+  body.abierto #tab span{writing-mode:horizontal-tb;transform:none}
+  body.abierto #tab i{transform:rotate(90deg)}
   body.abierto #fade{right:0}
+}
+/* ---- horizontal en celular (poca altura) ---- */
+@media (min-aspect-ratio:1/1) and (max-height:520px){
+  #ban{height:56px;padding:0 14px;gap:12px}#ban img{height:32px}#ban .t1{font-size:17px}#ban .t2{font-size:11px}#ban .tr .dseg{font-size:20px}#ban .tr .lab{display:none}
+  #grif{top:68px;width:240px;padding:8px 12px}
+  body:not(.abierto) #al{top:68px;left:14px;font-size:12px;padding:6px 12px;width:min(340px,46vw)}
+  .bt{width:42px;height:42px}.bt i{font-size:20px}
+  #btns{gap:6px}
+  body:not(.abierto) #btns{left:14px;bottom:14px}
+  #dock{right:14px;bottom:14px}
+  #dock .m{padding:8px 12px 8px 10px;gap:8px}#dock .m i{font-size:28px}#dock .m .num{font-size:22px}#dock .m .calle{font-size:10px;max-width:110px}
+  #dock .v{padding:8px 10px}#dock .v .num{font-size:22px}#dock .e{padding:8px 10px 8px 12px}#dock .e .num{font-size:18px}#dock .e .sub{font-size:10px}
+  #tab{height:120px}
+  #man{left:12px;top:12px;width:250px;padding:8px 12px;gap:10px}#man i{font-size:34px}#man .num{font-size:26px}#man .calle{font-size:11px}
+  body.abierto #al{left:12px;top:78px;width:250px;padding:6px 12px;font-size:12px}
+  #vsq{left:12px;bottom:12px}#vsq .box{width:64px;height:64px}#vsq .box .num{font-size:24px}.lim{width:40px;height:40px;font-size:14px;border-width:5px}
+  body.abierto #btns{bottom:12px}
+  #panel .hd{height:46px}#panel .cuerpo{padding:12px 14px}#panel .desp{padding:12px 14px;margin-bottom:12px}#panel .desp .dir{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){.pul,.meMk .onda,.meMk .punto,.uMk .onda,.uMk .punto{animation:none}#panel,#tab{transition:none}}
 </style>
@@ -234,6 +256,7 @@ body.abierto #fade{right:var(--pw)}
   </div>
 
   <div id="btns">
+    <button class="bt" id="b5" aria-label="Poner el norte arriba" hidden><i class="ti ti-compass"></i></button>
     <button class="bt ctr" id="b4" aria-label="Volver a centrar el mapa en tu vehículo" hidden><i class="ti ti-current-location"></i></button>
     <button class="bt" id="b1" aria-label="Inicio"><i class="ti ti-home"></i></button>
     <button class="bt" id="b2" aria-label="Buscar punto"><i class="ti ti-search"></i></button>
@@ -410,14 +433,17 @@ function medir(){ const st=$('stage'); W=st.clientWidth; H=st.clientHeight; }
 function objetivos(){
   const abierto = document.body.classList.contains('abierto') && !document.body.classList.contains('sin-ruta');
   const vert = vertical();
-  V.padRObj = (abierto && !vert) ? Math.min(510, W*.4) : 0;
-  V.padBObj = (abierto && vert) ? H*.54 : 0;
+  const pn = $('panel');
+  V.padRObj = (abierto && !vert) ? pn.offsetWidth : 0;
+  V.padBObj = (abierto && vert) ? pn.offsetHeight : 0;
+  E.tam = vert ? .85 : 1;
 }
 function posicionarCarro(){
   const oy = H * (vertical() ? .62 : .74);                         // dónde queremos al carro, mirando desde arriba
   let padT=0, padB=0; if(2*oy > H) padT = 2*oy - H; else padB = H - 2*oy;
-  padB += V.padB;
-  V.camPad = { top:padT, bottom:padB, left:0, right:V.padR };
+  // celular en vertical con el panel abierto: el carro queda entre las tarjetas de arriba y la fila de botones, sin quedar tapado
+  const f = vertical() ? Math.min(1, V.padB / Math.max(1, $('panel').offsetHeight)) : 0;
+  V.camPad = { top:padT*(1-f) + 110*f, bottom:padB*(1-f) + V.padB + 50*f, left:0, right:V.padR };
 }
 window.addEventListener('resize', () => { medir(); objetivos(); if(mapa) mapa.resize(); });
 medir();
@@ -429,7 +455,9 @@ function iniciarMapa(){
       interactive:true, minZoom:10, maxZoom:19, attributionControl:false, keyboard:false, doubleClickZoom:false, fadeDuration:0, pixelRatio:Math.min(2, window.devicePixelRatio||1)
     });
   }catch(e){ avisar('Este dispositivo no puede dibujar el mapa', 'Falta compatibilidad con WebGL', 0); return; }
-  mapa.dragRotate.disable(); mapa.touchZoomRotate.disableRotation(); if(mapa.touchPitch) mapa.touchPitch.disable();
+  // se puede girar el mapa: dos dedos en el celular, o botón derecho (o Ctrl) y arrastrar en el PC; la inclinación con dos dedos queda desactivada
+  if(mapa.touchPitch) mapa.touchPitch.disable();
+  mapa.on('rotatestart', ev => { if(ev.originalEvent) soltar(); });
   // si la persona mueve o acerca el mapa con el dedo, la cámara deja de seguir al vehículo hasta que apriete «volver a centrar»
   // (la cámara se pausa mientras hay un dedo sobre el mapa; si el dedo se mueve, pasa a modo libre)
   const cont=mapa.getCanvasContainer(); let ini=null;
@@ -448,7 +476,7 @@ function iniciarMapa(){
 }
 
 /* =====================  Estado  ===================== */
-const E = { ruta:null, cum:[], destino:null, s:0, pos:null, rum:0, rumVista:0, vel:0, puntos:[], marcadores:[], unidades:[], uni:{}, sigue:null, camC:null, mkDestino:null, activo:false, t0:0, libre:false, tocando:false, esc:1, lejos:false, mkMe:null, meSvg:null };
+const E = { ruta:null, cum:[], destino:null, s:0, pos:null, rum:0, rumVista:0, vel:0, puntos:[], marcadores:[], unidades:[], uni:{}, sigue:null, camC:null, mkDestino:null, activo:false, t0:0, libre:false, tocando:false, esc:1, lejos:false, tam:1, mkMe:null, meSvg:null };
 
 function avisar(t, sub, ms){ const m=$('msg'); m.innerHTML = t + (sub ? '<small>'+sub+'</small>' : ''); m.classList.add('show'); clearTimeout(avisar._t); if(ms) avisar._t=setTimeout(()=>m.classList.remove('show'), ms); }
 function ocultarAviso(){ $('msg').classList.remove('show'); }
@@ -522,7 +550,7 @@ const Nav = {
     }
     pintarUnidades();
   },
-  _estado:E, _pedirRuta:pedirRuta, get _mapa(){ return mapa; }
+  _estado:E, _pedirRuta:pedirRuta, _soltar(){ soltar(); }, get _mapa(){ return mapa; }
 };
 window.VigorNav = Nav;
 
@@ -591,7 +619,7 @@ function moverUnidades(dt){
 }
 
 /* =====================  Cámara libre y vehículo  ===================== */
-function setLibre(v){ if(E.libre===v) return; E.libre=v; $('b4').hidden=!v; }
+function setLibre(v){ if(E.libre===v) return; E.libre=v; $('b4').hidden=!v; if(!v) $('b5').hidden=true; }
 function soltar(){ if(E.sigue){ E.sigue=null; pintarUnidades(); } setLibre(true); }
 function recentrar(){
   if(E.sigue){ E.sigue=null; pintarUnidades(); }
@@ -602,7 +630,7 @@ const MEHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradien
 function vehiculo(){
   if(!E.mkMe){ const d=document.createElement('div'); d.className='meMk'; d.innerHTML=MEHTML; E.meSvg=d.firstChild; E.mkMe=new maplibregl.Marker({ element:d, anchor:'center' }).setLngLat(E.pos).addTo(mapa); }
   else E.mkMe.setLngLat(E.pos);
-  E.meSvg.style.transform='rotate('+difAng(E.rum, mapa.getBearing())+'deg) scale('+(E.lejos?.45:E.esc)+')';   // el cono apunta hacia donde va el vehículo, aunque se mueva el mapa
+  E.meSvg.style.transform='rotate('+difAng(E.rum, mapa.getBearing())+'deg) scale('+((E.lejos?.45:E.esc)*E.tam)+')';   // el cono apunta hacia donde va el vehículo, aunque se mueva el mapa
 }
 /* solo se muestran los puntos que caen dentro de lo que se ve en pantalla (y a una distancia razonable) */
 function visible(lng, lat, c, alcance){
@@ -641,7 +669,12 @@ function cuadro(ts){
         mapa.jumpTo({ center:E.camC, pitch:58, padding:V.camPad }); }
     } else if(!E.libre && !E.tocando) mapa.jumpTo({ center:E.pos, bearing:E.rumVista, pitch:58, zoom, padding:V.camPad });
     vehiculo(); escalaIconos(); filtrarVisibles();
-    for(const m of E.marcadores){ const d=dist(E.pos,[m.p.lng,m.p.lat]); const tx = d<350 ? `${m.p.nombre||m.t.nombre} · ${Math.round(d/10)*10} m` : ''; if(tx!==m.tx){ m.tx=tx; m.el.querySelector('.lb').textContent=tx; } }
+    if(E.libre){ const br=((mapa.getBearing()%360)+360)%360, giro=br>180?br-360:br; const hid=Math.abs(giro)<1.5; if($('b5').hidden!==hid) $('b5').hidden=hid; if(!hid) $('b5').firstElementChild.style.transform='rotate('+(-giro)+'deg)'; }
+    // solo llevan etiqueta los puntos más cercanos a la vista (3 en el celular vertical, 5 en pantallas grandes); así no se apelotonan los nombres
+    const cp = mapa.getCenter().toArray(), maxEt = vertical() ? 3 : 5, cerca = [];
+    for(const m of E.marcadores){ if(m.vis===false) continue; const d=dist(cp,[m.p.lng,m.p.lat]); if(d<350) cerca.push({m,d}); }
+    cerca.sort((a,b)=>a.d-b.d); const conEt=new Set(cerca.slice(0,maxEt).map(x=>x.m));
+    for(const m of E.marcadores){ const d=dist(E.pos,[m.p.lng,m.p.lat]); const tx = conEt.has(m) ? `${m.p.nombre||m.t.nombre} · ${Math.round(d/10)*10} m` : ''; if(tx!==m.tx){ m.tx=tx; m.el.querySelector('.lb').textContent=tx; } }
   }
   if(E.activo) actualizarHUD();
   requestAnimationFrame(cuadro);
@@ -658,6 +691,7 @@ try{ if(localStorage.getItem('vigor_nav_panel')==='1' || PARAMS.get('panel')==='
 /* =====================  Reloj, unidad y botones  ===================== */
 const tic=()=>{ $('clock').textContent=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false}); }; tic(); setInterval(tic,10000);
 $('b4').onclick=recentrar;
+$('b5').onclick=()=>{ if(mapa) mapa.jumpTo({ bearing:0 }); };
 $('b1').onclick=()=>{ location.href='tablet_carro.html'; };
 $('b2').onclick=()=>avisar('Buscar un punto', 'Llega en una próxima parte: buscar entre los puntos del Cuerpo', 3200);
 $('b3').onclick=()=>avisar('Agregar un punto al mapa', 'Llega en una próxima parte: marcar un punto nuevo con su tipo', 3200);
