@@ -262,6 +262,7 @@ function renderFeed(){
         </div>
         <div class="feed-coords">📍 ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div>
         <div class="feed-actions">
+          <a class="feed-btn" style="text-decoration:none;display:inline-block;" href="consola_despacho.html?lat=${r.lat}&lng=${r.lng}&origen=terminal">🚒 Despachar aquí</a>
           <button class="feed-btn" onclick="verEnMapa(${r.lat}, ${r.lng})">🗺️ Ver en Mapa</button>
           <button class="feed-btn" onclick="copiarCoords(${r.lat}, ${r.lng})">📋 Copiar</button>
           ${!r.leido ? `<button class="feed-btn" onclick="marcarLeido('${r.id}')">✓ Marcar como leído</button>` : ''}

@@ -102,6 +102,36 @@
   }
   .field input:focus{ outline:none; border-color:var(--cyan);}
 
+
+  /* ---- Ubicación del siniestro (buscar, tocar el mapa o pegar coordenadas) ---- */
+  .ubic-bar{ display:flex; gap:8px;}
+  .ubic-bar input[type=text]{ flex:1; min-width:0;}
+  .ubic-btn{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); border-radius:4px; padding:0 18px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:.04em; text-transform:uppercase; cursor:pointer;}
+  .ubic-btn:hover{ border-color:var(--cyan);}
+  .ubic-btn.on{ border-color:var(--cyan); background:var(--cyan-dim); color:#fff;}
+  .ubic-pos{ position:relative;}
+  .ubic-sug{ position:absolute; left:0; right:0; top:100%; z-index:20; background:var(--panel); border:1px solid var(--cyan); border-top:none; display:none; max-height:290px; overflow:auto; box-shadow:0 12px 28px rgba(0,0,0,.5);}
+  .ubic-sug.on{ display:block;}
+  .ubic-sug button{ display:block; width:100%; text-align:left; background:none; border:none; border-bottom:1px solid var(--line); padding:10px 14px; color:var(--text); cursor:pointer; font-family:'Inter',sans-serif; font-size:14px;}
+  .ubic-sug button:last-child{ border-bottom:none;}
+  .ubic-sug button:hover, .ubic-sug button.sel{ background:var(--panel-alt);}
+  .ubic-sug small{ display:block; color:var(--text-dim); font-size:12px; margin-top:2px;}
+  .ubic-estado{ display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--text-muted);}
+  .ubic-estado.on{ display:flex;}
+  .ubic-estado .pin-dot{ width:10px; height:10px; border-radius:50%; background:var(--emergencia, #F13746); flex:none;}
+  .ubic-estado .mono{ color:var(--text);}
+  .ubic-estado .chip{ background:var(--panel-alt); border:1px solid var(--line-strong); padding:2px 9px; border-radius:10px; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--cyan);}
+  .ubic-estado button{ margin-left:auto; background:none; border:1px solid var(--line-strong); color:var(--text-muted); border-radius:4px; padding:3px 10px; cursor:pointer; font-size:12px;}
+  .ubic-estado button:hover{ border-color:var(--emergencia, #F13746); color:#fff;}
+  .ubic-map{ margin-top:12px; height:320px; border:1px solid var(--line-strong); border-radius:4px; overflow:hidden; position:relative; background:#030B13;}
+  .ubic-map.off{ display:none;}
+  #ubicMap{ position:absolute; inset:0;}
+  .ubic-pin{ width:34px; height:34px; cursor:grab;}
+  .ubic-pin b{ position:absolute; left:3px; top:0; width:28px; height:28px; background:#F13746; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid #030B13; display:grid; place-items:center;}
+  .ubic-pin svg{ width:15px; height:15px; transform:rotate(45deg);}
+  .ubic-pin:active{ cursor:grabbing;}
+  .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right{ display:none;}
+
   .cia-select{ display:flex; gap:8px; flex-wrap:wrap;}
   .cia-btn{
     background:var(--panel-alt); border:2px solid var(--alerta); color:#fff;
@@ -289,6 +319,7 @@
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
 <script src="vigor-tema.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 </head>
 <body>
 
@@ -336,9 +367,18 @@
       <div class="frame-head"><h2>Consola de Despacho</h2><span class="tag">nuevo evento</span></div>
       <div class="frame-body">
 
-        <div class="field">
+        <div class="field" id="ubicField">
           <label>Dirección / ubicación</label>
-          <input type="text" id="direccion" placeholder="Ej. Camino Los Aromos, km 4, sector rural">
+          <div class="ubic-pos">
+            <div class="ubic-bar">
+              <input type="text" id="direccion" placeholder="Ej. Camino Los Aromos, km 4, sector rural — o pega las coordenadas" autocomplete="off">
+              <button type="button" class="ubic-btn" id="ubicBuscar">Buscar</button>
+              <button type="button" class="ubic-btn on" id="ubicMapa">Mapa</button>
+            </div>
+            <div class="ubic-sug" id="ubicSug"></div>
+          </div>
+          <div class="ubic-estado" id="ubicEstado"></div>
+          <div class="ubic-map" id="ubicMapWrap"><div id="ubicMap"></div></div>
         </div>
 
         <div class="field">
@@ -407,6 +447,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="vigor-config.js"></script>
+<script src="vigor-mapa.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -476,6 +519,7 @@ async function cargarSesion(){
     document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
   }
 
+  try{ ubicInit(); }catch(e){ console.warn('mapa de ubicación:', e && e.message); }
   await Promise.all([cargarClaves(), cargarCiasYCarros(), cargarEmergenciasEnCurso(), cargarOperadorTurno(), actualizarBadgeCoordenadas()]);
   renderCiaStrip(); renderCiaSelect(); renderEmergencias(); renderSeleccionados(); renderAlertas(); renderEmergenciasEnCurso();
   suscribirRealtime();
@@ -896,20 +940,22 @@ function mensajeErrorOperador(error){
 
 async function confirmarDespacho(){
   marcarAccionLocal();
+  ubicAntesDeConfirmar();
   const dir = document.getElementById('direccion').value.trim();
   if(!dir || despachoActual.length===0 || !tipoSel){
     toast('Completa dirección, al menos una Compañía/carro y el tipo de emergencia');
     return;
   }
   const unidades = despachoActual.flatMap(d => d.carros.map(c => ({ compania_id: d.compania_id, carro_id: c.id })));
-  const { error } = await sb.rpc('confirmar_despacho', {
-    p_direccion: dir, p_tipo_emergencia_id: tipoSel, p_unidades: unidades
-  });
+  const { error } = UBIC.pin
+    ? await sb.rpc('confirmar_despacho_con_ubicacion', { p_direccion: dir, p_tipo_emergencia_id: tipoSel, p_unidades: unidades,
+        p_lat: UBIC.pin.lat, p_lng: UBIC.pin.lng, p_origen: UBIC.origen, p_referencia: UBIC.referencia || null })
+    : await sb.rpc('confirmar_despacho', { p_direccion: dir, p_tipo_emergencia_id: tipoSel, p_unidades: unidades });
   if(error){ toast(mensajeErrorOperador(error) || 'No se pudo confirmar el despacho — ' + error.message); return; }
 
   reproducirTono(null);
   toast(`Despacho confirmado — ${despachoActual.map(d=>d.ciaNombre+': '+d.carros.map(c=>c.nom).join(',')).join(' | ')}`);
-  document.getElementById('direccion').value='';
+  document.getElementById('direccion').value=''; ubicQuitar();
   despachoActual=[]; tipoSel=null;
   renderSeleccionados(); renderEmergencias();
   await cargarEmergenciasEnCurso();
@@ -981,6 +1027,129 @@ async function confirmarAlerta(id){
   alertaCiasSel[id] = []; alertaOpen[id] = false;
   renderAlertas();
 }
+
+
+/* =====================  Ubicación del siniestro  =====================
+   Tres formas de ubicar el lugar, todas opcionales (si no hay internet, se despacha escribiendo la dirección como siempre):
+   1) tocar el mapa (el pin se puede arrastrar)  2) buscar una calle, referencia o lugar  3) pegar coordenadas.
+   Si hay pin, el despacho guarda las coordenadas y las ven las tablets y el Mapa de Flota. */
+const UBIC = { pin:null, origen:null, referencia:'', auto:false, mapa:null, marker:null, centro:null, timer:null, sug:[], seq:0 };
+const ORIGEN_TXT = { mapa:'Mapa', busqueda:'Búsqueda', coordenadas:'Coordenadas', terminal:'Terminal de coordenadas' };
+const $u = id => document.getElementById(id);
+const ubicMapaOk = () => typeof maplibregl !== 'undefined' && typeof vigorEstiloMapa === 'function';
+const fmtC = (a, b) => a.toFixed(5) + ', ' + b.toFixed(5);
+
+async function ubicInit(){
+  const inp = $u('direccion');
+  inp.addEventListener('input', ubicAlEscribir);
+  inp.addEventListener('keydown', ev => {
+    const cont = $u('ubicSug'); const items = [...cont.querySelectorAll('button')];
+    if(ev.key === 'Escape'){ ubicCerrarSug(); return; }
+    if(!items.length || !cont.classList.contains('on')) return;
+    let i = items.findIndex(b => b.classList.contains('sel'));
+    if(ev.key === 'ArrowDown'){ ev.preventDefault(); i = (i + 1) % items.length; }
+    else if(ev.key === 'ArrowUp'){ ev.preventDefault(); i = (i - 1 + items.length) % items.length; }
+    else if(ev.key === 'Enter'){ ev.preventDefault(); ubicElegir(i >= 0 ? i : 0); return; }
+    else return;
+    items.forEach((b, k) => b.classList.toggle('sel', k === i));
+  });
+  document.addEventListener('click', ev => { if(!ev.target.closest('.ubic-pos')) ubicCerrarSug(); });
+  $u('ubicBuscar').onclick = () => ubicBuscar();
+  $u('ubicMapa').onclick = () => { const w = $u('ubicMapWrap'); w.classList.toggle('off'); $u('ubicMapa').classList.toggle('on', !w.classList.contains('off')); if(UBIC.mapa) setTimeout(() => UBIC.mapa.resize(), 30); };
+  if(!ubicMapaOk()){ $u('ubicMapWrap').classList.add('off'); $u('ubicMapa').style.display = 'none'; return; }   // sin internet o sin librería: solo texto
+  // centro y límite de la comuna del Cuerpo
+  let centro = (window.VIGOR_CONFIG && window.VIGOR_CONFIG.CENTRO_DEFECTO) || [-72.6636, -36.8236], slug = '';
+  try{
+    const { data:cu } = await sb.from('cuerpos').select('comuna,centro_lat,centro_lng').eq('id', miCuerpoId).maybeSingle();
+    if(cu){ if(cu.centro_lat != null && cu.centro_lng != null) centro = [cu.centro_lng, cu.centro_lat];
+      slug = String(cu.comuna || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_'); }
+  }catch(e){}
+  UBIC.centro = centro;
+  UBIC.mapa = new maplibregl.Map({ container:'ubicMap', style:vigorEstiloMapa(), center:centro, zoom:12.5, minZoom:6, maxZoom:19, attributionControl:false, fadeDuration:0, dragRotate:false, pitchWithRotate:false, doubleClickZoom:false });
+  UBIC.mapa.touchZoomRotate.disableRotation();
+  UBIC.mapa.getCanvas().style.cursor = 'crosshair';
+  UBIC.mapa.on('click', ev => ubicPoner(ev.lngLat.lat, ev.lngLat.lng, 'mapa'));
+  UBIC.mapa.on('load', async () => {
+    if(slug){ try{ const r = await fetch('limites/' + slug + '.geojson', { method:'HEAD' }); if(r.ok){
+      UBIC.mapa.addSource('lim', { type:'geojson', data:'limites/' + slug + '.geojson' });
+      UBIC.mapa.addLayer({ id:'lim-linea', type:'line', source:'lim', filter:['==', ['geometry-type'], 'Polygon'], paint:{ 'line-color':'#49E9FF', 'line-width':2, 'line-opacity':.85 } });
+    } }catch(e){} }
+    ubicDesdeUrl();
+  });
+}
+function ubicDesdeUrl(){
+  const q = new URLSearchParams(location.search), lat = parseFloat(q.get('lat')), lng = parseFloat(q.get('lng'));
+  if(isFinite(lat) && isFinite(lng)) ubicPoner(lat, lng, q.get('origen') === 'terminal' ? 'terminal' : 'coordenadas');
+}
+function ubicCerrarSug(){ $u('ubicSug').classList.remove('on'); }
+
+function ubicAlEscribir(){
+  UBIC.auto = false; clearTimeout(UBIC.timer);
+  if($u('direccion').value.trim().length < 3){ ubicCerrarSug(); return; }
+  // se espera a que termine de escribir o pegar; así unas coordenadas a medio escribir no se toman por buenas
+  UBIC.timer = setTimeout(() => {
+    const t = $u('direccion').value.trim();
+    const c = window.vigorParseCoord ? vigorParseCoord(t) : null;
+    if(c){ ubicCerrarSug(); ubicPoner(c.lat, c.lng, 'coordenadas'); } else ubicBuscar();
+  }, 650);
+}
+async function ubicBuscar(){
+  const t = $u('direccion').value.trim(); if(t.length < 2 || !window.vigorBuscarLugar) return;
+  const n = ++UBIC.seq;
+  const res = await vigorBuscarLugar(t, UBIC.centro);
+  if(n !== UBIC.seq) return;                                              // llegó una búsqueda más nueva
+  UBIC.sug = res.slice(0, 6);
+  const cont = $u('ubicSug');
+  if(!UBIC.sug.length){ cont.classList.remove('on'); return; }
+  cont.innerHTML = UBIC.sug.map((x, i) => `<button type="button" data-i="${i}"><b>${ubicEsc(x.principal)}</b>${x.lugar ? '<small>' + ubicEsc(x.lugar) + '</small>' : ''}</button>`).join('');
+  cont.querySelectorAll('button').forEach(b => b.onclick = () => ubicElegir(+b.dataset.i));
+  cont.classList.add('on');
+}
+function ubicEsc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+function ubicElegir(i){ const x = UBIC.sug[i]; if(!x) return; ubicCerrarSug(); ubicPoner(x.lat, x.lng, 'busqueda', { texto:x.texto, referencia:x.referencia }); }
+
+/* Coloca (o mueve) el pin. Si el texto está vacío o lo escribió el propio sistema, lo completa con la dirección más cercana. */
+async function ubicPoner(lat, lng, origen, op){
+  op = op || {}; UBIC.pin = { lat, lng }; UBIC.origen = origen; if(op.referencia != null) UBIC.referencia = op.referencia;
+  ubicPintarPin(); ubicPintarEstado();
+  const inp = $u('direccion');
+  if(op.texto){ inp.value = op.texto; UBIC.auto = true; }
+  else {
+    const puedeLlenar = !inp.value.trim() || UBIC.auto || (origen === 'coordenadas' && vigorParseCoord(inp.value));
+    if(puedeLlenar){ inp.value = 'Coordenadas ' + fmtC(lat, lng); UBIC.auto = true; }
+    const n = ++UBIC.seq;
+    const lugar = window.vigorLugarDe ? await vigorLugarDe(lat, lng) : null;
+    if(n !== UBIC.seq) return;
+    if(lugar){ UBIC.referencia = lugar.referencia || lugar.lugar || ''; if(puedeLlenar && UBIC.auto){ inp.value = lugar.texto; } }
+  }
+  ubicPintarEstado();
+}
+function ubicPintarPin(){
+  if(!UBIC.mapa || !UBIC.pin) return;
+  const ll = [UBIC.pin.lng, UBIC.pin.lat];
+  if(!UBIC.marker){
+    const el = document.createElement('div'); el.className = 'ubic-pin';
+    el.innerHTML = '<b><svg viewBox="0 0 24 24" fill="none" stroke="#030B13" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9Z"/></svg></b>';
+    UBIC.marker = new maplibregl.Marker({ element:el, anchor:'bottom', draggable:true }).setLngLat(ll).addTo(UBIC.mapa);
+    UBIC.marker.on('dragend', () => { const p = UBIC.marker.getLngLat(); ubicPoner(p.lat, p.lng, 'mapa'); });
+  } else UBIC.marker.setLngLat(ll);
+  const b = UBIC.mapa.getBounds(), dentro = b.contains(ll);
+  if(UBIC.origen !== 'mapa' || !dentro) UBIC.mapa.easeTo({ center:ll, zoom:Math.max(UBIC.mapa.getZoom(), UBIC.origen === 'mapa' ? 0 : 15), duration:500 });
+}
+function ubicPintarEstado(){
+  const e = $u('ubicEstado');
+  if(!UBIC.pin){ e.classList.remove('on'); e.innerHTML = ''; return; }
+  e.classList.add('on');
+  e.innerHTML = `<span class="pin-dot"></span><span class="mono">${fmtC(UBIC.pin.lat, UBIC.pin.lng)}</span><span class="chip">${ORIGEN_TXT[UBIC.origen] || ''}</span>${UBIC.referencia ? '<span>' + ubicEsc(UBIC.referencia) + '</span>' : ''}<button type="button" id="ubicQuitar">Quitar pin</button>`;
+  $u('ubicQuitar').onclick = () => ubicQuitar();
+}
+function ubicQuitar(){
+  UBIC.pin = null; UBIC.origen = null; UBIC.referencia = ''; UBIC.auto = false;
+  if(UBIC.marker){ UBIC.marker.remove(); UBIC.marker = null; }
+  ubicPintarEstado();
+}
+// Si hay pin pero el texto quedó vacío, el despacho igual necesita una dirección escrita
+function ubicAntesDeConfirmar(){ const inp = $u('direccion'); if(UBIC.pin && !inp.value.trim()) inp.value = 'Coordenadas ' + fmtC(UBIC.pin.lat, UBIC.pin.lng); }
 
 cargarSesion();
 </script>
