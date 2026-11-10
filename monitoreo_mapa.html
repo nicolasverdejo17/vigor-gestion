@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VIGOR - Gestiona tu compañía de forma eficiente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png?v=2" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+<meta name="theme-color" content="#030B13">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<style>
+/* Monitoreo de flota — mapa plano (2D, norte arriba) con todos los carros del Cuerpo.
+   Mismo lenguaje que Vigor: Montserrat, paleta azul oscura, ángulos rectos, relojes de 7 segmentos, rojo de emergencia #F13746. */
+@font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+:root{
+  --bg:#030B13;--p:#061520;--c:#091D2C;--l:#0F2A3B;--l2:#153A52;
+  --cy:#2DD3DB;--rj:#F13746;--vd:#3CF29A;--az:#34B8FF;--am:#FFC247;--tx:#EAF6FB;--mu:#8FB0C2;
+  --bh:56px;--pw:340px;--tam:1;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;font-family:'Montserrat','Segoe UI',sans-serif}
+button{font-family:inherit;color:inherit}
+.dseg{font-family:'DSEG7',monospace;font-weight:700;letter-spacing:.06em;color:var(--cy)}
+.lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:600}
+.num{font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.num small{font-size:.45em;font-weight:600;margin-left:.2em;color:var(--mu)}
+
+/* ---- banner Vigor ---- */
+#ban{position:fixed;left:0;right:0;top:0;height:var(--bh);z-index:40;display:flex;align-items:center;gap:14px;padding:0 18px;background:linear-gradient(180deg,#07192A,#030B13);border-bottom:1px solid var(--l)}
+#ban img{height:36px;width:auto;display:block;flex:none}
+#ban .sep{width:1.5px;height:24px;background:var(--l2);flex:none}
+#ban .t{font-size:16px;font-weight:700;white-space:nowrap}
+#ban .sim{font-size:10px;font-weight:700;letter-spacing:.12em;color:#030B13;background:var(--am);padding:3px 8px;white-space:nowrap}
+#ban .cnt{display:flex;gap:8px;margin-left:8px}
+.chip{display:flex;align-items:center;gap:7px;border:1px solid var(--l2);background:var(--p);padding:4px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip i.d{width:9px;height:9px;border-radius:50%;background:var(--k);display:inline-block}
+#ban .reloj{margin-left:auto;font-size:22px}
+
+/* ---- mapa ---- */
+#stage{position:fixed;left:0;right:0;top:var(--bh);bottom:0;overflow:hidden}
+#map{position:absolute;inset:0}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
+
+/* ---- panel de unidades ---- */
+#panel{position:absolute;left:0;top:0;bottom:0;width:var(--pw);z-index:20;background:rgba(6,21,32,.96);border-right:1px solid var(--l2);display:flex;flex-direction:column;transition:transform .3s}
+body.cerrado #panel{transform:translateX(-100%)}
+#panel .cuerpo{overflow:auto;padding:14px 14px 20px;flex:1}
+#panel h4{margin:14px 0 8px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:600;display:flex;justify-content:space-between}
+#panel h4:first-child{margin-top:0}
+.it{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--c);border:1px solid var(--l2);padding:9px 12px;margin-bottom:6px;cursor:pointer;font-size:14px;color:var(--tx)}
+.it:hover{border-color:var(--cy)}.it:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.it.sel{border-color:var(--cy);background:rgba(45,211,219,.1)}
+.it .pt{width:11px;height:11px;border-radius:50%;background:var(--k);flex:none}
+.it.off{opacity:.55}.it.off .pt{background:transparent;border:2px dashed var(--mu)}
+.it b{font-weight:700}
+.it .st{font-size:11px;color:var(--mu);margin-top:2px;font-weight:500}
+.it .d{margin-left:auto;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.it .d small{display:block;font-size:10px;color:var(--mu);font-weight:500}
+.sin{border-left:4px solid var(--rj);background:linear-gradient(90deg,rgba(241,55,70,.18),transparent)}
+.sin i{color:var(--rj);font-size:20px}
+.vacio{color:var(--mu);font-size:13px;padding:4px 2px 10px}
+#ptab{position:absolute;z-index:25;left:var(--pw);top:50%;transform:translateY(-50%);width:34px;height:120px;background:var(--p);border:1px solid var(--l2);border-left:none;border-top:3px solid var(--cy);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;padding:0;transition:left .3s}
+#ptab i{font-size:20px;color:var(--cy)}
+#ptab span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:700;font-size:10px;letter-spacing:.14em;color:var(--mu)}
+body.cerrado #ptab{left:0}
+body:not(.cerrado) #ptab .ab,body.cerrado #ptab .ce{display:none}
+
+/* ---- controles del mapa ---- */
+#ctl{position:absolute;right:14px;top:14px;z-index:15;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.tg{display:flex;align-items:center;gap:8px;background:rgba(6,21,32,.94);border:1px solid var(--l2);padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--mu)}
+.tg i{font-size:18px}
+.tg.on{color:var(--tx);border-color:var(--cy)}.tg.on i{color:var(--cy)}
+.tg:hover{border-color:var(--cy)}
+#leg{position:absolute;left:calc(var(--pw) + 56px);bottom:14px;z-index:15;display:flex;gap:12px;flex-wrap:wrap;background:rgba(6,21,32,.94);border:1px solid var(--l2);padding:7px 12px;font-size:11px;font-weight:600;color:var(--mu);transition:left .3s}
+body.cerrado #leg{left:36px}
+#leg span{display:flex;align-items:center;gap:6px}#leg i{width:9px;height:9px;border-radius:50%;background:var(--k);display:inline-block}
+
+/* ---- tarjeta de la unidad seleccionada ---- */
+#card{position:absolute;z-index:18;bottom:60px;left:calc(var(--pw) + 56px);width:420px;max-width:calc(100% - var(--pw) - 90px);background:var(--p);border:1px solid var(--l2);border-top:3px solid var(--k,var(--cy));padding:14px 18px;display:none;transition:left .3s}
+body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
+#card.on{display:block}
+#card .x{position:absolute;right:8px;top:8px;width:30px;height:30px;background:none;border:none;cursor:pointer;color:var(--mu);font-size:20px;padding:0}
+#card .nm{font-size:26px;font-weight:800;line-height:1}
+#card .es{display:inline-flex;align-items:center;gap:7px;margin-left:10px;font-size:12px;font-weight:700;color:var(--k)}
+#card .es i{width:9px;height:9px;border-radius:50%;background:var(--k);display:inline-block}
+#card .fila{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap}
+#card .fila .num{font-size:22px}
+#card .fila .lab{margin-top:4px}
+#card .hacia{margin-top:12px;font-size:13px;color:var(--mu)}#card .hacia b{color:var(--tx)}
+#card .barra{height:5px;background:var(--l2);margin-top:10px}#card .barra i{display:block;height:100%;background:var(--k,var(--cy))}
+
+/* ---- marcadores ---- */
+.uM{width:56px;height:56px;z-index:5;cursor:pointer}
+.uM svg{position:absolute;inset:0;width:56px;height:56px;overflow:visible;transform:scale(var(--ue,1))}
+.uM .pul{transform-box:fill-box;transform-origin:center;animation:late 1.6s ease-out infinite;opacity:0}
+.uM .pt{transform-box:view-box;transform-origin:28px 28px}
+@keyframes late{0%{transform:scale(1);opacity:.55}100%{transform:scale(3);opacity:0}}
+.uM .nom{position:absolute;left:50%;top:44px;transform:translateX(-50%);font:700 11px 'Montserrat',sans-serif;color:#fff;background:rgba(3,11,19,.92);border:1px solid var(--l2);padding:1px 7px;white-space:nowrap;line-height:1.35}
+.uM .nom small{font-weight:600;color:var(--mu);margin-left:5px}
+.uM.off svg{opacity:.5}
+.uM.sel .nom{border-color:var(--cy)}
+.uM.sel svg circle.base{stroke:var(--cy);stroke-width:4}
+.lejos .uM .nom small{display:none}
+.mk{width:34px;height:34px;pointer-events:none}
+.g{position:absolute;inset:0;transform:scale(calc(var(--esc,1) * var(--tam,1)));transform-origin:50% 100%}
+.g b{position:absolute;left:3px;top:0;width:28px;height:28px;background:var(--k);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #030B13;display:grid;place-items:center}
+.g b i{transform:rotate(45deg);font-size:15px;color:#030B13;line-height:1}
+.g.big{width:46px;height:46px;inset:auto;left:-6px;top:-12px}
+.g.big b{left:4px;width:38px;height:38px}.g.big b i{font-size:21px}
+.ptm{display:none;position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--k);border:1.5px solid #030B13}
+.ptm.gr{width:16px;height:16px;margin-left:-8px;bottom:-8px}
+.mk .lb{display:none;position:absolute;left:50%;top:38px;transform:translateX(-50%);font:600 10px 'Montserrat',sans-serif;color:var(--tx);background:rgba(3,11,19,.88);border:1px solid var(--l2);padding:1px 7px;white-space:nowrap}
+.cerca .mk .lb{display:block}
+.mk.cu .lb{display:block}
+.lejos .mk .g,.lejos .mk .lb,.lejos .sp{display:none}
+.lejos .mk .ptm{display:block}
+.sp{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-34px 0 0 -30px;border-radius:50%;background:var(--rj);opacity:.3;animation:late 1.6s ease-out infinite;pointer-events:none}
+.mk .lb.sx{display:block;top:50px;font-weight:700}
+
+/* ---- mensaje ---- */
+#msg{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:30;max-width:min(520px,90%);text-align:center;font-weight:600;font-size:13px;background:rgba(6,21,32,.96);border:1px solid var(--l2);border-top:3px solid var(--cy);padding:10px 16px;display:none}
+#msg.show{display:block}
+
+/* ---- celular en vertical: la lista sube desde abajo ---- */
+@media (max-aspect-ratio:1/1){
+  :root{--bh:52px}
+  #ban{padding:0 12px;gap:10px}#ban img{height:30px}#ban .t{font-size:14px}#ban .cnt{display:none}#ban .reloj{display:none}#ban .t{font-size:13px}#ban .sim{margin-left:auto;font-size:8.5px;padding:3px 6px}
+  #panel{left:0;right:0;top:auto;bottom:0;width:auto;height:46%;border-right:none;border-top:1px solid var(--l2);transform:translateY(0)}
+  body.cerrado #panel{transform:translateY(100%)}
+  #ptab{left:50%;top:auto;bottom:46%;transform:translateX(-50%);width:132px;height:32px;flex-direction:row;border:1px solid var(--l2);border-bottom:none;border-top:3px solid var(--cy);transition:bottom .3s}
+  #ptab span{writing-mode:horizontal-tb;transform:none}
+  #ptab i{transform:rotate(90deg)}
+  body.cerrado #ptab{left:50%;bottom:0}
+  #ctl{right:10px;top:10px}
+  .tg{padding:7px 10px;font-size:11px}
+  #leg{display:none}
+  #card,body.cerrado #card{left:10px;right:10px;width:auto;max-width:none;bottom:calc(46% + 44px);padding:12px 14px}
+  body.cerrado #card{bottom:44px}
+  :root{--tam:.85}
+}
+@media (prefers-reduced-motion:reduce){.uM .pul,.sp{animation:none}#panel,#ptab,#card{transition:none}}
+</style>
+</head>
+<body>
+<div id="ban">
+  <img src="img/logo.png" alt="Vigor">
+  <div class="sep"></div>
+  <span class="t">Monitoreo de flota</span>
+  <span class="sim" id="simTag" hidden>DATOS DE EJEMPLO</span>
+  <div class="cnt" id="cnt"></div>
+  <span class="dseg reloj" id="clock">--:--</span>
+</div>
+
+<div id="stage">
+  <div id="map"></div>
+
+  <aside id="panel" aria-label="Lista de unidades">
+    <div class="cuerpo">
+      <h4>Siniestros activos <span id="nSin"></span></h4><div id="sinL"></div>
+      <h4>Unidades <span id="nUni"></span></h4><div id="uniL"></div>
+    </div>
+  </aside>
+  <button id="ptab" aria-label="Mostrar u ocultar la lista"><i class="ti ti-chevron-left ab"></i><i class="ti ti-chevron-right ce"></i><span class="ab">OCULTAR</span><span class="ce">UNIDADES</span></button>
+
+  <div id="ctl">
+    <button class="tg" id="tAll"><i class="ti ti-arrows-maximize"></i>Ver todo</button>
+    <button class="tg on" id="tPun"><i class="ti ti-map-pin"></i>Puntos</button>
+    <button class="tg on" id="tCua"><i class="ti ti-building-community"></i>Cuarteles</button>
+    <button class="tg on" id="tEst"><i class="ti ti-route"></i>Estelas</button>
+    <button class="tg on" id="tLim"><i class="ti ti-border-outer"></i>Límite comunal</button>
+  </div>
+  <div id="leg"></div>
+
+  <div id="card"><button class="x" id="cardX" aria-label="Cerrar"><i class="ti ti-x"></i></button>
+    <div><span class="nm" id="cNom">—</span><span class="es" id="cEst"><i></i><span></span></span></div>
+    <div class="fila" id="cFila"></div>
+    <div class="hacia" id="cHacia"></div>
+    <div class="barra" id="cBar" hidden><i></i></div>
+  </div>
+  <div id="msg" role="status"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="vigor-sesion.js"></script>
+<script src="vigor-config.js"></script>
+<script>
+(function(){
+'use strict';
+const C = Object.assign({
+  MAPA_ESTILO_URL:'', MAPA_TILEJSON:'https://tiles.openfreemap.org/planet',
+  MAPA_GLYPHS:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf', MAPA_FUENTE_TEXTO:'Noto Sans Regular',
+  CENTRO_DEFECTO:[-72.6636,-36.8236], RUTEO_PROVEEDOR:'valhalla', RUTEO_URL:'https://valhalla1.openstreetmap.de',
+  LIMITES:['limites/florida.geojson']
+}, window.VIGOR_CONFIG || {});
+const $ = id => document.getElementById(id);
+const PARAMS = new URLSearchParams(location.search);
+const esc = t => String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RAD=Math.PI/180, RT=6371008.8;
+function dist(a,b){ const dLa=(b[1]-a[1])*RAD, dLo=(b[0]-a[0])*RAD, la1=a[1]*RAD, la2=b[1]*RAD; const h=Math.sin(dLa/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)**2; return 2*RT*Math.asin(Math.sqrt(h)); }
+function rumbo(a,b){ const la1=a[1]*RAD, la2=b[1]*RAD, dLo=(b[0]-a[0])*RAD; return (Math.atan2(Math.sin(dLo)*Math.cos(la2), Math.cos(la1)*Math.sin(la2)-Math.sin(la1)*Math.cos(la2)*Math.cos(dLo))/RAD+360)%360; }
+const PTS8=['N','NE','E','SE','S','SO','O','NO'], punto=r=>PTS8[Math.round(r/45)%8];
+function decodificarPolilinea(str, prec){ let i=0,lat=0,lng=0; const f=Math.pow(10,prec||6), out=[];
+  while(i<str.length){ let b,s=0,r=0; do{ b=str.charCodeAt(i++)-63; r|=(b&31)<<s; s+=5; }while(b>=32); lat+=(r&1)?~(r>>1):(r>>1);
+    s=0; r=0; do{ b=str.charCodeAt(i++)-63; r|=(b&31)<<s; s+=5; }while(b>=32); lng+=(r&1)?~(r>>1):(r>>1); out.push([lng/f,lat/f]); } return out; }
+function avisar(t, ms){ const m=$('msg'); m.textContent=t; m.classList.add('show'); clearTimeout(avisar._t); if(ms) avisar._t=setTimeout(()=>m.classList.remove('show'), ms); }
+
+/* =====================  Estados de las unidades  ===================== */
+const EST = {
+  emergencia:{ nombre:'En emergencia', color:'#F13746', orden:0 },
+  servicio:  { nombre:'En servicio', color:'#3CF29A', orden:1 },
+  mant:      { nombre:'En mantención', color:'#FFC247', orden:2 },
+  fuera:     { nombre:'Fuera de servicio', color:'#8FB0C2', orden:3 }
+};
+const SIN_SENAL = { nombre:'Sin señal', color:'#8FB0C2' };
+$('leg').innerHTML = ['emergencia','servicio','mant','fuera'].map(k=>`<span style="--k:${EST[k].color}"><i></i>${EST[k].nombre}</span>`).join('') + '<span style="--k:transparent"><i style="border:2px dashed #8FB0C2;background:none"></i>Sin señal</span>';
+
+/* =====================  Tipos de punto (los mismos de la navegación)  ===================== */
+const FAM = { agua:'#34B8FF', salud:'#3CF29A', auto:'#DCE8F5', sensible:'#B58CFF', riesgo:'#FF8A3D', vial:'#FFC247', terr:'#3DEBC0', com:'#8DA1C3', desp:'#F13746', pers:'#FF6FB5' };
+const TIPOS = {};
+[
+ ['grifo','agua','fire-hydrant','Grifo'],['fuente_agua','agua','ripple','Fuente de agua'],['estanque','agua','cylinder','Estanque'],['toma_agua','agua','droplet-half-2','Toma en río o canal'],['piscina','agua','pool','Piscina'],['laguna','agua','droplet','Laguna o embalse'],
+ ['hospital','salud','building-hospital','Hospital'],['posta','salud','first-aid-kit','Posta o Cesfam'],['clinica','salud','stethoscope','Clínica'],['ambulancia','salud','ambulance','Ambulancia base'],['farmacia','salud','pill','Farmacia'],
+ ['cuartel','auto','building-community','Cuartel de bomberos'],['carabineros','auto','shield-check','Carabineros'],['pdi','auto','shield','PDI'],['municipalidad','auto','flag','Municipalidad'],['proteccion_civil','auto','alert-octagon','Protección civil'],['helipuerto','auto','helicopter','Helipuerto'],
+ ['escuela','sensible','school','Escuela'],['jardin','sensible','baby-carriage','Jardín infantil'],['universidad','sensible','books','Universidad'],['hogar_ancianos','sensible','wheelchair','Hogar de ancianos'],['iglesia','sensible','building-church','Iglesia'],['estadio','sensible','ball-football','Estadio o gimnasio'],['carcel','sensible','lock','Cárcel'],['hotel','sensible','bed','Hotel o residencial'],
+ ['bodega_riesgo','riesgo','building-warehouse','Bodega de riesgo'],['bencinera','riesgo','gas-station','Bencinera'],['gas','riesgo','flame','Gas'],['industria','riesgo','building-factory-2','Industria'],['aserradero','riesgo','trees','Aserradero'],['polvorin','riesgo','bomb','Polvorín'],['alta_tension','riesgo','bolt','Alta tensión'],['agroquimicos','riesgo','flask','Agroquímicos'],
+ ['puente','vial','building-bridge-2','Puente con límite de peso'],['tunel','vial','arrows-vertical','Túnel o paso bajo'],['paso_nivel','vial','train','Paso a nivel'],['vado','vial','wave-sine','Vado'],['calle_angosta','vial','arrows-horizontal','Calle angosta'],['cuesta','vial','trending-up','Cuesta fuerte'],['porton','vial','lock-access','Portón o barrera'],
+ ['poblado','terr','building-cottage','Poblado'],['fundo','terr','plant-2','Fundo o sector rural'],['condominio','terr','building-skyscraper','Condominio'],['sin_cobertura','terr','antenna-bars-off','Sin cobertura'],['cerro','terr','mountain','Cerro o mirador'],['punto_encuentro','terr','users-group','Punto de encuentro'],
+ ['negocio','com','building-store','Negocio'],['supermercado','com','shopping-cart','Supermercado'],['ferreteria','com','tool','Ferretería'],['restaurante','com','tools-kitchen-2','Restaurante'],['banco','com','coin','Banco'],['antena','com','antenna','Antena'],
+ ['siniestro','desp','flame','Siniestro'],['unidad','desp','truck','Unidad en ruta'],['zona_trabajo','desp','barrier-block','Zona de trabajo'],['personalizado','pers','map-pin-plus','Punto personalizado']
+].forEach(a=>{ TIPOS[a[0]]={ icono:a[2], nombre:a[3], color:FAM[a[1]] }; });
+const tipoDe = p => TIPOS[p.tipo||p.categoria] || TIPOS.personalizado;
+function gota(color, icono, grande){ return `<div class="g${grande?' big':''}" style="--k:${color}"><b><i class="ti ti-${icono}"></i></b></div><div class="ptm${grande?' gr':''}" style="--k:${color}"></div>`; }
+function elem(html, cls){ const d=document.createElement('div'); d.className='mk'+(cls?' '+cls:''); d.innerHTML=html; return d; }
+
+/* =====================  Mapa plano  ===================== */
+function construirEstilo(){
+  if(C.MAPA_ESTILO_URL) return C.MAPA_ESTILO_URL;
+  const src='osm', fuente=[C.MAPA_FUENTE_TEXTO];
+  const w=(pts,extra)=>{ const x=extra||0, a=['interpolate',['linear'],['zoom']]; pts.forEach(p=>{ a.push(p[0], p[1]+x); }); return a; };
+  const grupos=[
+    { id:'mayor', clases:['motorway','trunk'],        pts:[[7,.8],[10,1.4],[14,4],[17,12],[20,26]], color:'#3A86AD' },
+    { id:'prim',  clases:['primary'],                 pts:[[8,.6],[10,1],[14,3.2],[17,10],[20,22]], color:'#2F7396' },
+    { id:'sec',   clases:['secondary','tertiary'],    pts:[[11,.8],[14,2.6],[17,8],[20,18]],        color:'#235C7B' },
+    { id:'local', clases:['minor','service','track'], pts:[[13,.6],[15,1.8],[17,6],[20,14]],        color:'#1A4660' }
+  ];
+  const capas=[
+    { id:'fondo', type:'background', paint:{'background-color':'#030B13'} },
+    { id:'cobertura', type:'fill', source:src, 'source-layer':'landcover', paint:{'fill-color':'#061520','fill-opacity':.9} },
+    { id:'parques', type:'fill', source:src, 'source-layer':'park', paint:{'fill-color':'#08241F','fill-opacity':.7} },
+    { id:'uso', type:'fill', source:src, 'source-layer':'landuse', paint:{'fill-color':'#061520','fill-opacity':.8} },
+    { id:'agua', type:'fill', source:src, 'source-layer':'water', paint:{'fill-color':'#06263A'} },
+    { id:'rios', type:'line', source:src, 'source-layer':'waterway', paint:{'line-color':'#0A3552','line-width':['interpolate',['linear'],['zoom'],10,.6,16,3]} },
+    { id:'edificios', type:'fill', source:src, 'source-layer':'building', minzoom:14, paint:{'fill-color':'#0C2A3F','fill-opacity':.95} }
+  ];
+  const filtro=g=>['all',['==',['geometry-type'],'LineString'],['in',['get','class'],['literal',g.clases]]];
+  for(const g of grupos) capas.push({ id:'borde-'+g.id, type:'line', source:src, 'source-layer':'transportation', filter:filtro(g), layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':'#030B13','line-width':w(g.pts,2.5)} });
+  for(const g of grupos.slice().reverse()) capas.push({ id:'via-'+g.id, type:'line', source:src, 'source-layer':'transportation', filter:filtro(g), layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':g.color,'line-width':w(g.pts)} });
+  capas.push(
+    { id:'nombres-calles', type:'symbol', source:src, 'source-layer':'transportation_name', minzoom:14, layout:{'symbol-placement':'line','text-field':['get','name'],'text-font':fuente,'text-size':11,'text-letter-spacing':.08,'text-transform':'uppercase'}, paint:{'text-color':'#7FA6C2','text-halo-color':'#030B13','text-halo-width':1.3} },
+    { id:'lugares', type:'symbol', source:src, 'source-layer':'place', filter:['in',['get','class'],['literal',['city','town','village','suburb','hamlet','neighbourhood']]], layout:{'text-field':['get','name'],'text-font':fuente,'text-size':['match',['get','class'],'city',16,'town',14,'village',12,11]}, paint:{'text-color':'#9FC0D6','text-halo-color':'#030B13','text-halo-width':1.4} }
+  );
+  return { version:8, glyphs:C.MAPA_GLYPHS, sources:{ [src]:{ type:'vector', url:C.MAPA_TILEJSON } }, layers:capas };
+}
+let mapa=null, listo=false;
+const vertical=()=>window.innerWidth<window.innerHeight;
+function iniciarMapa(){
+  try{
+    mapa=new maplibregl.Map({ container:'map', style:construirEstilo(), center:C.CENTRO_DEFECTO, zoom:11.5, pitch:0, bearing:0, minZoom:7, maxZoom:19, attributionControl:false, fadeDuration:0,
+      dragRotate:false, pitchWithRotate:false, keyboard:false, doubleClickZoom:false, pixelRatio:Math.min(2, window.devicePixelRatio||1) });
+  }catch(e){ avisar('Este dispositivo no puede dibujar el mapa (falta WebGL)', 0); return; }
+  mapa.touchZoomRotate.disableRotation(); if(mapa.touchPitch) mapa.touchPitch.disable();
+  mapa.on('error', ev=>console.warn('mapa:', ev && ev.error && ev.error.message));
+  mapa.on('load', ()=>{
+    const vacio={ type:'FeatureCollection', features:[] };
+    // límite de la comuna (contorno completo); el archivo viene de OpenStreetMap y está en limites/
+    (C.LIMITES||[]).forEach((url,i)=>{
+      const id='lim'+i; mapa.addSource(id,{type:'geojson',data:url});
+      mapa.addLayer({ id:id+'-relleno', type:'fill', source:id, filter:['==',['geometry-type'],'Polygon'], paint:{'fill-color':'#2DD3DB','fill-opacity':.035} });
+      mapa.addLayer({ id:id+'-halo', type:'line', source:id, filter:['==',['geometry-type'],'Polygon'], layout:{'line-join':'round'}, paint:{'line-color':'#2DD3DB','line-width':8,'line-opacity':.12,'line-blur':4} });
+      mapa.addLayer({ id:id+'-linea', type:'line', source:id, filter:['==',['geometry-type'],'Polygon'], layout:{'line-join':'round'}, paint:{'line-color':'#2DD3DB','line-width':['interpolate',['linear'],['zoom'],8,1.5,14,2.5],'line-opacity':.9} });
+      mapa.addLayer({ id:id+'-nombre', type:'symbol', source:id, filter:['==',['geometry-type'],'Point'], maxzoom:13, layout:{'text-field':['get','etiqueta'],'text-font':[C.MAPA_FUENTE_TEXTO],'text-size':13,'text-letter-spacing':.3}, paint:{'text-color':'#2DD3DB','text-opacity':.8,'text-halo-color':'#030B13','text-halo-width':1.5} });
+    });
+    limiteVisible();
+    mapa.addSource('rutas',{type:'geojson',data:vacio}); mapa.addSource('estelas',{type:'geojson',data:vacio});
+    mapa.addLayer({ id:'rutas-borde', type:'line', source:'rutas', layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':'#030B13','line-width':['case',['get','sel'],8,5],'line-opacity':.8} });
+    mapa.addLayer({ id:'rutas-otras', type:'line', source:'rutas', filter:['!=',['get','sel'],true], layout:{'line-cap':'butt','line-join':'round'}, paint:{'line-color':'#F13746','line-width':2.5,'line-opacity':.8,'line-dasharray':[2,1.4]} });
+    mapa.addLayer({ id:'rutas-sel', type:'line', source:'rutas', filter:['==',['get','sel'],true], layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':'#2DD3DB','line-width':4.5} });
+    mapa.addLayer({ id:'estelas', type:'line', source:'estelas', layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':['get','color'],'line-width':3,'line-opacity':.55} });
+    listo=true; document.dispatchEvent(new Event('vigor-mapa-listo'));
+  });
+  mapa.on('click', ev=>{ if(!ev.originalEvent.target.closest('.uM')) seleccionar(null); });
+  mapa.on('zoom', escalaIconos); mapa.on('moveend', filtrarPuntos); mapa.on('load', escalaIconos);
+}
+let esc_=1, lejos=false;
+function escalaIconos(){
+  const z=mapa.getZoom(), e = z>=15.5 ? 1 : (z<=12.5 ? .6 : .6+(z-12.5)/3*.4), le = z<12.5;
+  if(Math.abs(e-esc_)>.015){ esc_=e; mapa.getContainer().style.setProperty('--esc', e.toFixed(3)); mapa.getContainer().style.setProperty('--ue', Math.max(.75,e).toFixed(3)); }
+  if(le!==lejos){ lejos=le; mapa.getContainer().classList.toggle('lejos', le); }
+  mapa.getContainer().classList.toggle('cerca', z>=15);
+}
+
+/* =====================  Datos en tiempo real  ===================== */
+const D = { uni:{}, sin:{}, puntos:[], cuarteles:[], sel:null, capas:{ puntos:true, cuarteles:true, estelas:true, limites:true } };
+function limiteVisible(){ if(!mapa) return; (C.LIMITES||[]).forEach((u,i)=>{ ['relleno','halo','linea','nombre'].forEach(k=>{ const l='lim'+i+'-'+k; if(mapa.getLayer(l)) mapa.setLayoutProperty(l,'visibility',D.capas.limites?'visible':'none'); }); }); }
+try{ const g=JSON.parse(localStorage.getItem('vigor_mon_capas')||'null'); if(g) Object.assign(D.capas,g); }catch(e){}
+
+const UCLASE = e => e.en ? EST[e.estado] || EST.servicio : SIN_SENAL;
+function html_unidad(color){
+  return `<svg viewBox="0 0 56 56" aria-hidden="true"><circle class="pul" cx="28" cy="28" r="12" fill="${color}"/><g class="pt"><polygon points="28,2 35,14 21,14" fill="${color}" stroke="#030B13" stroke-width="2" stroke-linejoin="round"/></g><circle class="base" cx="28" cy="28" r="12" fill="${color}" stroke="#fff" stroke-width="3"/></svg>`;
+}
+function crearMarcador(e){
+  const d=document.createElement('div'); d.className='uM'; d.innerHTML=html_unidad('#fff')+'<div class="nom"></div>';
+  d.addEventListener('click', ev=>{ ev.stopPropagation(); seleccionar(e.id, true); });
+  e.el=d; e.mk=new maplibregl.Marker({ element:d, anchor:'center' }).setLngLat(e.cur).addTo(mapa); e.colorAct=null;
+}
+function pintarMarcador(e){
+  const k=UCLASE(e), col=k.color;
+  if(e.colorAct!==col+(e.estado==='emergencia'&&e.en)){
+    e.colorAct=col+(e.estado==='emergencia'&&e.en);
+    const s=e.el.querySelector('svg'); s.querySelectorAll('circle.base,.pt polygon').forEach(n=>n.setAttribute('fill',col)); s.querySelector('.pul').setAttribute('fill',col);
+    s.querySelector('.pul').style.display = (e.estado==='emergencia'&&e.en) ? '' : 'none';
+  }
+  const mov = e.en && e.vel>2;
+  e.el.querySelector('.pt').style.display = mov ? '' : 'none';
+  if(mov) e.el.querySelector('.pt').style.transform='rotate('+Math.round(e.rum||0)+'deg)';
+  e.el.classList.toggle('off', !e.en); e.el.classList.toggle('sel', D.sel===e.id);
+  const nom=e.el.querySelector('.nom'); const t=esc(e.nombre)+(mov?`<small>${Math.round(e.vel)} km/h</small>`:''); if(nom._t!==t){ nom._t=t; nom.innerHTML=t; }
+}
+
+const Mon = {
+  /* unidades: [{id,nombre,estado,lng,lat,rum,vel,ts,enLinea,destino:{id,titulo},kmRest,etaMin,ruta:[[lng,lat]..]}]
+     Se llama cada vez que llegan posiciones nuevas; el mapa mueve cada carro con suavidad. */
+  setUnidades(lista){
+    const ids=new Set((lista||[]).map(u=>u.id));
+    for(const id in D.uni) if(!ids.has(id)){ if(D.uni[id].mk) D.uni[id].mk.remove(); delete D.uni[id]; if(D.sel===id) D.sel=null; }
+    for(const u of lista||[]){
+      let e=D.uni[u.id]; if(!e) e=D.uni[u.id]={ id:u.id, cur:null, tgt:null, estela:[], mk:null };
+      const en = u.enLinea!==false && (!u.ts || Date.now()-u.ts<45000) && isFinite(u.lng) && isFinite(u.lat);
+      Object.assign(e,{ nombre:u.nombre||u.id, estado:u.estado||'servicio', rum:u.rum||0, vel:u.vel||0, en, destino:u.destino||null, kmRest:u.kmRest, etaMin:u.etaMin, ruta:u.ruta||e.ruta||null, prog:u.prog });
+      if(isFinite(u.lng)&&isFinite(u.lat)){
+        e.tgt=[u.lng,u.lat]; if(!e.cur){ e.cur=[u.lng,u.lat]; }
+        if(!e.mk) crearMarcador(e);
+        if(en){ const ult=e.estela[e.estela.length-1]; if(!ult || dist(ult,e.tgt)>8){ e.estela.push(e.tgt.slice()); if(e.estela.length>14) e.estela.shift(); } }
+      }
+    }
+    pintarTodo();
+  },
+  /* siniestros activos: [{id,titulo,dir,lng,lat}] */
+  setSiniestros(lista){
+    for(const id in D.sin){ if(D.sin[id].mk) D.sin[id].mk.remove(); } D.sin={};
+    for(const s of lista||[]){ const mk=new maplibregl.Marker({ element:elem(`<div class="sp"></div>`+gota('#F13746','flame',true)+`<div class="lb sx">${esc(s.titulo||'Siniestro')}</div>`,'sx'), anchor:'bottom' }).setLngLat([s.lng,s.lat]).addTo(mapa); D.sin[s.id]={...s,mk}; }
+    pintarLista();
+  },
+  /* puntos propios: [{id,tipo,nombre,lng,lat}] */
+  setPuntos(lista){ D.puntos.forEach(p=>p.mk&&p.mk.remove()); D.puntos=(lista||[]).map(p=>{ const t=tipoDe(p); const mk=new maplibregl.Marker({ element:elem(gota(t.color,t.icono)+'<div class="lb">'+esc(p.nombre||t.nombre)+'</div>'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); return {...p,mk,vis:false}; }); filtrarPuntos(); },
+  /* cuarteles: [{id,nombre,lng,lat}] */
+  setCuarteles(lista){ D.cuarteles.forEach(p=>p.mk&&p.mk.remove()); D.cuarteles=(lista||[]).map(p=>{ const mk=new maplibregl.Marker({ element:elem(gota('#DCE8F5','building-community')+'<div class="lb">'+esc(p.nombre||'Cuartel')+'</div>','cu'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); return {...p,mk,vis:false}; }); filtrarPuntos(); },
+  verTodo, _datos:D, get _mapa(){ return mapa; }
+};
+window.VigorMon = Mon;
+
+function filtrarPuntos(){
+  if(!mapa) return; const b=mapa.getBounds();
+  const aplicar=(lista,on)=>{ for(const p of lista){ const v = on && b.contains([p.lng,p.lat]); if(v!==p.vis){ p.vis=v; if(v) p.mk.addTo(mapa); else p.mk.remove(); } } };
+  aplicar(D.puntos, D.capas.puntos); aplicar(D.cuarteles, D.capas.cuarteles);
+}
+
+/* =====================  Pintado  ===================== */
+function ruta_geojson(){
+  const f=[]; for(const id in D.uni){ const e=D.uni[id]; if(!e.ruta||!e.en||e.estado!=='emergencia') continue;
+    f.push({ type:'Feature', properties:{ id, sel:D.sel===id }, geometry:{ type:'LineString', coordinates:[e.cur].concat(e.ruta.slice(e.prog||0)) } }); }
+  f.sort((a,b)=>a.properties.sel-b.properties.sel); return { type:'FeatureCollection', features:f };
+}
+function estela_geojson(){
+  const f=[]; if(D.capas.estelas) for(const id in D.uni){ const e=D.uni[id]; if(e.estela.length<2||!e.en) continue; f.push({ type:'Feature', properties:{ color:UCLASE(e).color }, geometry:{ type:'LineString', coordinates:e.estela.concat([e.cur]) } }); }
+  return { type:'FeatureCollection', features:f };
+}
+function pintarLista(){
+  const us=Object.values(D.uni).sort((a,b)=> (a.en===b.en ? ((EST[a.estado]||EST.servicio).orden-(EST[b.estado]||EST.servicio).orden) : (a.en?-1:1)) || a.nombre.localeCompare(b.nombre,'es',{numeric:true}));
+  $('uniL').innerHTML = us.length ? us.map(e=>{ const k=UCLASE(e);
+    const der = e.en ? (e.estado==='emergencia'&&e.destino ? `${e.kmRest!=null?e.kmRest.toFixed(1)+' km':'—'}<small>${e.etaMin!=null?(e.etaMin>0?e.etaMin+' min':'en el lugar'):''}</small>` : (e.vel>2?Math.round(e.vel)+' km/h':'detenida')) : '<small>sin datos</small>';
+    return `<button type="button" class="it${e.en?'':' off'}${D.sel===e.id?' sel':''}" data-u="${esc(e.id)}" style="--k:${k.color}"><span class="pt"></span><div><b>${esc(e.nombre)}</b><div class="st">${esc(e.en?(EST[e.estado]||EST.servicio).nombre:'Sin señal')}</div></div><span class="d">${der}</span></button>`; }).join('') : '<div class="vacio">Sin unidades conectadas.</div>';
+  $('nUni').textContent = us.length||'';
+  const ss=Object.values(D.sin);
+  $('sinL').innerHTML = ss.length ? ss.map(s=>{ const n=us.filter(e=>e.en&&e.estado==='emergencia'&&e.destino&&e.destino.id===s.id).length; return `<button type="button" class="it sin" data-s="${esc(s.id)}"><i class="ti ti-flame"></i><div><b>${esc(s.titulo||'Siniestro')}</b><div class="st">${esc(s.dir||'')}</div></div><span class="d">${n}<small>${n===1?'unidad':'unidades'}</small></span></button>`; }).join('') : '<div class="vacio">Sin siniestros activos.</div>';
+  $('nSin').textContent = ss.length||'';
+  const cuenta=(f)=>us.filter(f).length;
+  $('cnt').innerHTML = `<span class="chip" style="--k:${EST.servicio.color}"><i class="d"></i>${cuenta(e=>e.en&&e.estado==='servicio')} en servicio</span><span class="chip" style="--k:${EST.emergencia.color}"><i class="d"></i>${cuenta(e=>e.en&&e.estado==='emergencia')} en emergencia</span><span class="chip" style="--k:#8FB0C2"><i class="d"></i>${cuenta(e=>!e.en)} sin señal</span>`;
+}
+function pintarCard(){
+  const e=D.uni[D.sel], c=$('card'); if(!e){ c.classList.remove('on'); return; }
+  const k=UCLASE(e); c.classList.add('on'); c.style.setProperty('--k',k.color);
+  $('cNom').textContent=e.nombre; $('cEst').querySelector('span').textContent = e.en ? (EST[e.estado]||EST.servicio).nombre : 'Sin señal';
+  const mov=e.en&&e.vel>2;
+  let fila=`<div><div class="num">${e.en?Math.round(e.vel):'—'}<small>km/h</small></div><div class="lab">Velocidad</div></div><div><div class="num">${mov?punto(e.rum):'—'}</div><div class="lab">Rumbo</div></div>`;
+  if(e.en&&e.estado==='emergencia'&&e.destino&&e.kmRest!=null){
+    const hora=new Date(Date.now()+(e.etaMin||0)*60000).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false});
+    fila+=`<div><div class="num">${e.kmRest.toFixed(1)}<small>km</small></div><div class="lab">Por recorrer</div></div><div><div class="num">${e.etaMin>0?e.etaMin:0}<small>min</small></div><div class="lab">Llega a las ${hora}</div></div>`;
+  }
+  $('cFila').innerHTML=fila;
+  $('cHacia').innerHTML = e.destino ? `Hacia <b>${esc(e.destino.titulo||'siniestro')}</b>` : (e.en ? 'Sin despacho' : 'Sin señal: se muestra su última posición conocida');
+  const b=$('cBar'); if(e.en&&e.estado==='emergencia'&&e.ruta&&e.prog!=null&&e.kmTotal){ b.hidden=false; b.firstElementChild.style.width=Math.max(2,Math.min(100,100*(1-e.kmRest/e.kmTotal)))+'%'; } else b.hidden=true;
+}
+function pintarTodo(){
+  pintarLista(); pintarCard();
+  for(const id in D.uni){ const e=D.uni[id]; if(e.el) pintarMarcador(e); }
+  if(listo){ mapa.getSource('rutas').setData(ruta_geojson()); mapa.getSource('estelas').setData(estela_geojson()); }
+}
+function seleccionar(id, centrar){
+  D.sel = id && D.uni[id] ? id : null; pintarTodo();
+  if(D.sel && centrar!==false){ const e=D.uni[D.sel]; if(e.cur){ mapa.easeTo({ center:e.cur, zoom:Math.max(mapa.getZoom(),14), duration:600, padding: padCam() }); } }
+}
+const padCam=()=>({ left: (!vertical() && !document.body.classList.contains('cerrado')) ? 340 : 0, top:0, right:0, bottom: (vertical() && !document.body.classList.contains('cerrado')) ? Math.round(window.innerHeight*.46) : 0 });
+let limBounds=null;
+function cargarLimites(){ (C.LIMITES||[]).forEach(u=>fetch(u).then(r=>r.json()).then(fc=>{ const b=limBounds||new maplibregl.LngLatBounds(); (fc.features||[]).forEach(f=>{ if(f.geometry&&f.geometry.type==='Polygon') f.geometry.coordinates[0].forEach(c=>b.extend(c)); }); limBounds=b; }).catch(()=>{})); }
+function verComuna(){ if(!listo||!limBounds) return verTodo(); const pd=padCam(); mapa.fitBounds(limBounds,{ padding:{ left:pd.left+40, right:60, top:60, bottom:pd.bottom+70 }, duration:700 }); }
+function verTodo(){
+  if(!listo) return; const b=new maplibregl.LngLatBounds(); let n=0;
+  const add=p=>{ if(p&&isFinite(p[0])&&isFinite(p[1])){ b.extend(p); n++; } };
+  Object.values(D.uni).forEach(e=>add(e.cur)); Object.values(D.sin).forEach(s=>add([s.lng,s.lat]));
+  if(!n){ D.cuarteles.forEach(c=>add([c.lng,c.lat])); }
+  if(!n) return; const pd=padCam(); mapa.fitBounds(b,{ padding:{ left:pd.left+70, right:70, top:90, bottom:pd.bottom+90 }, maxZoom:15, duration:700 });
+}
+$('uniL').addEventListener('click', ev=>{ const b=ev.target.closest('[data-u]'); if(b) seleccionar(b.dataset.u, true); });
+$('sinL').addEventListener('click', ev=>{ const b=ev.target.closest('[data-s]'); if(b){ const s=D.sin[b.dataset.s]; if(s) mapa.easeTo({ center:[s.lng,s.lat], zoom:Math.max(mapa.getZoom(),14), duration:600, padding:padCam() }); } });
+$('cardX').onclick=()=>seleccionar(null);
+$('tAll').onclick=verTodo;
+function capa(clave, id){ const b=$(id); b.classList.toggle('on', D.capas[clave]); }
+['tPun:puntos','tCua:cuarteles','tEst:estelas','tLim:limites'].forEach(x=>{ const [id,k]=x.split(':'); capa(k,id); $(id).onclick=()=>{ D.capas[k]=!D.capas[k]; capa(k,id); try{ localStorage.setItem('vigor_mon_capas',JSON.stringify(D.capas)); }catch(e){} filtrarPuntos(); limiteVisible(); pintarTodo(); }; });
+$('ptab').onclick=()=>{ document.body.classList.toggle('cerrado'); try{ localStorage.setItem('vigor_mon_panel', document.body.classList.contains('cerrado')?'0':'1'); }catch(e){} setTimeout(()=>mapa&&mapa.resize(),320); };
+try{ if(localStorage.getItem('vigor_mon_panel')==='0' || (vertical() && localStorage.getItem('vigor_mon_panel')===null)) document.body.classList.add('cerrado'); }catch(e){}
+const tic=()=>{ $('clock').textContent=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false}); }; tic(); setInterval(tic,10000);
+
+/* movimiento suave de los carros entre una posición y la siguiente */
+let ult=null;
+function cuadro(ts){
+  if(ult===null) ult=ts; const dt=Math.min(.1,(ts-ult)/1000); ult=ts;
+  if(listo){ const k=Math.min(1,dt*2.5); let mov=false;
+    for(const id in D.uni){ const e=D.uni[id]; if(!e.mk||!e.tgt) continue; e.cur[0]+=(e.tgt[0]-e.cur[0])*k; e.cur[1]+=(e.tgt[1]-e.cur[1])*k; e.mk.setLngLat(e.cur); mov=true; }
+    if(mov && (ts-(cuadro.u||0))>400){ cuadro.u=ts; mapa.getSource('rutas').setData(ruta_geojson()); mapa.getSource('estelas').setData(estela_geojson()); }
+  }
+  requestAnimationFrame(cuadro);
+}
+iniciarMapa(); cargarLimites(); requestAnimationFrame(cuadro);
+
+/* =====================  Simulación (datos de ejemplo hasta tener el GPS real)  ===================== */
+const SIM = PARAMS.get('sim')!=='0';
+if(SIM){
+  $('simTag').hidden=false;
+  document.addEventListener('vigor-mapa-listo', async ()=>{
+    const factor=Math.max(1,Math.min(20,+PARAMS.get('x')||3)); $('simTag').textContent='DATOS DE EJEMPLO · x'+factor;
+    const CU=[{id:'c1',nombre:'1ª Compañía · Florida',lng:-72.6636,lat:-36.8236},{id:'c2',nombre:'2ª Compañía · Copiulemu',lng:-72.8070,lat:-36.8943},{id:'c3',nombre:'3ª Compañía · Cancha Los Monteros',lng:-72.6833,lat:-36.9209}];
+    const SI={id:'s1',titulo:'Incendio estructural',dir:'Calle Prat 1240, Florida',lng:-72.6590,lat:-36.8190};
+    const PU=[['grifo','G-01',-72.6620,-36.8215],['grifo','G-02',-72.6575,-36.8205],['fuente_agua','Fuente de agua',-72.6540,-36.8170],['escuela','Escuela El Roble',-72.6650,-36.8190],['hospital','Hospital de Florida',-72.6600,-36.8260],['carabineros','Carabineros',-72.6640,-36.8250],['puente','Puente 12 t',-72.7300,-36.8620],['bodega_riesgo','Bodega agroquímicos',-72.7050,-36.9050],['posta','Posta Cancha Los Monteros',-72.6823,-36.9251],['escuela','Escuela Cancha de Los Monteros',-72.6829,-36.9251],['grifo','G-12',-72.8040,-36.8920],['posta','Posta Copiulemu',-72.8085,-36.8960]];
+    Mon.setCuarteles(CU); Mon.setSiniestros([SI]); Mon.setPuntos(PU.map((a,i)=>({id:'p'+i,tipo:a[0],nombre:a[1],lng:a[2],lat:a[3]})));
+    async function rutaVal(o,d){
+      try{ const cuerpo={ locations:[{lat:o[1],lon:o[0]},{lat:d[1],lon:d[0]}], costing:'auto', costing_options:{auto:{shortest:true}}, directions_options:{units:'kilometers'} };
+        const r=await fetch(C.RUTEO_URL.replace(/\/$/,'')+'/route?json='+encodeURIComponent(JSON.stringify(cuerpo))); const j=await r.json(); return decodificarPolilinea(j.trip.legs[0].shape,6);
+      }catch(e){ const n=30, co=[]; for(let i=0;i<=n;i++) co.push([o[0]+(d[0]-o[0])*i/n, o[1]+(d[1]-o[1])*i/n]); return co; }
+    }
+    const desp=[{id:'b1',nombre:'B-1',cu:0,vel:52},{id:'b3',nombre:'B-3',cu:1,vel:62},{id:'r2',nombre:'R-2',cu:2,vel:58}];
+    avisar('Calculando las rutas de ejemplo…', 0);
+    const rutas=await Promise.all(desp.map(d=>rutaVal([CU[d.cu].lng,CU[d.cu].lat],[SI.lng,SI.lat])));
+    $('msg').classList.remove('show');
+    desp.forEach((d,i)=>{ const co=rutas[i], cum=[0]; for(let k=1;k<co.length;k++) cum.push(cum[k-1]+dist(co[k-1],co[k])); d.co=co; d.cum=cum; d.tot=cum[cum.length-1]; d.s=0; });
+    const en=(d)=>{ const c=d.cum; let lo=0,hi=c.length-1; while(lo<hi-1){ const m=(lo+hi)>>1; if(c[m]<=d.s) lo=m; else hi=m; } const a=d.co[lo], b=d.co[Math.min(lo+1,c.length-1)], seg=(c[lo+1]||c[lo])-c[lo], t=seg>0?(d.s-c[lo])/seg:0; return { p:[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t], i:lo, r:rumbo(a,b) }; };
+    // patrulla: un carro en servicio que recorre un circuito corto
+    const ronda=[[-72.6636,-36.8236],[-72.6600,-36.8236],[-72.6600,-36.8270],[-72.6636,-36.8270]]; let rt=0, rs=0;
+    let t0=Date.now();
+    const emitir=()=>{
+      const lista=[], ahora=Date.now(), seg=(ahora-t0)/1000;
+      let llegaron=0;
+      for(const d of desp){
+        const llego=d.s>=d.tot-5, v=llego?0:d.vel;
+        if(!llego) d.s=Math.min(d.tot, d.s+(d.vel/3.6)*2*factor);
+        else llegaron++;
+        const e=en(d), rest=d.tot-d.s, etaMin=llego?0:Math.max(1,Math.ceil(rest/(d.vel*factor/3.6)/60));
+        lista.push({ id:d.id, nombre:d.nombre, estado:'emergencia', lng:e.p[0], lat:e.p[1], rum:e.r, vel:v, ts:ahora, enLinea:true, destino:{id:SI.id,titulo:SI.titulo}, kmRest:rest/1000, etaMin, ruta:d.co, prog:e.i+1, kmTotal:d.tot/1000 });
+        lista[lista.length-1].prog=e.i+1;
+      }
+      // patrulla
+      const a=ronda[rt], b=ronda[(rt+1)%ronda.length], seg1=dist(a,b); rs+= (25/3.6)*2*factor; if(rs>=seg1){ rs-=seg1; rt=(rt+1)%ronda.length; }
+      const a2=ronda[rt], b2=ronda[(rt+1)%ronda.length], f=Math.min(1,rs/dist(a2,b2));
+      lista.push({ id:'k1', nombre:'K-1', estado:'servicio', lng:a2[0]+(b2[0]-a2[0])*f, lat:a2[1]+(b2[1]-a2[1])*f, rum:rumbo(a2,b2), vel:25, ts:ahora, enLinea:true });
+      lista.push({ id:'b2', nombre:'B-2', estado:'servicio', lng:CU[0].lng+.0006, lat:CU[0].lat-.0004, rum:0, vel:0, ts:ahora, enLinea:true });
+      lista.push({ id:'bx1', nombre:'BX-1', estado:'mant', lng:CU[1].lng-.0005, lat:CU[1].lat+.0004, rum:0, vel:0, ts:ahora, enLinea:true });
+      lista.push({ id:'f1', nombre:'F-1', estado:'servicio', lng:CU[2].lng+.0007, lat:CU[2].lat+.0003, rum:0, vel:0, ts:ahora-120000, enLinea:false });   // sin señal hace 2 minutos
+      Mon.setUnidades(lista);
+      if(llegaron===desp.length && !emitir.fin){ emitir.fin=true; setTimeout(()=>{ desp.forEach(d=>{ d.s=0; }); (D.uni.b1||{estela:[]}).estela=[]; Object.values(D.uni).forEach(e=>{ e.estela=[]; e.cur=null; }); emitir.fin=false; }, 8000); }
+    };
+    emitir(); setInterval(emitir,2000);
+    setTimeout(()=>{ if(PARAMS.get('vista')==='flota') verTodo(); else verComuna(); if(PARAMS.get('sel')) seleccionar(PARAMS.get('sel'), true); }, 900);
+  });
+} else {
+  document.addEventListener('vigor-mapa-listo', ()=>avisar('Esperando datos de las unidades en línea', 0));
+}
+})();
+</script>
+</body>
+</html>
