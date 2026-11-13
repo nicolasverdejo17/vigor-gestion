@@ -353,6 +353,7 @@
           </div>
         </div>
       </div>
+      <div id="parteVinculo" style="display:none; margin:-6px 0 14px; padding:9px 12px; border:1px solid var(--cyan); border-left:4px solid var(--cyan); background:rgba(45,211,219,.08); font-size:12.5px; color:var(--text);"></div>
 
       <div class="section-title"><span class="n">2</span>Detalle de la Emergencia</div>
       <div class="form-row">
@@ -502,6 +503,7 @@ const ESTADO_LABEL_CARRO = { servicio:'En Servicio', mant:'En Mantención', fuer
 let BOMBEROS = [];
 let CLAVES = [];
 let dotacionSel = { oficial: null, maquinista: null, asistentes: [] };
+let DESPACHO_PARTE = null;   // emergencia (despacho) a la que corresponde este parte
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
@@ -537,14 +539,31 @@ async function cargarDatos(){
   CLAVES = claves || [];
   document.getElementById('tipoEmergencia').innerHTML = CLAVES.map(k => `<option value="${k.id}">${k.codigo} — ${k.nombre}</option>`).join('');
 
+  await vincularConDespacho();
   await refrescarNumeroParte();
+}
+
+// El parte queda ligado a la emergencia a la que fue despachado este carro: todos los carros de una misma emergencia
+// quedan bajo el mismo despacho en la Central. Aquí se traen la dirección y la clave ya puestas (se pueden corregir).
+async function vincularConDespacho(){
+  try{
+    const { data } = await sb.rpc('tablet_despacho_para_parte');
+    const d = data && data[0]; DESPACHO_PARTE = d || null;
+    const caja = document.getElementById('parteVinculo');
+    if(!d){ caja.style.display = 'none'; return; }
+    const dir = document.getElementById('direccionEmergencia'); if(!dir.value.trim()) dir.value = d.d_direccion || '';
+    if(d.d_tipo_id && CLAVES.some(k => k.id === d.d_tipo_id)) document.getElementById('tipoEmergencia').value = d.d_tipo_id;
+    const hora = new Date(d.d_fecha).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false});
+    caja.innerHTML = '<b>Emergencia vinculada:</b> ' + (d.d_tipo_codigo ? d.d_tipo_codigo + ' · ' : '') + String(d.d_direccion || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + ' · despachada ' + hora;
+    caja.style.display = 'block';
+  }catch(e){ console.warn('despacho del parte:', e && e.message); }
 }
 
 async function refrescarNumeroParte(){
   const { data: partes } = await sb.rpc('tablet_listar_partes');
   const maxNum = (partes || []).reduce((m,p) => Math.max(m, p.numero_parte), 0);
   document.getElementById('numeroParteField').value = String(maxNum + 1).padStart(3,'0') + ' (al guardar)';
-  document.getElementById('fechaHora').value = new Date().toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false});
+  document.getElementById('fechaHora').value = (DESPACHO_PARTE ? new Date(DESPACHO_PARTE.d_fecha) : new Date()).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false});
 }
 
 function nombrePorId(id){ const b = BOMBEROS.find(x=>x.personal_id===id); return b ? b.nombre_completo : null; }
@@ -704,6 +723,7 @@ async function guardarParte(){
 
   const numero = data && data[0] ? data[0].r_numero_parte : null;
   toast(`Parte de Emergencia N°${String(numero).padStart(3,'0')} guardado`);
+  await vincularConDespacho();   // si salió a otra emergencia pendiente, se trae la siguiente
   await refrescarNumeroParte();
 }
 

@@ -168,6 +168,45 @@
   .central-tab.on{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff;}
   .central-tab:hover{ border-color:var(--brass-bright);}
   .tab-badge{ display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px; background:var(--emergencia); color:#fff; font-size:9.5px; font-weight:800; border-radius:8px; padding:0 4px; margin-left:6px; vertical-align:middle;}
+
+  /* ---- Partes de emergencia de cada despacho (los que hacen las tablets de los carros) ---- */
+  html body #tablaBody tr.fila-despacho{ cursor:pointer; }
+  html body #tablaBody tr.fila-despacho:hover td{ background:rgba(45,211,219,.06); }
+  html body #tablaBody tr.fila-despacho.abierta td{ background:rgba(45,211,219,.08); }
+  .hd-flecha{ display:inline-block; width:14px; color:#2DD3DB; font-size:11px; transition:transform .15s; }
+  .abierta .hd-flecha{ transform:rotate(90deg); }
+  .hd-partes{ display:inline-block; font-family:'Montserrat',sans-serif; font-weight:800; font-size:12px; letter-spacing:.04em; padding:3px 10px; border:1px solid #153A52; color:#8FB0C2; border-radius:0; white-space:nowrap; }
+  .hd-partes.completo{ color:#3CF29A; border-color:rgba(60,242,154,.6); }
+  .hd-partes.parcial{ color:#FFC247; border-color:rgba(255,194,71,.6); }
+  html body #tablaBody tr.detalle > td{ padding:0 !important; background:#050F18; border-top:none; }
+  .hd-det{ padding:16px 20px 20px 34px; border-left:3px solid #2DD3DB; display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:12px; }
+  .hd-parte{ background:#091D2C; border:1px solid #153A52; border-left:3px solid #3CF29A; padding:12px 14px; font-family:'Montserrat',sans-serif; }
+  .hd-parte.falta{ border-left-color:#FFC247; }
+  .hd-parte .cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  .hd-parte .cab b{ font-weight:800; font-size:18px; color:#EAF6FB; letter-spacing:.02em; }
+  .hd-parte .cab span{ font-weight:700; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:#2DD3DB; }
+  .hd-parte.falta .cab span{ color:#FFC247; }
+  .hd-parte dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:12.5px; }
+  .hd-parte dt{ font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#8FB0C2; padding-top:2px; }
+  .hd-parte dd{ margin:0; color:#EAF6FB; word-break:break-word; }
+  .hd-parte .desc{ margin-top:8px; padding-top:8px; border-top:1px solid #153A52; font-size:12.5px; line-height:1.5; color:#EAF6FB; white-space:pre-wrap; }
+  .hd-parte .sinp{ font-size:12px; color:#8FB0C2; }
+  .hd-parte .si{ color:#F13746; font-weight:700; }
+
+  .hd-asist{ grid-column:1/-1; background:#061520; border:1px solid #153A52; border-left:3px solid #2DD3DB; padding:14px 16px; font-family:'Montserrat',sans-serif; }
+  .hd-asist-t{ font-weight:700; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:#8FB0C2; margin-bottom:10px; }
+  .hd-asist-t b{ margin-left:8px; font-size:15px; color:#2DD3DB; letter-spacing:0; }
+  .hd-cias{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px 18px; }
+  .hd-cia-h{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; border-bottom:1px solid #153A52; padding-bottom:5px; margin-bottom:6px; }
+  .hd-cia-h b{ font-weight:800; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase; color:#EAF6FB; }
+  .hd-cia-h span{ font-weight:800; font-size:13px; color:#2DD3DB; }
+  .hd-bom{ display:grid; grid-template-columns:42px 1fr; column-gap:8px; padding:4px 0; align-items:baseline; }
+  .hd-bom .reg{ font-weight:800; font-size:12.5px; color:#3CF29A; }
+  .hd-bom .nom{ font-weight:600; font-size:13px; color:#EAF6FB; }
+  .hd-bom .meta{ grid-column:2; font-size:10.5px; letter-spacing:.04em; color:#8FB0C2; }
+  .hd-bom.oficial .nom{ color:#FFC247; }
+  .hd-sin{ font-size:12px; color:#8FB0C2; }
+  @media print{ .hd-flecha{ display:none; } }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -243,7 +282,7 @@
 
     <div class="table-panel show" id="tablePanel">
       <table>
-        <thead><tr><th>Código</th><th>Dirección</th><th>Compañía(s)</th><th>Carros</th><th>Despachado</th><th>Duración</th></tr></thead>
+        <thead><tr><th>Código</th><th>Dirección</th><th>Compañía(s)</th><th>Carros</th><th>Partes</th><th>Despachado</th><th>Duración</th></tr></thead>
         <tbody id="tablaBody"></tbody>
       </table>
     </div>
@@ -323,15 +362,45 @@ async function cargarDatos(){
   NOMBRE_TIPO['12.10'] = 'Llamado a Maquinistas'; NOMBRE_TIPO['6.6'] = 'Llamado a Voluntarios'; NOMBRE_TIPO['ACUART.'] = 'Llamado general';
 
   const { data: despachos } = await sb.from('despachos')
-    .select('direccion, fecha_hora_despacho, fecha_hora_termino, claves_emergencia(codigo, nombre), despacho_unidades(companias(nombre), carros(nomenclatura))')
+    .select('id, direccion, fecha_hora_despacho, fecha_hora_termino, claves_emergencia(codigo, nombre), despacho_unidades(carro_id, companias(nombre), carros(nomenclatura))')
     .eq('cuerpo_id', miCuerpoId);
+  // Partes de emergencia que hicieron las tablets de los carros: cada uno queda ligado al despacho de su emergencia
+  const { data: partes } = await sb.from('partes_emergencia')
+    .select('id, despacho_id, carro_id, numero_parte, oficial_cargo_id, maquinista_id, hora_llegada, hora_regreso, descripcion_actuacion, hubo_lesionados, uso_material_carro, tipo_afectado, afectado_nombre, novedades_adicionales')
+    .eq('cuerpo_id', miCuerpoId).not('despacho_id', 'is', null);
+  const idsPartes = (partes || []).map(x => x.id);
+  const { data: asis } = idsPartes.length ? await sb.from('parte_asistentes').select('parte_id, personal_id').in('parte_id', idsPartes) : { data: [] };
+  const { data: pers } = await sb.from('personal').select('id, nombre_completo, numero_registro, cargo, compania_id').eq('cuerpo_id', miCuerpoId);
+  const NOM = {}, PERS = {}; (pers || []).forEach(x => { NOM[x.id] = x.nombre_completo; PERS[x.id] = { nombre:x.nombre_completo, reg:x.numero_registro, cargo:x.cargo, cia:x.compania_id }; });
+  const ASIS = {}, ASIS_IDS = {}; (asis || []).forEach(a => { (ASIS[a.parte_id] = ASIS[a.parte_id] || []).push(NOM[a.personal_id] || '?'); (ASIS_IDS[a.parte_id] = ASIS_IDS[a.parte_id] || []).push(a.personal_id); });
+  const PARTES_POR = {}; (partes || []).forEach(x => { (PARTES_POR[x.despacho_id] = PARTES_POR[x.despacho_id] || []).push(x); });
   const { data: alertas } = await sb.from('alertas_especiales')
     .select('tipo, companias_destino, fecha_hora')
     .eq('cuerpo_id', miCuerpoId);
 
   const dDespachos = (despachos || []).map(d => {
     const min = duracionMinutos(d.fecha_hora_despacho, d.fecha_hora_termino);
+    // una fila por carro despachado, con su parte (si ya lo hizo)
+    const porCarro = {}; (PARTES_POR[d.id] || []).forEach(x => { porCarro[x.carro_id] = x; });
+    const unidades = d.despacho_unidades.map(u => {
+      const pt = porCarro[u.carro_id] || null;
+      return { nom: u.carros.nomenclatura, cia: u.companias.nombre, parte: pt ? { ...pt, oficial: NOM[pt.oficial_cargo_id] || null, maquinista: NOM[pt.maquinista_id] || null, dotacion: ASIS[pt.id] || [] } : null };
+    });
+    // Bomberos que asistieron a esta emergencia: oficial a cargo, maquinista y dotación de los partes de cada carro,
+    // agrupados por la compañía a la que pertenece cada bombero (no necesariamente la del carro en que salió)
+    const gente = new Map();
+    const sumar = (pid, carro, rol) => {
+      if(!pid) return; const x = PERS[pid], cur = gente.get(pid);
+      if(cur){ if(!cur.carros.includes(carro)) cur.carros.push(carro); if(rol === 'oficial' || (rol === 'maquinista' && cur.rol === 'dotacion')) cur.rol = rol; }
+      else gente.set(pid, { nombre: x ? x.nombre : '?', reg: x ? x.reg : '', cia: x ? x.cia : null, rol, carros:[carro] });
+    };
+    unidades.forEach(u => { if(!u.parte) return; sumar(u.parte.oficial_cargo_id, u.nom, 'oficial'); sumar(u.parte.maquinista_id, u.nom, 'maquinista'); (ASIS_IDS[u.parte.id] || []).forEach(pid => sumar(pid, u.nom, 'dotacion')); });
+    const ORDEN_ROL = { oficial:0, maquinista:1, dotacion:2 };
+    const porCia = {};
+    gente.forEach(g => { const nombreCia = g.cia ? (COMPANIAS_ID_NOMBRE[g.cia] || '?') : 'Sin compañía'; (porCia[nombreCia] = porCia[nombreCia] || []).push(g); });
+    Object.values(porCia).forEach(l => l.sort((a, b) => ORDEN_ROL[a.rol] - ORDEN_ROL[b.rol] || (a.reg || 0) - (b.reg || 0)));
     return {
+      id: d.id, unidades, asistieron: porCia, totalAsistieron: gente.size,
       cod: d.claves_emergencia.codigo, dir: d.direccion,
       cias: [...new Set(d.despacho_unidades.map(u=>u.companias.nombre))],
       carros: d.despacho_unidades.map(u=>u.carros.nomenclatura),
@@ -343,7 +412,7 @@ async function cargarDatos(){
     cod: a.tipo === 'acuartelamiento' ? 'ACUART.' : (a.tipo === '12_10' ? '12.10' : '6.6'),
     dir: `Alerta Especial — ${a.tipo === 'acuartelamiento' ? 'Llamado general' : a.tipo === '12_10' ? 'Llamado a Maquinistas' : 'Llamado a Voluntarios'}`,
     cias: a.companias_destino ? CIAS_por_id(a.companias_destino) : ['Todas'],
-    carros: ['—'], fecha: a.fecha_hora, hora: fmtHora(a.fecha_hora), duracionMin: null, duracion: '—'
+    carros: ['—'], unidades: null, asistieron: {}, totalAsistieron: 0, fecha: a.fecha_hora, hora: fmtHora(a.fecha_hora), duracionMin: null, duracion: '—'
   }));
 
   DESPACHOS = [...dDespachos, ...dAlertas].sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
@@ -377,6 +446,7 @@ function suscribirRealtime(){
   sb.channel('historial-despacho-live')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => cargarDatos())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'alertas_especiales', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => cargarDatos())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'partes_emergencia', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => cargarDatos())
     .subscribe();
 }
 
@@ -449,20 +519,62 @@ function renderTabla(){
   document.getElementById('kpiDuracion').innerHTML = promedioMin !== null ? `${promedioMin}<span style="font-size:15px;"> min</span>` : `—<span style="font-size:15px;"> min</span>`;
   const body = document.getElementById('tablaBody');
   if(filtrados.length===0){
-    body.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-dim);">Sin despachos que coincidan con los filtros elegidos.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-dim);">Sin despachos que coincidan con los filtros elegidos.</td></tr>`;
     return;
   }
-  body.innerHTML = filtrados.map(d => `
-    <tr>
-      <td class="td-tipo">${TIPOS_SIN_CODIGO.has(d.cod) ? etiquetaTipo(d.cod) : d.cod}</td>
-      <td>${d.dir}</td>
+  body.innerHTML = filtrados.map(d => {
+    const esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const tipoTxt = TIPOS_SIN_CODIGO.has(d.cod) ? etiquetaTipo(d.cod) : d.cod;
+    if(!d.unidades){   // alertas especiales: no tienen carros ni partes
+      return `<tr><td class="td-tipo">${tipoTxt}</td><td>${esc(d.dir)}</td><td>${d.cias.join(', ')}</td><td class="mono">${d.carros.join(', ')}</td><td class="mono">—</td><td class="mono">${d.hora}</td><td class="mono">${d.duracion}</td></tr>`;
+    }
+    const total = d.unidades.length, hechos = d.unidades.filter(u => u.parte).length;
+    const estadoPartes = hechos === 0 ? '' : hechos === total ? 'completo' : 'parcial';
+    const abierta = PARTES_ABIERTOS.has(d.id);
+    const fila = `<tr class="fila-despacho ${abierta ? 'abierta' : ''}" onclick="togglePartes('${d.id}')">
+      <td class="td-tipo"><span class="hd-flecha">▶</span>${tipoTxt}</td>
+      <td>${esc(d.dir)}</td>
       <td>${d.cias.join(', ')}</td>
       <td class="mono">${d.carros.join(', ')}</td>
+      <td><span class="hd-partes ${estadoPartes}" title="Partes hechos por los carros de esta emergencia">${hechos} / ${total}</span></td>
       <td class="mono">${d.hora}</td>
       <td class="mono">${d.duracion}</td>
-    </tr>
-  `).join('');
+    </tr>`;
+    if(!abierta) return fila;
+    const si = (v) => v ? '<span class="si">Sí</span>' : 'No';
+    const tarjetas = d.unidades.map(u => {
+      const pt = u.parte;
+      if(!pt) return `<div class="hd-parte falta"><div class="cab"><b>${esc(u.nom)}</b><span>Parte pendiente</span></div><div class="sinp">${esc(u.cia)} · este carro aún no hace su parte.</div></div>`;
+      return `<div class="hd-parte"><div class="cab"><b>${esc(u.nom)}</b><span>Parte N° ${String(pt.numero_parte).padStart(3, '0')}</span></div>
+        <dl>
+          <dt>Compañía</dt><dd>${esc(u.cia)}</dd>
+          <dt>Oficial a cargo</dt><dd>${esc(pt.oficial) || '—'}</dd>
+          <dt>Maquinista</dt><dd>${esc(pt.maquinista) || '—'}</dd>
+          <dt>Dotación</dt><dd>${pt.dotacion.length ? esc(pt.dotacion.join(', ')) : '—'}</dd>
+          <dt>Llegada / regreso</dt><dd class="mono">${esc(pt.hora_llegada)} — ${esc(pt.hora_regreso)}</dd>
+          <dt>Lesionados</dt><dd>${si(pt.hubo_lesionados)}</dd>
+          <dt>Uso de material</dt><dd>${si(pt.uso_material_carro)}</dd>
+          <dt>Afectado</dt><dd>${esc(pt.tipo_afectado)}${pt.afectado_nombre ? ' · ' + esc(pt.afectado_nombre) : ''}</dd>
+        </dl>
+        <div class="desc">${esc(pt.descripcion_actuacion)}</div>
+        ${pt.novedades_adicionales ? `<div class="desc"><b style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8FB0C2;">Novedades</b><br>${esc(pt.novedades_adicionales)}</div>` : ''}
+      </div>`;
+    }).join('');
+    const ROL_TXT = { oficial:'Oficial a cargo', maquinista:'Maquinista', dotacion:'' };
+    const columnas = Object.keys(d.asistieron).sort((a, b) => a.localeCompare(b, 'es', { numeric:true })).map(nc => `
+      <div class="hd-cia"><div class="hd-cia-h"><b>${esc(nc)}</b><span>${d.asistieron[nc].length}</span></div>
+        ${d.asistieron[nc].map(g => `<div class="hd-bom ${g.rol}"><span class="reg">${esc(g.reg)}</span><span class="nom">${esc(g.nombre)}</span><span class="meta">${ROL_TXT[g.rol] ? ROL_TXT[g.rol] + ' · ' : ''}${esc(g.carros.join(', '))}</span></div>`).join('')}
+      </div>`).join('');
+    const asistentes = d.totalAsistieron
+      ? `<div class="hd-asist"><div class="hd-asist-t">Bomberos que asistieron <b>${d.totalAsistieron}</b></div><div class="hd-cias">${columnas}</div></div>`
+      : `<div class="hd-asist"><div class="hd-asist-t">Bomberos que asistieron <b>0</b></div><div class="hd-sin">Aún no hay partes: el listado se arma con la dotación que registra cada carro en su parte.</div></div>`;
+    return fila + `<tr class="detalle"><td colspan="7"><div class="hd-det">${asistentes}${tarjetas}</div></td></tr>`;
+  }).join('');
 }
+
+// Al tocar un despacho se abren los partes de todos los carros que salieron a esa emergencia
+const PARTES_ABIERTOS = new Set();
+function togglePartes(id){ if(PARTES_ABIERTOS.has(id)) PARTES_ABIERTOS.delete(id); else PARTES_ABIERTOS.add(id); renderTabla(); }
 
 function toast(msg){
   const t = document.getElementById('toast');
