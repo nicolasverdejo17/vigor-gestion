@@ -141,15 +141,19 @@ details .in{padding:2px 10px 10px;font-size:12px}
   .cap i{font-size:17px}
   .sw{flex:none;margin:0;padding:0 4px 0 8px;border:0;border-left:1px solid var(--l2);gap:8px;font-size:10.5px;white-space:nowrap}
   /* ficha, leyenda y tiempo se apilan abajo, a todo el ancho */
-  #abajo{display:flex;flex-direction:column;gap:6px;position:absolute;left:0;right:0;bottom:0;z-index:6;padding:6px 8px 8px;max-height:62%;overflow:auto;pointer-events:none}
+  /* abajo: la ficha es una hoja con su propio desplazamiento; la leyenda y el tiempo quedan siempre a la vista */
+  #abajo{display:flex;flex-direction:column;gap:6px;position:absolute;left:0;right:0;bottom:0;z-index:6;padding:6px 8px 8px;max-height:78%;overflow:hidden;pointer-events:none}
   #abajo .pn{position:static;width:auto;pointer-events:auto}
-  #ficha{max-height:none;overflow:visible}
+  #ficha{max-height:none;overflow:hidden;display:flex;flex-direction:column;flex:0 1 auto;min-height:40px}
+  #ficha .pn-h{flex:none}
+  #ficha .pn-b{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;min-height:0;flex:1 1 auto}
+  #leyenda,#tiempo{flex:none}
   .pn-h{padding:11px 12px;font-size:10px}
   #leyenda .pn-b{padding:8px 12px} #barra{height:10px} #lNota{display:none} #escala{font-size:10px}
-  #tiempo .pn-b{flex-wrap:wrap;gap:8px 12px;padding:8px 12px}
-  #hora{min-width:0;flex:1} #hora b{font-size:17px}
-  #rango{flex:1 1 100%;order:3;height:34px}
-  #play{width:42px;height:42px}
+  #tiempo .pn-b{flex-wrap:nowrap;gap:10px;padding:8px 12px}
+  #hora{min-width:0;flex:none} #hora b{font-size:17px} #hDia{display:block;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #rango{flex:1 1 90px;min-width:70px;order:0;height:34px}
+  #play{width:42px;height:42px;flex:none}
   #fuente{display:none}
   .grid{gap:6px} .dato{padding:7px 9px} .dato b{font-size:17px}
   .nota{font-size:9.5px}
