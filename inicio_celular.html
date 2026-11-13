@@ -500,18 +500,21 @@ function suscribirAlertaDespacho(perfil){
 // alertas_especiales) -- vivían sin ningún aviso al celular, ni tono en
 // vivo ni push, porque solo se cableó el de despacho. companias_destino
 // null significa "todas las Compañías del Cuerpo".
-const ETIQUETA_ALERTA_ESPECIAL = { acuartelamiento: 'Llamado general', '12_10': 'Llamado a Maquinistas', '6_6': 'Llamado a Voluntarios' };
+const ETIQUETA_ALERTA_ESPECIAL = { acuartelamiento: 'Llamado general', '12_10': 'Llamado a Maquinistas', '6_6': 'Llamado a Voluntarios', batallon: 'Tu Batallón está en emergencia' };
 function suscribirAlertaEspecial(perfil){
   if(!perfil.cuerpo_id) return;
   sb.channel('alerta-especial-celular-' + perfil.compania_id)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alertas_especiales', filter: `cuerpo_id=eq.${perfil.cuerpo_id}` }, async (payload) => {
       const destino = payload.new.companias_destino;
-      if(destino && !destino.includes(perfil.compania_id)) return;
+      // Batallón en emergencia: solo suena para los bomberos asignados (personal_destino); el resto de la compañía no
+      const personas = payload.new.personal_destino;
+      if(personas && personas.length && !personas.includes(perfil.id)) return;
+      if(destino && !destino.includes(perfil.compania_id) && !(personas && personas.includes(perfil.id))) return;
       if(miEstado === 'fuera') return;
       const { data: prefs } = await sb.from('notificaciones_preferencias').select('alertas_despacho').eq('personal_id', perfil.id).maybeSingle();
       if(prefs && prefs.alertas_despacho === false) return;
       reproducirTonoDespacho();
-      toast(`${ETIQUETA_ALERTA_ESPECIAL[payload.new.tipo] || 'Alerta de Central'} — revisa la app`);
+      toast(payload.new.tipo === 'batallon' ? `${ETIQUETA_ALERTA_ESPECIAL.batallon}${payload.new.detalle ? ' — ' + payload.new.detalle : ''}` : `${ETIQUETA_ALERTA_ESPECIAL[payload.new.tipo] || 'Alerta de Central'} — revisa la app`);
     })
     .subscribe();
 }

@@ -476,10 +476,22 @@ async function eliminarBatallon(id){
   await cargarBatallones(true);
   toast('Batallón eliminado');
 }
+// Pasar un Batallón a «En Emergencia» funciona como un despacho: sus carros y bomberos pasan a emergencia y suena el celular de los bomberos asignados.
+// Al volver a Disponible o Rancho, todo vuelve a como estaba.
 async function setEstado(id, estado){
-  await sb.from('batallones').update({ estado }).eq('id', id);
-  batallones.find(b=>b.id===id).estado = estado;
-  render(true);
+  const b = batallones.find(x => x.id === id); if(!b || b.estado === estado) return;
+  const antes = b.estado;
+  const { data, error } = await sb.rpc('batallon_cambiar_estado', { p_batallon_id: id, p_estado: estado });
+  if(error){ toast('No se pudo cambiar el estado — ' + error.message); return; }
+  b.estado = estado; render(true);
+  if(estado === 'emergencia' && antes !== 'emergencia' && data){
+    const partes = [];
+    if(data.carros) partes.push(data.carros + (data.carros === 1 ? ' carro' : ' carros'));
+    if(data.bomberos) partes.push(data.bomberos + (data.bomberos === 1 ? ' bombero' : ' bomberos'));
+    let msg = 'Batallón en emergencia' + (partes.length ? ': ' + partes.join(' y ') + ' pasaron a emergencia' : '') + (data.alertados ? ' · ' + data.alertados + (data.alertados === 1 ? ' celular alertado' : ' celulares alertados') : '');
+    if(data.sin_resolver && data.sin_resolver.length) msg += ' · No se encontraron en el sistema: ' + data.sin_resolver.join(', ');
+    toast(msg);
+  }
 }
 async function setNombre(id, val){
   val = (val || '').trim() || 'Batallón';
