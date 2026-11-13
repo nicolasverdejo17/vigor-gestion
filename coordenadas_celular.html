@@ -10,6 +10,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<script>if(new URLSearchParams(location.search).get('embed')==='1') document.documentElement.classList.add('embed');</script>
 <style>
   @view-transition { navigation: auto; }
   :root{
@@ -115,6 +116,9 @@
   .tabbar-real a .ic{ line-height:1; display:flex;}
   .tabbar-real a .ic svg{ width:22px; height:22px;}
   .tabbar-real a.active{ color:var(--cyan);}
+  /* dentro de la pantalla «Mapa» del celular: sin encabezado ni barra propios */
+  html.embed .app-head, html.embed .tabbar-real{ display:none; }
+  html.embed .content{ padding-top:12px; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -130,6 +134,7 @@
 <script src="vigor-tema.js" defer></script>
 </head>
 <body>
+<script>if(document.documentElement.classList.contains('embed')) document.body.setAttribute('data-sin-banner','');   // incrustado en «Mapa»: sin el banner de Vigor</script>
 
   <div class="phone">
     <div class="app-head">
@@ -355,7 +360,7 @@ const TABS_NAV = [
   {href:'compania_celular.html', ic:'compania', label:'Compañía'},
   {href:'pizarra_celular.html', ic:'pizarra', label:'Pizarra'},
   {href:'actividades_celular.html', ic:'actividades', label:'Activid.'},
-  {href:'coordenadas_celular.html', ic:'gps', label:'GPS'},
+  {href:'mapa_celular.html', ic:'gps', label:'Mapa'},
   {href:'opciones_celular.html', ic:'opciones', label:'Opciones'},
 ];
 (function renderTabbarReal(){

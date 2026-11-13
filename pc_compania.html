@@ -136,6 +136,10 @@
   }
   .crisis-btn:hover{ filter:brightness(1.15); }
 
+  /* botón de acceso al mapa de Clima, al lado de Modo Crisis */
+  .crisis-btn.clima-btn{ background:rgba(73,233,255,.10); border-color:var(--cyan); color:#DFF9FF; }
+  .crisis-btn.clima-btn::before{ background:var(--cyan); animation:none; box-shadow:none; }
+
   @keyframes pulse{
     0%{box-shadow:0 0 0 0 rgba(241,55,70,0.55);}
     70%{box-shadow:0 0 0 9px rgba(241,55,70,0);}
@@ -915,6 +919,7 @@
           <span id="dateline">—</span>
         </div>
         <button class="crisis-btn" onclick="window.location.href='modo_crisis.html'">Modo Crisis</button>
+        <button class="crisis-btn clima-btn" onclick="window.location.href='clima.html?volver=pc_compania.html'">Clima</button>
         <button class="crisis-btn" style="background:transparent; border-color:var(--line-strong); color:var(--text-muted);" onclick="vigorCerrarSesion()">Cerrar sesión</button>
       </div>
     </div>

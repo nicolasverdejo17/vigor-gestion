@@ -55,6 +55,8 @@ button{font-family:inherit;color:inherit}
 /* ---- mapa ---- */
 #stage{position:fixed;left:0;right:0;top:calc(var(--bh) + var(--th));bottom:0;overflow:hidden}
 body.con-tabs{--th:55px}
+body.embed{--bh:0px;--th:0px}
+body.embed #ban,body.embed #ctabs{display:none}
 @media (min-width:900px){ :root{--bh:62px} #ban{padding:0 28px !important} #ban img{height:42px !important} #ban .t{font-size:19px !important} }
 #ctabs{position:fixed;left:0;right:0;top:var(--bh);height:var(--th);z-index:39;display:none;align-items:center;gap:8px;padding:0 18px;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--l)}
 @media (min-width:900px){ #ctabs{padding:0 28px} }
@@ -88,7 +90,7 @@ body.cerrado #panel{transform:translateX(-100%)}
 #ptab i{font-size:20px;color:var(--cy)}
 #ptab span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:700;font-size:10px;letter-spacing:.14em;color:var(--mu)}
 body.cerrado #ptab{left:0}
-body:not(.cerrado) #ptab .ab,body.cerrado #ptab .ce{display:none}
+body:not(.cerrado) #ptab .ce,body.cerrado #ptab .ab{display:none}   /* abierta: «Ocultar»; cerrada: «Unidades» */
 
 /* ---- controles del mapa ---- */
 #ctl{position:absolute;right:14px;top:14px;z-index:15;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
@@ -293,6 +295,8 @@ function construirEstilo(){
 }
 let mapa=null, listo=false, agregarLimites=()=>{}, limN=0;
 const MODO_SIM = new URLSearchParams(location.search).get('sim')==='1';
+const EMBED = new URLSearchParams(location.search).get('embed')==='1';   // incrustado en la pantalla «Mapa» del celular
+if(EMBED) document.body.classList.add('embed');
 const vertical=()=>window.innerWidth<window.innerHeight;
 function iniciarMapa(){
   try{
@@ -589,9 +593,10 @@ const SB_URL='https://mcfcfbtiruewlcejionr.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';   // clave pública (anon): los permisos por Cuerpo los da la base de datos
 const R={ carros:new Map(), pos:new Map(), desp:[], du:[], claves:new Map(), sinJson:'' };
 function armarPestanas(central){
+  if(EMBED) return;   // dentro del celular no lleva banner ni pestañas
   const t=$('ctabs');
   t.innerHTML = central
-    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="monitoreo_mapa.html" class="on">Mapa Comunal</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a>'
+    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="monitoreo_mapa.html" class="on">Mapa Comunal</a><a href="clima.html">Clima</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a>'
     : '<a href="comandancia.html" class="on">← Volver a Comandancia</a>';
   document.body.classList.add('con-tabs'); setTimeout(()=>mapa&&mapa.resize(),50);
 }

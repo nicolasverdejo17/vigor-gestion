@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#030B13">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png?v=2" sizes="16x16" type="image/png">
+<title>VIGOR - Gestiona tu compañía de forma eficiente</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+@font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+:root{ --bh:56px; --th:0px; --vg-grad:linear-gradient(90deg,#34B8FF,#2DD3DB 35%,#3DEBC0 60%,#35F454); --bg:#030B13; --p:#061520; --c:#091D2C; --l:#0F2A3B; --l2:#153A52; --cy:#2DD3DB; --rj:#F13746; --vd:#3CF29A; --am:#FFC247; --tx:#EAF6FB; --mu:#8FB0C2; }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;height:100dvh;background:var(--bg);color:var(--tx);font-family:'Montserrat',sans-serif;overflow:hidden}
+button{font-family:inherit;color:inherit}
+#stage{position:fixed;left:0;right:0;top:calc(var(--bh) + var(--th));bottom:0;overflow:hidden}
+body.con-tabs{--th:55px}
+body.embed{--bh:0px;--th:0px}
+body.embed #ban,body.embed #ctabs{display:none}
+#mapa{position:absolute;inset:0}
+#abajo{display:contents}
+#viento{position:absolute;inset:0;pointer-events:none;z-index:2}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
+
+#ban{position:fixed;left:0;right:0;top:0;height:var(--bh);z-index:40;display:flex;align-items:center;gap:14px;padding:0 18px;background:linear-gradient(180deg,#07192A,#030B13);border-bottom:1px solid var(--l)}
+#ban img{height:36px;width:auto;display:block;flex:none}
+#ban .sep{width:1.5px;height:24px;background:var(--l2);flex:none}
+#ban .t{font-size:16px;font-weight:700;white-space:nowrap}
+#ban .volver{margin-left:6px;text-decoration:none;border:1px solid var(--l2);background:var(--p);color:var(--tx);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;white-space:nowrap}
+#ban .volver:hover{border-color:var(--cy)}
+#ban .reloj{margin-left:auto;display:flex;align-items:center;gap:14px;flex-shrink:0;color:var(--mu);font-size:13px;line-height:1;text-align:right}
+#ban .reloj span{white-space:nowrap}
+#ban .reloj strong{display:block;font-size:22px;margin:0;letter-spacing:.02em;font-weight:700;color:var(--cy);font-family:'DSEG7',monospace;text-shadow:0 0 12px rgba(45,211,219,.35)}
+@media (max-width:900px){ #ban .reloj span{display:none} }
+@media (min-width:900px){ :root{--bh:62px} #ban{padding:0 28px !important} #ban img{height:42px !important} #ban .t{font-size:19px !important} }
+#ctabs{position:fixed;left:0;right:0;top:var(--bh);height:var(--th);z-index:39;display:none;align-items:center;gap:8px;padding:0 18px;overflow-x:auto;background:var(--bg);border-bottom:1px solid var(--l)}
+@media (min-width:900px){ #ctabs{padding:0 28px} }
+body.con-tabs #ctabs{display:flex}
+#ctabs a{flex:none;height:34px;display:inline-flex;align-items:center;text-decoration:none;border:1px solid var(--l2);border-radius:8px;background:var(--p);color:var(--mu);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:0 14px;white-space:nowrap}
+#ctabs a:hover{border-color:var(--cy);color:#fff}
+#ctabs a.on{background:var(--vg-grad);border-color:transparent;color:#fff}
+
+/* paneles desplegables */
+.pn{position:absolute;z-index:6;background:rgba(6,21,32,.95);border:1px solid var(--l2)}
+.pn-h{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;border-bottom:1px solid var(--l2);color:var(--mu);font:700 10.5px 'Montserrat',sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:10px 12px;cursor:pointer;text-align:left}
+.pn-h:hover{color:var(--tx)}
+.pn-h i{font-size:16px;transition:transform .2s}
+.pn.cerrado .pn-h{border-bottom-color:transparent}
+.pn.cerrado .pn-h i{transform:rotate(180deg)}
+.pn.cerrado .pn-b{display:none}
+.pn-b{padding:12px}
+#capas{left:16px;top:16px;width:214px}
+.cap{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--c);border:1px solid var(--l2);border-left:3px solid var(--l2);color:var(--tx);padding:10px 12px;margin-bottom:6px;font:700 12.5px 'Montserrat',sans-serif;letter-spacing:.04em;cursor:pointer}
+.cap i{font-size:18px;color:var(--mu)}
+.cap:hover{border-color:var(--cy)}
+.cap.on{background:rgba(45,211,219,.14);border-color:var(--cy);border-left-color:var(--vd)}
+.cap.on i{color:var(--cy)}
+.sw{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--l2);font-size:11.5px;font-weight:600;color:var(--mu)}
+.sw button{background:var(--c);border:1px solid var(--l2);color:var(--mu);font:700 10.5px 'Montserrat',sans-serif;letter-spacing:.1em;padding:5px 10px;cursor:pointer}
+.sw button.on{color:#fff;border-color:var(--cy);background:rgba(45,211,219,.14)}
+
+#ficha{right:16px;top:16px;width:330px;max-height:calc(100% - 150px);overflow:auto}
+#ficha h3{margin:0 0 2px;font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+#ficha .sub{font-size:11px;color:var(--mu);margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dato{background:var(--c);border:1px solid var(--l2);padding:8px 10px}
+.dato b{display:block;font-size:20px;font-weight:800;line-height:1.1}
+.dato b small{font-size:11px;font-weight:600;color:var(--mu);margin-left:2px}
+.dato span{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--mu)}
+.dato.ancho{grid-column:1/-1}
+#riesgo{margin-top:10px;padding:10px 12px;border:1px solid var(--l2);border-left:4px solid var(--vd);background:var(--c)}
+#riesgo .e{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--mu)}
+#riesgo .n{font-weight:800;font-size:16px;letter-spacing:.04em;text-transform:uppercase;margin-top:2px}
+#riesgo .d{font-size:11.5px;color:var(--mu);margin-top:3px;line-height:1.45}
+details{margin-top:8px;background:var(--c);border:1px solid var(--l2)}
+details summary{cursor:pointer;padding:8px 10px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);list-style:none;display:flex;justify-content:space-between;align-items:center}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:'▾';font-size:12px}
+details[open] summary::after{content:'▴'}
+details .in{padding:2px 10px 10px;font-size:12px}
+.fila{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--l)}
+.fila:last-child{border-bottom:0}
+.fila span{color:var(--mu);font-weight:600}
+.fila b{font-weight:800;text-align:right}
+.ok{color:var(--vd)} .no{color:var(--mu)} .alerta{color:var(--rj)}
+.nota{margin-top:10px;font-size:10px;color:#6F86A3;line-height:1.55}
+.nota b{color:var(--mu)}
+.cond{display:grid;grid-template-columns:1fr auto;gap:1px 10px;padding:7px 0;border-top:1px solid var(--l);font-size:12px}
+.cond:first-of-type{margin-top:8px}
+.cond span{color:var(--mu);font-weight:600}
+.cond b{font-weight:800;text-align:right}
+.cond i{grid-column:1/-1;font-style:normal;font-size:11px;font-weight:700;color:var(--mu)}
+.cond.si b,.cond.si i{color:var(--rj)}
+.cond.si i::before{content:'● ';}
+
+#leyenda{left:16px;bottom:124px;width:320px}
+#barra{height:12px;border:1px solid var(--l2)}
+#escala{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--mu);margin-top:4px}
+#lNota{font-size:10px;color:#6F86A3;margin-top:6px;line-height:1.5}
+#tiempo{left:16px;right:16px;bottom:16px}
+#tiempo .pn-b{display:flex;align-items:center;gap:16px;padding:10px 16px}
+#tiempo.cerrado .pn-b{display:none}
+#play{width:40px;height:40px;background:var(--c);border:1px solid var(--cy);color:var(--cy);font-size:20px;cursor:pointer;flex:none;display:grid;place-items:center}
+#hora{min-width:150px}
+#hora b{display:block;font-size:19px;font-weight:800;line-height:1.1}
+#hora span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--mu)}
+#rango{flex:1;accent-color:#2DD3DB;height:30px}
+#fuente{position:absolute;right:16px;bottom:124px;z-index:5;font-size:10px;color:#6F86A3}
+
+.mkE{width:34px;height:34px}
+.mkE .g{position:absolute;left:3px;top:0;width:28px;height:28px;background:var(--rj);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #030B13;display:grid;place-items:center}
+.mkE .g i{transform:rotate(45deg);color:#fff;font-size:15px}
+.mkE .lb{position:absolute;left:50%;top:38px;transform:translateX(-50%);white-space:nowrap;font:700 10px 'Montserrat',sans-serif;background:rgba(3,11,19,.9);border:1px solid var(--l2);padding:2px 7px}
+.mkP{width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:var(--cy);box-shadow:0 0 0 4px rgba(45,211,219,.3)}
+#msg{position:absolute;left:50%;top:16px;transform:translateX(-50%);z-index:9;background:var(--p);border:1px solid var(--cy);padding:9px 18px;font-size:12.5px;font-weight:600;display:none}
+
+/* ===================== adaptación a todos los tamaños ===================== */
+.pn-h em{font-style:normal;margin-left:10px;color:var(--cy);letter-spacing:.04em;display:none}
+.pn.cerrado .pn-h em{display:inline}
+#rango{touch-action:pan-x}
+/* tablet horizontal / PC pequeño */
+@media (max-width:1180px){
+  #capas{width:190px} #ficha{width:290px} #leyenda{width:280px}
+  .cap{padding:9px 10px;font-size:12px}
+  .dato b{font-size:18px}
+}
+/* tablet vertical y celulares (también cuando el celular está horizontal y queda poca altura) */
+@media (max-width:820px), (max-height:520px){
+  #ban{padding:0 12px;gap:10px} #ban .t{font-size:15px} #ban img{height:32px}
+  #msg{top:8px;max-width:90%;font-size:11.5px;text-align:center}
+  /* capas: barra de botones que se desliza, siempre a mano */
+  #capas{left:8px;right:8px;top:8px;width:auto}
+  #capas .pn-h{display:none}
+  #capas .pn-b{display:flex;gap:6px;overflow-x:auto;padding:6px;-webkit-overflow-scrolling:touch}
+  .cap{flex:none;width:auto;margin:0;padding:9px 12px;font-size:11.5px;gap:7px;border-left-width:1px}
+  .cap i{font-size:17px}
+  .sw{flex:none;margin:0;padding:0 4px 0 8px;border:0;border-left:1px solid var(--l2);gap:8px;font-size:10.5px;white-space:nowrap}
+  /* ficha, leyenda y tiempo se apilan abajo, a todo el ancho */
+  #abajo{display:flex;flex-direction:column;gap:6px;position:absolute;left:0;right:0;bottom:0;z-index:6;padding:6px 8px 8px;max-height:62%;overflow:auto;pointer-events:none}
+  #abajo .pn{position:static;width:auto;pointer-events:auto}
+  #ficha{max-height:none;overflow:visible}
+  .pn-h{padding:11px 12px;font-size:10px}
+  #leyenda .pn-b{padding:8px 12px} #barra{height:10px} #lNota{display:none} #escala{font-size:10px}
+  #tiempo .pn-b{flex-wrap:wrap;gap:8px 12px;padding:8px 12px}
+  #hora{min-width:0;flex:1} #hora b{font-size:17px}
+  #rango{flex:1 1 100%;order:3;height:34px}
+  #play{width:42px;height:42px}
+  #fuente{display:none}
+  .grid{gap:6px} .dato{padding:7px 9px} .dato b{font-size:17px}
+  .nota{font-size:9.5px}
+  .mkE .lb{display:none}
+}
+/* celulares horizontales: los paneles pasan a una columna a la derecha y el mapa ocupa el resto */
+@media (max-height:520px){
+  #capas{top:8px;right:316px}
+  #abajo{left:auto;width:308px;top:8px;bottom:0;max-height:none;padding:6px 8px 8px 0}
+  #tiempo .pn-b{padding:6px 12px} #rango{height:30px} #play{width:36px;height:36px}
+  #hora b{font-size:15px}
+  .pn-h{padding:8px 12px}
+}
+</style>
+</head>
+<body>
+<div id="ban">
+  <img src="img/logo.png" alt="Vigor">
+  <div class="sep"></div>
+  <span class="t" id="tit">Clima</span>
+  <a class="volver" id="volver" href="#" hidden>← Volver</a>
+  <div class="reloj"><span id="fechaHoy">—</span><strong id="clock">--:--:--</strong></div>
+</div>
+<div id="ctabs"></div>
+<div id="stage">
+<div id="mapa"></div>
+<canvas id="viento"></canvas>
+<div id="msg"></div>
+
+<div class="pn" id="capas">
+  <button class="pn-h"><span>Capa</span><i class="ti ti-chevron-up"></i></button>
+  <div class="pn-b">
+    <button class="cap on" data-c="viento"><i class="ti ti-wind"></i>Viento</button>
+    <button class="cap" data-c="temp"><i class="ti ti-temperature"></i>Temperatura</button>
+    <button class="cap" data-c="hum"><i class="ti ti-droplet-half-2"></i>Humedad</button>
+    <button class="cap" data-c="riesgo"><i class="ti ti-flame"></i>Peligro de incendio</button>
+    <div class="sw"><span>Límite comunal</span><button id="bLim" class="on">SÍ</button></div>
+  </div>
+</div>
+
+<div id="abajo">
+<div class="pn" id="ficha">
+  <button class="pn-h"><span>Clima del punto<em id="fRes"></em></span><i class="ti ti-chevron-up"></i></button>
+  <div class="pn-b">
+    <h3 id="fTit">—</h3>
+    <div class="sub" id="fSub">—</div>
+    <div class="grid">
+      <div class="dato"><span>Temperatura</span><b id="fT">—</b></div>
+      <div class="dato"><span>Humedad</span><b id="fH">—</b></div>
+      <div class="dato"><span>Viento</span><b id="fV">—</b></div>
+      <div class="dato"><span>Sopla hacia</span><b id="fD">—</b></div>
+    </div>
+    <div id="riesgo"><div class="e">Peligro de incendio · regla 30-30-30</div><div class="n" id="rN">—</div><div class="d" id="rD"></div><div id="rF"></div></div>
+    <div class="nota" id="notaF"></div>
+  </div>
+</div>
+
+<div class="pn" id="leyenda">
+  <button class="pn-h"><span id="lTit">Viento</span><i class="ti ti-chevron-up"></i></button>
+  <div class="pn-b"><div id="barra"></div><div id="escala"></div><div id="lNota"></div></div>
+</div>
+<div class="pn" id="tiempo">
+  <button class="pn-h"><span>Tiempo</span><i class="ti ti-chevron-up"></i></button>
+  <div class="pn-b">
+    <button id="play" title="Reproducir"><i class="ti ti-player-play-filled"></i></button>
+    <div id="hora"><span id="hDia">—</span><b id="hHora">—</b></div>
+    <input type="range" id="rango" min="0" max="71" value="0">
+  </div>
+</div>
+</div>
+<div id="fuente">Datos meteorológicos: MET Norway (CC BY 4.0) · Relieve: AWS Terrain Tiles · Mapa: OpenFreeMap © OpenStreetMap</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vigor-sesion.js"></script>
+<script src="vigor-config.js"></script>
+<script src="vigor-mapa.js"></script>
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const RAD = Math.PI / 180;
+const SB_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true } });
+const PARAMS = new URLSearchParams(location.search), EMBED = PARAMS.get('embed') === '1';
+if(EMBED) document.body.classList.add('embed');
+let INFO = null, ES_CENTRAL = false, ACTIVOS = [];
+// reloj del banner
+const tic = () => { const n = new Date(); $('clock').textContent = n.toLocaleTimeString('es-CL', { hour12:false }); $('fechaHoy').textContent = n.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' }); }; tic(); setInterval(tic, 1000);
+// pestañas de la Central (la misma fila en todas las pantallas)
+function armarPestanas(){
+  const t = $('ctabs');
+  if(ES_CENTRAL){
+    t.innerHTML = '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="monitoreo_mapa.html">Mapa Comunal</a><a href="clima.html" class="on">Clima</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a>';
+    document.body.classList.add('con-tabs'); $('tit').textContent = 'Central de Alarmas';
+  } else if(!EMBED){
+    // desde el PC de cuartel u otra pantalla: botón para volver a donde se estaba
+    let v = PARAMS.get('volver'); if(!/^[a-z0-9_]+\.html$/.test(v || '')){ try{ const r = new URL(document.referrer); if(r.origin === location.origin) v = r.pathname.split('/').pop(); }catch(e){} }
+    const a = $('volver'); a.href = /^[a-z0-9_]+\.html$/.test(v || '') && v !== 'clima.html' ? v : 'index.html'; a.hidden = false;
+  }
+  setTimeout(() => mapa && mapa.resize(), 50);
+}
+const slugComuna = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_');
+
+/* ===================== paneles desplegables ===================== */
+const PEQ = () => window.innerWidth <= 820 || window.innerHeight <= 520;
+document.querySelectorAll('.pn').forEach(pn => {
+  const k = 'clima_pn_' + pn.id; let g = null; try{ g = localStorage.getItem(k); }catch(e){}
+  if(g === '1' || (g === null && PEQ() && pn.id === 'ficha')) pn.classList.add('cerrado');
+  pn.querySelector('.pn-h').onclick = () => { pn.classList.toggle('cerrado'); try{ localStorage.setItem(k, pn.classList.contains('cerrado') ? '1' : '0'); }catch(e){} };
+});
+
+/* la leyenda y la fuente se acomodan encima de la barra de tiempo, esté abierta o cerrada */
+new ResizeObserver(() => { const h = $('tiempo').offsetHeight + 24; $('leyenda').style.bottom = h + 'px'; $('fuente').style.bottom = h + 'px'; }).observe($('tiempo'));
+
+/* ===================== comuna ===================== */
+let POLIS = [], CB = null;   // polígonos de la comuna y su caja
+function dentro(lng, lat){
+  for(const poli of POLIS){
+    let ins = false; const a = poli[0];
+    for(let i = 0, j = a.length - 1; i < a.length; j = i++){ const xi = a[i][0], yi = a[i][1], xj = a[j][0], yj = a[j][1]; if(((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) ins = !ins; }
+    if(ins){ let hueco = false; for(let h = 1; h < poli.length && !hueco; h++){ const b = poli[h]; let d2 = false; for(let i = 0, j = b.length - 1; i < b.length; j = i++){ const xi = b[i][0], yi = b[i][1], xj = b[j][0], yj = b[j][1]; if(((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) d2 = !d2; } hueco = d2; } if(!hueco) return true; }
+  }
+  return false;
+}
+
+/* ===================== datos: MET Norway (Instituto Meteorológico de Noruega) =====================
+   Se consulta directo desde el equipo: unos 25 puntos repartidos sobre la comuna. El navegador guarda cada respuesta hasta la hora
+   en que MET Norway dice que vence, y además aquí se guarda el resultado 30 minutos para no repetir la consulta.
+   MET entrega la hora siguiente cada 1 h durante ~2,5 días y luego cada 6 h: aquí se arma una serie horaria de 72 horas. */
+const MD = { nx:5, ny:5 };
+let D = null, ALT = null, horas = [], hora = 0, capa = 'viento', playing = false, timer = null;
+const malla = (nx, ny) => { const lg = [], lt = []; for(let i = 0; i < nx; i++) lg.push(CB.w + (CB.e - CB.w) * i / (nx - 1)); for(let j = 0; j < ny; j++) lt.push(CB.n - (CB.n - CB.s) * j / (ny - 1)); return { lg, lt }; };
+function muestra(g, lng, lat){   // interpolación entre los puntos de la malla
+  const nx = g[0].length, ny = g.length;
+  const fx = Math.min(nx - 1.0001, Math.max(0, (lng - CB.w) / (CB.e - CB.w) * (nx - 1))), fy = Math.min(ny - 1.0001, Math.max(0, (CB.n - lat) / (CB.n - CB.s) * (ny - 1)));
+  const i = Math.floor(fx), j = Math.floor(fy), tx = fx - i, ty = fy - j;
+  return (g[j][i] * (1 - tx) + g[j][i+1] * tx) * (1 - ty) + (g[j+1][i] * (1 - tx) + g[j+1][i+1] * tx) * ty;
+}
+const nueva3 = (N, ny, nx) => Array.from({length:N}, () => Array.from({length:ny}, () => new Array(nx).fill(0)));
+async function pedirPunto(lat, lng){
+  const url = 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=' + lat.toFixed(4) + '&lon=' + lng.toFixed(4);   // 4 decimales como pide MET
+  for(let k = 0; k < 3; k++){
+    try{ const r = await fetch(url); if(r.ok) return await r.json(); if(r.status === 403 || r.status === 400) break; }catch(e){}
+    await new Promise(res => setTimeout(res, 1200 * (k + 1)));
+  }
+  throw new Error('MET Norway no respondió');
+}
+// serie de MET (horas irregulares) -> 72 horas exactas, interpolando; el viento se interpola por componentes
+function aHorario(ts, inicio, N){
+  const t = ts.map(x => Date.parse(x.time)), d = ts.map(x => x.data.instant.details), out = { t:[], h:[], v:[], d:[] };
+  for(let k = 0; k < N; k++){
+    const T = inicio + k * 3600000; let i = t.findIndex(x => x >= T); if(i < 0) i = t.length - 1; const a = Math.max(0, i - 1), f = t[i] === t[a] ? 0 : Math.min(1, Math.max(0, (T - t[a]) / (t[i] - t[a])));
+    const L = (u, w) => u + (w - u) * f, wa = d[a].wind_speed * 3.6, wb = d[i].wind_speed * 3.6;
+    const ua = -wa * Math.sin(d[a].wind_from_direction * RAD), va = -wa * Math.cos(d[a].wind_from_direction * RAD), ub = -wb * Math.sin(d[i].wind_from_direction * RAD), vb = -wb * Math.cos(d[i].wind_from_direction * RAD);
+    const uu = L(ua, ub), vv = L(va, vb);
+    out.t.push(L(d[a].air_temperature, d[i].air_temperature)); out.h.push(L(d[a].relative_humidity, d[i].relative_humidity));
+    out.v.push(Math.hypot(uu, vv)); out.d.push((Math.atan2(-uu, -vv) / RAD + 360) % 360);   // dirección de DONDE viene el viento
+  }
+  return out;
+}
+async function cargarClima(){
+  const N = 72, { lg, lt } = malla(MD.nx, MD.ny), pts = []; for(let j = 0; j < MD.ny; j++) for(let i = 0; i < MD.nx; i++) pts.push({ i, j, lat:lt[j], lng:lg[i] });
+  const resp = new Array(pts.length); let sig = 0, fallos = 0;
+  await Promise.all(Array.from({ length:5 }, async () => { while(sig < pts.length){ const k = sig++; try{ resp[k] = await pedirPunto(pts[k].lat, pts[k].lng); }catch(e){ fallos++; } } }));
+  if(fallos > 3) throw new Error('el servicio de clima no respondió');
+  const ok = resp.find(Boolean), t0 = Date.parse(ok.properties.timeseries[0].time), ahora = Math.floor(Date.now() / 3600000) * 3600000, inicio = Math.max(ahora, t0);
+  D = { t:nueva3(N, MD.ny, MD.nx), h:nueva3(N, MD.ny, MD.nx), v:nueva3(N, MD.ny, MD.nx), d:nueva3(N, MD.ny, MD.nx) }; ALT = Array.from({length:MD.ny}, () => new Array(MD.nx).fill(0));
+  horas = Array.from({length:N}, (_, k) => new Date(inicio + k * 3600000).toISOString());
+  pts.forEach((p, k) => {
+    const r = resp[k] || ok;   // un punto que falló toma el valor de uno vecino
+    const s = aHorario(r.properties.timeseries, inicio, N); ALT[p.j][p.i] = r.geometry.coordinates[2] || 0;
+    for(let h = 0; h < N; h++){ D.t[h][p.j][p.i] = s.t[h]; D.h[h][p.j][p.i] = s.h[h]; D.v[h][p.j][p.i] = s.v[h]; D.d[h][p.j][p.i] = s.d[h]; }
+  });
+  horaActual();
+}
+
+/* ===================== relieve: el clima de cada punto se corrige por su altura =====================
+   MET da el clima a la altura de cada punto de la malla. Entre puntos, la temperatura baja ~6,5 °C cada 1.000 m de subida y el punto
+   de rocío ~2 °C; con la altura real del terreno (teselas abiertas de AWS) se recalcula la temperatura y la humedad de cada rincón.
+   Así valles y cerros se distinguen y el mapa no queda plano. */
+let ELEV = null;   // altura (m) de cada pixel de la imagen del mapa
+const W_IMG = 420, H_IMG = 420;
+async function cargarRelieve(){
+  const Z = 10, n = 2 ** Z, tx = lng => (lng + 180) / 360 * n, ty = lat => (1 - Math.log(Math.tan(lat * RAD) + 1 / Math.cos(lat * RAD)) / Math.PI) / 2 * n;
+  const x0 = Math.floor(tx(CB.w)), x1 = Math.floor(tx(CB.e)), y0 = Math.floor(ty(CB.n)), y1 = Math.floor(ty(CB.s)), cargas = [];
+  for(let y = y0; y <= y1; y++) for(let x = x0; x <= x1; x++) cargas.push(new Promise(res => { const im = new Image(); im.crossOrigin = 'anonymous'; im.onload = () => { const c = document.createElement('canvas'); c.width = c.height = 256; const q = c.getContext('2d', { willReadFrequently:true }); q.drawImage(im, 0, 0); res({ x, y, d:q.getImageData(0, 0, 256, 256).data }); }; im.onerror = () => res(null); im.src = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/' + Z + '/' + x + '/' + y + '.png'; }));
+  const tiles = await Promise.all(cargas); if(tiles.some(t => !t)) throw new Error('relieve no disponible');
+  const T = {}; tiles.forEach(t => T[t.x + '_' + t.y] = t.d); ELEV = new Float32Array(W_IMG * H_IMG);
+  for(let py = 0; py < H_IMG; py++) for(let px = 0; px < W_IMG; px++){
+    const lng = CB.w + (CB.e - CB.w) * px / (W_IMG - 1), lat = CB.n - (CB.n - CB.s) * py / (H_IMG - 1), fx = tx(lng), fy = ty(lat), d = T[Math.floor(fx) + '_' + Math.floor(fy)];
+    if(!d){ ELEV[py * W_IMG + px] = NaN; continue; }
+    const o = (Math.min(255, Math.floor((fy - Math.floor(fy)) * 256)) * 256 + Math.min(255, Math.floor((fx - Math.floor(fx)) * 256))) * 4;
+    ELEV[py * W_IMG + px] = d[o] * 256 + d[o+1] + d[o+2] / 256 - 32768;
+  }
+}
+const elevEn = (lng, lat) => { if(!ELEV) return NaN; const px = Math.round((lng - CB.w) / (CB.e - CB.w) * (W_IMG - 1)), py = Math.round((CB.n - lat) / (CB.n - CB.s) * (H_IMG - 1)); return px < 0 || py < 0 || px >= W_IMG || py >= H_IMG ? NaN : ELEV[py * W_IMG + px]; };
+// temperatura y humedad de un punto, ya corregidas por la altura de ese punto
+function climaEn(h, lng, lat, z){
+  const T0 = muestra(D.t[h], lng, lat), H0 = Math.min(100, Math.max(1, muestra(D.h[h], lng, lat))), V = muestra(D.v[h], lng, lat);
+  if(!isFinite(z)) return { T:T0, H:H0, V };
+  const dz = Math.max(-500, Math.min(500, z - muestra(ALT, lng, lat)));
+  const a = 17.625, b = 243.04, g = Math.log(H0 / 100) + a * T0 / (b + T0), Td = b * g / (a - g);   // punto de rocío (Magnus)
+  const T = T0 - 0.0065 * dz, Tdc = Td - 0.002 * dz, H = Math.min(100, Math.max(1, 100 * Math.exp(a * Tdc / (b + Tdc)) / Math.exp(a * T / (b + T))));
+  return { T, H, V };
+}
+
+/* ===================== regla 30-30-30 (peligro de incendio) =====================
+   Condiciones críticas de propagación: temperatura de 30 °C o más, humedad de 30 % o menos y viento de 30 km/h o más.
+   Cuántas de las tres se cumplen en cada punto: 0, 1, 2 o 3. Con las tres, el peligro es máximo. */
+const R3 = { T:30, H:30, V:30 };
+const NIVEL = [
+  { n:0, nombre:'Sin condiciones críticas', color:'#3CF29A', txt:'Ninguna de las tres condiciones se cumple.' },
+  { n:1, nombre:'Vigilar', color:'#F5E146', txt:'Se cumple 1 de las 3 condiciones.' },
+  { n:2, nombre:'Atención', color:'#FF9628', txt:'Se cumplen 2 de las 3 condiciones: el fuego se propagaría con facilidad.' },
+  { n:3, nombre:'Peligro alto', color:'#F13746', txt:'Se cumplen las 3 condiciones: propagación rápida y difícil de controlar.' }
+];
+const cuenta = c => (c.T >= R3.T ? 1 : 0) + (c.H <= R3.H ? 1 : 0) + (c.V >= R3.V ? 1 : 0);
+
+/* ===================== colores ===================== */
+const ARCO = [[0,[84,48,200]],[.12,[40,104,255]],[.25,[24,186,255]],[.38,[22,222,176]],[.5,[96,236,84]],[.62,[236,236,50]],[.75,[255,166,36]],[.88,[255,66,48]],[1,[196,26,120]]];
+function arco(t){ t = Math.min(1, Math.max(0, t)); for(let k = 1; k < ARCO.length; k++){ if(t <= ARCO[k][0]){ const a = ARCO[k-1], b = ARCO[k], u = (t - a[0]) / (b[0] - a[0]); return a[1].map((x, i) => Math.round(x + (b[1][i] - x) * u)); } } return ARCO[ARCO.length-1][1]; }
+/* ===================== mapa ===================== */
+const mapa = new maplibregl.Map({ container:'mapa', style:vigorEstiloMapa(), center:[-72.7, -36.82], zoom:10.3, minZoom:7, maxZoom:16, attributionControl:false, dragRotate:false, pitchWithRotate:false });
+mapa.touchZoomRotate.disableRotation();
+let listo = false, mkP = null, puntoSel = { lng:-72.7, lat:-36.8, nombre:'Centro de la comuna', sub:'' };
+
+mapa.on('load', async () => {
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session){ msg('Inicia sesión para ver el clima'); if(!EMBED) $('msg').innerHTML += ' · <a href="login_registro.html" style="color:var(--cy)">Iniciar sesión</a>'; return; }
+  try{ const r = await sb.rpc('central_obtener_cuerpo'); ES_CENTRAL = Array.isArray(r.data) ? r.data.length > 0 : !!r.data; }catch(e){}
+  armarPestanas();
+  try{ const r = await sb.rpc('mi_cuerpo_info'); INFO = Array.isArray(r.data) ? r.data[0] : r.data; }catch(e){}
+  if(!INFO){ msg('Tu cuenta no está asociada a un Cuerpo activo'); return; }
+  let fc = null;
+  try{ fc = await vigorLimiteComunal({ comuna:INFO.c_comuna, region:INFO.c_region, limite:INFO.c_limite }, g => sb.rpc('guardar_limite_comunal', { p_geojson:g })); }catch(e){}
+  const f0 = fc && fc.features.find(x => x.geometry && /Polygon/.test(x.geometry.type)); if(!f0){ msg('No se encontró el límite de la comuna'); return; }
+  POLIS = f0.geometry.type === 'MultiPolygon' ? f0.geometry.coordinates : [f0.geometry.coordinates];
+  let w = 180, e = -180, s = 90, n = -90; POLIS.forEach(p => p[0].forEach(c => { w = Math.min(w, c[0]); e = Math.max(e, c[0]); s = Math.min(s, c[1]); n = Math.max(n, c[1]); }));
+  const mx = (e - w) * 0.02, my = (n - s) * 0.02; CB = { w:w - mx, e:e + mx, s:s - my, n:n + my };
+  mapa.addSource('lim', { type:'geojson', data:fc });
+  mapa.addSource('clima', { type:'image', url:document.createElement('canvas').toDataURL(), coordinates:[[CB.w,CB.n],[CB.e,CB.n],[CB.e,CB.s],[CB.w,CB.s]] });
+  mapa.addLayer({ id:'clima-img', type:'raster', source:'clima', paint:{ 'raster-opacity':.8, 'raster-fade-duration':0, 'raster-resampling':'linear' } });
+  mapa.addLayer({ id:'lim-halo', type:'line', source:'lim', filter:['==',['geometry-type'],'Polygon'], paint:{ 'line-color':'#030B13', 'line-width':5, 'line-opacity':.6 } });
+  mapa.addLayer({ id:'lim-linea', type:'line', source:'lim', filter:['==',['geometry-type'],'Polygon'], paint:{ 'line-color':'#49E9FF', 'line-width':2, 'line-dasharray':[3,2] } });
+  const enc = () => mapa.fitBounds([[CB.w, CB.s], [CB.e, CB.n]], { padding: PEQ() ? (window.innerHeight <= 520 ? { top:70, bottom:18, left:18, right:332 } : { top:76, bottom: Math.round(window.innerHeight * .34), left:18, right:18 }) : { top:24, bottom:150, left:250, right:370 }, duration:0 }); enc(); window.__enc = enc;
+  const c = { lng:(CB.w + CB.e) / 2, lat:(CB.s + CB.n) / 2 };
+  puntoSel = { lng:c.lng, lat:c.lat, nombre:'Centro de la comuna', sub:'Toca el mapa para ver el clima en otro punto' };
+  try{
+    msg('Cargando el clima de la comuna…');
+    const cache = leerCache();
+    if(cache){ horas = cache.horas; D = cache.D; ALT = cache.ALT; horaActual(); }
+    else { await cargarClima(); guardarCache(); }
+  }catch(err){
+    // sin conexión o con el servicio ocupado: se usa lo último guardado (hasta 6 horas) avisando de cuándo es
+    const viejo = leerCache(360);
+    if(!viejo){ msg('No se pudo cargar el clima: ' + err.message); return; }
+    horas = viejo.horas; D = viejo.D; ALT = viejo.ALT; horaActual(); $('fuente').textContent = 'Datos guardados hace ' + Math.round((Date.now() - viejo.t) / 60000) + ' min (sin conexión con el servicio de clima)';
+  }
+  try{ await cargarRelieve(); }catch(e){ ELEV = null; }   // sin relieve el mapa funciona igual, solo con menos detalle
+  listo = true; await cargarActivos(); dibujar(); actualizarFicha(); iniciarParticulas(); $('msg').style.display = 'none';
+  setInterval(() => cargarActivos().then(actualizarFicha), 60000);
+});
+
+/* ---------- emergencias en curso: se marcan en el mapa y se puede ver el clima justo ahí ---------- */
+const MK_E = {};
+async function cargarActivos(){
+  try{
+    const { data } = await sb.from('despachos').select('id, direccion, lat, lng, claves_emergencia(codigo, nombre)').eq('estado', 'activo');
+    ACTIVOS = (data || []).filter(d => isFinite(d.lat) && isFinite(d.lng) && d.lat != null && d.lng != null);
+  }catch(e){ ACTIVOS = []; }
+  const ids = new Set(ACTIVOS.map(d => d.id));
+  for(const id in MK_E) if(!ids.has(id)){ MK_E[id].remove(); delete MK_E[id]; }
+  for(const d of ACTIVOS){
+    if(MK_E[d.id]) continue;
+    const em = document.createElement('div'); em.className = 'mkE'; em.style.cursor = 'pointer';
+    em.innerHTML = '<div class="g"><i class="ti ti-flame"></i></div><div class="lb">' + ((d.claves_emergencia && d.claves_emergencia.nombre) || 'Emergencia').replace(/[&<>]/g, '') + '</div>';
+    em.addEventListener('click', ev => { ev.stopPropagation(); elegirEmergencia(d); });
+    MK_E[d.id] = new maplibregl.Marker({ element:em, anchor:'bottom' }).setLngLat([d.lng, d.lat]).addTo(mapa);
+  }
+  // si aún no se eligió nada y hay una emergencia, el clima parte ahí
+  if(!puntoSel.emergencia && !puntoSel.tocado && ACTIVOS.length) elegirEmergencia(ACTIVOS[0], true);
+}
+function elegirEmergencia(d, silencio){
+  puntoSel = { lng:d.lng, lat:d.lat, emergencia:d.id, nombre:'Emergencia · ' + ((d.claves_emergencia && d.claves_emergencia.nombre) || ''), sub:d.direccion || '' };
+  if(mkP){ mkP.remove(); mkP = null; }
+  if(!silencio) actualizarFicha();
+}
+/* ---------- memoria: el clima de una comuna se guarda 30 minutos en el equipo para no repetir la consulta ---------- */
+const CLAVE_CACHE = () => 'vigor_clima_met_v1_' + slugComuna(INFO && INFO.c_comuna);
+function leerCache(maxMin){ try{ const o = JSON.parse(localStorage.getItem(CLAVE_CACHE()) || 'null'); if(o && o.D && o.ALT && Date.now() - o.t < (maxMin || 30) * 60 * 1000 && o.horas && o.horas.length) return o; }catch(e){} return null; }
+function guardarCache(){ try{ localStorage.setItem(CLAVE_CACHE(), JSON.stringify({ t:Date.now(), horas, D, ALT }, (k, v) => typeof v === 'number' ? Math.round(v * 10) / 10 : v)); }catch(e){} }
+function horaActual(){ const ahora = Math.floor(Date.now() / 3600000) * 3600000; hora = Math.max(0, horas.findIndex(x => Date.parse(x) >= ahora)); $('rango').max = horas.length - 1; $('rango').value = hora; }
+mapa.on('click', ev => {
+  puntoSel = { lng:ev.lngLat.lng, lat:ev.lngLat.lat, tocado:true, nombre: dentro(ev.lngLat.lng, ev.lngLat.lat) ? 'Punto elegido' : 'Punto fuera de la comuna', sub:ev.lngLat.lat.toFixed(4) + ', ' + ev.lngLat.lng.toFixed(4) };
+  if(!mkP){ const d = document.createElement('div'); d.className = 'mkP'; mkP = new maplibregl.Marker({ element:d }).setLngLat(ev.lngLat).addTo(mapa); } else mkP.setLngLat(ev.lngLat);
+  actualizarFicha();
+});
+function msg(t){ const m = $('msg'); m.textContent = t; m.style.display = 'block'; }
+
+/* ===================== capa de colores (solo dentro de los límites de la comuna) ===================== */
+const cv = document.createElement('canvas'), cv2 = document.createElement('canvas'); cv.width = cv2.width = W_IMG; cv.height = cv2.height = H_IMG;
+const cx = cv.getContext('2d'), cx2 = cv2.getContext('2d', { willReadFrequently:true });
+const SPAN_MIN = { temp:4, hum:12, viento:6 };   // diferencia mínima que se estira por toda la paleta: así las variaciones pequeñas igual se ven
+const TZ = 'America/Santiago';
+function dibujar(){
+  if(!listo) return;
+  // clima de cada pixel de la comuna (con la altura del terreno), una sola vez por redibujo
+  const N = W_IMG * H_IMG, T = new Float32Array(N), Hh = new Float32Array(N), V = new Float32Array(N), dentroM = new Uint8Array(N); let lo = 1e9, hi = -1e9;
+  const clave = capa === 'temp' ? 'T' : capa === 'hum' ? 'H' : 'V';
+  for(let y = 0; y < H_IMG; y++) for(let x = 0; x < W_IMG; x++){
+    const lng = CB.w + (CB.e - CB.w) * x / (W_IMG - 1), lat = CB.n - (CB.n - CB.s) * y / (H_IMG - 1), k = y * W_IMG + x, c = climaEn(hora, lng, lat, ELEV ? ELEV[k] : NaN);
+    T[k] = c.T; Hh[k] = c.H; V[k] = c.V;
+    if(x % 3 === 0 && y % 3 === 0 && dentro(lng, lat)){ dentroM[k] = 1; const v = clave === 'T' ? c.T : clave === 'H' ? c.H : c.V; if(v < lo) lo = v; if(v > hi) hi = v; }
+  }
+  if(lo > hi){ lo = 0; hi = 1; }
+  const span = SPAN_MIN[capa === 'viento' ? 'viento' : capa]; if(span && hi - lo < span){ const m = (hi + lo) / 2; lo = m - span / 2; hi = m + span / 2; }
+  const pad = (hi - lo) * 0.04; lo -= pad; hi += pad;
+  const img = cx.createImageData(W_IMG, H_IMG);
+  for(let k = 0; k < N; k++){
+    let c, a = 255;
+    if(capa === 'riesgo'){ const nv = cuenta({ T:T[k], H:Hh[k], V:V[k] }); c = hex(NIVEL[nv].color); a = [95, 190, 225, 255][nv]; }
+    else if(capa === 'temp') c = arco((T[k] - lo) / (hi - lo));
+    else if(capa === 'hum') c = arco(1 - (Hh[k] - lo) / (hi - lo));
+    else { c = arco((V[k] - lo) / (hi - lo)); a = 150; }
+    const o = k * 4; img.data[o] = c[0]; img.data[o+1] = c[1]; img.data[o+2] = c[2]; img.data[o+3] = a;
+  }
+  cx2.clearRect(0, 0, W_IMG, H_IMG); cx2.putImageData(img, 0, 0);
+  // recorte con el contorno de la comuna: nada se pinta fuera de sus límites
+  cx.clearRect(0, 0, W_IMG, H_IMG); cx.save(); cx.beginPath();
+  POLIS.forEach(poli => poli.forEach(anillo => anillo.forEach((c, k) => { const x = (c[0] - CB.w) / (CB.e - CB.w) * W_IMG, y = (CB.n - c[1]) / (CB.n - CB.s) * H_IMG; k ? cx.lineTo(x, y) : cx.moveTo(x, y); })));
+  cx.clip('evenodd'); cx.drawImage(cv2, 0, 0); cx.restore();
+  mapa.getSource('clima').updateImage({ url:cv.toDataURL(), coordinates:[[CB.w,CB.n],[CB.e,CB.n],[CB.e,CB.s],[CB.w,CB.s]] });
+  leyenda(lo, hi);
+  const f = new Date(horas[hora]);
+  $('hDia').textContent = f.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'short', timeZone:TZ }); $('hHora').textContent = f.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:TZ }); $('rango').value = hora;
+}
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+function leyenda(lo, hi){
+  $('lTit').textContent = { viento:'Velocidad del viento (km/h)', temp:'Temperatura (°C)', hum:'Humedad relativa (%)', riesgo:'Peligro de incendio · regla 30-30-30' }[capa];
+  if(capa === 'riesgo'){
+    $('barra').style.background = 'linear-gradient(90deg,' + NIVEL.map((n, i) => n.color + ' ' + (i * 25) + '%,' + n.color + ' ' + ((i + 1) * 25) + '%').join(',') + ')';
+    $('escala').innerHTML = ['0 de 3', '1 de 3', '2 de 3', '3 de 3'].map(t => '<span>' + t + '</span>').join('');
+    $('lNota').textContent = 'Condiciones cumplidas: temperatura ≥ 30 °C, humedad ≤ 30 %, viento ≥ 30 km/h.';
+    return;
+  }
+  const n = 24, st = []; for(let i = 0; i <= n; i++){ const t = i / n, c = capa === 'hum' ? arco(1 - t) : arco(t); st.push('rgb(' + c.join(',') + ') ' + (t * 100) + '%'); }
+  $('barra').style.background = 'linear-gradient(90deg,' + st.join(',') + ')';
+  $('escala').innerHTML = [0, .25, .5, .75, 1].map(t => '<span>' + (lo + (hi - lo) * t).toFixed(capa === 'temp' ? 1 : 0) + '</span>').join('');
+  $('lNota').textContent = 'Escala ajustada a lo que varía dentro de la comuna en esta hora, para distinguir bien las diferencias.';
+}
+
+/* ===================== ficha del punto ===================== */
+const PUNTOS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+function actualizarFicha(){
+  if(!listo) return;
+  const { lng, lat } = puntoSel, c = climaEn(hora, lng, lat, elevEn(lng, lat)), T = c.T, Hm = c.H, V = c.V;
+  const gu = D.v[hora].map((f, j) => f.map((x, i) => -x * Math.sin(D.d[hora][j][i] * RAD))), gv = D.v[hora].map((f, j) => f.map((x, i) => -x * Math.cos(D.d[hora][j][i] * RAD)));
+  const hacia = (Math.atan2(muestra(gu, lng, lat), muestra(gv, lng, lat)) / RAD + 360) % 360;
+  $('fRes').textContent = T.toFixed(1) + '° · ' + Math.round(Hm) + '% · ' + Math.round(V) + ' km/h';
+  $('fTit').textContent = puntoSel.nombre; $('fSub').textContent = puntoSel.sub + ' · ' + new Date(horas[hora]).toLocaleString('es-CL', { weekday:'short', hour:'2-digit', minute:'2-digit', hour12:false, timeZone:TZ });
+  $('fT').innerHTML = T.toFixed(1) + '<small>°C</small>'; $('fH').innerHTML = Math.round(Hm) + '<small>%</small>'; $('fV').innerHTML = Math.round(V) + '<small>km/h</small>';
+  $('fD').innerHTML = '<i class="ti ti-arrow-up" style="display:inline-block;transform:rotate(' + hacia.toFixed(0) + 'deg);color:#2DD3DB;vertical-align:-3px"></i> ' + PUNTOS[Math.round(hacia / 22.5) % 16];
+  // regla 30-30-30: cuántas condiciones se cumplen y cuánto falta para las que no
+  // se evalúa con los mismos números que se muestran, para que lo que ves coincida con el resultado
+  const Tr = Math.round(T * 10) / 10, Hr = Math.round(Hm), Vr = Math.round(V), nv = NIVEL[cuenta({ T:Tr, H:Hr, V:Vr })];
+  $('riesgo').style.borderLeftColor = nv.color; $('rN').style.color = nv.color; $('rN').textContent = nv.nombre + ' · ' + nv.n + ' de 3'; $('rD').textContent = nv.txt;
+  const fila = (si, nombre, valor, falta) => '<div class="cond ' + (si ? 'si' : '') + '"><span>' + nombre + '</span><b>' + valor + '</b><i>' + (si ? 'Se cumple' : falta) + '</i></div>';
+  $('rF').innerHTML = fila(Tr >= R3.T, 'Temperatura 30 °C o más', Tr.toFixed(1) + ' °C', 'Faltan ' + (R3.T - Tr).toFixed(1) + ' °C')
+    + fila(Hr <= R3.H, 'Humedad 30 % o menos', Hr + ' %', 'Sobran ' + (Hr - R3.H) + (Hr - R3.H === 1 ? ' punto' : ' puntos'))
+    + fila(Vr >= R3.V, 'Viento 30 km/h o más', Vr + ' km/h', 'Faltan ' + (R3.V - Vr) + ' km/h');
+  $('notaF').innerHTML = '<b>Cómo se calcula.</b> Pronóstico de MET Norway ajustado a la altura del terreno de cada punto. Es una estimación y no reemplaza los avisos oficiales de CONAF, SENAPRED ni la Dirección Meteorológica de Chile.';
+}
+
+/* ===================== viento: pocas partículas, siempre la misma densidad en pantalla ===================== */
+const vc = $('viento'), vx = vc.getContext('2d'); let parts = [], nObj = 0;
+// componentes del viento (hacia el este / hacia el norte, en km/h) de cada hora; se interpolan así para no romper en 359°/1°
+const UVC = {}; function uvGrids(h){ if(!UVC[h]) UVC[h] = [D.v[h].map((f, j) => f.map((x, i) => -x * Math.sin(D.d[h][j][i] * RAD))), D.v[h].map((f, j) => f.map((x, i) => -x * Math.cos(D.d[h][j][i] * RAD)))]; return UVC[h]; }
+function ajustarCanvas(){ const r = $('mapa').getBoundingClientRect(), d = window.devicePixelRatio || 1; vc.width = r.width * d; vc.height = r.height * d; vc.style.width = r.width + 'px'; vc.style.height = r.height + 'px'; vx.setTransform(d, 0, 0, d, 0, 0); }
+function nuevaP(){
+  const b = mapa.getBounds(), w = Math.max(b.getWest(), CB.w), e = Math.min(b.getEast(), CB.e), s = Math.max(b.getSouth(), CB.s), n = Math.min(b.getNorth(), CB.n);
+  if(w >= e || s >= n) return null;
+  for(let k = 0; k < 14; k++){ const lng = w + Math.random() * (e - w), lat = s + Math.random() * (n - s); if(dentro(lng, lat)) return { lng, lat, edad:0, vida:35 + Math.floor(Math.random() * 45) }; }
+  return null;
+}
+function recalcular(){
+  // cantidad según el área de comuna que se ve en pantalla (≈ 1 partícula cada 2.600 px²): al acercar o alejar no se satura
+  const a = mapa.project([Math.max(CB.w, mapa.getBounds().getWest()), Math.min(CB.n, mapa.getBounds().getNorth())]), b = mapa.project([Math.min(CB.e, mapa.getBounds().getEast()), Math.max(CB.s, mapa.getBounds().getSouth())]);
+  const area = Math.max(0, b.x - a.x) * Math.max(0, b.y - a.y) * 0.6; nObj = Math.min(520, Math.max(0, Math.round(area / 2600)));
+  while(parts.length < nObj){ const p = nuevaP(); if(!p) break; parts.push(p); } parts.length = Math.min(parts.length, nObj);
+}
+function iniciarParticulas(){ ajustarCanvas(); recalcular(); requestAnimationFrame(paso); }
+let tPrev = performance.now(), moviendo = false;
+function paso(t){
+  const dt = Math.min(.05, (t - tPrev) / 1000); tPrev = t;
+  if(capa === 'viento' && listo && !moviendo){
+    vx.globalCompositeOperation = 'destination-out'; vx.fillStyle = 'rgba(0,0,0,.14)'; vx.fillRect(0, 0, vc.clientWidth, vc.clientHeight); vx.globalCompositeOperation = 'source-over'; vx.lineWidth = 1.6; vx.lineCap = 'round';
+    for(let k = 0; k < parts.length; k++){
+      const p = parts[k], uv = uvGrids(hora), gu = muestra(uv[0], p.lng, p.lat), gv = muestra(uv[1], p.lng, p.lat), vel = Math.hypot(gu, gv) || 0.001, u = gu / vel, vv = gv / vel;
+      const a = mapa.project([p.lng, p.lat]), px = Math.max(10, vel) * 2.1 * dt;   // velocidad en pantalla: la misma a cualquier zoom
+      const nx = a.x + u * px, ny = a.y - vv * px, ll = mapa.unproject([nx, ny]);
+      const c = arco((vel - 0) / 40); vx.strokeStyle = 'rgba(' + Math.min(255, c[0] + 60) + ',' + Math.min(255, c[1] + 60) + ',' + Math.min(255, c[2] + 60) + ',.9)';
+      vx.beginPath(); vx.moveTo(a.x, a.y); vx.lineTo(nx, ny); vx.stroke();
+      p.lng = ll.lng; p.lat = ll.lat; p.edad++;
+      if(p.edad > p.vida || !dentro(p.lng, p.lat)){ const q = nuevaP(); if(q) parts[k] = q; }
+    }
+  } else if(capa !== 'viento'){ vx.clearRect(0, 0, vc.clientWidth, vc.clientHeight); }
+  requestAnimationFrame(paso);
+}
+mapa.on('movestart', () => { moviendo = true; vx.clearRect(0, 0, vc.clientWidth, vc.clientHeight); });
+mapa.on('moveend', () => { moviendo = false; if(listo){ parts = []; recalcular(); } });
+let tRes = null; window.addEventListener('resize', () => { ajustarCanvas(); mapa.resize(); clearTimeout(tRes); tRes = setTimeout(() => { if(listo && window.__enc) window.__enc(); parts = []; recalcular(); }, 250); });
+
+/* ===================== controles ===================== */
+document.querySelectorAll('.cap').forEach(b => b.onclick = () => { capa = b.dataset.c; document.querySelectorAll('.cap').forEach(x => x.classList.toggle('on', x === b)); vx.clearRect(0, 0, vc.clientWidth, vc.clientHeight); dibujar(); actualizarFicha(); });
+$('rango').oninput = () => { hora = +$('rango').value; dibujar(); actualizarFicha(); };
+$('play').onclick = () => { playing = !playing; $('play').innerHTML = '<i class="ti ti-player-' + (playing ? 'pause' : 'play') + '-filled"></i>'; clearInterval(timer); if(playing) timer = setInterval(() => { hora = (hora + 1) % horas.length; dibujar(); actualizarFicha(); }, 700); };
+$('bLim').onclick = () => { const on = $('bLim').classList.toggle('on'); $('bLim').textContent = on ? 'SÍ' : 'NO'; ['lim-halo','lim-linea'].forEach(id => mapa.getLayer(id) && mapa.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none')); };
+window.__clima = { mapa, set:(c) => document.querySelector('.cap[data-c="' + c + '"]').click(), hora:(h) => { hora = h; dibujar(); actualizarFicha(); }, estado:() => ({ listo, horas:horas.length, hora, capa, relieve:!!ELEV, particulas:parts.length }), datos:() => ({ D, ALT, horas }) };
+})();
+</script>
+</body>
+</html>
