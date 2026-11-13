@@ -100,7 +100,7 @@ details .in{padding:2px 10px 10px;font-size:12px}
 
 #leyenda{left:16px;bottom:124px;width:320px}
 #barra{height:12px;border:1px solid var(--l2)}
-#escala{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--mu);margin-top:4px}
+#escala{position:relative;height:16px;font-size:10.5px;font-weight:700;color:var(--mu);margin-top:4px}
 #lNota{font-size:10px;color:#6F86A3;margin-top:6px;line-height:1.5}
 #tiempo{left:16px;right:16px;bottom:16px}
 #tiempo .pn-b{display:flex;align-items:center;gap:16px;padding:10px 16px}
@@ -372,8 +372,19 @@ const NIVEL = [
 const cuenta = c => (c.T >= R3.T ? 1 : 0) + (c.H <= R3.H ? 1 : 0) + (c.V >= R3.V ? 1 : 0);
 
 /* ===================== colores ===================== */
-const ARCO = [[0,[84,48,200]],[.12,[40,104,255]],[.25,[24,186,255]],[.38,[22,222,176]],[.5,[96,236,84]],[.62,[236,236,50]],[.75,[255,166,36]],[.88,[255,66,48]],[1,[196,26,120]]];
-function arco(t){ t = Math.min(1, Math.max(0, t)); for(let k = 1; k < ARCO.length; k++){ if(t <= ARCO[k][0]){ const a = ARCO[k-1], b = ARCO[k], u = (t - a[0]) / (b[0] - a[0]); return a[1].map((x, i) => Math.round(x + (b[1][i] - x) * u)); } } return ARCO[ARCO.length-1][1]; }
+/* ===================== colores: escalas FIJAS =====================
+   Cada valor tiene siempre el mismo color, a cualquier hora y en cualquier comuna: lo frío siempre es azul, lo cálido siempre es
+   naranja o rojo. Los tramos están más juntos entre 10 y 35 °C, donde ocurre casi todo, para que las diferencias se noten.
+   Los valores de la regla 30-30-30 (30 °C, 30 %, 30 km/h) caen justo en un cambio de color. */
+const PALETAS = {
+  // paso = tamaño de cada franja: dentro de una franja el color es uno solo y entre franjas cambia de tono, así cada grado se nota
+  temp:  { min:-5, max:40, paso:1, ticks:[-5, 5, 15, 25, 35],  u:'°C',   stops:[[-5,[42,30,143]],[2,[47,107,255]],[8,[18,181,255]],[12,[22,224,216]],[16,[43,227,138]],[19,[160,232,50]],[22,[255,225,46]],[25,[255,176,40]],[28,[255,120,35]],[30,[245,60,45]],[32,[215,25,70]],[34,[180,20,120]],[36,[150,25,170]],[38,[110,30,190]],[40,[70,30,160]]] },
+  hum:   { min:0,  max:100, paso:2, ticks:[0, 25, 50, 75, 100], u:'%',    stops:[[0,[122,10,10]],[10,[217,30,24]],[18,[255,90,31]],[24,[255,163,31]],[30,[255,224,31]],[36,[166,226,46]],[42,[63,214,107]],[50,[31,207,192]],[60,[31,163,232]],[72,[45,107,255]],[85,[90,75,224]],[100,[138,43,201]]] },
+  viento:{ min:0,  max:60,  paso:2, ticks:[0, 15, 30, 45, 60],  u:'km/h', stops:[[0,[74,107,224]],[6,[30,155,255]],[12,[24,210,224]],[18,[43,227,138]],[24,[152,232,58]],[30,[255,225,46]],[38,[255,163,43]],[46,[255,90,43]],[54,[224,38,62]],[60,[176,24,122]]] }
+};
+function colB(capa, v){ const P = PALETAS[capa], q = Math.floor((Math.min(P.max, Math.max(P.min, v)) - P.min) / P.paso); return colA(capa, P.min + (q + .5) * P.paso); }
+function colA(capa, v){ const st = PALETAS[capa].stops; if(v <= st[0][0]) return st[0][1]; for(let k = 1; k < st.length; k++){ if(v <= st[k][0]){ const a = st[k-1], b = st[k], u = (v - a[0]) / (b[0] - a[0]); return a[1].map((x, i) => Math.round(x + (b[1][i] - x) * u)); } } return st[st.length - 1][1]; }
+
 /* ===================== mapa ===================== */
 const mapa = new maplibregl.Map({ container:'mapa', style:vigorEstiloMapa(), center:[-72.7, -36.82], zoom:10.3, minZoom:7, maxZoom:16, attributionControl:false, dragRotate:false, pitchWithRotate:false });
 mapa.touchZoomRotate.disableRotation();
@@ -455,28 +466,22 @@ function msg(t){ const m = $('msg'); m.textContent = t; m.style.display = 'block
 /* ===================== capa de colores (solo dentro de los límites de la comuna) ===================== */
 const cv = document.createElement('canvas'), cv2 = document.createElement('canvas'); cv.width = cv2.width = W_IMG; cv.height = cv2.height = H_IMG;
 const cx = cv.getContext('2d'), cx2 = cv2.getContext('2d', { willReadFrequently:true });
-const SPAN_MIN = { temp:4, hum:12, viento:6 };   // diferencia mínima que se estira por toda la paleta: así las variaciones pequeñas igual se ven
 const TZ = 'America/Santiago';
 function dibujar(){
   if(!listo) return;
   // clima de cada pixel de la comuna (con la altura del terreno), una sola vez por redibujo
-  const N = W_IMG * H_IMG, T = new Float32Array(N), Hh = new Float32Array(N), V = new Float32Array(N), dentroM = new Uint8Array(N); let lo = 1e9, hi = -1e9;
-  const clave = capa === 'temp' ? 'T' : capa === 'hum' ? 'H' : 'V';
+  const N = W_IMG * H_IMG, T = new Float32Array(N), Hh = new Float32Array(N), V = new Float32Array(N);
   for(let y = 0; y < H_IMG; y++) for(let x = 0; x < W_IMG; x++){
     const lng = CB.w + (CB.e - CB.w) * x / (W_IMG - 1), lat = CB.n - (CB.n - CB.s) * y / (H_IMG - 1), k = y * W_IMG + x, c = climaEn(hora, lng, lat, ELEV ? ELEV[k] : NaN);
     T[k] = c.T; Hh[k] = c.H; V[k] = c.V;
-    if(x % 3 === 0 && y % 3 === 0 && dentro(lng, lat)){ dentroM[k] = 1; const v = clave === 'T' ? c.T : clave === 'H' ? c.H : c.V; if(v < lo) lo = v; if(v > hi) hi = v; }
   }
-  if(lo > hi){ lo = 0; hi = 1; }
-  const span = SPAN_MIN[capa === 'viento' ? 'viento' : capa]; if(span && hi - lo < span){ const m = (hi + lo) / 2; lo = m - span / 2; hi = m + span / 2; }
-  const pad = (hi - lo) * 0.04; lo -= pad; hi += pad;
   const img = cx.createImageData(W_IMG, H_IMG);
   for(let k = 0; k < N; k++){
     let c, a = 255;
     if(capa === 'riesgo'){ const nv = cuenta({ T:T[k], H:Hh[k], V:V[k] }); c = hex(NIVEL[nv].color); a = [95, 190, 225, 255][nv]; }
-    else if(capa === 'temp') c = arco((T[k] - lo) / (hi - lo));
-    else if(capa === 'hum') c = arco(1 - (Hh[k] - lo) / (hi - lo));
-    else { c = arco((V[k] - lo) / (hi - lo)); a = 150; }
+    else if(capa === 'temp') c = colB('temp', T[k]);
+    else if(capa === 'hum') c = colB('hum', Hh[k]);
+    else { c = colB('viento', V[k]); a = 150; }
     const o = k * 4; img.data[o] = c[0]; img.data[o+1] = c[1]; img.data[o+2] = c[2]; img.data[o+3] = a;
   }
   cx2.clearRect(0, 0, W_IMG, H_IMG); cx2.putImageData(img, 0, 0);
@@ -485,23 +490,25 @@ function dibujar(){
   POLIS.forEach(poli => poli.forEach(anillo => anillo.forEach((c, k) => { const x = (c[0] - CB.w) / (CB.e - CB.w) * W_IMG, y = (CB.n - c[1]) / (CB.n - CB.s) * H_IMG; k ? cx.lineTo(x, y) : cx.moveTo(x, y); })));
   cx.clip('evenodd'); cx.drawImage(cv2, 0, 0); cx.restore();
   mapa.getSource('clima').updateImage({ url:cv.toDataURL(), coordinates:[[CB.w,CB.n],[CB.e,CB.n],[CB.e,CB.s],[CB.w,CB.s]] });
-  leyenda(lo, hi);
+  leyenda();
   const f = new Date(horas[hora]);
   $('hDia').textContent = f.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'short', timeZone:TZ }); $('hHora').textContent = f.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:TZ }); $('rango').value = hora;
 }
 const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
-function leyenda(lo, hi){
+function leyenda(){
   $('lTit').textContent = { viento:'Velocidad del viento (km/h)', temp:'Temperatura (°C)', hum:'Humedad relativa (%)', riesgo:'Peligro de incendio · regla 30-30-30' }[capa];
   if(capa === 'riesgo'){
     $('barra').style.background = 'linear-gradient(90deg,' + NIVEL.map((n, i) => n.color + ' ' + (i * 25) + '%,' + n.color + ' ' + ((i + 1) * 25) + '%').join(',') + ')';
-    $('escala').innerHTML = ['0 de 3', '1 de 3', '2 de 3', '3 de 3'].map(t => '<span>' + t + '</span>').join('');
+    $('escala').innerHTML = ['0 de 3', '1 de 3', '2 de 3', '3 de 3'].map((t, i) => '<span style="position:absolute;left:' + (i * 25 + 12.5) + '%;transform:translateX(-50%)">' + t + '</span>').join('');
     $('lNota').textContent = 'Condiciones cumplidas: temperatura ≥ 30 °C, humedad ≤ 30 %, viento ≥ 30 km/h.';
     return;
   }
-  const n = 24, st = []; for(let i = 0; i <= n; i++){ const t = i / n, c = capa === 'hum' ? arco(1 - t) : arco(t); st.push('rgb(' + c.join(',') + ') ' + (t * 100) + '%'); }
+  const P = PALETAS[capa], n = Math.round((P.max - P.min) / P.paso), st = [];
+  for(let i = 0; i < n; i++){ const c = 'rgb(' + colB(capa, P.min + (i + .5) * P.paso).join(',') + ')'; st.push(c + ' ' + (i / n * 100).toFixed(2) + '%', c + ' ' + ((i + 1) / n * 100).toFixed(2) + '%'); }
   $('barra').style.background = 'linear-gradient(90deg,' + st.join(',') + ')';
-  $('escala').innerHTML = [0, .25, .5, .75, 1].map(t => '<span>' + (lo + (hi - lo) * t).toFixed(capa === 'temp' ? 1 : 0) + '</span>').join('');
-  $('lNota').textContent = 'Escala ajustada a lo que varía dentro de la comuna en esta hora, para distinguir bien las diferencias.';
+  // las marcas van en su lugar exacto de la barra (escala fija)
+  $('escala').innerHTML = P.ticks.map(t => '<span style="position:absolute;left:' + ((t - P.min) / (P.max - P.min) * 100) + '%;transform:translateX(-50%)">' + t + '</span>').join('');
+  $('lNota').textContent = 'Escala fija por franjas: cada color siempre es el mismo valor (' + P.paso + ' ' + P.u + ' por franja).';
 }
 
 /* ===================== ficha del punto ===================== */
@@ -553,7 +560,7 @@ function paso(t){
       const p = parts[k], uv = uvGrids(hora), gu = muestra(uv[0], p.lng, p.lat), gv = muestra(uv[1], p.lng, p.lat), vel = Math.hypot(gu, gv) || 0.001, u = gu / vel, vv = gv / vel;
       const a = mapa.project([p.lng, p.lat]), px = Math.max(10, vel) * 2.1 * dt;   // velocidad en pantalla: la misma a cualquier zoom
       const nx = a.x + u * px, ny = a.y - vv * px, ll = mapa.unproject([nx, ny]);
-      const c = arco((vel - 0) / 40); vx.strokeStyle = 'rgba(' + Math.min(255, c[0] + 60) + ',' + Math.min(255, c[1] + 60) + ',' + Math.min(255, c[2] + 60) + ',.9)';
+      const c = colB('viento', vel); vx.strokeStyle = 'rgba(' + Math.min(255, c[0] + 60) + ',' + Math.min(255, c[1] + 60) + ',' + Math.min(255, c[2] + 60) + ',.9)';
       vx.beginPath(); vx.moveTo(a.x, a.y); vx.lineTo(nx, ny); vx.stroke();
       p.lng = ll.lng; p.lat = ll.lat; p.edad++;
       if(p.edad > p.vida || !dentro(p.lng, p.lat)){ const q = nuevaP(); if(q) parts[k] = q; }
