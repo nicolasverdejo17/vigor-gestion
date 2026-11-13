@@ -17,20 +17,5 @@ window.VIGOR_CONFIG = {
   MAPA_FUENTE_TEXTO: 'Noto Sans Regular',
 
   /* Centro del mapa cuando todavía no hay posición (comuna del Cuerpo): [longitud, latitud] */
-  CENTRO_DEFECTO: [-72.6636, -36.8236],
-
-  /* ---- Rutas ----
-     Criterio principal: la ruta con MENOS KILÓMETROS hasta el siniestro. No se usan las medidas del vehículo (alto, ancho, largo).
-     Proveedores soportados: 'valhalla'.
-     OJO: el servidor público de abajo es solo para PRUEBAS. Para producción hay que usar
-     uno propio (o contratado) y poner aquí su dirección. */
-  RUTEO_PROVEEDOR: 'valhalla',
-  RUTEO_URL: 'https://valhalla1.openstreetmap.de',
-  /* Peso del vehículo en toneladas (0 = no considerar peso). Es un valor de ejemplo: se pondrá el peso real de cada carro. */
-  RUTEO_PESO_T: 14,
-  /* Cuántas rutas alternativas pedir además de la principal para compararlas por distancia */
-  RUTEO_ALTERNATIVAS: 2,
-
-  /* Destino de la ruta de prueba (?sim=1): [longitud, latitud] */
-  DEMO_DESTINO: [-72.6900, -36.7800]
+  CENTRO_DEFECTO: [-72.6636, -36.8236]
 };

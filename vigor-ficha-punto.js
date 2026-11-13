@@ -20,7 +20,7 @@ window.vigorPuntoCatastro = function(o){
 };
 
 /* Abre la ficha (o la cierra si se llama sin datos) */
-let el = null;
+let el = null, actual = null;
 function crear(){
   const s = document.createElement('style');
   s.textContent = '#vgFicha{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2000;width:min(380px,calc(100vw - 32px));box-sizing:border-box;background:#061520;border:1px solid #2DD3DB;color:#E8F1F8;font:500 13px "Montserrat",sans-serif;padding:12px 14px 10px;box-shadow:0 10px 34px rgba(0,0,0,.65);display:none}'
@@ -30,11 +30,16 @@ function crear(){
     + '#vgFicha dt{color:#8DA1C3;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}'
     + '#vgFicha dd{margin:0;word-break:break-word}'
     + '#vgFicha .f{margin-top:9px;color:#6F86A3;font-size:10px}'
+    + '#vgFicha .ac{display:flex;gap:8px;margin-top:11px}'
+    + '#vgFicha .ac button{flex:1;background:#2DD3DB;color:#030B13;border:0;font:700 12px "Montserrat",sans-serif;padding:9px 10px;cursor:pointer}'
     + '#vgFicha .x{position:absolute;right:6px;top:6px;width:32px;height:32px;border:0;background:transparent;color:#E8F1F8;font-size:20px;cursor:pointer}'
     + '.mk .g{pointer-events:auto;cursor:pointer}';
   document.head.appendChild(s);
   el = document.createElement('div'); el.id = 'vgFicha';
-  el.addEventListener('click', ev => { if(ev.target.closest('.x')) cerrar(); ev.stopPropagation(); });
+  el.addEventListener('click', ev => {
+    if(ev.target.closest('.x')) cerrar();
+    const b = ev.target.closest('.ac button'); if(b && actual && actual.acciones){ const a = actual.acciones[+b.dataset.a]; cerrar(); if(a && a.fn) a.fn(); }
+    ev.stopPropagation(); });
   document.body.appendChild(el);
   document.addEventListener('keydown', ev => { if(ev.key === 'Escape') cerrar(); });
 }
@@ -43,7 +48,10 @@ window.vigorFichaPunto = function(f){
   if(!el) crear();
   if(!f){ cerrar(); return; }
   const filas = (f.filas || []).filter(r => r[1] != null && String(r[1]).trim() !== '' && r[1] !== 0);
-  el.innerHTML = '<button class="x" aria-label="Cerrar">×</button><h4>' + esc(f.titulo) + '</h4><dl>' + filas.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>' + (f.fuente ? '<div class="f">' + esc(f.fuente) + '</div>' : '');
+  actual = f;
+  el.innerHTML = '<button class="x" aria-label="Cerrar">×</button><h4>' + esc(f.titulo) + '</h4><dl>' + filas.map(r => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('') + '</dl>'
+    + (f.acciones && f.acciones.length ? '<div class="ac">' + f.acciones.map((a, i) => '<button type="button" data-a="' + i + '">' + esc(a.texto) + '</button>').join('') + '</div>' : '')
+    + (f.fuente ? '<div class="f">' + esc(f.fuente) + '</div>' : '');
   el.classList.add('on');
 };
 })();

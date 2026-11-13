@@ -110,7 +110,8 @@ details .in{padding:2px 10px 10px;font-size:12px}
 #hora b{display:block;font-size:19px;font-weight:800;line-height:1.1}
 #hora span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--mu)}
 #rango{flex:1;accent-color:#2DD3DB;height:30px}
-#fuente{position:absolute;right:16px;bottom:124px;z-index:5;font-size:10px;color:#6F86A3}
+#fuente{position:absolute;right:16px;bottom:124px;z-index:5;max-width:560px;text-align:right;font-size:9.5px;line-height:1.4;color:#6F86A3;pointer-events:auto}
+#fuente a{color:inherit;text-decoration:underline}
 
 .mkE{width:34px;height:34px}
 .mkE .g{position:absolute;left:3px;top:0;width:28px;height:28px;background:var(--rj);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #030B13;display:grid;place-items:center}
@@ -154,7 +155,7 @@ details .in{padding:2px 10px 10px;font-size:12px}
   #hora{min-width:0;flex:none} #hora b{font-size:17px} #hDia{display:block;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #rango{flex:1 1 90px;min-width:70px;order:0;height:34px}
   #play{width:42px;height:42px;flex:none}
-  #fuente{display:none}
+  #fuente{position:static;max-width:none;text-align:left;font-size:8.5px;padding:0 4px 2px;flex:none}
   .grid{gap:6px} .dato{padding:7px 9px} .dato b{font-size:17px}
   .nota{font-size:9.5px}
   .mkE .lb{display:none}
@@ -223,8 +224,8 @@ details .in{padding:2px 10px 10px;font-size:12px}
     <input type="range" id="rango" min="0" max="71" value="0">
   </div>
 </div>
+<div id="fuente">Basado en datos de <a href="https://www.met.no/" target="_blank" rel="noopener">MET Norway</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>): producto derivado que no es responsabilidad de MET Norway · Relieve: SRTM/USGS y NOAA vía AWS Terrain Tiles · Mapa: © <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a>, datos de <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></div>
 </div>
-<div id="fuente">Datos meteorológicos: MET Norway (CC BY 4.0) · Relieve: AWS Terrain Tiles · Mapa: OpenFreeMap © OpenStreetMap</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -424,7 +425,7 @@ mapa.on('load', async () => {
     // sin conexión o con el servicio ocupado: se usa lo último guardado (hasta 6 horas) avisando de cuándo es
     const viejo = leerCache(360);
     if(!viejo){ msg('No se pudo cargar el clima: ' + err.message); return; }
-    horas = viejo.horas; D = viejo.D; ALT = viejo.ALT; horaActual(); $('fuente').textContent = 'Datos guardados hace ' + Math.round((Date.now() - viejo.t) / 60000) + ' min (sin conexión con el servicio de clima)';
+    horas = viejo.horas; D = viejo.D; ALT = viejo.ALT; horaActual(); $('lNota').textContent = 'Datos guardados hace ' + Math.round((Date.now() - viejo.t) / 60000) + ' min (sin conexión con el servicio de clima).';
   }
   try{ await cargarRelieve(); }catch(e){ ELEV = null; }   // sin relieve el mapa funciona igual, solo con menos detalle
   listo = true; await cargarActivos(); dibujar(); actualizarFicha(); iniciarParticulas(); $('msg').style.display = 'none';
@@ -534,7 +535,7 @@ function actualizarFicha(){
   $('rF').innerHTML = fila(Tr >= R3.T, 'Temperatura 30 °C o más', Tr.toFixed(1) + ' °C', 'Faltan ' + (R3.T - Tr).toFixed(1) + ' °C')
     + fila(Hr <= R3.H, 'Humedad 30 % o menos', Hr + ' %', 'Sobran ' + (Hr - R3.H) + (Hr - R3.H === 1 ? ' punto' : ' puntos'))
     + fila(Vr >= R3.V, 'Viento 30 km/h o más', Vr + ' km/h', 'Faltan ' + (R3.V - Vr) + ' km/h');
-  $('notaF').innerHTML = '<b>Cómo se calcula.</b> Pronóstico de MET Norway ajustado a la altura del terreno de cada punto. Es una estimación y no reemplaza los avisos oficiales de CONAF, SENAPRED ni la Dirección Meteorológica de Chile.';
+  $('notaF').innerHTML = '<b>Cómo se calcula.</b> Pronóstico de MET Norway ajustado a la altura del terreno de cada punto. Es un producto derivado de datos de MET Norway, que no se hace responsable de él. Es una estimación y no reemplaza los avisos oficiales de CONAF, SENAPRED ni la Dirección Meteorológica de Chile.';
 }
 
 /* ===================== viento: pocas partículas, siempre la misma densidad en pantalla ===================== */

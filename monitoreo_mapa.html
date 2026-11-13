@@ -166,6 +166,45 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
   :root{--tam:.85}
 }
 @media (prefers-reduced-motion:reduce){.uM .pul,.sp{animation:none}#panel,#ptab,#card{transition:none}}
+/* ---- Puntos del Cuerpo: formulario para marcar un punto en el mapa ---- */
+#pp{position:absolute;right:14px;top:14px;z-index:30;width:344px;max-height:calc(100% - 28px);overflow-y:auto;background:var(--p);border:1px solid var(--cy);box-shadow:0 12px 36px rgba(0,0,0,.6);display:none;font-size:12px}
+body.pp-abierto #pp{display:block}
+body.pp-abierto #ctl{display:none}
+#pp .cab{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--l2);background:var(--c)}
+#pp .cab b{font-size:13px;font-weight:800;letter-spacing:.04em}
+#pp .cab button{background:none;border:0;color:var(--mu);font-size:20px;cursor:pointer;width:30px;height:30px;padding:0}
+#pp .cu{padding:12px 14px;display:flex;flex-direction:column;gap:11px}
+#pp label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);display:block;margin-bottom:5px}
+#pp .fams{display:flex;flex-wrap:wrap;gap:5px}
+#pp .fams button{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--l2);color:var(--mu);font:600 11px 'Montserrat',sans-serif;padding:6px 9px;cursor:pointer}
+#pp .fams button i{width:9px;height:9px;border-radius:50%;background:var(--k)}
+#pp .fams button.on{color:var(--tx);border-color:var(--k)}
+#pp .tipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:5px}
+#pp .tipos button{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--l2);color:var(--tx);font:600 10.5px 'Montserrat',sans-serif;padding:8px 4px 7px;cursor:pointer;text-align:center;line-height:1.15}
+#pp .tipos button i{font-size:20px;color:var(--k)}
+#pp .tipos button.on{border-color:var(--k);background:var(--c);box-shadow:inset 0 0 0 1px var(--k)}
+#pp input[type=text],#pp textarea{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--l2);color:var(--tx);font:500 13px 'Montserrat',sans-serif;padding:9px 10px;outline:none}
+#pp input[type=text]:focus,#pp textarea:focus{border-color:var(--cy)}
+#pp textarea{resize:vertical;min-height:60px}
+#pp .ico{display:flex;flex-wrap:wrap;gap:5px}
+#pp .ico button{width:36px;height:36px;background:var(--bg);border:1px solid var(--l2);color:var(--tx);font-size:19px;cursor:pointer;padding:0}
+#pp .ico button.on{border-color:var(--cy);color:var(--cy)}
+#pp .col button{width:28px;height:28px;border:2px solid var(--bg);background:var(--k);cursor:pointer;padding:0}
+#pp .col button.on{border-color:#fff}
+#pp .ubic{display:flex;align-items:center;gap:9px;border:1px dashed var(--l2);padding:9px 10px;color:var(--mu);font-weight:600}
+#pp .ubic i{font-size:20px;color:var(--am)}
+#pp .ubic.ok{border-style:solid;border-color:var(--vd);color:var(--tx)}#pp .ubic.ok i{color:var(--vd)}
+#pp .pie{position:sticky;bottom:0;background:var(--p);border-top:1px solid var(--l2);padding:10px 14px 12px;display:flex;flex-direction:column;gap:9px}
+#pp .bt{display:flex;gap:8px}
+#pp .bt button{flex:1;border:0;font:800 12.5px 'Montserrat',sans-serif;padding:11px 8px;cursor:pointer;letter-spacing:.03em}
+#pp .bt .gu{background:var(--cy);color:var(--bg)}
+#pp .bt .gu:disabled{background:var(--l2);color:var(--mu);cursor:not-allowed}
+#pp .bt .el{flex:0 0 auto;background:var(--bg);color:#FF8A8A;border:1px solid #6A2A33}
+#pp .bt .el.conf{background:var(--rj);color:#fff;border-color:var(--rj)}
+@media (max-width:900px){
+  #pp{left:10px;right:10px;top:auto;bottom:10px;width:auto;max-height:62%}
+  #pp .tipos{grid-template-columns:repeat(auto-fill,minmax(86px,1fr))}
+}
 </style>
 </head>
 <body>
@@ -173,7 +212,6 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
   <img src="img/logo.png" alt="Vigor">
   <div class="sep"></div>
   <span class="t">Central de Alarmas</span>
-  <span class="sim" id="simTag" hidden>DATOS DE EJEMPLO</span>
   <div class="cnt" id="cnt"></div>
   <div class="reloj"><span id="fechaHoy">—</span><strong class="dseg" id="clock">--:--:--</strong></div>
 </div>
@@ -193,12 +231,26 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 
   <div id="ctl">
     <button class="tg" id="tAll"><i class="ti ti-arrows-maximize"></i>Ver todo</button>
+    <button class="tg" id="tMas" style="display:none"><i class="ti ti-map-pin-plus"></i>Agregar punto</button>
     <button class="tg on" id="tPun"><i class="ti ti-map-pin"></i>Puntos</button>
     <button class="tg on" id="tCua"><i class="ti ti-building-community"></i>Cuarteles</button>
-    <button class="tg on" id="tRut"><i class="ti ti-route"></i>Rutas</button>
     <button class="tg on" id="tLim"><i class="ti ti-border-outer"></i>Límite comunal</button>
   </div>
   <div id="leg"></div>
+  <div id="pp" role="dialog" aria-label="Punto del Cuerpo">
+    <div class="cab"><b id="ppTitulo">Nuevo punto</b><button type="button" id="ppCerrar" aria-label="Cerrar">×</button></div>
+    <div class="cu">
+      <div><label>Familia</label><div class="fams" id="ppFams"></div></div>
+      <div><label>Tipo de punto</label><div class="tipos" id="ppTipos"></div></div>
+      <div id="ppExtra" style="display:none;flex-direction:column;gap:11px"><div><label>Ícono</label><div class="ico" id="ppIco"></div></div><div><label>Color</label><div class="ico col" id="ppCol"></div></div></div>
+      <div><label for="ppNombre">Nombre</label><input type="text" id="ppNombre" maxlength="80" autocomplete="off"></div>
+      <div><label for="ppNota">Nota</label><textarea id="ppNota" maxlength="500"></textarea></div>
+    </div>
+    <div class="pie">
+    <div class="ubic" id="ppUbic"></div>
+    <div class="bt"><button type="button" class="el" id="ppElim" style="display:none">Eliminar</button><button type="button" id="ppCancelar" style="background:var(--bg);color:var(--tx);border:1px solid var(--l2)">Cancelar</button><button type="button" class="gu" id="ppGuardar" disabled>Guardar</button></div>
+    </div>
+  </div>
 
   <div id="card"><button class="x" id="cardX" aria-label="Cerrar"><i class="ti ti-x"></i></button>
     <div><span class="nm" id="cNom">—</span><span class="es" id="cEst"><i></i><span></span></span></div>
@@ -210,6 +262,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="vigor-atribucion.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
 <script src="vigor-mapa.js"></script>
@@ -221,7 +274,7 @@ body.cerrado #card{left:50px;max-width:calc(100% - 80px)}
 const C = Object.assign({
   MAPA_ESTILO_URL:'', MAPA_TILEJSON:'https://tiles.openfreemap.org/planet',
   MAPA_GLYPHS:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf', MAPA_FUENTE_TEXTO:'Noto Sans Regular',
-  CENTRO_DEFECTO:[-72.6636,-36.8236], RUTEO_PROVEEDOR:'valhalla', RUTEO_URL:'https://valhalla1.openstreetmap.de',
+  CENTRO_DEFECTO:[-72.6636,-36.8236],
   LIMITES:['limites/florida.geojson']
 }, window.VIGOR_CONFIG || {});
 const $ = id => document.getElementById(id);
@@ -231,9 +284,6 @@ const RAD=Math.PI/180, RT=6371008.8;
 function dist(a,b){ const dLa=(b[1]-a[1])*RAD, dLo=(b[0]-a[0])*RAD, la1=a[1]*RAD, la2=b[1]*RAD; const h=Math.sin(dLa/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)**2; return 2*RT*Math.asin(Math.sqrt(h)); }
 function rumbo(a,b){ const la1=a[1]*RAD, la2=b[1]*RAD, dLo=(b[0]-a[0])*RAD; return (Math.atan2(Math.sin(dLo)*Math.cos(la2), Math.cos(la1)*Math.sin(la2)-Math.sin(la1)*Math.cos(la2)*Math.cos(dLo))/RAD+360)%360; }
 const PTS8=['N','NE','E','SE','S','SO','O','NO'], punto=r=>PTS8[Math.round(r/45)%8];
-function decodificarPolilinea(str, prec){ let i=0,lat=0,lng=0; const f=Math.pow(10,prec||6), out=[];
-  while(i<str.length){ let b,s=0,r=0; do{ b=str.charCodeAt(i++)-63; r|=(b&31)<<s; s+=5; }while(b>=32); lat+=(r&1)?~(r>>1):(r>>1);
-    s=0; r=0; do{ b=str.charCodeAt(i++)-63; r|=(b&31)<<s; s+=5; }while(b>=32); lng+=(r&1)?~(r>>1):(r>>1); out.push([lng/f,lat/f]); } return out; }
 function avisar(t, ms){ const m=$('msg'); m.textContent=t; m.classList.add('show'); clearTimeout(avisar._t); if(ms) avisar._t=setTimeout(()=>m.classList.remove('show'), ms); }
 
 /* =====================  Estados de las unidades  ===================== */
@@ -259,7 +309,7 @@ const TIPOS = {};
  ['poblado','terr','building-cottage','Poblado'],['fundo','terr','plant-2','Fundo o sector rural'],['condominio','terr','building-skyscraper','Condominio'],['sin_cobertura','terr','antenna-bars-off','Sin cobertura'],['cerro','terr','mountain','Cerro o mirador'],['punto_encuentro','terr','users-group','Punto de encuentro'],
  ['negocio','com','building-store','Negocio'],['supermercado','com','shopping-cart','Supermercado'],['ferreteria','com','tool','Ferretería'],['restaurante','com','tools-kitchen-2','Restaurante'],['banco','com','coin','Banco'],['antena','com','antenna','Antena'],
  ['siniestro','desp','flame','Siniestro'],['unidad','desp','truck','Unidad en ruta'],['zona_trabajo','desp','barrier-block','Zona de trabajo'],['personalizado','pers','map-pin-plus','Punto personalizado']
-].forEach(a=>{ TIPOS[a[0]]={ icono:a[2], nombre:a[3], color:FAM[a[1]] }; });
+].forEach(a=>{ TIPOS[a[0]]={ fam:a[1], icono:a[2], nombre:a[3], color:FAM[a[1]] }; });
 const tipoDe = p => TIPOS[p.tipo||p.categoria] || TIPOS.personalizado;
 function gota(color, icono, grande){ return `<div class="g${grande?' big':''}" style="--k:${color}"><b><i class="ti ti-${icono}"></i></b></div><div class="ptm${grande?' gr':''}" style="--k:${color}"></div>`; }
 function elem(html, cls){ const d=document.createElement('div'); d.className='mk'+(cls?' '+cls:''); d.innerHTML=html; return d; }
@@ -294,7 +344,6 @@ function construirEstilo(){
   return { version:8, glyphs:C.MAPA_GLYPHS, sources:{ [src]:{ type:'vector', url:C.MAPA_TILEJSON } }, layers:capas };
 }
 let mapa=null, listo=false, agregarLimites=()=>{}, limN=0;
-const MODO_SIM = new URLSearchParams(location.search).get('sim')==='1';
 const EMBED = new URLSearchParams(location.search).get('embed')==='1';   // incrustado en la pantalla «Mapa» del celular
 if(EMBED) document.body.classList.add('embed');
 const vertical=()=>window.innerWidth<window.innerHeight;
@@ -315,11 +364,6 @@ function iniciarMapa(){
       mapa.addLayer({ id:id+'-linea', type:'line', source:id, filter:['==',['geometry-type'],'Polygon'], layout:{'line-join':'round'}, paint:{'line-color':'#2DD3DB','line-width':['interpolate',['linear'],['zoom'],8,1.5,14,2.5],'line-opacity':.9} });
       mapa.addLayer({ id:id+'-nombre', type:'symbol', source:id, filter:['==',['geometry-type'],'Point'], maxzoom:13, layout:{'text-field':['get','etiqueta'],'text-font':[C.MAPA_FUENTE_TEXTO],'text-size':13,'text-letter-spacing':.3}, paint:{'text-color':'#2DD3DB','text-opacity':.8,'text-halo-color':'#030B13','text-halo-width':1.5} });
     }); limiteVisible(); };
-    if(MODO_SIM) agregarLimites(C.LIMITES);
-    mapa.addSource('rutas',{type:'geojson',data:vacio});
-    mapa.addLayer({ id:'rutas-borde', type:'line', source:'rutas', layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':'#030B13','line-width':['case',['get','sel'],8,5],'line-opacity':.8} });
-    mapa.addLayer({ id:'rutas-otras', type:'line', source:'rutas', filter:['!=',['get','sel'],true], layout:{'line-cap':'butt','line-join':'round'}, paint:{'line-color':'#F13746','line-width':2.5,'line-opacity':.8,'line-dasharray':[2,1.4]} });
-    mapa.addLayer({ id:'rutas-sel', type:'line', source:'rutas', filter:['==',['get','sel'],true], layout:{'line-cap':'round','line-join':'round'}, paint:{'line-color':'#2DD3DB','line-width':4.5} });
     listo=true; document.dispatchEvent(new Event('vigor-mapa-listo'));
   });
   mapa.on('click', ev=>{ if(window.vigorFichaPunto) vigorFichaPunto(null); if(!ev.originalEvent.target.closest('.uM')) seleccionar(null); });
@@ -334,7 +378,7 @@ function escalaIconos(){
 }
 
 /* =====================  Datos en tiempo real  ===================== */
-const D = { uni:{}, sin:{}, puntos:[], cuarteles:[], sel:null, capas:{ puntos:true, cuarteles:true, rutas:true, limites:true } };
+const D = { uni:{}, sin:{}, puntos:[], propios:[], cuarteles:[], sel:null, capas:{ puntos:true, cuarteles:true, limites:true } };
 function limiteVisible(){ if(!mapa) return; mapa.getStyle().layers.filter(l=>/^lim\d+-/.test(l.id)).forEach(l=>mapa.setLayoutProperty(l.id,'visibility',D.capas.limites?'visible':'none')); }
 try{ const g=JSON.parse(localStorage.getItem('vigor_mon_capas')||'null'); if(g) Object.assign(D.capas,g); }catch(e){}
 
@@ -397,6 +441,8 @@ const Mon = {
   },
   /* puntos propios: [{id,tipo,nombre,lng,lat}] */
   setPuntos(lista){ D.puntos.forEach(p=>p.mk&&p.mk.remove()); D.puntos=(lista||[]).map(p=>{ const t=tipoDe(p); const mk=new maplibregl.Marker({ element:elem(gota(t.color,t.icono)+'<div class="lb">'+esc(p.nombre||t.nombre)+'</div>'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); conFicha(p,mk); return {...p,mk,vis:false}; }); filtrarPuntos(); },
+  /* puntos del Cuerpo (los que se marcan en el mapa): [{id,tipo,nombre,lng,lat,icono?,color?,ficha}] */
+  setPuntosPropios(lista){ D.propios.forEach(p=>p.mk&&p.mk.remove()); D.propios=(lista||[]).map(p=>{ const t0=tipoDe(p), t={ icono:p.icono||t0.icono, color:p.color||t0.color }; const mk=new maplibregl.Marker({ element:elem(gota(t.color,t.icono)+'<div class="lb">'+esc(p.nombre||t0.nombre)+'</div>'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); conFicha(p,mk); return {...p,mk,vis:false}; }); filtrarPuntos(); },
   /* cuarteles: [{id,nombre,lng,lat}] */
   setCuarteles(lista){ D.cuarteles.forEach(p=>p.mk&&p.mk.remove()); D.cuarteles=(lista||[]).map(p=>{ const mk=new maplibregl.Marker({ element:elem(gota('#DCE8F5','building-community')+'<div class="lb">'+esc(p.nombre||'Cuartel')+'</div>','cu'), anchor:'bottom' }).setLngLat([p.lng,p.lat]); conFicha(p,mk); return {...p,mk,vis:false}; }); filtrarPuntos(); },
   verTodo, _datos:D, get _mapa(){ return mapa; }
@@ -410,6 +456,7 @@ function filtrarPuntos(){
   // los grifos del catastro nacional son muchos: solo se dibujan al acercarse (zoom ≥ 14) y dentro de la vista
   const z=mapa.getZoom();
   for(const p of D.puntos){ const v = D.capas.puntos && (!p.cat || z>=14) && b.contains([p.lng,p.lat]); if(v!==p.vis){ p.vis=v; if(v) p.mk.addTo(mapa); else p.mk.remove(); } }
+  aplicar(D.propios, D.capas.puntos);
   aplicar(D.cuarteles, D.capas.cuarteles);
 }
 
@@ -440,28 +487,6 @@ async function cargarCatastro(sb, fc){
 }
 
 /* =====================  Pintado  ===================== */
-/* tramo de la ruta que le falta al carro, medido desde donde está dibujado (no desde donde llegó el último dato):
-   así la línea empieza siempre debajo del ícono y no se desfasa */
-function ruta_restante(e){
-  const r=e.ruta; if(e.piRuta!==r){ e.piRuta=r; e.pi=0; }
-  const kx=Math.cos(e.cur[1]*Math.PI/180); let mejor=1e18, bi=e.pi||0;
-  // solo se mira un tramo corto hacia adelante (unos 250 m de ruta): si la ruta da una vuelta y pasa de nuevo cerca del ícono,
-  // no se confunde con un punto más adelante y no "se come" lo que falta
-  let acum=0;
-  for(let k=e.pi||0; k<r.length; k++){
-    const dx=(r[k][0]-e.cur[0])*kx, dy=r[k][1]-e.cur[1], d=dx*dx+dy*dy; if(d<mejor){ mejor=d; bi=k; }
-    if(k>(e.pi||0)){ acum+=dist(r[k-1],r[k]); if(acum>250 && k>(e.pi||0)+2) break; }
-  }
-  e.pi=bi;
-  // si el ícono aún no llega a ese vértice (está antes), el vértice también cuenta como parte del tramo que falta
-  const a=r[bi], b=r[Math.min(bi+1,r.length-1)]; const adelante = ((b[0]-a[0])*kx*(e.cur[0]-a[0])*kx + (b[1]-a[1])*(e.cur[1]-a[1])) >= 0;
-  return [e.cur].concat(r.slice(adelante ? bi+1 : bi));
-}
-function ruta_geojson(){
-  const f=[]; if(!D.capas.rutas) return { type:'FeatureCollection', features:f }; for(const id in D.uni){ const e=D.uni[id]; if(!e.ruta||!e.en||e.estado!=='emergencia') continue;
-    f.push({ type:'Feature', properties:{ id, sel:D.sel===id }, geometry:{ type:'LineString', coordinates:ruta_restante(e) } }); }
-  f.sort((a,b)=>a.properties.sel-b.properties.sel); return { type:'FeatureCollection', features:f };
-}
 function pintarLista(){
   const us=Object.values(D.uni).sort((a,b)=> (a.en===b.en ? ((EST[a.estado]||EST.servicio).orden-(EST[b.estado]||EST.servicio).orden) : (a.en?-1:1)) || a.nombre.localeCompare(b.nombre,'es',{numeric:true}));
   $('uniL').innerHTML = us.length ? us.map(e=>{ const k=UCLASE(e);
@@ -491,7 +516,6 @@ function pintarCard(){
 function pintarTodo(){
   pintarLista(); pintarCard();
   for(const id in D.uni){ const e=D.uni[id]; if(e.el) pintarMarcador(e); }
-  if(listo){ mapa.getSource('rutas').setData(ruta_geojson()); }
 }
 function seleccionar(id, centrar){
   D.sel = id && D.uni[id] ? id : null; pintarTodo();
@@ -513,7 +537,7 @@ $('sinL').addEventListener('click', ev=>{ const b=ev.target.closest('[data-s]');
 $('cardX').onclick=()=>seleccionar(null);
 $('tAll').onclick=verTodo;
 function capa(clave, id){ const b=$(id); b.classList.toggle('on', D.capas[clave]); }
-['tPun:puntos','tCua:cuarteles','tRut:rutas','tLim:limites'].forEach(x=>{ const [id,k]=x.split(':'); capa(k,id); $(id).onclick=()=>{ D.capas[k]=!D.capas[k]; capa(k,id); try{ localStorage.setItem('vigor_mon_capas',JSON.stringify(D.capas)); }catch(e){} filtrarPuntos(); limiteVisible(); pintarTodo(); }; });
+['tPun:puntos','tCua:cuarteles','tLim:limites'].forEach(x=>{ const [id,k]=x.split(':'); capa(k,id); $(id).onclick=()=>{ D.capas[k]=!D.capas[k]; capa(k,id); try{ localStorage.setItem('vigor_mon_capas',JSON.stringify(D.capas)); }catch(e){} filtrarPuntos(); limiteVisible(); pintarTodo(); }; });
 $('ptab').onclick=()=>{ document.body.classList.toggle('cerrado'); try{ localStorage.setItem('vigor_mon_panel', document.body.classList.contains('cerrado')?'0':'1'); }catch(e){} setTimeout(()=>mapa&&mapa.resize(),320); };
 try{ if(localStorage.getItem('vigor_mon_panel')==='0' || (vertical() && localStorage.getItem('vigor_mon_panel')===null)) document.body.classList.add('cerrado'); }catch(e){}
 const tic=()=>{ const n=new Date(); $('clock').textContent=n.toLocaleTimeString('es-CL',{hour12:false}); $('fechaHoy').textContent=n.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'}); }; tic(); setInterval(tic,1000);
@@ -530,62 +554,103 @@ function cuadro(ts){
       else { let i=b.length-1; while(i>0 && b[i-1].t>rt) i--; const A=b[i-1], B=b[i], f=(rt-A.t)/(B.t-A.t); x=A.p[0]+(B.p[0]-A.p[0])*f; y=A.p[1]+(B.p[1]-A.p[1])*f; }
       if(x!==e.cur[0] || y!==e.cur[1]){ e.cur[0]=x; e.cur[1]=y; e.mk.setLngLat(e.cur); mov=true; }
     }
-    if(mov && (ts-(cuadro.u||0))>60){ cuadro.u=ts; mapa.getSource('rutas').setData(ruta_geojson()); }
   }
   requestAnimationFrame(cuadro);
 }
-iniciarMapa(); if(MODO_SIM) cargarLimites(C.LIMITES); requestAnimationFrame(cuadro);
+iniciarMapa(); requestAnimationFrame(cuadro);
 
-/* =====================  Simulación (datos de ejemplo hasta tener el GPS real)  ===================== */
-const SIM = MODO_SIM;
-if(SIM){
-  $('simTag').hidden=false;
-  document.addEventListener('vigor-mapa-listo', async ()=>{
-    const factor=Math.max(1,Math.min(20,+PARAMS.get('x')||3)); $('simTag').textContent='DATOS DE EJEMPLO · x'+factor;
-    const CU=[{id:'c1',nombre:'1ª Compañía · Florida',lng:-72.6636,lat:-36.8236},{id:'c2',nombre:'2ª Compañía · Copiulemu',lng:-72.8070,lat:-36.8943},{id:'c3',nombre:'3ª Compañía · Cancha Los Monteros',lng:-72.6833,lat:-36.9209}];
-    const SI={id:'s1',titulo:'Incendio estructural',dir:'Calle Prat 1240, Florida',lng:-72.6590,lat:-36.8190};
-    const PU=[['grifo','G-01',-72.6620,-36.8215],['grifo','G-02',-72.6575,-36.8205],['fuente_agua','Fuente de agua',-72.6540,-36.8170],['escuela','Escuela El Roble',-72.6650,-36.8190],['hospital','Hospital de Florida',-72.6600,-36.8260],['carabineros','Carabineros',-72.6640,-36.8250],['puente','Puente 12 t',-72.7300,-36.8620],['bodega_riesgo','Bodega agroquímicos',-72.7050,-36.9050],['posta','Posta Cancha Los Monteros',-72.6823,-36.9251],['escuela','Escuela Cancha de Los Monteros',-72.6829,-36.9251],['grifo','G-12',-72.8040,-36.8920],['posta','Posta Copiulemu',-72.8085,-36.8960]];
-    Mon.setCuarteles(CU); Mon.setSiniestros([SI]); Mon.setPuntos(PU.map((a,i)=>({id:'p'+i,tipo:a[0],nombre:a[1],lng:a[2],lat:a[3]})));
-    async function rutaVal(o,d){
-      try{ const cuerpo={ locations:[{lat:o[1],lon:o[0]},{lat:d[1],lon:d[0]}], costing:'auto', costing_options:{auto:{shortest:true}}, directions_options:{units:'kilometers'} };
-        const r=await fetch(C.RUTEO_URL.replace(/\/$/,'')+'/route?json='+encodeURIComponent(JSON.stringify(cuerpo))); const j=await r.json(); return decodificarPolilinea(j.trip.legs[0].shape,6);
-      }catch(e){ const n=30, co=[]; for(let i=0;i<=n;i++) co.push([o[0]+(d[0]-o[0])*i/n, o[1]+(d[1]-o[1])*i/n]); return co; }
-    }
-    const desp=[{id:'b1',nombre:'B-1',cu:0,vel:52},{id:'b3',nombre:'B-3',cu:1,vel:62},{id:'r2',nombre:'R-2',cu:2,vel:58}];
-    avisar('Calculando las rutas de ejemplo…', 0);
-    const rutas=await Promise.all(desp.map(d=>rutaVal([CU[d.cu].lng,CU[d.cu].lat],[SI.lng,SI.lat])));
-    $('msg').classList.remove('show');
-    desp.forEach((d,i)=>{ const co=rutas[i], cum=[0]; for(let k=1;k<co.length;k++) cum.push(cum[k-1]+dist(co[k-1],co[k])); d.co=co; d.cum=cum; d.tot=cum[cum.length-1]; d.s=0; });
-    const en=(d)=>{ const c=d.cum; let lo=0,hi=c.length-1; while(lo<hi-1){ const m=(lo+hi)>>1; if(c[m]<=d.s) lo=m; else hi=m; } const a=d.co[lo], b=d.co[Math.min(lo+1,c.length-1)], seg=(c[lo+1]||c[lo])-c[lo], t=seg>0?(d.s-c[lo])/seg:0; return { p:[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t], i:lo, r:rumbo(a,b) }; };
-    // patrulla: un carro en servicio que recorre un circuito corto
-    const ronda=[[-72.6636,-36.8236],[-72.6600,-36.8236],[-72.6600,-36.8270],[-72.6636,-36.8270]]; let rt=0, rs=0;
-    let t0=Date.now();
-    const emitir=()=>{
-      const lista=[], ahora=Date.now(), seg=(ahora-t0)/1000;
-      let llegaron=0;
-      for(const d of desp){
-        const llego=d.s>=d.tot-5, v=llego?0:d.vel;
-        if(!llego) d.s=Math.min(d.tot, d.s+(d.vel/3.6)*2*factor);
-        else llegaron++;
-        const e=en(d), rest=d.tot-d.s, etaMin=llego?0:Math.max(1,Math.ceil(rest/(d.vel*factor/3.6)/60));
-        lista.push({ id:d.id, nombre:d.nombre, estado:'emergencia', lng:e.p[0], lat:e.p[1], rum:e.r, vel:v, ts:ahora, enLinea:true, destino:{id:SI.id,titulo:SI.titulo}, kmRest:rest/1000, etaMin, ruta:d.co, prog:e.i+1, kmTotal:d.tot/1000 });
-        lista[lista.length-1].prog=e.i+1;
-      }
-      // patrulla
-      const a=ronda[rt], b=ronda[(rt+1)%ronda.length], seg1=dist(a,b); rs+= (25/3.6)*2*factor; if(rs>=seg1){ rs-=seg1; rt=(rt+1)%ronda.length; }
-      const a2=ronda[rt], b2=ronda[(rt+1)%ronda.length], f=Math.min(1,rs/dist(a2,b2));
-      lista.push({ id:'k1', nombre:'K-1', estado:'servicio', lng:a2[0]+(b2[0]-a2[0])*f, lat:a2[1]+(b2[1]-a2[1])*f, rum:rumbo(a2,b2), vel:25, ts:ahora, enLinea:true });
-      lista.push({ id:'b2', nombre:'B-2', estado:'servicio', lng:CU[0].lng+.0006, lat:CU[0].lat-.0004, rum:0, vel:0, ts:ahora, enLinea:true });
-      lista.push({ id:'bx1', nombre:'BX-1', estado:'mant', lng:CU[1].lng-.0005, lat:CU[1].lat+.0004, rum:0, vel:0, ts:ahora, enLinea:true });
-      lista.push({ id:'f1', nombre:'F-1', estado:'servicio', lng:CU[2].lng+.0007, lat:CU[2].lat+.0003, rum:0, vel:0, ts:ahora-120000, enLinea:false });   // sin señal hace 2 minutos
-      Mon.setUnidades(lista);
-      if(llegaron===desp.length && !emitir.fin){ emitir.fin=true; setTimeout(()=>{ desp.forEach(d=>{ d.s=0; }); Object.values(D.uni).forEach(e=>{ e.cur=null; }); emitir.fin=false; }, 8000); }
-    };
-    emitir(); setInterval(emitir,2000);
-    setTimeout(()=>{ if(PARAMS.get('vista')==='flota') verTodo(); else verComuna(); if(PARAMS.get('sel')) seleccionar(PARAMS.get('sel'), true); }, 900);
-  });
-} else {
-  document.addEventListener('vigor-mapa-listo', ()=>{ iniciarReal(); });
+document.addEventListener('vigor-mapa-listo', ()=>{ iniciarReal(); });
+
+/* =====================  Puntos del Cuerpo (se marcan en el mapa)  =====================
+   La Central marca puntos propios (grifos, puentes, escuelas, riesgos, personalizados…) con los 56 tipos de Vigor. Se guardan en la
+   tabla puntos_cuerpo; todo el personal del Cuerpo los ve en el Mapa Comunal y se actualizan en vivo. */
+const PT_FAMS = [['agua','Agua'],['salud','Salud'],['auto','Autoridades'],['sensible','Lugares sensibles'],['riesgo','Riesgo'],['vial','Vialidad'],['terr','Territorio'],['com','Comercio y servicios'],['desp','Zona de trabajo'],['pers','Personalizado']];
+const PT_ICONOS = ['map-pin','flag','star','home','building','tent','campfire','trees','car','truck','alert-triangle','first-aid-kit','droplet','bolt','antenna','eye'];
+const PT_COLORES = ['#FF6FB5','#34B8FF','#3CF29A','#FFC247','#FF8A3D','#B58CFF','#3DEBC0','#DCE8F5'];
+const PT_OCULTOS = new Set(['siniestro','unidad']);          // los genera el despacho solo
+const Pt = { sb:null, cuerpoId:null, central:false, filas:[], abierto:false, fila:null, fam:'agua', tipo:null, ll:null, mk:null, icono:'map-pin', color:'#FF6FB5', tEl:null };
+
+function ptPunto(f){
+  const t0 = TIPOS[f.tipo] || TIPOS.personalizado;
+  const filas = [['Tipo', t0.nombre], ['Nota', f.nota], ['Agregado', new Date(f.creado_en).toLocaleDateString('es-CL', { day:'numeric', month:'long', year:'numeric' })]];
+  return { id:'u'+f.id, tipo:f.tipo, nombre:f.nombre, lng:f.lng, lat:f.lat, icono:f.icono, color:f.color,
+    ficha:{ titulo:f.nombre, filas, fuente:'Punto del Cuerpo', acciones: Pt.central ? [{ texto:'Editar punto', fn:()=>ptAbrir(f) }] : [] } };
+}
+function ptPintar(){ Mon.setPuntosPropios(Pt.filas.map(ptPunto)); }
+async function ptCargar(){
+  const r = await Pt.sb.from('puntos_cuerpo').select('*').eq('cuerpo_id', Pt.cuerpoId).order('creado_en');
+  if(r.error){ console.warn('puntos del Cuerpo:', r.error.message); return; }
+  Pt.filas = r.data || []; ptPintar();
+}
+function ptColorActual(){ const t = TIPOS[Pt.tipo] || TIPOS.personalizado; return Pt.tipo === 'personalizado' ? Pt.color : t.color; }
+function ptIconoActual(){ const t = TIPOS[Pt.tipo] || TIPOS.personalizado; return Pt.tipo === 'personalizado' ? Pt.icono : t.icono; }
+function ptVistaPrevia(){
+  if(!Pt.ll || !Pt.tipo){ if(Pt.mk){ Pt.mk.remove(); Pt.mk = null; } return; }
+  const el = elem(gota(ptColorActual(), ptIconoActual()), 'pv'); el.style.pointerEvents = 'auto'; el.style.cursor = 'grab';
+  if(Pt.mk) Pt.mk.remove();
+  Pt.mk = new maplibregl.Marker({ element:el, anchor:'bottom', draggable:true }).setLngLat(Pt.ll).addTo(mapa);
+  Pt.mk.on('dragend', () => { const p = Pt.mk.getLngLat(); Pt.ll = [p.lng, p.lat]; ptUbic(); });
+}
+function ptUbic(){
+  const u = $('ppUbic'); if(!u) return;
+  u.classList.toggle('ok', !!Pt.ll);
+  u.innerHTML = Pt.ll ? '<i class="ti ti-map-pin-check"></i><span>Ubicado en el mapa · arrastra la gota para ajustar<br><small style="color:var(--mu)">'+Pt.ll[1].toFixed(5)+', '+Pt.ll[0].toFixed(5)+'</small></span>' : '<i class="ti ti-pointer"></i><span>Toca el mapa donde va el punto</span>';
+  ptValidar();
+}
+function ptValidar(){ const b = $('ppGuardar'); if(b) b.disabled = !(Pt.tipo && Pt.ll && $('ppNombre').value.trim()); }
+function ptFams(){
+  $('ppFams').innerHTML = PT_FAMS.map(([k, n]) => `<button type="button" data-f="${k}" style="--k:${FAM[k]}" class="${Pt.fam===k?'on':''}"><i></i>${n}</button>`).join('');
+  const lista = Object.keys(TIPOS).filter(k => TIPOS[k].fam === Pt.fam && !PT_OCULTOS.has(k));
+  $('ppTipos').innerHTML = lista.map(k => `<button type="button" data-t="${k}" style="--k:${TIPOS[k].color}" class="${Pt.tipo===k?'on':''}"><i class="ti ti-${TIPOS[k].icono}"></i>${esc(TIPOS[k].nombre)}</button>`).join('');
+  $('ppExtra').style.display = Pt.tipo === 'personalizado' ? 'flex' : 'none';
+  $('ppIco').innerHTML = PT_ICONOS.map(i => `<button type="button" data-i="${i}" class="${Pt.icono===i?'on':''}"><i class="ti ti-${i}"></i></button>`).join('');
+  $('ppCol').innerHTML = PT_COLORES.map(c => `<button type="button" data-c="${c}" style="--k:${c}" class="${Pt.color===c?'on':''}" aria-label="Color"></button>`).join('');
+}
+function ptAbrir(fila){
+  if(!Pt.central) return;
+  Pt.fila = fila || null; Pt.abierto = true;
+  Pt.tipo = fila ? fila.tipo : null; Pt.fam = fila && TIPOS[fila.tipo] ? TIPOS[fila.tipo].fam : 'agua';
+  Pt.ll = fila ? [fila.lng, fila.lat] : null; Pt.icono = (fila && fila.icono) || 'map-pin'; Pt.color = (fila && fila.color) || '#FF6FB5';
+  $('ppTitulo').textContent = fila ? 'Editar punto' : 'Nuevo punto';
+  $('ppNombre').value = fila ? fila.nombre : ''; $('ppNota').value = (fila && fila.nota) || '';
+  $('ppElim').style.display = fila ? 'block' : 'none'; $('ppElim').classList.remove('conf'); $('ppElim').textContent = 'Eliminar';
+  document.body.classList.add('pp-abierto'); mapa.getCanvas().style.cursor = 'crosshair'; window.vigorFichaPunto && window.vigorFichaPunto(null);
+  ptFams(); ptUbic(); ptVistaPrevia(); setTimeout(() => mapa && mapa.resize(), 50);
+}
+function ptCerrar(){
+  Pt.abierto = false; document.body.classList.remove('pp-abierto'); if(mapa) mapa.getCanvas().style.cursor = '';
+  if(Pt.mk){ Pt.mk.remove(); Pt.mk = null; } clearTimeout(Pt.tEl);
+}
+async function ptGuardar(){
+  const b = $('ppGuardar'); if(b.disabled) return; b.disabled = true;
+  const pers = Pt.tipo === 'personalizado';
+  const fila = { cuerpo_id:Pt.cuerpoId, tipo:Pt.tipo, nombre:$('ppNombre').value.trim().slice(0, 80), nota:$('ppNota').value.trim().slice(0, 500) || null, lat:Pt.ll[1], lng:Pt.ll[0], icono:pers ? Pt.icono : null, color:pers ? Pt.color : null };
+  const r = Pt.fila ? await Pt.sb.from('puntos_cuerpo').update(fila).eq('id', Pt.fila.id).select().single() : await Pt.sb.from('puntos_cuerpo').insert(fila).select().single();
+  if(r.error){ avisar('No se pudo guardar el punto: ' + r.error.message, 6000); b.disabled = false; return; }
+  const i = Pt.filas.findIndex(x => x.id === r.data.id); if(i >= 0) Pt.filas[i] = r.data; else Pt.filas.push(r.data);
+  ptPintar(); ptCerrar(); avisar(Pt.fila ? 'Punto actualizado' : 'Punto agregado al mapa', 2500);
+}
+async function ptEliminar(){
+  const b = $('ppElim');
+  if(!b.classList.contains('conf')){ b.classList.add('conf'); b.textContent = 'Confirmar'; clearTimeout(Pt.tEl); Pt.tEl = setTimeout(() => { b.classList.remove('conf'); b.textContent = 'Eliminar'; }, 4000); return; }
+  const r = await Pt.sb.from('puntos_cuerpo').delete().eq('id', Pt.fila.id);
+  if(r.error){ avisar('No se pudo eliminar: ' + r.error.message, 6000); return; }
+  Pt.filas = Pt.filas.filter(x => x.id !== Pt.fila.id); ptPintar(); ptCerrar(); avisar('Punto eliminado', 2500);
+}
+function iniciarPuntosPropios(sb, cuerpoId, central){
+  Pt.sb = sb; Pt.cuerpoId = cuerpoId; Pt.central = central && !EMBED;
+  ptCargar();
+  let deb = null; try{ sb.channel('puntos-cuerpo-' + Math.random().toString(36).slice(2, 8)).on('postgres_changes', { event:'*', schema:'public', table:'puntos_cuerpo', filter:'cuerpo_id=eq.' + cuerpoId }, () => { clearTimeout(deb); deb = setTimeout(() => { if(!Pt.abierto) ptCargar(); }, 300); }).subscribe(); }catch(e){}
+  if(!Pt.central) return;
+  $('tMas').style.display = 'flex'; $('tMas').onclick = () => ptAbrir(null);
+  $('ppCerrar').onclick = ptCerrar; $('ppCancelar').onclick = ptCerrar; $('ppGuardar').onclick = ptGuardar; $('ppElim').onclick = ptEliminar;
+  $('ppNombre').oninput = ptValidar;
+  $('ppFams').onclick = ev => { const b = ev.target.closest('[data-f]'); if(!b) return; Pt.fam = b.dataset.f; ptFams(); };
+  $('ppTipos').onclick = ev => { const b = ev.target.closest('[data-t]'); if(!b) return; Pt.tipo = b.dataset.t; if(!$('ppNombre').value.trim()) $('ppNombre').placeholder = TIPOS[Pt.tipo].nombre; ptFams(); ptVistaPrevia(); ptValidar(); };
+  $('ppIco').onclick = ev => { const b = ev.target.closest('[data-i]'); if(!b) return; Pt.icono = b.dataset.i; ptFams(); ptVistaPrevia(); };
+  $('ppCol').onclick = ev => { const b = ev.target.closest('[data-c]'); if(!b) return; Pt.color = b.dataset.c; ptFams(); ptVistaPrevia(); };
+  mapa.on('click', ev => { if(!Pt.abierto) return; Pt.ll = [ev.lngLat.lng, ev.lngLat.lat]; ptUbic(); ptVistaPrevia(); });
+  document.addEventListener('keydown', ev => { if(ev.key === 'Escape' && Pt.abierto) ptCerrar(); });
 }
 
 /* =====================  Datos reales (Supabase, en tiempo real)  ===================== */
@@ -608,6 +673,7 @@ async function iniciarReal(){
   if(!cuerpoId){ avisar('Tu cuenta no está asociada a un Cuerpo activo',0); return; }
   let central=false; try{ const r=await sb.rpc('central_obtener_cuerpo'); central=Array.isArray(r.data)?r.data.length>0:!!r.data; }catch(e){}
   armarPestanas(central);
+  iniciarPuntosPropios(sb, cuerpoId, central);
   if(central){ try{ const rc2=await sb.from('reportes_coordenadas').select('id',{count:'exact',head:true}).eq('cuerpo_id',cuerpoId).eq('leido',false);
     if(rc2.count>0){ const a=document.querySelector('#ctabs a[href="terminal_coordenadas.html"]'); if(a) a.insertAdjacentHTML('beforeend','<span class="badge">'+rc2.count+'</span>'); } }catch(e){} }
   // límite de la comuna del Cuerpo (archivo limites/<comuna>.geojson, si existe) y centro del mapa
