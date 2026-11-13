@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>VIGOR - Gestiona tu compañía de forma eficiente</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
@@ -39,11 +39,11 @@
   .content-wrap{ flex:1; min-height:0; padding:16px 26px 20px; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); grid-auto-rows:min-content; gap:12px; overflow-y:auto; align-content:start;}
   .toolbar-config{ flex-shrink:0; padding:12px 26px 0; display:flex; justify-content:flex-end;}
   .btn-config-dotmin{
-    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
-    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
-    font-size:11px; padding:8px 14px; border-radius:6px; cursor:pointer;
+    background:#091D2C; border:1px solid #153A52; color:#8FB0C2;
+    font-family:'Montserrat',sans-serif; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    font-size:10.5px; padding:9px 14px; border-radius:0; cursor:pointer;
   }
-  .btn-config-dotmin:hover{ border-color:var(--cyan); color:var(--cyan);}
+  .btn-config-dotmin:hover{ border-color:#2DD3DB; color:#2DD3DB;}
 
   .modal-overlay{ position:fixed; inset:0; background:rgba(5,10,15,0.75); z-index:60; display:none; align-items:center; justify-content:center; padding:24px;}
   .modal-overlay.show{ display:flex;}
@@ -75,59 +75,60 @@
   }
   .modal-guardar:hover{ background:var(--cyan); color:#0D2226;}
 
-  .cia-card{
-    background:var(--panel); border:2px solid var(--line-strong); border-radius:10px;
-    padding:16px; display:flex; flex-direction:column; position:relative;
-  }
-  .cia-card::before{ content:""; position:absolute; inset:6px; border:1px solid var(--brass-dim); border-radius:6px; pointer-events:none; opacity:.4; z-index:0;}
-  .cia-card.ok{ border-color:var(--servicio);}
-  .cia-card.alerta{ border-color:var(--fuera);}
+  /* ---- Resumen general ---- */
+  .vc-resumen{ flex-shrink:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; padding:14px 26px 0; }
+  .vc-r{ background:#091D2C; border:1px solid #153A52; border-left:3px solid #153A52; padding:10px 14px; }
+  .vc-r b{ display:block; font-family:'Montserrat',sans-serif; font-weight:800; font-size:26px; line-height:1.1; color:#EAF6FB; }
+  .vc-r span{ font-family:'Montserrat',sans-serif; font-weight:600; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:#8FB0C2; }
+  .vc-r.rojo{ border-left-color:#F13746; background:rgba(241,55,70,.12); }
+  .vc-r.rojo b{ color:#F13746; }
+  .vc-r.verde{ border-left-color:#3CF29A; }
 
-  .cia-head{ position:relative; z-index:1; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--line);}
-  .cia-nombre{ font-size:16px; margin-bottom:4px;}
-  .cia-dotacion-tag{
-    display:inline-flex; align-items:center; gap:5px; font-size:9.5px; font-weight:700; text-transform:uppercase;
-    padding:3px 8px; border-radius:10px; letter-spacing:.03em;
-  }
-  .cia-dotacion-tag.ok{ background:var(--servicio); color:#fff;}
-  .cia-dotacion-tag.alerta{ background:var(--fuera); color:#241505;}
-  .cia-dotacion-tag::before{ content:""; width:5px;height:5px;border-radius:50%; background:currentColor; opacity:.7;}
+  /* ---- Tarjeta de compañía ---- */
+  .content-wrap{ grid-template-columns:repeat(auto-fill,minmax(360px,1fr)) !important; }
+  .cia-card{ background:#061520; border:1px solid #153A52; border-left:4px solid #3CF29A; border-radius:0; padding:16px 18px; display:flex; flex-direction:column; gap:14px; }
+  .cia-card.alerta{ border-left-color:#FFC247; }
+  .cia-card.emerg{ border-color:#F13746; border-left-color:#F13746; background:linear-gradient(180deg,rgba(241,55,70,.10),#061520 60%); }
+  .vc-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .cia-nombre{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:16px; letter-spacing:.04em; text-transform:uppercase; color:#EAF6FB; }
+  .vc-tags{ display:flex; gap:6px; flex-wrap:wrap; }
+  .vc-tag{ display:inline-flex; align-items:center; gap:6px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:4px 9px; border:1px solid #153A52; color:#8FB0C2; }
+  .vc-tag::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .vc-tag.ok{ color:#3CF29A; border-color:rgba(60,242,154,.5); }
+  .vc-tag.alerta{ color:#FFC247; border-color:rgba(255,194,71,.5); }
+  .vc-tag.emerg{ color:#fff; background:#F13746; border-color:#F13746; }
+  .vc-cifras{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .vc-cifra{ background:#091D2C; border:1px solid #153A52; padding:10px 12px; }
+  .vc-cifra b{ display:block; font-family:'Montserrat',sans-serif; font-weight:800; font-size:24px; line-height:1.1; color:#EAF6FB; }
+  .vc-cifra span{ display:block; font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#8FB0C2; margin-top:2px; }
+  .vc-cifra small{ display:block; font-family:'Montserrat',sans-serif; font-weight:500; font-size:11.5px; color:#8FB0C2; margin-top:5px; }
+  .vc-cifra small em{ font-style:normal; color:#F13746; font-weight:700; }
+  .vc-mando{ border-left:3px solid #2DD3DB; padding:2px 0 2px 12px; }
+  .vc-mando span, .cia-section-label{ display:block; font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#8FB0C2; margin-bottom:6px; }
+  .vc-mando b{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:14px; color:#EAF6FB; }
+  .cia-section-label{ margin-bottom:8px; }
 
-  .cia-stat-row{ display:flex; gap:14px; align-items:center; margin-bottom:12px; position:relative; z-index:1;}
-  .ring-wrap{ position:relative; width:72px; height:72px; flex-shrink:0;}
-  .ring-wrap svg{ filter:drop-shadow(0 0 6px var(--cyan-glow));}
-  .ring-val{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
-  .ring-val b{ font-family:'JetBrains Mono',monospace; font-size:19px; color:var(--cyan); font-weight:700; line-height:1;}
-  .ring-val .of{ font-family:'JetBrains Mono',monospace; font-size:8.5px; color:var(--text-dim); margin-top:2px;}
-  .cia-stat{ flex:1; min-width:0;}
-  .cia-stat b{ display:block; font-family:'JetBrains Mono',monospace; font-size:16px; color:var(--cyan); font-weight:700;}
-  .cia-stat span{ font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
+  .cia-bomberos{ display:grid; grid-template-columns:repeat(auto-fill,minmax(58px,1fr)); gap:6px; max-height:260px; overflow-y:auto; }
+  .bom{ appearance:none; font:inherit; cursor:default; background:#091D2C; border:1px solid var(--bc); border-left:3px solid var(--bc); color:#EAF6FB; padding:8px 4px; text-align:center;
+    font-family:'Montserrat',sans-serif; font-weight:800; font-size:13px; letter-spacing:.02em; }
+  .bom.disponible{ --bc:#3CF29A; }
+  .bom.emergencia{ --bc:#F13746; background:#F13746; color:#fff; }
+  .bom.no_disponible{ --bc:#FFC247; color:#FFC247; opacity:.85; }
+  .bom.puede{ cursor:pointer; }
+  .bom.puede:hover{ filter:brightness(1.25); }
+  .bom.puede:active{ transform:scale(.97); }
+  .bom:disabled{ opacity:1; }
+  .bom.guardando{ opacity:.5; pointer-events:none; }
+  .vc-vacio{ grid-column:1/-1; font-family:'Montserrat',sans-serif; font-size:12px; color:#516E78; }
 
-  .cia-section-label{ font-size:9.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; margin-bottom:6px; position:relative; z-index:1;}
-
-  .cia-almando{ font-size:12px; margin-bottom:12px; position:relative; z-index:1;}
-  .cia-almando b{ display:block; font-size:13px;}
-
-  .cia-bomberos{ display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; margin-bottom:12px; position:relative; z-index:1; max-height:280px; overflow-y:auto; flex-shrink:0;}
-  .bombero-mini{
-    background:var(--b-color, var(--nodisp));
-    border-radius:5px; padding:6px 2px; text-align:center;
-    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px; color:#fff;
-    text-shadow:0 1px 2px rgba(0,0,0,.2);
-  }
-
-  .cia-carros-chips{ display:flex; flex-wrap:wrap; gap:6px; position:relative; z-index:1;}
-  .carro-chip{
-    display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-weight:700;
-    font-size:12px; background:var(--panel-alt); border:1.5px solid var(--nodisp); padding:5px 10px; border-radius:5px; color:var(--text);
-  }
-  .carro-chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0;}
-  .carro-chip.servicio{ border-color:var(--servicio); color:var(--servicio);}
-  .carro-chip.servicio .nom-txt{ color:var(--text);}
-  .carro-chip.fuera{ border-color:var(--burdeo-bright); color:var(--burdeo-bright);}
-  .carro-chip.fuera .nom-txt{ color:var(--text);}
-  .carro-chip.mant{ border-color:var(--fuera); color:var(--fuera);}
-  .carro-chip.mant .nom-txt{ color:var(--text);}
+  .cia-carros-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .carro-chip{ display:inline-flex; align-items:center; gap:7px; font-family:'Montserrat',sans-serif; font-weight:800; font-size:13px; letter-spacing:.03em; background:#091D2C; border:1px solid var(--cc); border-left:3px solid var(--cc); padding:6px 12px; color:#EAF6FB; border-radius:0; }
+  .carro-chip::before{ display:none; }
+  .carro-chip.servicio{ --cc:#3CF29A; }
+  .carro-chip.emergencia{ --cc:#F13746; background:#F13746; color:#fff; }
+  .carro-chip.mant{ --cc:#FFC247; }
+  .carro-chip.fuera{ --cc:#42555C; color:#8FB0C2; }
+  .carro-chip small{ font-weight:600; font-size:10px; letter-spacing:.08em; text-transform:uppercase; opacity:.85; }
 
   .toast{
     position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
@@ -188,6 +189,7 @@
   <div id="sinSesion" style="display:none; padding:40px; text-align:center; color:var(--text-muted);">
     Debes iniciar sesión primero. <a href="login_registro.html" style="color:var(--cyan);">Ir a iniciar sesión</a>
   </div>
+  <div class="vc-resumen" id="resumen"></div>
   <div class="content-wrap" id="grid"></div>
 
   <div class="modal-overlay" id="dotMinModal">
@@ -213,6 +215,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
 let COMPANIAS = [];
+let ES_CENTRAL = false;   // solo la Central de Alarmas puede cambiar el estado de un bombero desde aquí
 let suscritoVisualCompanias = false;
 
 // Estas 5 pestañas nacieron como herramientas de Central de Alarmas, pero
@@ -234,6 +237,7 @@ async function cargarDatos(){
   }
   const { data: cuerpoCentral } = await sb.rpc('central_obtener_cuerpo');
   const filaCentral = cuerpoCentral && cuerpoCentral[0];
+  ES_CENTRAL = !!filaCentral;
   ajustarTabsSegunSesion(!!filaCentral);
   if(filaCentral){
     document.getElementById('cuerpoLabel').textContent = 'Central de Alarmas · ' + filaCentral.c_nombre_oficial + ' · Vigor';
@@ -245,7 +249,7 @@ async function cargarDatos(){
     .select(`
       id, nombre, dotacion_minima,
       carros(estado),
-      personal(id, numero_registro, cargo, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)),
+      personal(id, numero_registro, nombre_completo, cargo, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)),
       compania_al_mando(tipo_mando, personal(nombre_completo, cargo))
     `)
     .order('numero');
@@ -261,7 +265,7 @@ async function cargarDatos(){
   COMPANIAS = cias.map(c => {
     const regs = (c.personal || []).map(p => {
       const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
-      return { n: p.numero_registro, estado: fv ? fv.estado : 'fuera' };
+      return { id: p.id, n: p.numero_registro, nombre: p.nombre_completo, estado: fv ? fv.estado : 'fuera' };
     });
     const carros = (c.carros || []).map(car => ({ nom: null, estado: car.estado })); // nomenclatura se agrega abajo
     const am = c.compania_al_mando;
@@ -319,51 +323,86 @@ async function actualizarBadgeCoordenadas(){
 // Misma paleta de 4 estados que el PC del Cuartel — coherencia en todo el sistema.
 const COLOR_ESTADO = { disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#F13746' };
 
+const ESTADO_TXT = { disponible:'Disponible', emergencia:'En emergencia', no_disponible:'No disponible' };
+const CARRO_TXT = { servicio:'En servicio', emergencia:'En emergencia', mant:'En mantención', fuera:'Fuera de servicio' };
+const escV = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// Una compañía está en emergencia apenas uno de sus carros es despachado (el carro pasa solo a "emergencia").
+const ciaEnEmergencia = (c) => c.carros.some(x => x.estado === 'emergencia');
+
 function render(){
+  // "Fuera de Servicio" no aparece en el sistema: se filtra por completo de la vista.
+  const todos = COMPANIAS.flatMap(c => c.regs.filter(r => r.estado !== 'fuera'));
+  const todosCarros = COMPANIAS.flatMap(c => c.carros);
+  const nEmergCias = COMPANIAS.filter(ciaEnEmergencia).length;
+  const nEmergCarros = todosCarros.filter(x => x.estado === 'emergencia').length;
+  document.getElementById('resumen').innerHTML = `
+    <div class="vc-r ${nEmergCias ? 'rojo' : ''}"><b>${nEmergCias}</b><span>Compañías en emergencia</span></div>
+    <div class="vc-r ${nEmergCarros ? 'rojo' : ''}"><b>${nEmergCarros}</b><span>Unidades despachadas</span></div>
+    <div class="vc-r verde"><b>${todos.filter(r => r.estado === 'disponible').length}</b><span>Personal disponible</span></div>
+    <div class="vc-r"><b>${todos.length}</b><span>Personal presente</span></div>`;
+
   document.getElementById('grid').innerHTML = COMPANIAS.map(c => {
-    // "Fuera de Servicio" no aparece en el sistema — mismo criterio que en
-    // el PC del Cuartel, se filtra por completo de la vista.
-    const presentes = c.regs.filter(r => r.estado !== 'fuera');
-    // Bug corregido: "Dotación Mínima OK/Insuficiente" era un booleano fijo
-    // sin relación a los datos reales. Ahora se calcula de verdad contra
-    // un umbral configurable (⚙ Configurar Dotación Mínima) comparado con
-    // los bomberos realmente "Disponibles" en este momento.
-    const disponibles = c.regs.filter(r => r.estado === 'disponible').length;
-    const cumpleDotMin = disponibles >= c.dotMinRequerida;
-    const bomberosHtml = presentes.map(r=>`<div class="bombero-mini" style="--b-color:${COLOR_ESTADO[r.estado]}">${r.n}</div>`).join('');
-    const carrosChipsHtml = c.carros.map(car => {
-      const label = car.estado==='servicio'?'En Servicio':car.estado==='fuera'?'Fuera de Servicio':'En Mantención';
-      return `<span class="carro-chip ${car.estado}" title="${label}"><span class="nom-txt">${car.nom}</span></span>`;
+    const presentes = c.regs.filter(r => r.estado !== 'fuera').sort((a, b) => a.n - b.n);
+    const disp = presentes.filter(r => r.estado === 'disponible').length;
+    const emer = presentes.filter(r => r.estado === 'emergencia').length;
+    const nodis = presentes.filter(r => r.estado === 'no_disponible').length;
+    // Dotación mínima: se calcula contra los bomberos realmente "Disponibles" (⚙ Configurar Dotación Mínima)
+    const cumpleDotMin = disp >= c.dotMinRequerida;
+    const enEmerg = ciaEnEmergencia(c);
+    const estadoCia = enEmerg ? 'emerg' : (cumpleDotMin ? '' : 'alerta');
+    const nCarrosEmerg = c.carros.filter(x => x.estado === 'emergencia').length;
+    const carrosServ = c.carros.filter(x => x.estado === 'servicio').length;
+
+    const tags = (enEmerg ? `<span class="vc-tag emerg">En emergencia</span>` : '')
+      + `<span class="vc-tag ${cumpleDotMin ? 'ok' : 'alerta'}" title="Mínimo configurado: ${c.dotMinRequerida} disponibles">${cumpleDotMin ? 'Dotación mínima OK' : 'Dotación insuficiente'}</span>`;
+
+    const bomberos = presentes.map(r => {
+      const puede = ES_CENTRAL && (r.estado === 'disponible' || r.estado === 'emergencia');
+      const sig = r.estado === 'emergencia' ? 'Disponible' : 'Emergencia';
+      return `<button type="button" class="bom ${r.estado} ${puede ? 'puede' : ''}" ${puede ? `data-id="${r.id}" data-estado="${r.estado}"` : 'disabled'}
+        title="${escV(r.nombre)} · ${ESTADO_TXT[r.estado]}${puede ? ' — toca para pasarlo a ' + sig : ''}">${r.n}</button>`;
     }).join('');
+
+    const carros = c.carros.map(car =>
+      `<span class="carro-chip ${car.estado}" title="${CARRO_TXT[car.estado] || car.estado}">${escV(car.nom)}${car.estado === 'emergencia' ? '<small>Despachado</small>' : ''}</span>`
+    ).join('');
+
     return `
-      <div class="cia-card ${cumpleDotMin?'ok':'alerta'}">
-        <div class="cia-head">
-          <div class="cia-nombre">${c.nombre}</div>
-          <span class="cia-dotacion-tag ${cumpleDotMin?'ok':'alerta'}" title="Mínimo configurado: ${c.dotMinRequerida} disponibles">${cumpleDotMin?'Dotación Mínima OK':'Dotación Insuficiente'}</span>
+      <div class="cia-card ${estadoCia}">
+        <div class="vc-top">
+          <div class="cia-nombre">${escV(c.nombre)}</div>
+          <div class="vc-tags">${tags}</div>
         </div>
-        <div class="cia-stat-row">
-          <div class="ring-wrap">
-            <svg viewBox="0 0 72 72" width="72" height="72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="var(--line-strong)" stroke-width="7"/>
-              <circle cx="36" cy="36" r="30" fill="none" stroke="var(--cyan)" stroke-width="7" stroke-linecap="round"
-                stroke-dasharray="188" stroke-dashoffset="${c.regs.length > 0 ? 188 - (188 * presentes.length / c.regs.length) : 188}" transform="rotate(-90 36 36)"/>
-            </svg>
-            <div class="ring-val"><b>${presentes.length}</b><span class="of">de ${c.regs.length}</span></div>
-          </div>
-          <div class="cia-stat"><b>${c.carrosOk}/${c.carrosTotal}</b><span>Carros en Servicio</span></div>
+        <div class="vc-cifras">
+          <div class="vc-cifra"><b>${presentes.length}</b><span>Personal presente</span>
+            <small>${disp} disponible${disp === 1 ? '' : 's'}${emer ? ` · <em>${emer} en emergencia</em>` : ''}${nodis ? ` · ${nodis} no disp.` : ''}</small></div>
+          <div class="vc-cifra"><b>${carrosServ}/${c.carros.length}</b><span>Unidades en servicio</span>
+            <small>${nCarrosEmerg ? `<em>${nCarrosEmerg} despachada${nCarrosEmerg === 1 ? '' : 's'}</em>` : 'Sin despachos'}</small></div>
         </div>
-        <div class="cia-almando">
-          <span class="cia-section-label" style="margin-bottom:2px;">Al Mando</span>
-          <b>${c.alMando}</b>
+        <div class="vc-mando"><span>Bombero a cargo</span><b>${escV(c.alMando)}</b></div>
+        <div>
+          <div class="cia-section-label">Personal</div>
+          <div class="cia-bomberos">${bomberos || '<span class="vc-vacio">Sin personal presente</span>'}</div>
         </div>
-        <div class="cia-section-label">Bomberos Presentes</div>
-        <div class="cia-bomberos">${bomberosHtml}</div>
-        <div class="cia-section-label">Carros</div>
-        <div class="cia-carros-chips">${carrosChipsHtml}</div>
-      </div>
-    `;
+        <div>
+          <div class="cia-section-label">Unidades</div>
+          <div class="cia-carros-chips">${carros || '<span class="vc-vacio">Sin unidades</span>'}</div>
+        </div>
+      </div>`;
   }).join('');
 }
+
+// La Central pasa a un bombero entre "Disponible" y "En emergencia" (solo esos dos) con un toque.
+document.getElementById('grid').addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('.bom.puede'); if(!btn || btn.classList.contains('guardando')) return;
+  const nuevo = btn.dataset.estado === 'emergencia' ? 'disponible' : 'emergencia';
+  btn.classList.add('guardando');
+  const { error } = await sb.rpc('central_cambiar_estado_bombero', { p_personal_id: btn.dataset.id, p_estado: nuevo });
+  if(error){ btn.classList.remove('guardando'); toast('No se pudo cambiar el estado: ' + (error.message || '')); return; }
+  for(const c of COMPANIAS){ const r = c.regs.find(x => x.id === btn.dataset.id); if(r){ r.estado = nuevo; break; } }
+  render();
+});
 
 function tick(){
   const n = new Date();

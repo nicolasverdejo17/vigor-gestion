@@ -278,10 +278,13 @@ function actualizarBannerInstitucional(cargo){
 // Faro: núcleo con el conteo de presentes (verde; rojo si alguien está en emergencia; gris si no hay nadie)
 // y, en órbita, la cara de cada bombero presente con el color de su estado. Más de 10 se resumen en "+N".
 const MAX_AVATARES = 10;
-function renderFaro(presentes){
+// Rojo si algún bombero está en emergencia o si la compañía tiene al menos un carro despachado (el carro pasa solo a "emergencia").
+function renderFaro(presentes, carros){
   const faro = document.getElementById('faro');
-  const hayEmergencia = presentes.some(p => p.estado === 'emergencia');
-  faro.className = 'faro ' + (presentes.length === 0 ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
+  const despachados = (carros || []).filter(c => c.estado === 'emergencia').length;
+  const hayEmergencia = despachados > 0 || presentes.some(p => p.estado === 'emergencia');
+  const vacio = presentes.length === 0 && !hayEmergencia;
+  faro.className = 'faro ' + (vacio ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
 
   const orden = [...presentes].sort((a, b) => {
     const ia = PRIORIDAD_CARGO_MANDO.indexOf(a.cargo), ib = PRIORIDAD_CARGO_MANDO.indexOf(b.cargo);
@@ -302,14 +305,15 @@ function renderFaro(presentes){
   }).join('');
 
   const n = (e) => presentes.filter(p => p.estado === e).length;
-  const titulo = presentes.length === 0 ? 'Cuartel sin personal' : hayEmergencia ? 'En emergencia' : 'Guardia activa';
+  const titulo = vacio ? 'Cuartel sin personal' : hayEmergencia ? 'En emergencia' : 'Guardia activa';
   const partes = [`${presentes.length} en el cuartel`];
+  if(despachados) partes.unshift(`${despachados} unidad${despachados === 1 ? '' : 'es'} despachada${despachados === 1 ? '' : 's'}`);
   if(n('disponible')) partes.push(`${n('disponible')} disponible${n('disponible') === 1 ? '' : 's'}`);
   if(n('no_disponible')) partes.push(`${n('no_disponible')} no disponible${n('no_disponible') === 1 ? '' : 's'}`);
   if(n('emergencia')) partes.push(`${n('emergencia')} en emergencia`);
   const est = document.getElementById('faroEstado');
-  est.className = 'faro-estado ' + (presentes.length === 0 ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
-  est.innerHTML = `<b>${titulo}</b><span>${presentes.length ? partes.join(' · ') : 'Nadie en servicio por ahora'}</span>`;
+  est.className = 'faro-estado ' + (vacio ? 'vacio' : hayEmergencia ? 'emerg' : 'ok');
+  est.innerHTML = `<b>${titulo}</b><span>${vacio ? 'Nadie en servicio por ahora' : partes.join(' · ')}</span>`;
 }
 
 const ESTADO_CARRO_TXT = { servicio:'En servicio', mant:'En mantención', fuera:'Fuera de servicio', emergencia:'En emergencia' };
@@ -390,7 +394,7 @@ async function cargarDatos(){
     const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
     return fv && fv.estado !== 'fuera' ? { ...p, estado: fv.estado } : null;
   }).filter(Boolean);
-  renderFaro(presentes);
+  renderFaro(presentes, carros || []);
   renderDotaciones(carros || [], companeros || [], perfil.id);
 
   const CARGO_ABREV = { 'Director':'Director','Capitán':'Cap.','Teniente 1°':'Tte. 1°','Teniente 2°':'Tte. 2°','Teniente 3°':'Tte. 3°','Teniente 4°':'Tte. 4°','Ayudante Cía.':'Ayte. Cía.' };
