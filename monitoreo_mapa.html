@@ -591,7 +591,7 @@ const R={ carros:new Map(), pos:new Map(), desp:[], du:[], claves:new Map(), sin
 function armarPestanas(central){
   const t=$('ctabs');
   t.innerHTML = central
-    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="monitoreo_mapa.html" class="on">Mapa Comunal</a>'
+    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="monitoreo_mapa.html" class="on">Mapa Comunal</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a>'
     : '<a href="comandancia.html" class="on">← Volver a Comandancia</a>';
   document.body.classList.add('con-tabs'); setTimeout(()=>mapa&&mapa.resize(),50);
 }
