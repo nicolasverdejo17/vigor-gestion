@@ -104,7 +104,7 @@
 
   <div class="toolbar" style="justify-content:space-between;">
     <div id="filtroRow" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-    <button class="btn-exportar-aud" onclick="window.print()">⬇ Exportar PDF</button>
+    <button class="btn-exportar-aud" onclick="exportarPDF()">⬇ Exportar PDF</button>
   </div>
 
   <div class="intro-nota">
@@ -123,6 +123,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -172,6 +173,19 @@ function renderTabla(){
       <td>${e.cia}</td>
     </tr>
   `).join('');
+}
+
+// PDF con el formato base de Vigor: los eventos del filtro elegido
+const ETQ_AUD = { critico:'rojo', creacion:'verde', modificacion:'ambar', acceso:'azul' };
+function exportarPDF(){
+  const lista = filtroActivo === 'todos' ? EVENTOS : EVENTOS.filter(e => e.tipo === filtroActivo);
+  const cuenta = t => lista.filter(e => e.tipo === t).length;
+  VigorInforme.generar({ sb, titulo:'Registro de Auditoría', subtitulo:(filtroActivo === 'todos' ? 'Todos los eventos' : 'Eventos de tipo ' + LABELS[filtroActivo]) + ' · ' + lista.length + (lista.length === 1 ? ' evento' : ' eventos'), archivo:'registro_de_auditoria',
+    secciones:[
+      { titulo:'Resumen', kpis:[['Eventos', lista.length], ['Críticos', cuenta('critico')], ['Creación', cuenta('creacion')], ['Modificación', cuenta('modificacion')], ['Acceso', cuenta('acceso')]] },
+      { titulo:'Eventos', tabla:{ columnas:[{ t:'Fecha / Hora', w:'15%' }, { t:'Usuario', w:'16%' }, { t:'Evento', w:'13%' }, { t:'Detalle' }, { t:'Compañía', w:'16%' }],
+          filas:lista.map(e => [e.fecha, e.usuario, { t:LABELS[e.tipo] || e.tipo, tag:ETQ_AUD[e.tipo] || 'gris' }, e.detalle, e.cia]) }, vacio:'Sin eventos registrados.' }
+    ] });
 }
 
 renderFiltro();

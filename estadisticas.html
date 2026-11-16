@@ -250,7 +250,7 @@
       <button class="view-btn on" id="btnGrafico" onclick="setVista('grafico')">Gráfico</button>
       <button class="view-btn" id="btnTabla" onclick="setVista('tabla')">Tabla</button>
     </div>
-    <button class="btn-exportar" onclick="window.print()">⬇ Exportar PDF</button>
+    <button class="btn-exportar" onclick="exportarPDF()">⬇ Exportar PDF</button>
   </div>
 
   <div class="content-wrap" id="printArea">
@@ -311,6 +311,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -694,6 +695,31 @@ async function setNivel(n){
 
   if(!DATA_NIVEL[n]) await cargarNivel(n);
   renderTodo();
+}
+
+// PDF con el formato base de Vigor: mismos datos que la pantalla, como tablas
+function exportarPDF(){
+  const d = DATA_NIVEL[nivelActivo]; if(!d){ toast('Espera a que carguen los datos'); return; }
+  const r = rangoFechas(), dia = x => new Date(x + 'T00:00:00').toLocaleDateString('es-CL');
+  const ESTADO = { servicio:'En servicio', mant:'En mantención', fuera:'Fuera de servicio', emergencia:'En emergencia' };
+  const ETQ = { servicio:'verde', mant:'ambar', fuera:'gris', emergencia:'rojo' };
+  const total = CLAVES.reduce((a, k) => a + (d.emergencias[k.codigo] || 0), 0);
+  const carros = d.carros, sum = k => carros.reduce((a, c) => a + c[k], 0);
+  const disp = carros.length ? Math.round(carros.filter(c => c.estado === 'servicio').length / carros.length * 100) : 0;
+  VigorInforme.generar({
+    sb, titulo:'Estadísticas', subtitulo:d.titulo.replace(/^Estadísticas — /, '') + ' · ' + dia(r.desde) + ' al ' + dia(r.hasta), archivo:'estadisticas',
+    secciones:[
+      { titulo:'Resumen del período', kpis:d.kpis.map(k => [k.label, k.val]) },
+      { titulo:'Emergencias por clave', tabla:{ columnas:[{ t:'Clave', w:'10%' }, { t:'Tipo' }, { t:'Cantidad', a:'r', w:'14%' }, { t:'% del total', a:'r', w:'14%' }],
+          filas:CLAVES.map(k => [k.codigo, k.nombre, d.emergencias[k.codigo] || 0, (total > 0 ? Math.round((d.emergencias[k.codigo] || 0) / total * 100) : 0) + ' %']), total:CLAVES.length ? ['', 'Total', total, total ? '100 %' : '0 %'] : null }, vacio:'Sin claves de emergencia configuradas.' },
+      { titulo:'Estadísticas de personal', datos:d.personal.mini.map(m => [m.label, m.val]), columnas:4 },
+      { titulo:'Evolución de participación (últimos 12 meses)', tabla:{ columnas:[{ t:'Mes' }, { t:'Participación', a:'r' }], filas:d.personal.evolucion.labels.map((l, i) => [l, d.personal.evolucion.valores[i]]) }, vacio:'Sin datos de participación.' },
+      { titulo:'Bomberos con mayor participación', tabla:{ columnas:[{ t:'Bombero' }, { t:'Participaciones', a:'r', w:'20%' }], filas:d.personal.topParticipacion.map(i => [i.nombre, i.cant]) }, vacio:'Sin datos de participación en el período.' },
+      { titulo:'Estadísticas de carros', kpis:[['Total salidas', sum('salidas')], ['Km recorridos', sum('km').toLocaleString('es-CL')], ['Mantenciones', sum('mant')], ['Disponibilidad actual', disp + ' %'], ['Carros en la flota', carros.length]] },
+      { titulo:'Detalle por unidad', tabla:{ columnas:[{ t:'Carro', w:'14%' }, { t:'Salidas', a:'r' }, { t:'Km', a:'r' }, { t:'Mantenciones', a:'r' }, { t:'Estado', w:'20%' }],
+          filas:carros.map(c => [c.nom, c.salidas, c.km.toLocaleString('es-CL'), c.mant, { t:ESTADO[c.estado] || c.estado, tag:ETQ[c.estado] || 'gris' }]) }, vacio:'Sin carros registrados.' }
+    ]
+  });
 }
 
 function setVista(v){

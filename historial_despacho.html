@@ -270,7 +270,7 @@
       <div class="tipo-popup" id="tipoPopup"></div>
     </div>
 
-    <button class="btn-exportar" onclick="window.print()">⬇ Exportar PDF</button>
+    <button class="btn-exportar" onclick="exportarPDF()">⬇ Exportar PDF</button>
   </div>
 
   <div class="content-wrap">
@@ -293,6 +293,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -571,6 +572,31 @@ function renderTabla(){
       : `<div class="hd-asist"><div class="hd-asist-t">Bomberos que asistieron <b>0</b></div><div class="hd-sin">Aún no hay partes: el listado se arma con la dotación que registra cada carro en su parte.</div></div>`;
     return fila + `<tr class="detalle"><td colspan="7"><div class="hd-det">${asistentes}${tarjetas}</div></td></tr>`;
   }).join('');
+}
+
+// PDF con el formato base de Vigor: la misma lista que se ve (período, compañía y tipo elegidos); si hay emergencias abiertas, se agrega su detalle
+function exportarPDF(){
+  const desde = new Date(calState.desde.sel); desde.setHours(0, 0, 0, 0);
+  const hasta = new Date(calState.hasta.sel); hasta.setHours(23, 59, 59, 999);
+  const lista = DESPACHOS.filter(d => (ciaFiltro === 'todas' || d.cias.includes(ciaFiltro)) && (!tipoFiltro || d.cod === tipoFiltro) && new Date(d.fecha) >= desde && new Date(d.fecha) <= hasta);
+  const dia = x => new Date(x).toLocaleDateString('es-CL');
+  const conDur = lista.filter(d => d.duracionMin !== null);
+  const prom = conDur.length ? Math.round(conDur.reduce((s, d) => s + d.duracionMin, 0) / conDur.length) : null;
+  const tipoTxt = d => TIPOS_SIN_CODIGO.has(d.cod) ? etiquetaTipo(d.cod) : d.cod;
+  const si = v => v ? 'Sí' : 'No';
+  const secciones = [
+    { titulo:'Resumen del período', kpis:[['Despachos', lista.length], ['Modo A (multi-Compañía)', lista.filter(d => d.cias.length > 1).length], ['Alertas especiales', lista.filter(d => d.duracionMin === null).length], ['Duración promedio', prom !== null ? prom + ' min' : '—']] },
+    { titulo:'Despachos', tabla:{ columnas:[{ t:'Código', w:'9%' }, { t:'Dirección' }, { t:'Compañía(s)', w:'17%' }, { t:'Carros', w:'13%' }, { t:'Partes', a:'c', w:'7%' }, { t:'Despachado', w:'14%' }, { t:'Duración', w:'10%' }],
+        filas:lista.map(d => [tipoTxt(d), d.dir, d.cias.join(', '), d.carros.join(', '), d.unidades ? d.unidades.filter(u => u.parte).length + ' / ' + d.unidades.length : '—', d.hora, d.duracion]) }, vacio:'Sin despachos que coincidan con los filtros elegidos.' }
+  ];
+  lista.filter(d => d.unidades && PARTES_ABIERTOS.has(d.id)).forEach(d => {
+    secciones.push({ titulo:'Detalle · ' + tipoTxt(d) + ' · ' + d.dir, tabla:{ columnas:[{ t:'Carro', w:'9%' }, { t:'Compañía', w:'16%' }, { t:'Parte', w:'8%' }, { t:'Oficial a cargo' }, { t:'Maquinista' }, { t:'Llegada — regreso', w:'14%' }, { t:'Lesionados', a:'c', w:'9%' }, { t:'Material', a:'c', w:'8%' }],
+        filas:d.unidades.map(u => u.parte ? [u.nom, u.cia, String(u.parte.numero_parte).padStart(3, '0'), u.parte.oficial || '', u.parte.maquinista || '', (u.parte.hora_llegada || '') + ' — ' + (u.parte.hora_regreso || ''), si(u.parte.hubo_lesionados), si(u.parte.uso_material_carro)] : [u.nom, u.cia, { t:'Pendiente', tag:'ambar' }, '', '', '', '', '']) } });
+    const asist = []; Object.keys(d.asistieron || {}).sort((a, b) => a.localeCompare(b, 'es', { numeric:true })).forEach(nc => d.asistieron[nc].forEach(g => asist.push([nc, g.reg, g.nombre, ({ oficial:'Oficial a cargo', maquinista:'Maquinista' })[g.rol] || 'Dotación', (g.carros || []).join(', ')])));
+    if(asist.length) secciones.push({ titulo:'Bomberos que asistieron · ' + asist.length, tabla:{ columnas:[{ t:'Compañía', w:'20%' }, { t:'N° Reg.', w:'9%' }, { t:'Bombero' }, { t:'Rol', w:'16%' }, { t:'Carros', w:'14%' }], filas:asist } });
+  });
+  VigorInforme.generar({ sb, titulo:'Historial de Despacho', subtitulo:dia(desde) + ' al ' + dia(hasta) + ' · ' + (ciaFiltro === 'todas' ? 'Todas las compañías' : ciaFiltro) + ' · ' + (tipoFiltro ? etiquetaTipo(tipoFiltro) : 'Todos los tipos'),
+    archivo:'historial_de_despacho', orientacion:'horizontal', secciones });
 }
 
 // Al tocar un despacho se abren los partes de todos los carros que salieron a esa emergencia

@@ -237,6 +237,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -456,7 +457,7 @@ function renderDetalle(){
       <div class="grow"><h2>Guardia del ${esc(fechaLarga(L.fecha))}</h2>
         <div class="nota">Horario ${CONFIG.hora_inicio.slice(0, 5)} a ${CONFIG.hora_fin.slice(0, 5)} · ${esc(ciaNombre)} · Abierto por ${esc(nombreCorto(L.abierto && L.abierto.nombre_completo) || '—')} el ${esc(fechaHora(L.hora_apertura))}${emer ? ` · <b style="color:var(--emergencia)">${emer} emergencia${emer === 1 ? '' : 's'}</b>` : ''}</div></div>
       <span class="chip ${L.estado}">${abierto ? 'Abierto' : 'Cerrado'}</span>
-      <span class="no-print" style="display:flex; gap:8px;"><button class="btn-sec" onclick="mostrarLista()">Todos los libros</button><button class="btn-sec" onclick="window.print()">Imprimir</button></span>
+      <span class="no-print" style="display:flex; gap:8px;"><button class="btn-sec" onclick="mostrarLista()">Todos los libros</button><button class="btn-sec" onclick="exportarPDF()">Exportar PDF</button></span>
     </div></div>
 
     <div class="panel"><h3>1 · Dotación disponible</h3>
@@ -509,6 +510,33 @@ function renderDetalle(){
         <textarea class="inp" id="anotTexto" placeholder="Corrección o aclaración posterior al cierre…"></textarea>
         <button class="btn-sec" style="margin-top:8px;" id="btnAnotar" onclick="agregarAnotacion()">Agregar anotación</button></div>
     </div>`}`;
+}
+
+// PDF con el formato base de Vigor
+function exportarPDF(){
+  if(!LIBRO) return;
+  const L = LIBRO, abierto = L.estado === 'abierto', ok = v => (v == null || v === '') ? '' : v;
+  const presentes = DOTACION.filter(d => ['completa', 'parcial', 'en_curso'].includes(d.estado));
+  const maqPres = presentes.filter(d => d.funcion === 'maquinista').length;
+  const emer = NOVEDADES.filter(n => n.tipo === 'emergencia').length;
+  const ETQ_ASIST = { completa:'verde', parcial:'ambar', ausente:'rojo', en_curso:'azul', pendiente:'gris' };
+  const ETQ_MAT = { servicio:'verde', mant:'ambar', fuera:'gris', emergencia:'rojo' };
+  const secciones = [
+    { titulo:'Resumen de la guardia', kpis:[['Presentes (mínimo ' + CONFIG.minimo_total + ')', presentes.length], ['Maquinistas presentes', maqPres], ['Novedades', NOVEDADES.length], ['Salidas a emergencia', emer]] },
+    { titulo:'1 · Dotación disponible', tabla:{ columnas:[{ t:'Voluntario' }, { t:'N° Reg.', w:'10%' }, { t:'Función', w:'13%' }, { t:'Estado', w:'14%' }, { t:'En servicio', w:'24%' }],
+        filas:DOTACION.map(d => [nombreCorto(d.nombre) + (d.inscrito ? '' : ' (reemplazo)') + (d.pernocta ? ' · pernocta' : ''), d.numero_registro, d.funcion === 'maquinista' ? 'Maquinista' : 'Bombero', { t:ASIST_LABEL[d.estado] || d.estado, tag:ETQ_ASIST[d.estado] || 'gris' }, d.minutos_presente > 0 ? hhmm(d.entrada) + ' → ' + hhmm(d.salida) + ' · ' + durTxt(d.minutos_presente) : '—']) }, vacio:'Nadie anotado ni en servicio en este horario.' },
+    { titulo:'2 · Estado del material', tabla:{ columnas:[{ t:'Carro', w:'14%' }, { t:'Estado', w:'16%' }, { t:'Combustible', w:'14%' }, { t:'Observaciones' }],
+        filas:MATERIAL.map(m => [m.carro_nombre, { t:ESTADO_MAT[m.estado] || m.estado, tag:ETQ_MAT[m.estado] || 'gris' }, m.combustible || '—', ok(m.observacion)]) }, vacio:'La Compañía no tiene carros registrados.' },
+    { titulo:'3 · Novedades', tabla:{ columnas:[{ t:'Hora', w:'8%' }, { t:'Tipo', w:'17%' }, { t:'Registró', w:'15%' }, { t:'Descripción' }],
+        filas:NOVEDADES.map(n => { const d = n.datos_emergencia; const extra = d ? ' [' + [d.clave && 'Clave ' + d.clave, d.direccion, d.unidad && 'Unidad ' + d.unidad, d.salida && 'Salió ' + d.salida, d.regreso && 'Regresó ' + d.regreso].filter(Boolean).join(' · ') + ']' : '';
+          return [hhmm(n.hora), TIPO_LABEL[n.tipo] || n.tipo, nombreCorto(n.autor && n.autor.nombre_completo) || '', (n.descripcion || '') + extra]; }) }, vacio:'Sin novedades registradas.' },
+    { titulo:'4 · Entrega de guardia', html:'<p class="tx"><b>Resumen final.</b> ' + esc(L.resumen_entrega || '—') + '</p><p class="tx"><b>Pendientes para el siguiente turno.</b> ' + esc(L.pendientes || '—') + '</p>' },
+    { titulo:'5 · Cierre', texto: abierto ? 'La guardia sigue abierta.' : 'Cerrado por ' + (nombreCorto(L.cerr && L.cerr.nombre_completo) || '—') + ' el ' + fechaHora(L.hora_cierre) + '.' }
+  ];
+  if(!abierto && ANOTACIONES.length) secciones.push({ titulo:'6 · Anotaciones posteriores', tabla:{ columnas:[{ t:'Fecha', w:'16%' }, { t:'Oficial', w:'18%' }, { t:'Anotación' }], filas:ANOTACIONES.map(a => [fechaHora(a.created_at), nombreCorto(a.oficial && a.oficial.nombre_completo) || '', a.texto]) } });
+  secciones.push({ firmas:['Oficial que entrega', 'Oficial que recibe'] });
+  VigorInforme.generar({ sb, titulo:'Libro de Guardia', subtitulo:'Guardia del ' + fechaLarga(L.fecha), archivo:'libro_de_guardia_' + L.fecha,
+    datos:[['Horario', CONFIG.hora_inicio.slice(0, 5) + ' a ' + CONFIG.hora_fin.slice(0, 5)], ['Abierto por', nombreCorto(L.abierto && L.abierto.nombre_completo) || '—'], ['Apertura', fechaHora(L.hora_apertura)], ['Estado', abierto ? 'Abierto' : 'Cerrado']], secciones });
 }
 
 // ---- Acciones ----
