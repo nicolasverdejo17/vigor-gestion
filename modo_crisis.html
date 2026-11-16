@@ -366,6 +366,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -633,19 +634,16 @@ document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && abiertoId
 
 // ---- Reporte (se imprime o se guarda como PDF) ----
 function generarReporte(){
-  const hora = new Date().toLocaleString('es-CL');
-  document.getElementById('reporteImp').innerHTML = `
-    <h2>Reporte de Modo Crisis — Puesto de Mando</h2>
-    <div class="rp-sub">${esc(document.getElementById('ciaLabel').textContent)} · Emitido el ${esc(hora)} · Activo hace ${esc(document.getElementById('timer').textContent)}</div>
-    ${batallones.map(b => `
-      <div class="rp-bat">
-        <h3>${esc(b.nombre)} — ${ESTADO_TXT[b.estado] || b.estado}</h3>
-        <div class="rp-linea"><b>Frente / Zona:</b> ${esc(b.frente || '—')} &nbsp;·&nbsp; <b>Responsable:</b> ${esc(b.responsable || '—')}</div>
-        <div class="rp-linea"><b>Carros (${b.carros.length}):</b> ${b.carros.length ? b.carros.map(c => esc(c.nomenclatura) + ' (' + esc(c.procedencia) + ')').join(', ') : '—'}</div>
-        ${ROLES.map(r => { const l = b.bomberos.filter(p => p.rol === r); return l.length ? `<div class="rp-linea"><b>${ROL_PLURAL[r]} (${l.length}):</b> ${l.map(p => esc(p.nombre)).join(', ')}</div>` : ''; }).join('')}
-        ${(() => { const l = b.bomberos.filter(p => !ROLES.includes(p.rol)); return l.length ? `<div class="rp-linea"><b>Otros (${l.length}):</b> ${l.map(p => esc(p.nombre) + ' (' + esc(p.rol) + ')').join(', ')}</div>` : ''; })()}
-      </div>`).join('') || '<p>Sin batallones.</p>'}`;
-  window.print();
+  const ETQ = { emergencia:'rojo', disponible:'verde', rancho:'gris' };
+  const secciones = [{ titulo:'Resumen', kpis:[['Batallones', batallones.length], ['En emergencia', batallones.filter(b => b.estado === 'emergencia').length], ['Disponibles', batallones.filter(b => b.estado === 'disponible').length], ['En rancho', batallones.filter(b => b.estado === 'rancho').length]] }];
+  batallones.forEach(b => {
+    secciones.push({ titulo:b.nombre + ' — ' + (ESTADO_TXT[b.estado] || b.estado), datos:[['Estado', ESTADO_TXT[b.estado] || b.estado], ['Frente / Zona', b.frente || '—'], ['Responsable', b.responsable || '—']],
+      tabla:{ columnas:[{ t:'Carro', w:'22%' }, { t:'Procedencia' }], filas:b.carros.map(c => [c.nomenclatura, c.procedencia]) }, vacio:'Sin carros asignados.' });
+    secciones.push({ titulo:'Dotación · ' + b.nombre + ' (' + b.bomberos.length + ')', tabla:{ columnas:[{ t:'Bombero' }, { t:'Rol', w:'24%' }], filas:b.bomberos.map(p => [p.nombre, p.rol]) }, vacio:'Sin bomberos asignados.' });
+  });
+  secciones.push({ firmas:['Jefe del puesto de mando', 'Capitán'] });
+  VigorInforme.generar({ sb, titulo:'Reporte de Modo Crisis', subtitulo:'Puesto de Mando · Activo hace ' + document.getElementById('timer').textContent, archivo:'modo_crisis', secciones });
+
 }
 
 function toast(msg){

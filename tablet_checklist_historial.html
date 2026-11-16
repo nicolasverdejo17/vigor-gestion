@@ -295,6 +295,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script src="vigor-despacho-tablet.js" data-auto></script>
 <script src="vigor-gps-tablet.js" data-auto></script>
 <script>
@@ -381,11 +382,18 @@ function toggleExpandir(i){
 }
 
 function exportarPDF(){
-  // Se expande todo antes de imprimir, para que el PDF muestre el detalle
-  // completo de cada revisión y no solo el resumen colapsado.
-  HISTORIAL.forEach((_, i) => { expandido[i] = true; });
-  renderHistorial();
-  setTimeout(()=>window.print(), 150);
+  const ETQ = { ok:'verde', falla:'rojo', na:'gris' };
+  const t = id => (document.getElementById(id) || {}).textContent || '';
+  const fallasTot = HISTORIAL.reduce((n, r) => n + (r.items || []).filter(i => i.estado === 'falla').length, 0);
+  const secciones = [{ titulo:'Resumen', kpis:[['Revisiones', HISTORIAL.length], ['Fallas encontradas', fallasTot], ['Revisiones sin fallas', HISTORIAL.filter(r => !(r.items || []).some(i => i.estado === 'falla')).length]] }];
+  HISTORIAL.forEach(rev => {
+    const f = new Date(rev.fecha_hora), fallas = (rev.items || []).filter(i => i.estado === 'falla').length;
+    secciones.push({ titulo:f.toLocaleDateString('es-CL') + ' ' + f.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false }) + ' · ' + (rev.responsable || 'Sin responsable') + ' · ' + rev.kilometraje + ' km · ' + (fallas ? fallas + (fallas === 1 ? ' falla' : ' fallas') : 'Todo OK'),
+      tabla:{ columnas:[{ t:'Punto de revisión' }, { t:'Estado', w:'14%' }, { t:'Observación', w:'34%' }], filas:(rev.items || []).map(i => [i.nombre, { t:ESTADO_LABEL[i.estado] || i.estado, tag:ETQ[i.estado] || 'gris' }, i.comentario || '']) }, vacio:'Sin puntos de revisión.' });
+  });
+  secciones.push({ firmas:['Maquinista que revisó', 'Capitán'] });
+  VigorInforme.generar({ sb, titulo:'Historial de Checklist', subtitulo:t('carroTitulo'), archivo:'checklist_' + t('carroSigla'),
+    datos:[['Carro', t('carroTitulo')], ['Conductor', t('dotConductor')], ['Oficial a cargo', t('dotOficial')]], secciones });
 }
 
 function toast(msg){

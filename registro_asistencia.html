@@ -241,6 +241,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -392,12 +393,26 @@ async function abrirDetalle(id){
 
 // ---- PDF (se guarda desde el diálogo de impresión, igual que el resto de la app) ----
 function exportar(){
-  const previo = document.title;
-  const nombre = ACTUAL ? 'Asistencia - ' + ACTUAL.nombre + ' - ' + isoAFecha(ACTUAL.fecha).replace(/\//g, '-') : 'Registro de asistencia - ' + ciaNombre;
-  document.title = nombre;
-  const restaurar = () => { document.title = previo; window.removeEventListener('afterprint', restaurar); };
-  window.addEventListener('afterprint', restaurar);
-  setTimeout(() => window.print(), 80);
+  const ETQ = { presente:'verde', justificado:'ambar', ausente:'rojo' };
+  const firmas = { firmas:['Secretario', 'Director'] };
+  if(ACTUAL){
+    const a = ACTUAL, filas = [];
+    ['presente', 'justificado', 'ausente'].forEach(est => DETALLE.filter(r => r.estado === est).forEach(r => filas.push([r.numero_registro, r.nombre_completo, r.cargo, { t:ESTADO_TXT[est], tag:ETQ[est] }])));
+    VigorInforme.generar({ sb, titulo:'Registro de Asistencia', subtitulo:a.nombre + ' · ' + fechaLarga(a.fecha), archivo:'asistencia_' + a.fecha,
+      datos:[['Actividad', a.nombre], ['Tipo', mayus1(a.tipo)], ['Fecha', fechaLarga(a.fecha)], ['Hora y lugar', horaLugar(a)]],
+      secciones:[
+        { titulo:'Resumen', kpis:[['Convocados', a.total], ['Presentes', a.presentes], ['Justificados', a.justificados], ['Ausentes', a.ausentes], ['Asistencia', pct(a) + ' %']] },
+        { titulo:'Asistencia', tabla:{ columnas:[{ t:'N° Reg.', w:'10%' }, { t:'Bombero' }, { t:'Cargo', w:'24%' }, { t:'Estado', w:'16%' }], filas }, vacio:'Sin registros.' }, firmas] });
+  } else {
+    const lista = FILTRADA || LISTA, tp = lista.reduce((s, a) => s + a.presentes, 0), tj = lista.reduce((s, a) => s + a.justificados, 0), ta = lista.reduce((s, a) => s + a.ausentes, 0), tt = lista.reduce((s, a) => s + a.total, 0);
+    const d = fechaAIso(document.getElementById('fDesde').value), h = fechaAIso(document.getElementById('fHasta').value), tipo = document.getElementById('fTipo').value;
+    const sub = [(d || h) ? 'Período: ' + (d ? isoAFecha(d) : 'inicio') + ' al ' + (h ? isoAFecha(h) : 'hoy') : 'Todo el período', tipo ? 'Tipo: ' + mayus1(tipo) : 'Todos los tipos'].join(' · ');
+    VigorInforme.generar({ sb, titulo:'Registro de Asistencia', subtitulo:sub, archivo:'registro_de_asistencia', orientacion:'horizontal',
+      secciones:[
+        { titulo:'Resumen', kpis:[['Actividades', lista.length], ['Asistencia promedio', (tt ? Math.round(tp / tt * 100) : 0) + ' %'], ['Presentes', tp], ['Justificados', tj], ['Ausentes', ta]] },
+        { titulo:'Actividades con asistencia', tabla:{ columnas:[{ t:'Fecha', w:'10%' }, { t:'Tipo', w:'12%' }, { t:'Actividad' }, { t:'Hora y lugar', w:'20%' }, { t:'Presentes', a:'r', w:'9%' }, { t:'Justif.', a:'r', w:'8%' }, { t:'Ausentes', a:'r', w:'9%' }, { t:'Asistencia', a:'r', w:'10%' }],
+            filas:lista.map(a => [isoAFecha(a.fecha), mayus1(a.tipo), a.nombre, horaLugar(a) || '—', a.presentes, a.justificados, a.ausentes, pct(a) + ' %']) }, vacio:'Ninguna actividad coincide con el filtro.' }, firmas] });
+  }
 }
 
 const ICONOS_TAB = {

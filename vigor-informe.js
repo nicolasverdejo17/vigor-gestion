@@ -47,6 +47,11 @@ async function contexto(sb){
         if(x.data){ c.numero = x.data.numero != null ? String(x.data.numero) : ''; c.direccion = x.data.direccion || ''; }
         return c; }
     }catch(e){}
+    // cuenta del carro (tablet)
+    try{
+      const r = await sb.rpc('tablet_obtener_carro'); const f = Array.isArray(r.data) ? r.data[0] : r.data;
+      if(f && f.t_id){ c.compania = f.t_compania_nombre || ''; c.cuerpo = f.t_cuerpo_nombre || ''; c.usuario = 'Carro ' + (f.t_nomenclatura || ''); return c; }
+    }catch(e){}
     // cuenta de la Central de Alarmas
     try{
       const r = await sb.rpc('central_obtener_cuerpo'); const f = Array.isArray(r.data) ? r.data[0] : r.data;

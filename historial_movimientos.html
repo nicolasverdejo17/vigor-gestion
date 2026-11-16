@@ -194,7 +194,7 @@
     <div class="head-row">
       <button class="back-btn" onclick="volverInventario()">← Volver</button>
       <h2>Historial de Movimientos</h2>
-      <button class="btn-exportar-hist" onclick="window.print()">⬇ Exportar PDF</button>
+      <button class="btn-exportar-hist" onclick="exportarPDF()">⬇ Exportar PDF</button>
     </div>
 
     <div class="layout" id="printArea">
@@ -268,6 +268,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -348,6 +349,18 @@ async function cargarDatos(){
   await cargarTimeline();
 }
 
+let FILAS_MOV = [];
+// PDF con el formato base de Vigor: la ficha del ítem y su historial de movimientos
+function exportarPDF(){
+  if(!itemActual) return;
+  const txt = id => (document.getElementById(id) || {}).textContent || '';
+  VigorInforme.generar({ sb, titulo:'Historial de Movimientos', subtitulo:txt('fichaCod') + ' · ' + txt('fichaNombre'), archivo:'movimientos_' + txt('fichaCod'),
+    datos:[['Código', txt('fichaCod')], ['Ítem', txt('fichaNombre')], ['Categoría', txt('fichaCategoria')], ['Estado', txt('fichaEstadoPill')], ['Lugar actual', txt('fichaLugar')], ['Valor', txt('fichaValor')], ['Fecha de ingreso', txt('fichaFecha')]],
+    secciones:[
+      { titulo:'Movimientos registrados', tabla:{ columnas:[{ t:'Fecha', w:'15%' }, { t:'Movimiento', w:'27%' }, { t:'Detalle' }, { t:'Registrado por', w:'22%' }], filas:FILAS_MOV }, vacio:'Sin movimientos registrados.' },
+      { firmas:['Tesorero', 'Director'] }] });
+}
+
 async function cargarTimeline(){
   const { data: movs } = await sb.from('inventario_movimientos')
     .select('*, personal(nombre_completo, cargo)')
@@ -361,6 +374,7 @@ async function cargarTimeline(){
   const fotosPorMov = {};
   (fotos || []).forEach(f => { (fotosPorMov[f.movimiento_id] = fotosPorMov[f.movimiento_id] || []).push(f.foto_url); });
 
+  FILAS_MOV = [];
   list.innerHTML = movs.map(m => {
     const fecha = new Date(m.fecha).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false});
     let tipoTexto = TIPO_LABEL[m.tipo] || m.tipo;
@@ -368,6 +382,7 @@ async function cargarTimeline(){
     if(m.tipo === 'traslado' && m.lugar_nuevo) tipoTexto = `Traslado${m.lugar_anterior ? ' — ' + m.lugar_anterior + ' → ' + m.lugar_nuevo : ' — a ' + m.lugar_nuevo}`;
     if(m.tipo === 'recategorizar' && m.categoria_nueva) tipoTexto = `Cambio de Categoría${m.categoria_anterior ? ' — ' + m.categoria_anterior + ' → ' + m.categoria_nueva : ' — a ' + m.categoria_nueva}`;
     const responsable = m.personal ? m.personal.nombre_completo + (m.personal.cargo ? ' — ' + m.personal.cargo : '') : 'Sistema';
+    FILAS_MOV.push([fecha, tipoTexto, m.detalle || '', responsable]);
     const fotosMov = fotosPorMov[m.id] || [];
     const fotosHtml = fotosMov.length
       ? `<div class="fotos-grid" style="margin-top:8px;">${fotosMov.map(url => `<a href="${url}" target="_blank" rel="noopener" class="foto-thumb" style="display:block;"><img src="${url}" alt="Evidencia"></a>`).join('')}</div>`

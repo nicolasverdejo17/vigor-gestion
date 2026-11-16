@@ -377,7 +377,7 @@ label {
       <div class="resumen-baja-row"><span>Fecha de la baja</span><b id="resumenFecha">—</b></div>
       <div class="resumen-baja-row"><span>Motivo</span><b id="resumenMotivo">—</b></div>
       <div class="resumen-baja-row"><span>Autorizado por</span><b id="resumenAutorizado">—</b></div>
-      <button class="btn-exportar-baja" onclick="window.print()">⬇ Exportar PDF</button>
+      <button class="btn-exportar-baja" onclick="exportarPDF()">⬇ Exportar PDF</button>
     </div>
 
     <div class="actions">
@@ -461,6 +461,7 @@ label {
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -469,6 +470,14 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 const bomberoId = new URLSearchParams(window.location.search).get('bombero');
 let miNombre = null, miCargo = null;
 let bombero = null;
+
+// PDF con el formato base de Vigor: constancia de la baja confirmada
+function exportarPDF(){
+  const t = id => (document.getElementById(id) || {}).textContent || '';
+  VigorInforme.generar({ sb, titulo:'Constancia de Baja', subtitulo:t('resumenNombre') + ' · N° ' + t('resumenReg'), archivo:'constancia_de_baja_' + t('resumenReg'),
+    datos:[['Bombero', t('resumenNombre')], ['N° de Registro', t('resumenReg')], ['Cargo previo', t('resumenCargoPrevio')], ['Fecha de la baja', t('resumenFecha')], ['Autorizado por', t('resumenAutorizado')]],
+    secciones:[{ titulo:'Motivo de la baja', texto:t('resumenMotivo') }, { firmas:['Director'] }] });
+}
 
 function iniciales(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2); }
 

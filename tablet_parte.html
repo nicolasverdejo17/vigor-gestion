@@ -485,6 +485,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script src="vigor-despacho-tablet.js" data-auto></script>
 <script src="vigor-gps-tablet.js" data-auto></script>
 <script>
@@ -733,7 +734,22 @@ function exportarParte(){
     toast('Completa los campos obligatorios antes de exportar');
     return;
   }
-  setTimeout(()=>window.print(), 150);
+  const v = id => (document.getElementById(id) || {}).value || '', t = id => (document.getElementById(id) || {}).textContent || '';
+  const sel = document.getElementById('tipoEmergencia'), tipoEm = sel && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex].text : '';
+  const afBtn = document.querySelector('#afectadoTipoRow button.on'), afTipo = afBtn ? afBtn.textContent.trim() : 'No aplica';
+  const vinculo = document.getElementById('parteVinculo'), vinculoTxt = vinculo && vinculo.style.display !== 'none' ? vinculo.textContent.trim().replace(/\s+/g, ' ') : '';
+  const num = v('numeroParteField').replace(/\s*\(al guardar\)/, '');
+  const dotacion = [['Conductor', t('dotConductor')], ['Oficial a cargo', t('dotOficial')]].concat(t('dotTripulantes') && t('dotTripulantes') !== 'Sin asignar' ? t('dotTripulantes').split(', ').map(n => ['Tripulante', n]) : []);
+  const secciones = [
+    { titulo:'Dotación de la salida', tabla:{ columnas:[{ t:'Rol', w:'24%' }, { t:'Bombero' }], filas:dotacion.filter(d => d[1] && d[1] !== 'Sin asignar') }, vacio:'Sin dotación asignada.' },
+    { titulo:'Descripción de la actuación', texto:v('descripcionActuacion') },
+    { titulo:'Lesionados y material', datos:[['Hubo lesionados', huboLesionadosSel ? 'Sí' : 'No'], ['Se usó material del carro', usoMaterialSel ? 'Sí' : 'No']], columnas:2 }
+  ];
+  if(afTipo !== 'No aplica') secciones.push({ titulo:'Afectado · ' + afTipo, datos:[['Nombre', v('nombreAfectado')], ['RUT', v('rutAfectado')], ['Edad', v('edadAfectado')], ['Teléfono', v('telefonoAfectado')], ['Dirección', v('direccionAfectado')]], columnas:3 });
+  if(v('novedadesAdicionales').trim()) secciones.push({ titulo:'Novedades adicionales', texto:v('novedadesAdicionales') });
+  secciones.push({ firmas:['Oficial a cargo', 'Capitán'] });
+  VigorInforme.generar({ sb, titulo:'Parte de Emergencia', subtitulo:'N° ' + num + (vinculoTxt ? ' · ' + vinculoTxt : ''), archivo:'parte_de_emergencia_' + num,
+    datos:[['N° de parte', num], ['Carro', v('carroField')], ['Fecha y hora', v('fechaHora')], ['Tipo de emergencia', tipoEm], ['Dirección / lugar', v('direccionEmergencia')], ['Hora de llegada', v('horaLlegada')], ['Hora de regreso', v('horaRegreso')]], secciones });
 }
 
 function toast(msg){

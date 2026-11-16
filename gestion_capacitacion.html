@@ -277,6 +277,7 @@
 
   <div class="toolbar" id="toolbarLista" style="display:none;">
     <input type="text" class="search-input" id="buscador" placeholder="Buscar por nombre o N° de Registro…" oninput="renderTabla()">
+    <button class="btn-exportar" onclick="exportarPDF()">⬇ Exportar PDF</button>
   </div>
 
   <div class="content-wrap">
@@ -330,6 +331,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -469,7 +471,7 @@ function renderDetalle(){
         </div>
       </div>
       <div class="detalle-actions">
-        <button class="btn-exportar" onclick="window.print()">⬇ Exportar PDF</button>
+        <button class="btn-exportar" onclick="exportarPDF()">⬇ Exportar PDF</button>
         ${puedoEditar ? `<button class="btn-agregar" onclick="abrirModal()">+ Agregar Curso</button>` : ''}
       </div>
     </div>
@@ -477,6 +479,31 @@ function renderDetalle(){
     <div class="historial-t">Historial de cursos</div>
     ${tarjetas}
   `;
+}
+
+// PDF con el formato base de Vigor: el historial de un bombero, o la lista de todo el personal
+function exportarPDF(){
+  const ETQ = { inicial:'gris', operativo:'verde', profesional:'azul', especialidad:'ambar', ninguno:'gris' };
+  const dia = iso => new Date(iso + 'T00:00:00').toLocaleDateString('es-CL');
+  const firmas = { firmas:['Capitán'] };
+  if(detalleAbierto){
+    const b = BOMBEROS[bomberoActivo]; if(!b) return;
+    const nv = b.nivelActual || 'ninguno';
+    VigorInforme.generar({ sb, titulo:'Historial de Capacitación', subtitulo:b.nombre + ' · N° ' + b.reg, archivo:'capacitacion_' + b.reg,
+      datos:[['Bombero', b.nombre], ['N° de Registro', b.reg], ['Cargo', b.cargo], ['Nivel actual', NIVEL_LABEL[nv]], ['Cursos', b.cursos.length], ['Último curso', b.cursos.length ? dia(b.cursos[0].fecha) : '']],
+      secciones:[
+        { titulo:'Cursos aprobados', tabla:{ columnas:[{ t:'Fecha', w:'13%' }, { t:'Curso' }, { t:'Nivel', w:'16%' }, { t:'Origen', w:'12%' }, { t:'Certificado', a:'c', w:'12%' }],
+            filas:b.cursos.map(c => [dia(c.fecha), c.nombre_curso, c.nivel ? { t:NIVEL_LABEL[c.nivel], tag:ETQ[c.nivel] || 'gris' } : '', c.es_externo ? 'Externo' : 'Del Cuerpo', c.certificado_url ? 'Sí' : 'No']) }, vacio:'Sin cursos ingresados todavía.' }, firmas] });
+  } else {
+    const q = document.getElementById('buscador').value.trim().toLowerCase();
+    const lista = BOMBEROS.filter(b => b.nombre.toLowerCase().includes(q) || String(b.reg).includes(q));
+    const n = k => lista.filter(b => (b.nivelActual || 'ninguno') === k).length;
+    VigorInforme.generar({ sb, titulo:'Gestión de Capacitación', subtitulo:'Personal y nivel de capacitación · ' + lista.length + (lista.length === 1 ? ' bombero' : ' bomberos'), archivo:'capacitacion',
+      secciones:[
+        { titulo:'Resumen por nivel', kpis:[['Inicial', n('inicial')], ['Operativo', n('operativo')], ['Profesional', n('profesional')], ['Especialidad', n('especialidad')], ['Sin nivel', n('ninguno')]] },
+        { titulo:'Personal', tabla:{ columnas:[{ t:'N° Reg.', w:'10%' }, { t:'Nombre' }, { t:'Cargo', w:'22%' }, { t:'Nivel', w:'16%' }, { t:'Cursos', a:'r', w:'9%' }],
+            filas:lista.map(b => { const nv = b.nivelActual || 'ninguno'; return [b.reg, b.nombre, b.cargo || '—', { t:NIVEL_LABEL[nv], tag:ETQ[nv] || 'gris' }, b.cursos.length]; }) }, vacio:'Sin resultados.' }, firmas] });
+  }
 }
 
 let cursoPorEliminar = null;

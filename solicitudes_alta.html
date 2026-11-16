@@ -202,7 +202,7 @@
 
       <div class="head-row" style="margin-top:28px;">
         <h2>Historial de resueltas</h2>
-        <button class="btn-exportar-sol" onclick="window.print()">⬇ Exportar PDF</button>
+        <button class="btn-exportar-sol" onclick="exportarPDF()">⬇ Exportar PDF</button>
       </div>
       <div id="historialResueltas"></div>
     </div>
@@ -245,6 +245,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
@@ -279,6 +280,17 @@ function renderHistorialResueltas(){
       <span class="hist-sol-badge ${r.estado}">${r.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}</span>
     </div>
   `).join('');
+}
+
+// PDF con el formato base de Vigor: solicitudes pendientes e historial de resueltas
+function exportarPDF(){
+  VigorInforme.generar({ sb, titulo:'Solicitudes de Alta', subtitulo:SOLICITUDES.length + (SOLICITUDES.length === 1 ? ' pendiente' : ' pendientes') + ' · ' + RESUELTAS.length + (RESUELTAS.length === 1 ? ' resuelta' : ' resueltas'), archivo:'solicitudes_de_alta',
+    secciones:[
+      { titulo:'Pendientes de revisión', tabla:{ columnas:[{ t:'Solicitante' }, { t:'RUT', w:'14%' }, { t:'Fecha nac.', w:'12%' }, { t:'Teléfono', w:'14%' }, { t:'Compañía solicitada', w:'18%' }, { t:'Solicitada', w:'14%' }],
+          filas:SOLICITUDES.map(s => [s.nombre_completo, s.rut, s.fecha_nacimiento, s.telefono, s.companias ? s.companias.nombre : '—', fmtFecha(s.fecha_solicitud)]) }, vacio:'No hay solicitudes pendientes por revisar.' },
+      { titulo:'Historial de resueltas', tabla:{ columnas:[{ t:'Solicitante' }, { t:'Resolución', w:'13%' }, { t:'Solicitada', w:'15%' }, { t:'Resuelta', w:'15%' }, { t:'Resuelto por', w:'17%' }, { t:'Motivo del rechazo', w:'20%' }],
+          filas:RESUELTAS.map(r => [r.nombre_completo, { t:r.estado === 'aprobado' ? 'Aprobada' : 'Rechazada', tag:r.estado === 'aprobado' ? 'verde' : 'rojo' }, fmtFecha(r.fecha_solicitud), fmtFecha(r.fecha_resolucion), r.resuelto_por || '—', r.motivo_rechazo || '']) }, vacio:'Sin solicitudes resueltas.' },
+      { firmas:['Director'] }] });
 }
 
 function iniciales(nombre){
