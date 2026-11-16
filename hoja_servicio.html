@@ -106,7 +106,7 @@
     <div class="nameplate-inner">
       <button class="back-btn" id="volverFichaBtn">← Volver</button>
       <div style="flex:1;"><h1 style="font-size:17px;">Hoja de Servicio</h1></div>
-      <button class="btn-exportar" onclick="window.print()">⬇ Exportar PDF</button>
+      <button class="btn-exportar" onclick="exportarPDF()">⬇ Exportar PDF</button>
     </div>
   </div>
 
@@ -162,6 +162,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -173,6 +174,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 const params = new URLSearchParams(window.location.search);
 let bomberoId = params.get('bombero');
 let bombero = null;
+let ULTIMO = null;   // datos del período que se está viendo (para el PDF)
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
@@ -228,6 +230,7 @@ async function renderPeriodo(p){
 
   const guardiasList = guardias || [];
   const totalHoras = guardiasList.reduce((s,g) => s + (new Date(g.hora_fin || Date.now()) - new Date(g.hora_inicio)) / 3600000, 0);
+  ULTIMO = { periodo:p, guardias:guardiasList, horas:totalHoras, emergencias:emergencias || [], capacitaciones:capacitaciones || [], actividades:actividades || [] };
 
   document.getElementById('kpiGrid').innerHTML = `
     <div class="kpi-card"><div class="kpi-val">${guardiasList.length}</div><div class="kpi-label">Guardias Asistidas</div></div>
@@ -268,6 +271,32 @@ async function renderPeriodo(p){
   document.getElementById('actividadesBody').innerHTML = Object.keys(porTipo).length ? Object.entries(porTipo).map(([tipo,v]) =>
     `<tr><td>${tipo}</td><td class="mono">${v.presente}</td><td class="mono">${v.ausente}</td><td class="mono">${v.justificado}</td></tr>`
   ).join('') : '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">Sin actividades registradas en el período.</td></tr>';
+}
+
+// PDF con el formato base de Vigor (banner, datos de la compañía, tablas estándar)
+const PERIODO_TXT = { anual:'Año en curso', semestre:'Último semestre', total:'Toda la trayectoria' };
+function exportarPDF(){
+  if(!bombero || !ULTIMO){ toast('Espera a que carguen los datos'); return; }
+  const b = bombero, U = ULTIMO, fmt = f => new Date(f).toLocaleDateString('es-CL');
+  const porMes = {};
+  U.guardias.forEach(g => { const d = new Date(g.hora_inicio); const k = d.toLocaleDateString('es-CL', { month:'long', year:'numeric' }); const h = (new Date(g.hora_fin || Date.now()) - d) / 3600000; if(!porMes[k]) porMes[k] = { n:0, h:0 }; porMes[k].n++; porMes[k].h += h; });
+  const meses = Object.entries(porMes).map(([k, v]) => [k[0].toUpperCase() + k.slice(1), v.n, Math.round(v.h) + ' h']);
+  const porTipo = {};
+  U.actividades.forEach(a => { const t = a.actividades.tipo; if(!porTipo[t]) porTipo[t] = { presente:0, ausente:0, justificado:0 }; porTipo[t][a.estado] = (porTipo[t][a.estado] || 0) + 1; });
+  const tipos = Object.entries(porTipo).map(([t, v]) => [t, v.presente, v.ausente, v.justificado]);
+  const suma = i => tipos.reduce((s, r) => s + r[i], 0);
+  VigorInforme.generar({
+    sb, titulo:'Hoja de Servicio', subtitulo:'Participación de servicio · ' + (PERIODO_TXT[U.periodo] || ''), archivo:'hoja_de_servicio_' + b.numero_registro,
+    datos:[['Bombero', b.nombre_completo], ['N° de Registro', b.numero_registro], ['Cargo', b.cargo], ['Compañía', b.companias ? b.companias.nombre : 'Cuerpo General'], ['Ingreso al Cuerpo', b.fecha_ingreso ? fmt(b.fecha_ingreso + 'T00:00:00') : ''], ['Período', PERIODO_TXT[U.periodo] || '']],
+    secciones:[
+      { titulo:'Resumen del período', kpis:[['Guardias asistidas', U.guardias.length], ['Horas de servicio', Math.round(U.horas) + ' h'], ['Emergencias atendidas', U.emergencias.length], ['Capacitaciones', U.capacitaciones.length]] },
+      { titulo:'Asistencia a guardias', tabla:{ columnas:[{ t:'Mes' }, { t:'Guardias asistidas', a:'r' }, { t:'Horas acumuladas', a:'r' }], filas:meses, total: meses.length ? ['Total', U.guardias.length, Math.round(U.horas) + ' h'] : null }, vacio:'Sin guardias registradas en el período.' },
+      { titulo:'Emergencias atendidas', tabla:{ columnas:[{ t:'Fecha', w:'14%' }, { t:'Clave', w:'10%' }, { t:'Dirección' }, { t:'Carro', w:'12%' }],
+          filas:U.emergencias.map(e => { const pe = e.partes_emergencia; return [fmt(pe.fecha_hora_despacho), pe.claves_emergencia ? pe.claves_emergencia.codigo : '', pe.direccion || '', pe.carros ? pe.carros.nomenclatura : '']; }) }, vacio:'Sin emergencias registradas en el período.' },
+      { titulo:'Capacitaciones completadas', tabla:{ columnas:[{ t:'Curso' }, { t:'Fecha', w:'14%' }, { t:'Nivel', w:'18%' }], filas:U.capacitaciones.map(c => [c.nombre_curso, fmt(c.fecha + 'T00:00:00'), c.nivel || '']) }, vacio:'Sin capacitaciones registradas en el período.' },
+      { titulo:'Asistencia a actividades', tabla:{ columnas:[{ t:'Categoría' }, { t:'Presente', a:'r' }, { t:'Ausente', a:'r' }, { t:'Justificado', a:'r' }], filas:tipos, total: tipos.length ? ['Total', suma(1), suma(2), suma(3)] : null }, vacio:'Sin actividades registradas en el período.' },
+      { firmas:['Director', 'Capitán'] }]
+  });
 }
 
 function setPeriodo(p, btn){

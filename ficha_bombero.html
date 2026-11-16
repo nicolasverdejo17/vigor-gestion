@@ -385,6 +385,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -655,12 +656,24 @@ function toggleExportTipo(key){
 }
 function generarPDF(){
   if(exportSel.size===0){ toast('Elige al menos un tipo de entrada'); return; }
-  document.querySelectorAll('.hv-item').forEach(item=>{
-    const tipo = item.getAttribute('data-tipo');
-    item.classList.toggle('print-hidden', !exportSel.has(tipo));
-  });
   cerrarExportModal();
-  setTimeout(()=>window.print(), 150);
+  const b = bomberoActual; if(!b) return;
+  const fmt = f => f ? new Date(f + 'T00:00:00').toLocaleDateString('es-CL') : '';
+  const ETIQ = { reconocimiento:['Reconocimiento','verde'], ascenso:['Ascenso','azul'], sancion:['Sanción','rojo'], ingreso:['Ingreso','azul'], curso:['Curso','gris'], otro:['Otro','gris'] };
+  const entradas = HOJA_VIDA.filter(e => exportSel.has(e.tipo));
+  const n = t => entradas.filter(e => e.tipo === t).length;
+  const esp = (b.personal_especialidades || []).map(pe => ESP_NOMBRE[pe.especialidades.codigo] || pe.especialidades.codigo).join(', ');
+  VigorInforme.generar({
+    sb, titulo:'Hoja de Vida', subtitulo:'Historial del bombero desde su ingreso', archivo:'hoja_de_vida_' + b.numero_registro,
+    datos:[['Bombero', b.nombre_completo], ['N° de Registro', b.numero_registro], ['RUT', b.rut], ['Cargo actual', b.cargo],
+      ['Compañía', b.companias ? b.companias.nombre : 'Cuerpo General'], ['Fecha de ingreso', fmt(b.fecha_ingreso)], ['Antigüedad', b.fecha_ingreso ? calcularAntiguedad(b.fecha_ingreso) : ''],
+      ['Nivel de capacitación', NIVEL_LABEL[b.nivel_capacitacion] || b.nivel_capacitacion], ['Estado', ESTADO_ADMIN_LABEL[b.estado] || b.estado], ['Especialidades', esp]],
+    secciones:[
+      { titulo:'Resumen', kpis:[['Entradas', entradas.length], ['Reconocimientos', n('reconocimiento')], ['Ascensos', n('ascenso')], ['Sanciones', n('sancion')], ['Cursos', n('curso')]] },
+      { titulo:'Historial', tabla:{ columnas:[{ t:'Fecha', w:'12%' }, { t:'Tipo', w:'17%' }, { t:'Entrada', w:'26%' }, { t:'Detalle' }, { t:'Registrado por', w:'18%' }],
+          filas:entradas.map(e => [fmt(e.fecha), { t:(ETIQ[e.tipo] || [e.tipo, 'gris'])[0], tag:(ETIQ[e.tipo] || [e.tipo, 'gris'])[1] }, e.titulo, e.detalle || '', e.autor_cargo || '']) }, vacio:'Sin entradas en la hoja de vida.' },
+      { firmas:['Director de la Compañía', 'Secretario de la Compañía'] }]
+  });
 }
 
 function toast(msg){

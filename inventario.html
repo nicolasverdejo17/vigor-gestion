@@ -282,6 +282,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
 <script>
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
@@ -655,14 +656,30 @@ function toggleExportCat(key){
 }
 function generarPDF(){
   if(exportSel.size===0){ toast('Elige al menos una categoría'); return; }
-  document.querySelectorAll('#tablaBody tr').forEach(tr=>{
-    const catLabel = tr.querySelector('.cat-badge');
-    if(!catLabel){ return; }
-    const key = Object.keys(CATS).find(k => CATS[k].label === catLabel.textContent);
-    tr.classList.toggle('print-hidden', key && !exportSel.has(key));
-  });
   cerrarExportModal();
-  setTimeout(()=>window.print(), 150);
+  const ETQ = { bueno:'verde', regular:'ambar', malo:'rojo', baja:'gris' };
+  const num = v => Number(String(v).replace(/\D/g, '')) || 0;
+  const peso = n => '$' + n.toLocaleString('es-CL');
+  const celdaEstado = i => ({ t:ESTADO_LABEL[i.estado] || i.estado, tag:ETQ[i.estado] || 'gris' });
+  const soloBajas = catActiva === '__baja__';
+  const secciones = []; let todos = [];
+  if(soloBajas){
+    const bajas = ITEMS.filter(i => i.estado === 'baja').sort((a, b) => new Date(b.fechaBaja || 0) - new Date(a.fechaBaja || 0)); todos = bajas;
+    secciones.push({ titulo:'Ítems dados de baja', tabla:{ columnas:[{ t:'Código', w:'11%' }, { t:'Nombre' }, { t:'Categoría', w:'18%' }, { t:'Fecha de baja', w:'13%' }, { t:'Lugar', w:'15%' }, { t:'Valor', a:'r', w:'12%' }],
+      filas:bajas.map(i => [i.cod, i.nombre, CATS[i.cat] ? CATS[i.cat].label : '', i.fechaBaja ? new Date(i.fechaBaja).toLocaleDateString('es-CL') : '', i.lugar, i.valor]) }, vacio:'No hay ítems dados de baja.' });
+  } else {
+    Object.keys(CATS).filter(k => k !== 'todos' && exportSel.has(k)).forEach(k => {
+      const items = ITEMS.filter(i => i.cat === k && i.estado !== 'baja'); if(!items.length) return; todos = todos.concat(items);
+      secciones.push({ titulo:CATS[k].label + ' · ' + items.length + (items.length === 1 ? ' ítem' : ' ítems'), tabla:{ columnas:[{ t:'Código', w:'11%' }, { t:'Nombre' }, { t:'Subcategoría', w:'16%' }, { t:'Estado', w:'12%' }, { t:'Lugar', w:'15%' }, { t:'Valor', a:'r', w:'12%' }],
+        filas:items.map(i => [i.cod, i.nombre, subcatLabelDe(i.subcat), celdaEstado(i), i.lugar, i.valor]), total:['', 'Subtotal', '', '', '', peso(items.reduce((s, i) => s + num(i.valor), 0))] } });
+    });
+  }
+  const cuenta = e => todos.filter(i => i.estado === e).length;
+  const resumen = soloBajas ? [['Ítems dados de baja', todos.length], ['Valor', peso(todos.reduce((s, i) => s + num(i.valor), 0))]]
+    : [['Ítems', todos.length], ['En buen estado', cuenta('bueno')], ['Regulares', cuenta('regular')], ['En mal estado', cuenta('malo')], ['Valor total', peso(todos.reduce((s, i) => s + num(i.valor), 0))]];
+  const donde = (document.getElementById('tituloInv').textContent || '').replace(/^Inventario\s*—\s*/, '');
+  VigorInforme.generar({ sb, titulo:'Inventario', subtitulo:donde + (soloBajas ? ' · Ítems dados de baja' : ' · ' + (exportSel.size === Object.keys(CATS).length - 1 ? 'Todas las categorías' : exportSel.size + (exportSel.size === 1 ? ' categoría' : ' categorías'))),
+    archivo:'inventario', secciones:[{ titulo:'Resumen', kpis:resumen }].concat(secciones, [{ firmas:['Tesorero', 'Director'] }]) });
 }
 
 // Ver el inventario: todos los Oficiales administrativos de Compañía
