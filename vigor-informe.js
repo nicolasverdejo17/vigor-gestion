@@ -119,7 +119,7 @@ function documento(op, ctx){
     [['Fecha de emisión', fechaHora(ahora)]]);
   const css = `
   @page{ size:A4 ${horizontal ? 'landscape' : 'portrait'}; margin:10mm 12mm 15mm 12mm;
-    @bottom-left{ content:${cssStr(pie)}; font:500 7pt ${FUENTE}; color:#7A8B99; vertical-align:top; padding-top:3mm; }
+    @bottom-left{ content:${cssStr(pie)} "\\A" "Desarrollado por Obsidian Core SpA"; white-space:pre; line-height:1.55; font:500 7pt/1.55 ${FUENTE}; color:#7A8B99; vertical-align:top; padding-top:3mm; }
     @bottom-right{ content:"Página " counter(page) " de " counter(pages); font:600 7pt ${FUENTE}; color:#51606D; vertical-align:top; padding-top:3mm; } }
   *{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   html,body{ margin:0; padding:0; background:#fff; }

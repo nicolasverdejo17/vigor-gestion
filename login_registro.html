@@ -154,6 +154,9 @@
   .card{ background:transparent; border:none; max-width:420px; padding:0;}
   .card::before{ display:none;}
   .login-logo{ position:absolute; left:56px; top:38px; height:54px; z-index:6;}
+  .login-credito{ position:absolute; left:64px; bottom:28px; z-index:7; display:flex; align-items:center; gap:10px; font:500 12px 'Montserrat','Segoe UI',sans-serif; color:#6F8CA0; }
+  .login-credito img{ height:30px; width:auto; display:block; opacity:.95; }
+  .login-credito b{ color:#B9D0DE; font-weight:700; }
   .login-hero{ position:relative; flex:1; min-height:100vh; overflow:hidden;}
   .hero-foto{ position:absolute; inset:0; background:url(img/hero.webp) 42% 30%/cover no-repeat; filter:grayscale(1);}
   .hero-shade{ position:absolute; inset:0; background:linear-gradient(90deg,#030B13 0,rgba(6,20,31,.6) 22%,rgba(6,20,31,.1) 60%),linear-gradient(0deg,rgba(6,20,31,.82),transparent 50%);}
@@ -181,7 +184,8 @@
     .hero-texto p{ font-size:15px; margin-top:10px;}
     .hero-icono{ width:46px; height:46px; right:20px; top:24px; border-radius:11px;}
     .login-logo{ left:20px; top:22px; height:40px;}
-    .login-panel{ flex:none; padding:8px 26px 44px; align-items:flex-start;}
+    .login-panel{ flex:none; padding:8px 26px 84px; align-items:flex-start;}
+    .login-credito{ left:26px; bottom:26px; }
     .card{ max-width:none;}
   }
 </style>
@@ -202,6 +206,7 @@
 
   <div class="login-shell">
     <img class="login-logo" src="img/logo.png" alt="Vigor">
+    <div class="login-credito"><img src="img/obsidian-core.png" alt="Obsidian Core"><span>Desarrollado por <b>Obsidian Core SpA</b></span></div>
     <section class="login-panel">
       <div class="card">
         <div class="content" id="content"></div>

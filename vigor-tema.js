@@ -44,7 +44,7 @@
   // de título/sesión que había debajo. Los demás botones de función quedan en una fila arriba.
   var PANTALLAS_VOLVER = ['registro_asistencia','ficha_bombero','editar_datos_personales','hoja_servicio','gestion_capacitacion','archivo_institucional_celular','guardia_nocturna','libro_guardia','notificaciones_celular','solicitudes_alta','asignacion_dotacion_celular','usuarios_sistema','estadisticas','inventario','auditoria_eliminaciones','gestion_especialidades','crear_carro',
     'alta_personal_rentado','configuracion_sistema','crear_actividad_celular','crear_compania','dar_de_baja','dar_de_baja_reactivar_personal','flota_comandancia','historial_movimientos','ingreso_item','pasar_asistencia','registro_auditoria','restablecer_passwords_global','secretaria',
-    'tablet_bitacora','tablet_checklist','tablet_checklist_historial','tablet_dotacion','tablet_parte'];
+    'acerca_de','tablet_bitacora','tablet_checklist','tablet_checklist_historial','tablet_dotacion','tablet_parte'];
   // En las tablets la franja de arriba muestra el carro, su estado y la hora: se queda; solo el «Volver» sube al banner
   var CONSERVAN_FRANJA = ['tablet_bitacora','tablet_checklist','tablet_checklist_historial','tablet_dotacion','tablet_parte'];
   function moverVolver(banner){

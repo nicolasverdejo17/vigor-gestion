@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIGOR - Gestiona tu compañía de forma eficiente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#030B13; --panel:#061520; --line:#153A52; --tx:#EAF6FB; --mu:#8FB0C2; --dim:#5F7F93; --cy:#2DD3DB; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; height:100%; }
+  body{ background:var(--bg); color:var(--tx); font-family:'Montserrat','Segoe UI',sans-serif; overflow-y:auto; }
+  .app-head{ display:none; }
+  .back-btn{ background:transparent; border:1px solid var(--line); color:var(--tx); font:600 13px 'Montserrat',sans-serif; padding:9px 14px; cursor:pointer; }
+  main.acerca{ max-width:520px; margin:0 auto; padding:34px 22px 56px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .a-vigor{ width:min(240px, 62%); height:auto; display:block; }
+  .a-lema{ margin:14px 0 0; font-size:14px; line-height:1.5; color:var(--mu); font-weight:500; }
+  .a-sep{ width:100%; height:1px; background:linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent); margin:34px 0 28px; }
+  .a-etq{ margin:0; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--dim); font-weight:700; }
+  .a-oc{ width:min(210px, 56%); height:auto; display:block; margin:20px 0 0; }
+  .a-razon{ margin:0; font-size:17px; font-weight:800; letter-spacing:.01em; }
+  .a-cred{ width:100%; text-align:left; }
+  .a-cred h2{ margin:0 0 12px; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); font-weight:700; text-align:center; }
+  .a-cred ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+  .a-cred li{ background:var(--panel); border:1px solid var(--line); padding:11px 14px; font-size:12px; line-height:1.5; color:var(--mu); }
+  .a-cred li b{ color:var(--tx); font-weight:700; }
+  .a-copy{ margin:30px 0 0; font-size:11.5px; color:var(--dim); line-height:1.6; }
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png?v=2" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+<meta name="theme-color" content="#030B13">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<link rel="stylesheet" href="vigor-tema.css">
+<script src="vigor-tema.js" defer></script>
+</head>
+<body>
+  <div class="app-head"><button class="back-btn" onclick="volver()">← Volver</button><h1>Acerca de Vigor</h1></div>
+
+  <main class="acerca">
+    <img class="a-vigor" src="img/logo.png" alt="Vigor">
+    <p class="a-lema">Sistema de gestión para cuerpos de bomberos</p>
+
+    <div class="a-sep"></div>
+    <p class="a-etq">Desarrollado por</p>
+    <img class="a-oc" src="img/obsidian-core.png" alt="Obsidian Core">
+
+    <div class="a-sep"></div>
+    <section class="a-cred">
+      <h2>Créditos de datos</h2>
+      <ul>
+        <li><b>Mapas:</b> © OpenMapTiles · Datos de OpenStreetMap (licencia ODbL)</li>
+        <li><b>Clima:</b> MET Norway (licencia CC BY 4.0) · Relieve: SRTM/USGS y NOAA, vía AWS Terrain Tiles</li>
+      </ul>
+    </section>
+
+    <p class="a-copy">© 2026 Obsidian Core SpA.<br>Todos los derechos reservados.</p>
+  </main>
+
+<script>
+function volver(){ if(window.history.length > 1){ window.history.back(); return; } window.location.href = 'opciones_celular.html'; }
+</script>
+</body>
+</html>
