@@ -1,0 +1,95 @@
+/* Vigor — sistema de diseño único (se carga después de vigor-tema.css en todas las pantallas).
+   Tipografía: Rajdhani (títulos, rótulos, botones, cabeceras) + Inter (texto) + JetBrains Mono (códigos) + DSEG7 (relojes).
+   Esquinas rectas. Una sola forma de botón, campo, tarjeta, tabla y etiqueta. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root{
+  --ui-bg:#030B13; --ui-panel:#061520; --ui-card:#091D2C; --ui-line:#0F2A3B; --ui-line2:#153A52;
+  --ui-tx:#EAF6FB; --ui-mu:#8FB0C2; --ui-dim:#6C8FA3;
+  --ui-cy:#2DD3DB; --ui-ok:#3CF29A; --ui-warn:#FFC94D; --ui-bad:#F13746;
+  --ui-grad:linear-gradient(90deg,#34B8FF,#2DD3DB 35%,#3DEBC0 60%,#35F454);
+  --ui-titulo:'Rajdhani','Inter',sans-serif; --ui-texto:'Inter','Segoe UI',sans-serif; --ui-mono:'JetBrains Mono',monospace;
+}
+
+/* ================= Tipografía ================= */
+html body, html body *{ font-family:var(--ui-texto) !important; }
+html body :is(h1,h2,h3,h4,h5,th,legend,label,button,input[type=button],input[type=submit],.btn,[class*="btn-"],[class*="-btn"],a[class*="btn"],
+  .section-title,.sec-title,.section-heading,.step-title,.cat-tab,.subcat-chip,.tab-btn,[class*="tabbar"] a,.central-tab,.nav-item,.role-tag,[class*="role-tag"],
+  .dc-title,.cia-card-nombre,.cuerpo-card-nombre,.tool-card b,.tool-row b,.kpi-label,.kpi-lbl,.dash-stat span,.chart-title,.num-badge){
+  font-family:var(--ui-titulo) !important; font-size-adjust:0.5; letter-spacing:.06em;
+}
+html body :is(h1,h2,h3,h4,h5,.step-title,.section-title,.sec-title,.section-heading,th,legend,.tool-card b,.tool-row b,.chart-title,.dc-title){ text-transform:uppercase !important; }
+html body :is(.mono,code,kbd,[class*="mono"],.codigo,.cod,.cr-pass){ font-family:var(--ui-mono) !important; font-size-adjust:none; letter-spacing:0; text-transform:none; }
+/* relojes de 7 segmentos (todos) */
+html body :is(#clk,#clock,#relojReal,.clock strong,.nameplate__clock strong,.crisis-clock strong,.crisis-timer strong,#vigor-banner .nameplate__clock strong){
+  font-family:'DSEG7','JetBrains Mono',monospace !important; font-weight:700 !important; letter-spacing:.06em; font-variant-numeric:tabular-nums; font-size-adjust:none; text-transform:none !important;
+}
+/* título del banner */
+html body #vigor-banner-titulo{ font-family:var(--ui-titulo) !important; font-weight:700; font-size:21px; letter-spacing:.04em; text-transform:uppercase; font-size-adjust:0.5; }
+html body h1{ font-size:26px; } html body h2{ font-size:22px; } html body h3{ font-size:16px; } html body :is(h1,h2,h3){ font-weight:700; line-height:1.15; }
+
+/* ================= Esquinas rectas ================= */
+html body :is(button,input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,table,.btn,[class*="btn-"],[class*="-btn"],a[class*="btn"],
+  [class*="card"],[class*="panel"],[class*="-box"],[class*="modal"],[class*="tab"]:not([class*="table"]),[class*="chip"],[class*="stat-"],[class*="kpi"],[class*="tool"],
+  [class*="field"],[class*="input"],.toast,[class*="popover"],[class*="menu"],[class*="dropdown"],[class*="lista"],[class*="-list"],[class*="item-"],[class*="row"]:not(tr),
+  .role-tag,[class*="role-tag"],.codigo-cuerpo-box,.nameplate-inner,[class*="-stat"],[class*="form"],.tarjeta,.dia,[class*="trigger"],.cat-opt,.brand-mark,[class*="tabbar"] a,.central-tab,a.active,.vg-volver,.back-btn,.back-cuartel,[class*="-fecha"],.nav a):not([class*="pill"]):not([class*="avatar"]):not([class*="dot"]):not([class*="badge"]):not([class*="toggle"]):not([class*="switch"]):not([class*="foto"]):not([class*="faro"]){
+  border-radius:0 !important;
+}
+html body .mini-btn, html body .pill, html body [class*="pill"]{ border-radius:999px !important; }
+
+/* ================= Botones ================= */
+html body :is(button,input[type=button],input[type=submit],.btn,a[class*="btn"],[class*="btn-"]:not(.btn-back),.back-btn):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="remove"]):not([class*="close"]):not([class*="cat-tab-accion"]):not([class*="tipo-"]):not(.tab-btn):not(.nav-item):not(.nav):not([role=tab]):not(.subcat-chip):not(.cat-tab){
+  font-weight:700 !important; font-size:14px !important; text-transform:uppercase !important; line-height:1.15;
+  min-height:40px; padding:0 18px; display:inline-flex; align-items:center; justify-content:center; gap:8px; border-width:1.5px; border-style:solid;
+}
+/* secundario: contorno */
+html body :is(button,.btn,a[class*="btn"]):not(.vg-grad):not(.ui-pri):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="remove"]):not([class*="close"]):not([class*="cat-tab-accion"]):not([class*="tipo-"]):not(.tab-btn):not(.nav-item):not(.nav):not(.subcat-chip):not(.cat-tab):not(.crisis-btn):not([class*="peligro"]):not([class*="danger"]){
+  background-color:var(--ui-panel); border-color:var(--ui-line2); color:var(--ui-tx);
+}
+html body :is(button,.btn,a[class*="btn"]):not(.vg-grad):not(.ui-pri):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="peligro"]):not([class*="danger"]):hover{ border-color:var(--ui-cy); color:var(--ui-cy); }
+/* principal: degradado de la marca (lo marca vigor-tema.js; el texto va oscuro para que se lea) */
+html body :is(.vg-grad,.ui-pri,.btn-pri,.btn-primary,.btn-guardar,.modal-guardar,.modal-generar){ background:var(--ui-grad) !important; border-color:transparent !important; color:#04121C !important; }
+html body :is(.vg-grad,.ui-pri,.btn-pri,.btn-primary,.btn-guardar):hover{ filter:brightness(1.08); color:#04121C !important; }
+/* peligro */
+html body :is([class*="peligro"],[class*="danger"],.btn-eliminar,.btn-baja):is(button,.btn,a){ background:transparent !important; border-color:rgba(241,55,70,.7) !important; color:#FF7A85 !important; }
+
+/* ================= Títulos de sección ================= */
+html body :is(.section-title,.sec-title,.section-heading,.seccion-titulo){
+  font-size:13px !important; font-weight:600 !important; letter-spacing:.16em !important; color:var(--ui-dim) !important;
+  border-bottom:1px solid var(--ui-line2) !important; padding:0 0 9px !important; margin:26px 0 14px !important;
+}
+
+/* ================= Campos ================= */
+html body :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]),select,textarea){
+  background-color:var(--ui-panel); border:1.5px solid var(--ui-line2); color:var(--ui-tx); min-height:40px; font-size:13.5px; padding-left:12px; padding-right:12px;
+}
+html body textarea{ padding-top:10px; padding-bottom:10px; }
+html body :is(input,select,textarea):focus{ outline:none; border-color:var(--ui-cy) !important; box-shadow:0 0 0 3px rgba(45,211,219,.14); }
+html body ::placeholder{ color:var(--ui-dim) !important; }
+
+/* ================= Tarjetas ================= */
+html body :is(.tool-card,.kpi-card,.cia-card,.cuerpo-card,.dash-stat,.card){ background:var(--ui-card); border:1px solid var(--ui-line2); box-shadow:none; }
+html body :is(.tool-card,.panel,.kpi-card)::before{ display:none !important; }
+html body :is(.tool-card,.cuerpo-card,.card):hover{ border-color:var(--ui-cy); transform:none; }
+
+/* ================= Tablas ================= */
+html body th{ font-size:12px !important; font-weight:600 !important; letter-spacing:.1em !important; color:var(--ui-dim) !important; padding:12px 14px; border-bottom:1.5px solid var(--ui-line2); background:transparent; }
+html body td{ border-bottom:1px solid var(--ui-line); }
+html body tbody tr:hover td{ background:rgba(45,211,219,.05); }
+
+/* ================= Pestañas y chips ================= */
+html body :is(.cat-tab,.subcat-chip){ min-height:36px; padding:0 14px; font-weight:700; font-size:13.5px; text-transform:uppercase; border:1.5px solid var(--ui-line2); background:var(--ui-panel); color:var(--ui-mu); }
+html body :is(.cat-tab,.subcat-chip).on{ background:rgba(45,211,219,.12) !important; border-color:var(--ui-cy) !important; color:var(--ui-cy) !important; }
+
+/* ================= Etiquetas de estado ================= */
+html body :is(.pill,[class*="pill"],.tag,[class*="status-badge"],[class*="estado-badge"]){ font-weight:600; }
+
+/* ================= Teléfono ================= */
+@media (max-width:700px){
+  html body :is(button,.btn,a[class*="btn"]):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="remove"]):not([class*="close"]):not([class*="cat-tab-accion"]):not([class*="tipo-"]):not(.tab-btn):not(.cat-tab):not(.subcat-chip):not([class*="tabbar"] *){ min-height:46px; }
+  html body :is(input:not([type=checkbox]):not([type=radio]),select){ min-height:46px; }
+}
+@media print{ :root{ --ui-bg:#fff; } }
+
+/* banner: botón Volver y accesos con esquina recta */
+html body #vigor-banner :is(.vg-volver,a,button){ border-radius:0 !important; }

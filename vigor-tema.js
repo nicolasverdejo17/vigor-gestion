@@ -18,7 +18,7 @@
       adaptarCentral(h);
     }
     // Botones primarios (color de acento antiguo) pasan al degradado
-    var ACENTOS = ['rgb(30, 110, 125)', 'rgb(73, 233, 255)', 'rgb(18, 131, 155)', 'rgb(45, 211, 219)'];
+    var ACENTOS = ['rgb(30, 110, 125)', 'rgb(73, 233, 255)', 'rgb(18, 131, 155)', 'rgb(45, 211, 219)', 'rgb(255, 201, 77)', 'rgb(255, 154, 68)', 'rgb(201, 122, 46)', 'rgb(138, 78, 30)'];
     var pendiente = null;
     var obs = new MutationObserver(function(){ clearTimeout(pendiente); pendiente = setTimeout(escanear, 250); });
     function escanear(){
@@ -27,7 +27,7 @@
       var els = d.querySelectorAll('button, a[class*="btn"], input[type="button"], input[type="submit"]');
       for(var i = 0; i < els.length; i++){
         var el = els[i];
-        if(el.id === 'vigor-banner') continue;
+        if(el.id === 'vigor-banner' || el.classList.contains('estado-btn') || el.classList.contains('mini-btn') || el.classList.contains('crisis-btn')) continue;
         var tenia = el.classList.contains('vg-grad');
         if(tenia) el.classList.remove('vg-grad');
         var cs = getComputedStyle(el);
