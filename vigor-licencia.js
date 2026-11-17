@@ -51,12 +51,27 @@
 
   function obtener(){
     var c = leerCache(); if(c) return Promise.resolve(c);
-    if(!window.supabase || !window.supabase.createClient) return Promise.resolve(null);
-    var cli = window.supabase.createClient(URL_SB, KEY_SB, { auth:{ persistSession:true, autoRefreshToken:false } });
-    return cli.auth.getSession().then(function(r){
-      if(!r.data || !r.data.session) return null;
-      return cli.rpc('mi_licencia').then(function(x){ if(x.error || !x.data) return null; guardarCache(x.data); return x.data; });
-    }).catch(function(){ return null; });
+    // Se usa el MISMO cliente que creó la pantalla. Crear otro propio hacía que dos clientes renovaran la sesión a la vez
+    // (los tokens se rotan) y cerraba la sesión de quien llevaba días sin entrar.
+    return esperarCliente().then(function(cli){
+      if(!cli) return null;
+      return cli.auth.getSession().then(function(r){
+        if(!r.data || !r.data.session) return null;
+        return cli.rpc('mi_licencia').then(function(x){ if(x.error || !x.data) return null; guardarCache(x.data); return x.data; });
+      }).catch(function(){ return null; });
+    });
+  }
+  // Algunas pantallas (Mapa Comunal) crean su conexión un poco después de cargar: se espera hasta ~12 s.
+  function esperarCliente(){
+    return new Promise(function(res){
+      var n = 0;
+      (function revisar(){
+        var cli = window.supabase && window.supabase.__clientes && window.supabase.__clientes[0];
+        if(cli) return res(cli);
+        if(n++ > 40) return res(null);
+        setTimeout(revisar, 300);
+      })();
+    });
   }
 
   function permitido(lic, paquete){

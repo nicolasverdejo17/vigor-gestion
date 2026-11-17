@@ -50,6 +50,7 @@
     };
 
     cliente = crear.call(S, url, key, opts);
+    (S.__clientes = S.__clientes || []).push(cliente);   // vigor-licencia.js usa este mismo cliente (un segundo cliente pisaría la renovación de la sesión)
     return cliente;
   };
 })();
