@@ -167,6 +167,7 @@
 <link rel="stylesheet" href="vigor-tema.css">
 <link rel="stylesheet" href="vigor-ui.css">
 <script src="vigor-tema.js" defer></script>
+<script src="vigor-errores.js"></script>
 </head>
 <body>
   <h1 class="sr">Soporte técnico</h1>
@@ -668,10 +669,11 @@ function abrirUsuario(id){
 const ETQ_ACCION = { reset_password:'Contraseña restablecida', suspender_cuerpo:'Cuerpo suspendido', reactivar_cuerpo:'Cuerpo reactivado', eliminar_cuerpo:'Cuerpo eliminado', editar_cuerpo:'Datos editados',
   exportar_datos:'Datos exportados', crear_licencia:'Licencia creada', licencia_plan:'Plan cambiado', licencia_extender:'Licencia extendida', licencia_revocar:'Licencia revocada', licencia_restaurar:'Licencia restaurada', licencia_vincular:'Licencia vinculada', entrar_como_admin:'Entró como Admin', crear_cuenta:'Cuenta creada', suspender_usuario:'Usuario suspendido', reactivar_usuario:'Usuario reactivado', cerrar_sesiones:'Sesiones cerradas' };
 const etiquetaAccion = a => ETQ_ACCION[a] || a;
+function dispositivoCorto(ua){ ua = ua || ''; const so = /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'Mac' : '—'; const nav = /CriOS|Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : /Firefox\//.test(ua) ? 'Firefox' : ''; return so + (nav ? ' · ' + nav : ''); }
 function vistaAuditoria(){
   return `
   <div class="titulo"><div><h2>Auditoría</h2><div class="sub">Qué se hizo y quién lo hizo</div></div></div>
-  <div class="subtabs"><button class="subtab ${S.subAud === 'soporte' ? 'on' : ''}" data-act="subAud" data-v="soporte">Acciones de soporte</button><button class="subtab ${S.subAud === 'cuerpos' ? 'on' : ''}" data-act="subAud" data-v="cuerpos">Actividad de los clientes</button></div>
+  <div class="subtabs"><button class="subtab ${S.subAud === 'soporte' ? 'on' : ''}" data-act="subAud" data-v="soporte">Acciones de soporte</button><button class="subtab ${S.subAud === 'cuerpos' ? 'on' : ''}" data-act="subAud" data-v="cuerpos">Actividad de los clientes</button><button class="subtab ${S.subAud === 'errores' ? 'on' : ''}" data-act="subAud" data-v="errores">Errores de la app</button></div>
   <div class="filtros">
     <select id="audCuerpo" onchange="S.audCuerpo=this.value; cargarAuditoria()"><option value="">Todos los clientes</option>${S.cuerpos.map(c => `<option value="${esc(c.id)}" ${S.audCuerpo === c.id ? 'selected' : ''}>${esc(c.nombre_oficial)}</option>`).join('')}</select>
     ${S.subAud === 'cuerpos' ? `<select id="audTipo" onchange="S.audTipo=this.value; cargarAuditoria()"><option value="">Todos los tipos</option>${['critico', 'modificacion', 'creacion'].map(t => `<option value="${t}" ${S.audTipo === t ? 'selected' : ''}>${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('')}</select>` : ''}
@@ -686,6 +688,7 @@ async function cargarAuditoria(){
   try {
     let q;
     if(S.subAud === 'soporte'){ q = sb.from('soporte_auditoria').select('*').order('ocurrido_en', { ascending:false }).limit(300); if(S.audCuerpo) q = q.eq('cuerpo_id', S.audCuerpo); }
+    else if(S.subAud === 'errores'){ q = sb.from('app_errores').select('*').order('ocurrido_en', { ascending:false }).limit(300); if(S.audCuerpo) q = q.eq('cuerpo_id', S.audCuerpo); }
     else { q = sb.from('registro_auditoria').select('*').order('ocurrido_en', { ascending:false }).limit(300); if(S.audCuerpo) q = q.eq('cuerpo_id', S.audCuerpo); if(S.audTipo) q = q.eq('tipo', S.audTipo); }
     const { data, error } = await q; if(error) throw error;
     _aud = data || []; pintarAuditoria();
@@ -698,6 +701,8 @@ function pintarAuditoria(){
   if(!lista.length){ el.innerHTML = `<div class="vacio">Sin registros.</div>`; return; }
   if(S.subAud === 'soporte'){
     el.innerHTML = `<div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>Acción</th><th>Detalle</th><th>Cliente</th><th>Quién</th></tr></thead><tbody>${lista.map(a => `<tr><td style="white-space:nowrap">${esc(fechaHora(a.ocurrido_en))}</td><td>${pill(a.accion.includes('eliminar') || a.accion.includes('suspender') || a.accion.includes('revocar') ? 'bad' : 'mute', etiquetaAccion(a.accion))}</td><td>${esc(a.detalle || '')}</td><td>${esc(a.cuerpo_nombre || (mc[a.cuerpo_id] || {}).nombre_oficial || '—')}</td><td>${esc(a.admin_nombre || '—')}</td></tr>`).join('')}</tbody></table></div>`;
+  } else if(S.subAud === 'errores'){
+    el.innerHTML = `<div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Persona</th><th>Pantalla</th><th>Error</th><th>Dispositivo</th></tr></thead><tbody>${lista.map(a => `<tr><td style="white-space:nowrap">${esc(fechaHora(a.ocurrido_en))}</td><td>${esc((mc[a.cuerpo_id] || {}).nombre_oficial || '—')}</td><td>${esc(a.usuario_label || 'sin sesión')}</td><td>${esc(a.pagina || '')}</td><td style="max-width:420px; word-break:break-word">${esc(a.mensaje || '')}${a.detalle ? `<span class="sub" style="font-family:var(--ui-mono,monospace); font-size:10.5px">${esc(String(a.detalle).slice(0, 220))}</span>` : ''}</td><td style="font-size:11px; color:var(--text-dim); max-width:220px">${esc(dispositivoCorto(a.agente))}</td></tr>`).join('')}</tbody></table></div>`;
   } else {
     el.innerHTML = `<div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Cliente</th><th>Quién</th></tr></thead><tbody>${lista.map(a => `<tr><td style="white-space:nowrap">${esc(fechaHora(a.ocurrido_en))}</td><td>${pill(a.tipo === 'critico' ? 'bad' : a.tipo === 'creacion' ? 'ok' : 'mute', a.tipo)}</td><td>${esc(a.detalle || '')}</td><td>${esc((mc[a.cuerpo_id] || {}).nombre_oficial || '—')}</td><td>${esc(a.usuario_label || '—')}</td></tr>`).join('')}</tbody></table></div>`;
   }
