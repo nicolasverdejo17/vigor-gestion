@@ -208,6 +208,7 @@ label {
     background: var(--bg); padding: 5px 9px; border-radius: 5px; border: 1px solid var(--brass-dim);
     min-width: 40px; text-align: center;
   }
+  .company-row .num-input { flex: 0 0 68px; width: 68px; text-align: center; font-family: 'JetBrains Mono'; color: var(--brass-bright); padding-left: 6px; padding-right: 6px; }
   .remove-btn {
     background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px;
     padding: 4px 8px;
@@ -361,11 +362,11 @@ label {
   <!-- PASO 2 — Crear Compañías -->
   <div class="panel panel-body step" data-step="2">
     <h1 class="step-title">Crear Compañías</h1>
-    <p class="step-sub">Agrega cada Compañía del Cuerpo. Puedes editar el detalle de cada una más tarde.</p>
+    <p class="step-sub">Agrega solo las Compañías que contratan el servicio e indica el número de cada una (por ejemplo, 4).</p>
     <div id="companyList">
       <div class="company-row">
-        <span class="num-badge mono">1ª</span>
-        <input type="text" placeholder="Ej. Bomba Central">
+        <input type="number" class="num-input mono" min="1" max="99" value="1" title="Número de la Compañía">
+        <input type="text" class="nombre-cia" placeholder="Ej. Bomba Central">
         <button class="remove-btn" title="Quitar">✕</button>
       </div>
     </div>
@@ -476,6 +477,7 @@ label {
 
   let current = 1;
   const total = 5;
+  let conCentral = true;   // se apaga si el plan no incluye SPARTAN (Central de Alarmas)
   const steps = document.querySelectorAll('.step');
   const segs = [null, document.getElementById('seg1'), document.getElementById('seg2'), document.getElementById('seg3'), document.getElementById('seg4')];
   const labs = [null, document.getElementById('lab1'), document.getElementById('lab2'), document.getElementById('lab3'), document.getElementById('lab4')];
@@ -545,19 +547,14 @@ label {
       else if (i === current) { segs[i].classList.add('active'); labs[i].classList.add('current'); }
     }
     btnBack.style.visibility = current === 1 ? 'hidden' : 'visible';
-    btnNext.textContent = current === total ? 'Ir al Panel Maestro' : (current === 4 ? 'Revisar y finalizar →' : 'Continuar →');
+    btnNext.textContent = current === total ? 'Ir al Panel Maestro' : (current === (conCentral ? 4 : 3) ? 'Revisar y finalizar →' : 'Continuar →');
 
     if (current === 3) buildDirectorList();
   }
 
-  function renumerarCompanias() {
-    // Bug corregido: al quitar una Compañía del medio, las restantes quedaban
-    // con numeración salteada (1ª, 3ª) y al agregar una nueva se repetía un
-    // número ya usado. Ahora se renumera todo el listado cada vez que cambia.
-    document.querySelectorAll('#companyList .company-row').forEach((row, i) => {
-      row.querySelector('.num-badge').textContent = (i + 1) + 'ª';
-    });
-  }
+  // Cada Compañía lleva el número que se le escribe (puede contratar solo la 4ª, sin crear las anteriores).
+  function numeroDeFila(row){ return parseInt(row.querySelector('.num-input').value, 10); }
+  function renumerarCompanias() { /* sin renumeración automática */ }
 
   function buildDirectorList() {
     // Antes de reconstruir, guarda lo que el usuario ya escribió en este paso.
@@ -568,12 +565,13 @@ label {
 
     const companyList = document.getElementById('directorList');
     companyList.innerHTML = '';
-    document.querySelectorAll('#companyList input').forEach((inp, i) => {
-      const name = inp.value.trim() || ('Compañía ' + (i + 1));
+    document.querySelectorAll('#companyList .company-row').forEach((row, i) => {
+      const numCia = numeroDeFila(row) || (i + 1);
+      const name = row.querySelector('.nombre-cia').value.trim() || ('Compañía ' + numCia);
       const saved = directorData[i] || { nombre: '', rut: '', registro: '' };
       const div = document.createElement('div');
       div.className = 'director-card';
-      div.innerHTML = `<div class="dc-title">${i+1}ª Compañía "${name}"</div>
+      div.innerHTML = `<div class="dc-title">${numCia}ª Compañía "${name}"</div>
         <div class="grid-2">
           <div class="field" style="margin-bottom:0;"><label>Nombre del Director</label><input type="text" placeholder="Nombre completo" value="${saved.nombre}"></div>
           <div class="field" style="margin-bottom:0;"><label>RUT</label><input type="text" placeholder="12.345.678-9" value="${saved.rut}"></div>
@@ -590,10 +588,11 @@ label {
     const list = document.getElementById('companyList');
     const div = document.createElement('div');
     div.className = 'company-row';
-    div.innerHTML = `<span class="num-badge mono"></span><input type="text" placeholder="Ej. Bomba Central"><button class="remove-btn" title="Quitar">✕</button>`;
+    const usados = Array.from(list.querySelectorAll('.num-input')).map(i => parseInt(i.value, 10)).filter(n => n > 0);
+    const siguiente = usados.length ? Math.max(...usados) + 1 : 1;
+    div.innerHTML = `<input type="number" class="num-input mono" min="1" max="99" value="${siguiente}" title="Número de la Compañía"><input type="text" class="nombre-cia" placeholder="Ej. Bomba Central"><button class="remove-btn" title="Quitar">✕</button>`;
     list.appendChild(div);
     attachRemove(div);
-    renumerarCompanias();
   });
 
   document.getElementById('addOpBtn').addEventListener('click', () => {
@@ -673,12 +672,23 @@ label {
       let faltantes = false;
       const filas = document.querySelectorAll('#companyList .company-row');
       if (filas.length === 0) faltantes = true;
+      const vistos = new Set(); let repetido = false, sinNumero = false;
       filas.forEach(row => {
-        const inp = row.querySelector('input');
+        const inp = row.querySelector('.nombre-cia');
         const vacio = !inp.value.trim();
         inp.style.borderColor = vacio ? '#F13746' : '';
         if (vacio) faltantes = true;
+        const num = numeroDeFila(row), numEl = row.querySelector('.num-input');
+        const valido = num >= 1 && num <= 99;
+        const malo = !valido || vistos.has(num);
+        if (!valido) sinNumero = true; else if (vistos.has(num)) repetido = true;
+        numEl.style.borderColor = malo ? '#F13746' : '';
+        vistos.add(num);
       });
+      if (sinNumero || repetido) {
+        document.getElementById('wizardError').textContent = repetido ? 'Dos Compañías tienen el mismo número — cada una necesita uno distinto.' : 'Indica el número de cada Compañía (entre 1 y 99).';
+        return;
+      }
       if (faltantes) {
         document.getElementById('wizardError').textContent = 'Completa el nombre de cada Compañía (o quita las que no vayas a usar) — necesitas al menos una.';
         return;
@@ -715,12 +725,14 @@ label {
     }
     if (current < total) {
       current++;
+      if (!conCentral && current === 4) current = 5;   // sin Central no hay operadores que cargar
       if (current === total) {
         const nCias = document.querySelectorAll('#companyList .company-row').length;
         const nOps = Array.from(document.querySelectorAll('#opList .op-row .op-nombre')).filter(i => i.value.trim()).length;
         const nombreCuerpo = document.getElementById('nombreCuerpo').value.trim();
-        document.getElementById('summaryText').textContent =
-          `${nombreCuerpo} está listo — ${nCias} Compañía(s) creada(s), Directores asignados y ${nOps} Operador(es) de Central registrados. Ya puedes ingresar al Panel Maestro.`;
+        document.getElementById('summaryText').textContent = conCentral
+          ? `${nombreCuerpo} está listo — ${nCias} Compañía(s) creada(s) con su PC del Cuartel, Directores asignados y ${nOps} Operador(es) de Central registrados. Ya puedes ingresar al Panel Maestro.`
+          : `${nombreCuerpo} está listo — ${nCias} Compañía(s) creada(s) con su PC del Cuartel y Directores asignados. Ya puedes ingresar al Panel Maestro.`;
       }
       render();
     } else {
@@ -733,7 +745,7 @@ label {
     const companyRows = document.querySelectorAll('#companyList .company-row');
     const directorCards = document.querySelectorAll('#directorList .director-card');
     companyRows.forEach((row, i) => {
-      const nombre = row.querySelector('input').value.trim();
+      const nombre = row.querySelector('.nombre-cia').value.trim();
       let director = null;
       const card = directorCards[i];
       if (card) {
@@ -742,13 +754,14 @@ label {
         const dRegistro = inputs[2].value.trim();
         if (dNombre) director = { numero_registro: parseInt(dRegistro, 10), nombre_completo: dNombre };
       }
-      companias.push({ numero: i + 1, nombre, director });
+      companias.push({ numero: numeroDeFila(row) || (i + 1), nombre, director });
     });
     return companias;
   }
 
   function construirPayloadOperadores() {
     const operadores = [];
+    if (!conCentral) return operadores;
     document.querySelectorAll('#opList .op-row').forEach(row => {
       const nombre = row.querySelector('.op-nombre').value.trim();
       const registro = row.querySelector('.op-registro').value.trim();
@@ -805,7 +818,7 @@ label {
       document.getElementById('credencialesList').innerHTML = personal.map(p => `
         <div class="credencial-row">
           <div class="cr-quien"><b>${p.nombre_completo}</b><span>${p.cargo}${p.compania ? ' — ' + p.compania : ''}</span></div>
-          <div class="cr-datos">N° ${p.numero_registro}<br><span class="cr-pass mono">${p.password_temporal}</span></div>
+          <div class="cr-datos">${p.numero_registro != null ? 'N° ' + p.numero_registro : (p.compania_numero != null ? 'Compañía N° ' + p.compania_numero : '')}<br><span class="cr-pass mono">${p.password_temporal}</span></div>
         </div>
       `).join('');
       document.getElementById('credencialesWrap').classList.remove('hidden');
@@ -816,12 +829,21 @@ label {
   }
 
   btnBack.addEventListener('click', () => {
-    if (current > 1) { current--; render(); }
+    if (current > 1) { current--; if (!conCentral && current === 4) current = 3; render(); }
   });
 
   (async () => {
     const ok = await verificarLicenciaWizard();
-    if (ok) render();
+    if (!ok) return;
+    try {
+      const { data: paq } = await sb.rpc('licencia_paquetes', { p_codigo: licenciaCodigo });
+      if (Array.isArray(paq) && !paq.includes('spartan')) {
+        conCentral = false;
+        document.getElementById('lab4').style.display = 'none';
+        document.getElementById('seg4').style.display = 'none';
+      }
+    } catch (e) { /* si no se puede saber, se muestra el paso */ }
+    render();
   })();
 </script>
 </body>
