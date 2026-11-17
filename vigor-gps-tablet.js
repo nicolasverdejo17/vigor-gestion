@@ -34,6 +34,7 @@ async function pedirWake(){ try{ if('wakeLock' in navigator && !G.wake){ G.wake 
 
 async function iniciar(sb){
   if(G.activo || !sb || !navigator.geolocation) return; G.activo = true; G.sb = sb;
+  try{ if(window.VigorLicencia && !(await window.VigorLicencia.tiene('sentinel'))){ G.activo = false; return; } }catch(e){}   // sin el paquete de Monitoreo no se reporta posición
   try{
     const { data:{ session } } = await sb.auth.getSession(); if(!session){ G.activo = false; return; }
     const { data } = await sb.rpc('tablet_obtener_carro'); const c = Array.isArray(data) ? data[0] : data;

@@ -128,6 +128,7 @@
 <meta name="apple-mobile-web-app-title" content="Vigor">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
+<script src="vigor-licencia.js"></script>
 <script src="vigor-tema.js" defer></script>
 </head>
 <body>
@@ -191,9 +192,9 @@
         <div class="flota-mini-lista" id="flotaMiniLista"></div>
         <div class="estado-selector" id="selEstadoFlotaMini"></div>
 
-        <div class="section-title">Mantenciones — Flota de Comandancia</div>
-        <div class="mant-resumen" id="mantResumen"></div>
-        <div class="mant-lista" id="mantLista"></div>
+        <div class="section-title" data-paquete="maintainer">Mantenciones — Flota de Comandancia</div>
+        <div class="mant-resumen" id="mantResumen" data-paquete="maintainer"></div>
+        <div class="mant-lista" id="mantLista" data-paquete="maintainer"></div>
 
         <div class="section-title">Personal Operativo</div>
         <div class="dash-stats" id="personalOperativoStats"></div>
@@ -274,7 +275,7 @@ async function renderDashStats(){
     sb.from('personal_estado_historial').select('estado, personal!inner(cuerpo_id)').is('hora_fin', null).eq('personal.cuerpo_id', miCuerpoId).eq('estado','disponible'),
   ]);
   document.getElementById('dashStats').innerHTML = `
-    <div class="dash-stat"><b class="crit">${emergAct||0}</b><span>Emergencias Activas</span></div>
+    <div class="dash-stat" data-paquete="spartan"><b class="crit">${emergAct||0}</b><span>Emergencias Activas</span></div>
     <div class="dash-stat"><b class="ok">${carrosOk||0}</b><span>Carros Disponibles</span></div>
     <div class="dash-stat"><b class="warn">${carrosFuera||0}</b><span>Carros Fuera de Servicio</span></div>
     <div class="dash-stat"><b class="neutral">${(personalEstados||[]).length}</b><span>Personal Disponible</span></div>
@@ -381,7 +382,7 @@ async function renderPersonalOperativo(){
   document.getElementById('personalOperativoStats').innerHTML = `
     <div class="dash-stat"><b class="neutral">${oficialesDisp}</b><span>Oficiales Disponibles</span></div>
     <div class="dash-stat"><b class="neutral">${(maquinistas||[]).length}</b><span>Conductores Habilitados</span></div>
-    <div class="dash-stat"><b class="neutral">${operadores||0}</b><span>Operadores de Central</span></div>
+    <div class="dash-stat" data-paquete="spartan"><b class="neutral">${operadores||0}</b><span>Operadores de Central</span></div>
     <div class="dash-stat"><b class="warn">${passExpira||0}</b><span>Contraseñas Temp. por Vencer (30 días)</span></div>
   `;
 }

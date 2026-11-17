@@ -162,6 +162,7 @@
 <meta name="apple-mobile-web-app-title" content="Vigor">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
+<script src="vigor-licencia.js"></script>
 <script src="vigor-tema.js" defer></script>
 </head>
 <body>
@@ -269,6 +270,8 @@ let catSel = null;
 let subcatSel = null;
 let creandoCat = false;
 let creandoSubcat = false;
+let guardandoSubcat = false;
+let guardandoIngreso = false;
 let miCuerpoId = null, miCompaniaId = null, miPersonalId = null;
 
 async function cargarDatos(){
@@ -338,7 +341,7 @@ function renderCats(){
     `<div class="subcat-opt ${subcatSel===s.key?'on':''}" onclick="setSubcat('${s.key}')">${s.label}</div>`
   ).join('');
   const addSubBtn = creandoSubcat
-    ? `<input class="mono cat-new-input" id="newSubcatInput" placeholder="Nueva subcategoría…" onkeydown="if(event.key==='Enter') confirmarSubcat(); if(event.key==='Escape') cancelarSubcat();">
+    ? `<input class="mono cat-new-input" id="newSubcatInput" placeholder="Nueva subcategoría…" onkeydown="if(event.key==='Enter'||event.keyCode===13){ event.preventDefault(); confirmarSubcat(); } if(event.key==='Escape') cancelarSubcat();" enterkeyhint="done" maxlength="60">
        <button class="btn-confirmar-mini" onclick="confirmarSubcat()">✓</button>
        <button class="btn-cancelar-mini" onclick="cancelarSubcat()">✕</button>`
     : `<div class="subcat-opt subcat-add-opt" onclick="creandoSubcat=true; renderCats(); document.getElementById('newSubcatInput').focus();">+ Subcategoría</div>`;
@@ -360,10 +363,20 @@ async function confirmarCat(){
 }
 function cancelarCat(){ creandoCat = false; renderCats(); }
 async function confirmarSubcat(){
-  const val = document.getElementById('newSubcatInput').value.trim();
-  if(!val){ toast('Escribe el nombre de la subcategoría'); return; }
-  const { data, error } = await sb.from('inventario_categorias').insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, parent_id: catSel, nombre: val }).select().single();
-  if(error){ toast('No se pudo crear la subcategoría — ' + error.message); return; }
+  if(guardandoSubcat) return;
+  const inp = document.getElementById('newSubcatInput');
+  if(!inp) return;
+  const val = inp.value.trim();
+  if(!val){ toast('Escribe el nombre de la subcategoría'); inp.focus(); return; }
+  if((SUBCATS[catSel] || []).some(s => s.label.toLowerCase() === val.toLowerCase())){ toast(`Ya existe una subcategoría "${val}" en esta categoría`); inp.focus(); return; }
+  guardandoSubcat = true;
+  let data = null, error = null;
+  try {
+    const r = await sb.from('inventario_categorias').insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, parent_id: catSel, nombre: val }).select().single();
+    data = r.data; error = r.error;
+  } catch(e){ error = e; }
+  guardandoSubcat = false;
+  if(error || !data){ toast('No se pudo crear la subcategoría — ' + ((error && error.message) || 'sin respuesta del servidor, intenta de nuevo')); const i2 = document.getElementById('newSubcatInput'); if(i2) i2.focus(); return; }
   const arr = SUBCATS[catSel] || (SUBCATS[catSel] = []);
   arr.push({ key: data.id, label: val });
   creandoSubcat = false;
@@ -406,7 +419,16 @@ function previsualizarFoto(input){
   reader.readAsDataURL(file);
 }
 
+// Evita ítems duplicados si se toca «Guardar Ingreso» dos veces mientras sube la foto.
 async function guardarIngreso(){
+  if(guardandoIngreso) return;
+  guardandoIngreso = true;
+  const btn = document.querySelector('.btn-guardar'); if(btn) btn.disabled = true;
+  try { await guardarIngresoReal(); }
+  catch(e){ toast('No se pudo guardar el ítem — ' + (e && e.message ? e.message : 'error inesperado')); }
+  finally { guardandoIngreso = false; if(btn) btn.disabled = false; }
+}
+async function guardarIngresoReal(){
   const campos = ['codigoField','nombreField','lugarField','valorField'];
   let faltantes = false;
   campos.forEach(id=>{

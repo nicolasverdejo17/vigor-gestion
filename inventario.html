@@ -218,6 +218,7 @@
 <meta name="apple-mobile-web-app-title" content="Vigor">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
+<script src="vigor-licencia.js"></script>
 <script src="vigor-tema.js" defer></script>
 </head>
 <body>
@@ -309,6 +310,7 @@ let ITEMS = [];
 let SUBCATS = {};
 let subcatActiva = null;
 let creandoSubcat = false;
+let guardandoSubcat = false;
 let creandoCategoria = false;
 let catActiva = 'todos';
 let miCuerpoId = null, miCompaniaId = null, miPersonalId = null;
@@ -411,7 +413,7 @@ async function confirmarCategoria(){
   const { data, error } = await sb.from('inventario_categorias')
     .insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, nombre: val })
     .select().single();
-  if(error){ toast('No se pudo crear \u2014 ' + error.message); return; }
+  if(error || !data){ toast('No se pudo crear \u2014 ' + ((error && error.message) || 'sin respuesta del servidor, intenta de nuevo')); return; }
   CATS[data.id] = { label: val };
   SUBCATS[data.id] = [];
   creandoCategoria = false;
@@ -449,7 +451,9 @@ function renderSubcats(){
   const allChip = `<button class="subcat-chip ${subcatActiva===null?'on':''}" onclick="setSubcat(null)">Todas</button>`;
   if(!puedeModificar()){ row.innerHTML = `<span class="subcat-label">Subcategoría</span>` + allChip + chips; return; }
   const addBtn = creandoSubcat
-    ? `<input class="subcat-input" id="newSubcatInput" placeholder="Nombre…" onkeydown="if(event.key==='Enter') confirmarSubcat(); if(event.key==='Escape') cancelarSubcat();">`
+    ? `<span style="display:inline-flex;align-items:center;gap:2px;flex-wrap:nowrap;"><input class="subcat-input" id="newSubcatInput" type="text" enterkeyhint="done" maxlength="60" placeholder="Nombre…" onkeydown="if(event.key==='Enter'||event.keyCode===13){ event.preventDefault(); confirmarSubcat(); } if(event.key==='Escape') cancelarSubcat();">
+       <button class="tipo-confirmar-cat" onclick="confirmarSubcat()" title="Guardar subcategoría">✓</button>
+       <button class="tipo-cancelar-cat" onclick="cancelarSubcat()" title="Cancelar">✕</button></span>`
     : `<button class="subcat-add" onclick="empezarCrearSubcat()">+ Crear subcategoría</button>`;
   row.innerHTML = `<span class="subcat-label">Subcategoría</span>` + allChip + chips + addBtn;
   if(creandoSubcat) document.getElementById('newSubcatInput').focus();
@@ -458,12 +462,23 @@ function setSubcat(key){ subcatActiva = key; renderSubcats(); renderTabla(); }
 function empezarCrearSubcat(){ creandoSubcat = true; renderSubcats(); }
 function cancelarSubcat(){ creandoSubcat = false; renderSubcats(); }
 async function confirmarSubcat(){
-  const val = document.getElementById('newSubcatInput').value.trim();
-  if(!val){ creandoSubcat=false; renderSubcats(); return; }
-  const { data, error } = await sb.from('inventario_categorias')
-    .insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, parent_id: catActiva, nombre: val })
-    .select().single();
-  if(error){ toast('No se pudo crear la subcategoría — ' + error.message); return; }
+  if(guardandoSubcat) return;
+  const inp = document.getElementById('newSubcatInput');
+  if(!inp) return;
+  const val = inp.value.trim();
+  if(!val){ toast('Escribe el nombre de la subcategoría antes de confirmar'); inp.focus(); return; }
+  const yaExiste = (SUBCATS[catActiva] || []).some(s => s.label.toLowerCase() === val.toLowerCase());
+  if(yaExiste){ toast(`Ya existe una subcategoría "${val}" en ${CATS[catActiva].label}`); inp.focus(); return; }
+  guardandoSubcat = true;
+  let data = null, error = null;
+  try {
+    const r = await sb.from('inventario_categorias')
+      .insert({ cuerpo_id: miCuerpoId, compania_id: miCompaniaId, parent_id: catActiva, nombre: val })
+      .select().single();
+    data = r.data; error = r.error;
+  } catch(e){ error = e; }
+  guardandoSubcat = false;
+  if(error || !data){ toast('No se pudo crear la subcategoría — ' + ((error && error.message) || 'sin respuesta del servidor, intenta de nuevo')); const i2 = document.getElementById('newSubcatInput'); if(i2) i2.focus(); return; }
   const subcatsDeEstaCategoria = SUBCATS[catActiva] || (SUBCATS[catActiva] = []);
   subcatsDeEstaCategoria.push({ key: data.id, label: val });
   creandoSubcat = false;

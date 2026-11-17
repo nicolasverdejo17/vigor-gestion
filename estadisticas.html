@@ -207,6 +207,7 @@
 <meta name="apple-mobile-web-app-title" content="Vigor">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
+<script src="vigor-licencia.js"></script>
 <script src="vigor-tema.js" defer></script>
 </head>
 <body>
@@ -271,7 +272,7 @@
         </div>
       </div>
 
-      <div class="section-block">
+      <div class="section-block" data-paquete="vanguard">
         <div class="section-heading">Estadísticas de Personal</div>
         <div class="stat-mini-grid" id="personalMiniGrid"></div>
         <div class="charts-row">
@@ -286,7 +287,7 @@
         </div>
       </div>
 
-      <div class="section-block">
+      <div class="section-block" data-paquete="maintainer">
         <div class="section-heading">Estadísticas de Carros</div>
         <div class="stat-mini-grid" id="carrosMiniGrid"></div>
         <div class="charts-row">

@@ -6,146 +6,153 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>VIGOR - Gestiona tu compañía de forma eficiente</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
-    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
-    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
-    --cyan:#49E9FF; --cyan-dim:#1E6E7D; --cyan-glow:rgba(73,233,255,0.35); --amber-glow:rgba(255,154,68,0.32);
-    --burdeo:#F13746; --burdeo-bright:#F13746;
-    --servicio:#3CF29A; --emergencia:#F13746; --alerta:#FFC94D; --fuera:#C9A63B; --nodisp:#42555C;
-    --master:#39FF14; --master-dim:#1F9E0A; --master-glow:rgba(57,255,20,0.28); --master-soft:rgba(57,255,20,0.10);
+    --bg:#030B13; --panel:#061520; --panel-alt:#091D2C; --line:#0F2A3B; --line-strong:#153A52;
+    --text:#EAF6FB; --text-muted:#8FB0C2; --text-dim:#6C8FA3;
+    --master:#39FF14; --master-dim:#1F9E0A; --master-soft:rgba(57,255,20,.10); --master-glow:rgba(57,255,20,.28);
+    --cyan:#2DD3DB; --ok:#3CF29A; --warn:#FFC94D; --bad:#F13746; --info:#7FA3B8;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
-  body{
-    background: radial-gradient(1100px 520px at 15% -10%, var(--master-soft), transparent 60%), var(--bg);
-    color:var(--text); font-family:'Inter',sans-serif; height:100vh; display:flex; flex-direction:column;
-    border-top:3px solid var(--master);
-  }
-  .mono{font-family:'JetBrains Mono',monospace;}
-  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
-
-  .wordmark{
-    text-align:center; font-family:'Rajdhani'; font-weight:600; letter-spacing:.35em;
-    font-size:12px; color:var(--master); padding:9px 0 7px; text-transform:uppercase; flex-shrink:0;
-    background:var(--bg);
-  }
-  .warn-banner{
-    flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:8px;
-    background:var(--master-soft); border-bottom:1px solid rgba(57,255,20,0.25); padding:8px 24px; text-align:center;
-    font-family:'Rajdhani'; font-weight:600; font-size:11px; letter-spacing:.04em; color:#B9F5A6;
-  }
-
-  .nameplate{ background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border-bottom:1px solid var(--line-strong); box-shadow:0 1px 0 var(--master-soft); flex-shrink:0;}
-  .nameplate-inner{ display:flex; align-items:center; justify-content:space-between; padding:14px 26px; flex-wrap:wrap; gap:12px; max-width:1180px; margin:0 auto;}
-  .brand{ display:flex; align-items:center; gap:12px;}
-  .brand-mark{ width:38px;height:38px; border:1.5px solid var(--master); border-radius:8px; display:flex; align-items:center; justify-content:center; position:relative; background:var(--panel); box-shadow:0 0 14px var(--master-glow);}
-  .brand-mark::before{ content:""; position:absolute; inset:5px; border:1px solid var(--master-dim); border-radius:5px; opacity:.5;}
-  .brand-text h1{ font-size:18px; letter-spacing:.04em; color:var(--text);}
-  .brand-text span{ font-size:10.5px; color:var(--master); letter-spacing:.1em; text-transform:uppercase; display:block; margin-top:2px;}
-  .role-tag{
-    font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
-    padding:6px 14px; border-radius:12px; background:var(--panel); border:1.5px solid var(--master); color:var(--master);
-  }
-
-  .content-wrap{ flex:1; min-height:0; padding:20px 26px 26px; overflow-y:auto; max-width:1180px; margin:0 auto; width:100%;}
-
-  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px;}
-  .kpi-card{ background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:15px 17px; transition:border-color .15s;}
-  .kpi-card:hover{ border-color:var(--master-dim);}
-  .kpi-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em;}
-  .kpi-val{ font-family:'JetBrains Mono',monospace; font-size:25px; font-weight:700; color:var(--master); margin-top:5px; text-shadow:0 0 16px var(--master-glow);}
-
-  .section-title{ font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.09em; font-weight:700; margin:22px 0 11px; padding-bottom:8px; border-bottom:1px solid var(--line);}
-
-  .cias-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:10px;}
-  .cia-card{ background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:14px 16px; transition:border-color .15s, transform .15s;}
-  .cia-card:hover{ border-color:var(--line-strong); transform:translateY(-1px);}
-  .cia-card-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
-  .cia-card-nombre{ font-size:14px; font-weight:700;}
-  .cia-card-stats{ font-size:11px; color:var(--text-muted); margin-bottom:12px;}
-  .btn-entrar{
-    width:100%; background:transparent; border:1.5px solid var(--master-dim); color:var(--master);
-    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
-    font-size:10.5px; padding:8px; border-radius:6px; cursor:pointer; transition:all .15s;
-  }
-  .btn-entrar:hover{ background:var(--master-soft); border-color:var(--master);}
-
-  .tools-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;}
-  .tool-row{
-    display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--line-strong);
-    border-radius:10px; padding:13px 15px; cursor:pointer; transition:border-color .15s, transform .15s;
-  }
-  .tool-row:hover{ border-color:var(--master-dim); transform:translateY(-1px);}
-  .tool-ico{ width:34px; height:34px; border-radius:9px; background:var(--panel-alt); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;}
-  .tool-row b{ font-size:13px; display:block;}
-  .tool-row span{ font-size:10.5px; color:var(--text-muted);}
-
-  .footer-note{
-    margin-top:24px; padding:14px 16px; background:var(--panel); border:1px solid var(--line-strong); border-left:2px solid var(--master-dim); border-radius:8px;
-    font-size:11px; color:var(--text-dim); line-height:1.6;
-  }
-  .footer-note b{ color:var(--master);}
-
-  .tab-bar{ flex-shrink:0; display:flex; gap:4px; padding:0 26px; background:var(--bg); border-bottom:1px solid var(--line); max-width:1180px; margin:0 auto; width:100%;}
-  .tab-btn{
-    background:transparent; border:none; border-bottom:2px solid transparent; color:var(--text-muted);
-    font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12.5px;
-    padding:13px 6px; cursor:pointer; margin-bottom:-1px; transition:color .15s;
-  }
-  .tab-btn:hover{ color:var(--text);}
-  .tab-btn.on{ color:var(--master); border-bottom-color:var(--master);}
-
-  .cuerpo-card{ background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:15px 17px; cursor:pointer; transition:border-color .15s, transform .15s;}
-  .cuerpo-card:hover{ border-color:var(--master-dim); transform:translateY(-1px);}
-  .cuerpo-card-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; gap:8px;}
-  .cuerpo-card-nombre{ font-size:15px; font-weight:700;}
-  .cuerpo-card-meta{ font-size:11.5px; color:var(--text-muted); margin-bottom:10px;}
-  .cuerpo-card-foot{ display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-dim);}
-
-  .btn-back{
-    background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted);
-    font-family:'Rajdhani'; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
-    font-size:11px; padding:8px 14px; border-radius:7px; cursor:pointer; margin-bottom:16px; transition:all .15s;
-  }
-  .btn-back:hover{ border-color:var(--master); color:var(--master);}
-
-  .toast{
-    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px);
-    background:var(--panel-alt); border:1px solid var(--master); color:#E9FFDE;
-    padding:13px 22px; border-radius:8px; font-size:13.5px; opacity:0; pointer-events:none;
-    transition:all .25s; z-index:50; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.4);
-  }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
-
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--text); min-height:100vh; }
+  .mono{ font-family:'JetBrains Mono',monospace !important; }
   .hidden{ display:none !important; }
+  h1.sr{ position:absolute; left:-9999px; }
 
-  .login-gate{ flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:40px;}
-  .login-panel{ width:370px; background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border:1px solid var(--master-dim); border-radius:16px; padding:26px 24px; box-shadow:0 0 40px var(--master-soft), 0 20px 50px rgba(0,0,0,.4);}
-  .login-panel h3{ font-size:13px; color:var(--master); letter-spacing:.08em; margin-bottom:16px; padding-bottom:11px; border-bottom:1px solid var(--line); text-align:center;}
-  .login-hint{ font-size:11.5px; color:var(--text-dim); margin-bottom:18px; line-height:1.6;}
-  .login-msg{ font-size:12px; color:var(--emergencia); margin-top:12px; min-height:14px; line-height:1.4; text-align:center;}
-  .field{ margin-bottom:14px;}
-  .field label{ display:block; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; font-weight:600;}
-  .field input{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:8px; padding:11px 13px; font-size:13.5px; color:var(--text); font-family:'Inter';}
-  .field input:focus{ outline:none; border-color:var(--master);}
-  .btn-login{ width:100%; background:var(--master); border:none; color:#0D2206; font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:14px; padding:14px; border-radius:9px; cursor:pointer; box-shadow:0 4px 20px var(--master-soft); transition:filter .15s;}
-  .btn-login:hover{ filter:brightness(1.08);}
-  .btn-logout{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text); font-size:11.5px; font-weight:600; padding:7px 14px; border-radius:7px; cursor:pointer; transition:all .15s;}
-  .btn-logout:hover{ border-color:var(--master); color:var(--master);}
+  /* ---------- acceso ---------- */
+  .login-gate{ min-height:calc(100vh - 56px); display:flex; align-items:center; justify-content:center; padding:32px 16px; }
+  .login-panel{ width:100%; max-width:380px; background:linear-gradient(180deg,var(--panel-alt),var(--panel)); border:1px solid var(--master-dim); border-radius:16px; padding:26px 24px; box-shadow:0 0 40px var(--master-soft), 0 20px 50px rgba(0,0,0,.4); }
+  .login-panel h2{ font-size:15px; margin:0 0 18px; padding-bottom:12px; border-bottom:1px solid var(--line); text-align:center; color:var(--master); }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11px; color:var(--text-dim); margin-bottom:6px; font-weight:600; }
+  .field input, .field select{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:9px; padding:11px 13px; font-size:13.5px; color:var(--text); }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--master); }
+  .field label.chk{ display:flex; gap:9px; align-items:flex-start; font-size:12.5px; color:var(--text); font-weight:500; padding:6px 0; cursor:pointer; margin:0; }
+  .field label.chk input{ width:auto; margin-top:2px; flex-shrink:0; }
+  .field label.chk span{ color:var(--text-dim); }
+  .login-msg{ font-size:12px; color:var(--bad); margin-top:12px; min-height:14px; text-align:center; }
 
-  .cuerpo-real-panel{ background:linear-gradient(135deg,var(--panel-alt),var(--panel)); border:1px solid var(--master-dim); border-radius:12px; padding:18px 22px; margin-bottom:20px;}
-  .cuerpo-real-titulo{ font-size:11px; color:var(--master); text-transform:uppercase; letter-spacing:.08em; font-weight:700; margin-bottom:10px;}
-  .cuerpo-real-nombre{ font-size:21px; font-weight:700; margin-bottom:6px;}
-  .cuerpo-real-meta{ font-size:12.5px; color:var(--text-muted); display:flex; flex-wrap:wrap; align-items:center; gap:14px;}
-  .cuerpo-real-pill{ display:inline-block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:3px 10px; border-radius:20px;}
-  .cuerpo-real-pill.activo{ background:rgba(60,242,154,.18); color:var(--servicio);}
-  .cuerpo-real-pill.suspendido{ background:rgba(241,55,70,.18); color:var(--emergencia);}
-  .cuerpo-real-vacio{ color:var(--text-dim); font-size:12.5px; line-height:1.6;}
-  .cuerpo-real-vacio a{ color:var(--cyan);}
-  .demo-tag{ font-size:9.5px; color:var(--text-dim); font-weight:400; text-transform:none; letter-spacing:0; margin-left:8px;}
+  /* ---------- estructura ---------- */
+  .shell{ display:grid; grid-template-columns:232px minmax(0,1fr); min-height:calc(100vh - 56px); }
+  .side{ position:sticky; top:56px; align-self:start; height:calc(100vh - 56px); background:var(--panel); border-right:1px solid var(--line); display:flex; flex-direction:column; padding:16px 12px; gap:4px; }
+  .side-tag{ font-size:10.5px; color:var(--master); font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:2px 10px 12px; }
+  .nav{ display:flex; align-items:center; gap:11px; width:100%; background:transparent; border:1px solid transparent; color:var(--text-muted); font-size:13.5px; font-weight:600; padding:11px 12px; border-radius:10px; cursor:pointer; text-align:left; }
+  .nav svg{ width:18px; height:18px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  .nav:hover{ color:var(--text); background:var(--panel-alt); }
+  .nav.on{ color:var(--master); background:var(--master-soft); border-color:rgba(57,255,20,.28); }
+  .nav .cnt{ margin-left:auto; font-size:11px; background:var(--bad); color:#fff; border-radius:10px; padding:1px 7px; font-weight:700; }
+  .side-foot{ margin-top:auto; border-top:1px solid var(--line); padding:14px 10px 4px; font-size:11.5px; color:var(--text-dim); display:flex; flex-direction:column; gap:10px; }
+  .side-foot b{ color:var(--text); font-size:12.5px; display:block; }
+  .side-foot span{ word-break:break-all; }
+  .main{ padding:22px 28px 60px; min-width:0; max-width:1240px; width:100%; }
+  .titulo{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+  .titulo h2{ margin:0; font-size:21px; }
+  .titulo .sub{ font-size:12.5px; color:var(--text-dim); margin-top:3px; }
+  .sec{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.09em; font-weight:700; margin:26px 0 11px; padding-bottom:8px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+
+  /* ---------- componentes ---------- */
+  .kpis{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+  .kpi{ background:var(--panel); border:1px solid var(--line-strong); border-radius:12px; padding:15px 17px; }
+  .kpi .k{ font-size:11px; color:var(--text-dim); font-weight:600; }
+  .kpi .v{ font-size:27px; font-weight:800; margin-top:6px; color:var(--text); font-variant-numeric:tabular-nums; }
+  .kpi .v small{ font-size:13px; color:var(--text-dim); font-weight:600; }
+  .kpi.alerta .v{ color:var(--warn); }
+  .kpi.ok .v{ color:var(--master); }
+
+  .pill{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+  .pill.ok{ background:rgba(60,242,154,.15); color:var(--ok); }
+  .pill.warn{ background:rgba(255,201,77,.15); color:var(--warn); }
+  .pill.bad{ background:rgba(241,55,70,.17); color:#FF7A85; }
+  .pill.mute{ background:rgba(127,163,184,.14); color:var(--info); }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .card{ background:var(--panel); border:1px solid var(--line-strong); border-radius:12px; padding:16px 18px; }
+  .card.click{ cursor:pointer; transition:border-color .15s, transform .15s; }
+  .card.click:hover{ border-color:var(--master-dim); transform:translateY(-1px); }
+  .c-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .c-nom{ font-size:14.5px; font-weight:700; line-height:1.3; }
+  .c-meta{ font-size:12px; color:var(--text-muted); margin:5px 0 13px; }
+  .c-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; border-top:1px solid var(--line); padding-top:12px; }
+  .c-stats div{ font-size:11px; color:var(--text-dim); }
+  .c-stats b{ display:block; font-size:16px; color:var(--text); font-variant-numeric:tabular-nums; }
+  .c-foot{ margin-top:12px; display:flex; justify-content:space-between; gap:8px; font-size:11.5px; color:var(--text-dim); flex-wrap:wrap; }
+
+  .atn{ display:flex; flex-direction:column; gap:8px; }
+  .atn-row{ display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--line-strong); border-left-width:3px; border-radius:10px; padding:11px 14px; cursor:pointer; }
+  .atn-row.n3{ border-left-color:var(--bad); } .atn-row.n2{ border-left-color:var(--warn); } .atn-row.n1{ border-left-color:var(--info); }
+  .atn-row:hover{ background:var(--panel-alt); }
+  .atn-row .q{ font-size:13px; font-weight:600; } .atn-row .c{ font-size:11.5px; color:var(--text-dim); margin-left:auto; text-align:right; }
+  .vacio{ color:var(--text-dim); font-size:13px; padding:22px; text-align:center; background:var(--panel); border:1px dashed var(--line-strong); border-radius:12px; }
+  .vacio.ok{ color:var(--ok); border-color:rgba(60,242,154,.35); }
+
+  .btn{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font-size:12.5px; font-weight:700; padding:9px 15px; border-radius:10px; cursor:pointer; white-space:nowrap; }
+  .btn:hover{ border-color:var(--master); color:var(--master); }
+  .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn.pri{ background:var(--master); border-color:var(--master); color:#0D2206; }
+  .btn.pri:hover{ filter:brightness(1.08); color:#0D2206; }
+  .btn.bad{ border-color:rgba(241,55,70,.55); color:#FF7A85; }
+  .btn.bad:hover{ background:rgba(241,55,70,.14); border-color:var(--bad); color:#FF7A85; }
+  .btn.sm{ padding:6px 11px; font-size:11.5px; border-radius:8px; }
+  .acciones{ display:flex; gap:8px; flex-wrap:wrap; }
+  .back{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-size:12px; font-weight:700; padding:8px 14px; border-radius:9px; cursor:pointer; margin-bottom:16px; }
+  .back:hover{ color:var(--master); border-color:var(--master); }
+
+  .tabla-wrap{ overflow-x:auto; border:1px solid var(--line-strong); border-radius:12px; background:var(--panel); }
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  th{ text-align:left; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.07em; padding:11px 14px; border-bottom:1px solid var(--line-strong); white-space:nowrap; }
+  td{ padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  tr.fila-click{ cursor:pointer; } tr.fila-click:hover td{ background:var(--panel-alt); }
+  td .sub{ display:block; font-size:11px; color:var(--text-dim); margin-top:2px; }
+  td.num{ font-variant-numeric:tabular-nums; }
+
+  .ficha-head{ background:linear-gradient(135deg,var(--panel-alt),var(--panel)); border:1px solid var(--master-dim); border-radius:14px; padding:20px 22px; }
+  .ficha-head h2{ margin:0 0 6px; font-size:22px; }
+  .ficha-meta{ display:flex; flex-wrap:wrap; gap:8px 20px; font-size:12.5px; color:var(--text-muted); margin-bottom:16px; }
+  .codigo{ display:inline-flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--line-strong); border-radius:8px; padding:5px 10px; font-size:12px; }
+  .codigo b{ color:var(--master); letter-spacing:.05em; }
+  .lic-box{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .lic-box div{ background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:11px 14px; font-size:11px; color:var(--text-dim); }
+  .lic-box b{ display:block; font-size:14px; color:var(--text); margin-top:4px; }
+  .tools{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+  .tool{ display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:12px 14px; cursor:pointer; }
+  .tool:hover{ border-color:var(--master-dim); }
+  .tool .ic{ width:32px; height:32px; border-radius:9px; background:var(--panel-alt); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .tool b{ font-size:12.5px; display:block; } .tool span{ font-size:11px; color:var(--text-dim); }
+
+  .filtros{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .filtros input, .filtros select{ background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:10px; padding:10px 13px; font-size:13px; color:var(--text); min-width:0; }
+  .filtros input{ flex:1 1 260px; } .filtros input:focus, .filtros select:focus{ outline:none; border-color:var(--master); }
+  .subtabs{ display:flex; gap:6px; margin-bottom:14px; }
+  .subtab{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-size:12.5px; font-weight:700; padding:8px 15px; border-radius:20px; cursor:pointer; }
+  .subtab.on{ background:var(--master-soft); border-color:var(--master); color:var(--master); }
+
+  /* ---------- ventana ---------- */
+  .velo{ position:fixed; inset:0; background:rgba(2,8,13,.78); z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
+  .modal{ width:100%; max-width:520px; background:var(--panel); border:1px solid var(--line-strong); border-radius:16px; padding:22px; box-shadow:0 24px 70px rgba(0,0,0,.55); max-height:calc(100vh - 32px); overflow-y:auto; }
+  .modal h3{ margin:0 0 14px; font-size:17px; }
+  .modal p{ margin:0 0 14px; font-size:13px; color:var(--text-muted); line-height:1.55; }
+  .modal .pie{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:18px; }
+  .kv{ display:grid; grid-template-columns:130px 1fr; gap:8px 12px; font-size:12.5px; margin-bottom:14px; }
+  .kv dt{ color:var(--text-dim); } .kv dd{ margin:0; word-break:break-word; }
+  .clave{ background:var(--bg); border:1.5px solid var(--master-dim); border-radius:12px; padding:16px; text-align:center; margin:4px 0 14px; }
+  .clave .v{ font-size:28px; font-weight:600; letter-spacing:.1em; color:var(--master); }
+  .clave .l{ font-size:11px; color:var(--text-dim); margin-bottom:6px; }
+  .toast{ position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--panel-alt); border:1px solid var(--master); color:#E9FFDE; padding:12px 22px; border-radius:10px; font-size:13px; opacity:0; pointer-events:none; transition:all .25s; z-index:200; text-align:center; max-width:calc(100vw - 32px); }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.err{ border-color:var(--bad); }
+
+  @media (max-width:980px){
+    .kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .shell{ grid-template-columns:1fr; }
+    .side{ position:sticky; top:56px; height:auto; flex-direction:row; align-items:center; overflow-x:auto; padding:8px 12px; border-right:none; border-bottom:1px solid var(--line); z-index:20; gap:6px; }
+    .side-tag, .side-foot{ display:none; }
+    .nav{ width:auto; white-space:nowrap; padding:9px 13px; }
+    .main{ padding:18px 16px 60px; }
+  }
+  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } .kv{ grid-template-columns:1fr; gap:2px; } .kv dd{ margin-bottom:8px; } }
 </style>
 <link rel="manifest" href="manifest-maestro.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -155,143 +162,39 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Vigor Maestro">
+<meta name="apple-mobile-web-app-title" content="Vigor Soporte">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
 <script src="vigor-tema.js" defer></script>
 </head>
 <body>
-
-  <div class="wordmark">VIGOR</div>
-  <div class="warn-banner">⚠ Cuenta técnica de mantención — invisible para todo el resto del sistema — acceso sin restricciones de aislamiento</div>
-
-  <div class="nameplate">
-    <div class="nameplate-inner">
-      <div class="brand">
-        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 2L4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" stroke="#39FF14" stroke-width="1.6"/></svg></div>
-        <div class="brand-text"><h1>Perfil Maestro</h1><span>Acceso técnico total · Vigor</span></div>
-      </div>
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div class="role-tag" id="roleTag">Sin sesión</div>
-        <button class="btn-logout hidden" id="btnLogout" onclick="cerrarSesion()">Cerrar sesión</button>
-      </div>
-    </div>
-  </div>
+  <h1 class="sr">Soporte técnico</h1>
 
   <div class="login-gate" id="loginGate">
     <div class="login-panel">
-      <h3>Acceso Super Admin</h3>
-      <div class="login-hint">Perfil Maestro es la cuenta técnica de mantención de esta instalación de Vigor. Solo cuentas registradas como Super Admin pueden entrar.</div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="tu@vigor.cl" autocomplete="username">
-      </div>
-      <div class="field">
-        <label>Contraseña</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesion();">
-      </div>
-      <button class="btn-login" id="btnLogin" onclick="iniciarSesion()">🔒 Iniciar Sesión</button>
+      <h2>Acceso Super Admin</h2>
+      <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="tu@vigor.cl" autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') iniciarSesion();"></div>
+      <button class="btn pri" style="width:100%; padding:13px;" id="btnLogin" onclick="iniciarSesion()">Iniciar sesión</button>
       <div class="login-msg" id="loginMsg"></div>
     </div>
   </div>
 
-  <div class="tab-bar hidden" id="tabBar">
-    <button class="tab-btn on" data-tab="cuerpos" onclick="setTab('cuerpos')">🏢 Cuerpos de Bomberos</button>
-    <button class="tab-btn" data-tab="licencias" onclick="setTab('licencias')">🧾 Licencias e Instalación</button>
-  </div>
-
-  <div class="content-wrap hidden" id="appWrap">
-
-    <!-- ============ TAB: CUERPOS DE BOMBEROS ============ -->
-    <div class="tab-panel" id="panelCuerpos">
-
-      <div class="kpi-grid" id="kpiGridGlobal"></div>
-
-      <div id="vistaListaCuerpos">
-        <div class="section-title">Cuerpos de Bomberos registrados</div>
-        <div class="cias-grid" id="cuerposGrid"></div>
+  <div class="shell hidden" id="shell">
+    <aside class="side">
+      <div class="side-tag">Soporte técnico</div>
+      <button class="nav on" data-nav="resumen"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="8" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.5"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.5"/><rect x="3.5" y="14.5" width="7" height="6" rx="1.5"/></svg>Resumen<span class="cnt hidden" id="cntAtencion">0</span></button>
+      <button class="nav" data-nav="clientes"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg>Clientes</button>
+      <button class="nav" data-nav="usuarios"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c0-3.2 2.7-5.5 6-5.5s6 2.3 6 5.5"/><circle cx="17.5" cy="9" r="2.4"/><path d="M16 14.3c2.8 0 5 1.8 5 4.7"/></svg>Usuarios</button>
+      <button class="nav" data-nav="dispositivos"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="11" height="16" rx="2"/><path d="M9.5 16.5h.01"/><rect x="15.5" y="9" width="5" height="10.5" rx="1.5"/></svg>Dispositivos</button>
+      <button class="nav" data-nav="auditoria"><svg viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-2.5z"/><path d="M9.3 12l1.9 1.9 3.5-3.8"/></svg>Auditoría</button>
+      <button class="nav" data-nav="licencias"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="M7.5 10h9M7.5 14h5"/></svg>Licencias</button>
+      <div class="side-foot">
+        <div><b id="adminNombre">—</b><span id="adminEmail"></span></div>
+        <button class="btn sm" onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
-
-      <div id="vistaDetalleCuerpo" class="hidden">
-        <button class="btn-back" onclick="volverAListaCuerpos()">← Todos los Cuerpos</button>
-        <div class="panel cuerpo-real-panel" id="cuerpoRealPanel"></div>
-
-        <div class="kpi-grid">
-          <div class="kpi-card"><div class="kpi-label">Compañías Registradas</div><div class="kpi-val" id="kpiCias">—</div></div>
-          <div class="kpi-card"><div class="kpi-label">Bomberos Totales</div><div class="kpi-val" id="kpiBomberos">—</div></div>
-          <div class="kpi-card"><div class="kpi-label">Carros Totales</div><div class="kpi-val" id="kpiCarros">—</div></div>
-          <div class="kpi-card"><div class="kpi-label">Solicitudes de Alta Pendientes</div><div class="kpi-val" id="kpiSolicitudes">—</div></div>
-        </div>
-
-        <div class="section-title">Compañías del Cuerpo — acceso directo, sin restricción</div>
-        <div class="cias-grid" id="ciasGrid"></div>
-
-        <div class="section-title">Módulos de este Cuerpo — sin restricción de rol ni Compañía</div>
-        <div class="tools-grid">
-          <div class="tool-row" onclick="window.location.href='inventario.html'">
-            <div class="tool-ico">📦</div><div><b>Inventario General</b><span>Todas las Compañías, todas las categorías</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='estadisticas.html'">
-            <div class="tool-ico">📊</div><div><b>Estadísticas Globales</b><span>Agregado del Cuerpo, no solo una Compañía</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='consola_despacho.html'">
-            <div class="tool-ico">📡</div><div><b>Central de Alarmas</b><span>Consola de Despacho, Historial completo</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='gestion_capacitacion.html'">
-            <div class="tool-ico">🎓</div><div><b>Capacitación</b><span>Todos los bomberos, todas las Compañías</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='gestion_especialidades.html'">
-            <div class="tool-ico">🏅</div><div><b>Especialidades</b><span>Todos los bomberos, todas las Compañías</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='ficha_bombero.html'">
-            <div class="tool-ico">📋</div><div><b>Hojas de Vida</b><span>Cualquier bombero, cualquier Compañía</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='crear_compania.html'">
-            <div class="tool-ico">🏢</div><div><b>Crear / Eliminar Compañía</b><span>Alcance: este Cuerpo</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='usuarios_sistema.html'">
-            <div class="tool-ico">👥</div><div><b>Registro de Bomberos</b><span>Todas las Compañías de este Cuerpo</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='configuracion_sistema.html'">
-            <div class="tool-ico">⚙️</div><div><b>Configuración del Sistema</b><span>Variables técnicas de este Cuerpo</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='registro_auditoria.html'">
-            <div class="tool-ico">🗂️</div><div><b>Registro de Auditoría</b><span>Historial de cambios de este Cuerpo</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='restablecer_passwords_global.html'">
-            <div class="tool-ico">🔑</div><div><b>Restablecer Contraseñas</b><span>Cualquier usuario de este Cuerpo, sin pasar por el Director</span></div>
-          </div>
-          <div class="tool-row" onclick="window.location.href='identidad_final.html'">
-            <div class="tool-ico">🎨</div><div><b>Identidad de la Institución</b><span>Nombre del Cuerpo, colores, nomenclatura</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-note">
-        <b>Nota de implementación:</b> esta cuenta debe excluirse explícitamente de toda query que alimente pantallas visibles para usuarios institucionales — Guardia, Pizarras, Reportes, Estadísticas, orden de visualización jerárquica. Ningún otro usuario del sistema puede saber que esta cuenta existe.
-      </div>
-    </div>
-
-    <!-- ============ TAB: LICENCIAS E INSTALACIÓN ============ -->
-    <div class="tab-panel hidden" id="panelLicencias">
-      <div class="section-title">Licencias e Instalación</div>
-      <div class="tools-grid">
-        <div class="tool-row" onclick="window.location.href='generador_licencias.html'">
-          <div class="tool-ico">🧾</div><div><b>Generador de Licencias</b><span>Emitir una licencia nueva para un Cuerpo cliente</span></div>
-        </div>
-        <div class="tool-row" onclick="window.location.href='activar_licencia.html'">
-          <div class="tool-ico">✅</div><div><b>Activar Licencia</b><span>Canjear el código de una licencia ya emitida</span></div>
-        </div>
-        <div class="tool-row" onclick="window.location.href='wizard_inicial.html'">
-          <div class="tool-ico">🧭</div><div><b>Wizard de Configuración Inicial</b><span>Puesta en marcha de un Cuerpo cliente nuevo</span></div>
-        </div>
-      </div>
-
-      <div class="footer-note">
-        <b>Nota comercial:</b> Perfil Maestro es un componente ESTÁNDAR del producto Vigor, no algo hecho a medida para un cliente en particular. Cada institución que compre e implemente Vigor queda registrada aquí, en la pestaña "Cuerpos de Bomberos" — este panel es la identidad visual del propio producto (marca del proveedor, verde nuclear #39FF14), independiente de la identidad institucional de cada cliente.
-      </div>
-    </div>
-
+    </aside>
+    <main class="main" id="main"></main>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -299,223 +202,704 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
 <script>
-// --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
-// --- Autenticación real (Supabase Auth + tabla super_admins) ---
-// Perfil Maestro ES la cuenta técnica de Super Admin — misma verificación
-// que generador_licencias.html, reutilizando la cuenta ya dada de alta.
+/* ===================== utilidades ===================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+function rel(d){
+  if(!d) return 'nunca';
+  const s = (Date.now() - new Date(d).getTime()) / 1000;
+  if(s < 90) return 'hace un momento';
+  const m = s / 60; if(m < 60) return 'hace ' + Math.round(m) + ' min';
+  const h = m / 60; if(h < 24) return 'hace ' + Math.round(h) + ' h';
+  const dd = h / 24; if(dd < 60) return 'hace ' + Math.round(dd) + ' d';
+  return 'hace ' + Math.round(dd / 30) + ' meses';
+}
+const fecha = d => d ? new Date(d).toLocaleDateString('es-CL', { day:'numeric', month:'short', year:'numeric' }) : '—';
+const fechaHora = d => d ? new Date(d).toLocaleString('es-CL', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:false }) : '—';
+const dias = d => Math.ceil((new Date(d).getTime() - Date.now()) / 864e5);
+function toast(msg, esError){
+  const t = $('toast'); t.textContent = msg; t.classList.toggle('err', !!esError); t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), esError ? 4200 : 2800);
+}
+function pill(tipo, txt){ return `<span class="pill ${tipo}">${esc(txt)}</span>`; }
+const MENSAJES = {
+  SIN_PERMISO:'Tu cuenta no tiene permiso para esto', USUARIO_NO_ENCONTRADO:'No se encontró a la persona', USUARIO_SIN_CUENTA:'Esta persona todavía no tiene cuenta de acceso',
+  USUARIO_DADO_DE_BAJA:'La persona está dada de baja', MOTIVO_REQUERIDO:'Escribe el motivo', CUERPO_NO_SUSPENDIDO:'Primero hay que suspender el Cuerpo',
+  CUENTA_NO_ENCONTRADA:'Esa cuenta no existe todavía', CUERPO_NO_ENCONTRADO:'No se encontró el Cuerpo', CLIENTE_REQUERIDO:'Escribe el nombre del cliente', PLAN_INVALIDO:'Elige un plan', SIN_VENCIMIENTO:'Esta licencia no tiene vencimiento', MESES_INVALIDOS:'Meses no válidos', NO_ESTA_REVOCADA:'La licencia no está revocada'
+};
+const msgErr = e => MENSAJES[e && e.message] || ('No se pudo completar — ' + ((e && e.message) || 'error desconocido'));
+async function rpc(nombre, args){
+  const { data, error } = await sb.rpc(nombre, args || {});
+  if(error) throw error;
+  return data;
+}
+function logSoporte(accion, detalle, cuerpoId, cuerpoNombre){
+  return sb.rpc('soporte_registrar', { p_accion:accion, p_detalle:detalle || null, p_cuerpo_id:cuerpoId || null, p_cuerpo_nombre:cuerpoNombre || null }).then(() => {}, () => {});
+}
+function copiar(texto){
+  const ok = () => toast('Copiado');
+  if(navigator.clipboard) navigator.clipboard.writeText(texto).then(ok, () => toast(texto)); else toast(texto);
+}
+
+/* ===================== ventana modal ===================== */
+let modalAbierto = null;
+function abrirModal({ titulo, html, botones, ancho }){
+  cerrarModal();
+  const velo = document.createElement('div'); velo.className = 'velo';
+  velo.innerHTML = `<div class="modal" role="dialog" aria-modal="true" ${ancho ? `style="max-width:${ancho}px"` : ''}><h3>${esc(titulo)}</h3><div id="modalCuerpo">${html || ''}</div><div class="pie" id="modalPie"></div></div>`;
+  document.body.appendChild(velo);
+  velo.addEventListener('mousedown', e => { if(e.target === velo) cerrarModal(); });
+  const pie = velo.querySelector('#modalPie');
+  (botones || [{ txt:'Cerrar' }]).forEach(b => {
+    const el = document.createElement('button'); el.className = 'btn ' + (b.cls || ''); el.textContent = b.txt; if(b.id) el.id = b.id; if(b.deshabilitado) el.disabled = true;
+    el.onclick = async () => {
+      if(!b.fn){ cerrarModal(); return; }
+      const antes = el.textContent; el.disabled = true; el.textContent = 'Un momento…';
+      let r; try { r = await b.fn(); } catch(e){ toast(msgErr(e), true); r = false; }
+      if(r === false){ el.disabled = false; el.textContent = antes; } else cerrarModal();
+    };
+    pie.appendChild(el);
+  });
+  modalAbierto = velo;
+  const primero = velo.querySelector('input, select, textarea'); if(primero) primero.focus();
+}
+function cerrarModal(){ if(modalAbierto){ modalAbierto.remove(); modalAbierto = null; } }
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarModal(); });
+function mostrarClave(titulo, filas, clave){
+  abrirModal({ titulo, html:`<dl class="kv">${filas.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl><div class="clave"><div class="l">Contraseña temporal</div><div class="v mono" id="claveTxt">${esc(clave)}</div></div>`,
+    botones:[{ txt:'Copiar contraseña', fn:() => { copiar(clave); return false; } }, { txt:'Listo', cls:'pri' }] });
+}
+
+/* ===================== estado ===================== */
+const S = { paquetes:[], planes:[], disp:[], dispTipo:'', dispCuerpo:'', dispProblemas:false, tab:'resumen', cuerpos:[], ficha:null, fichaId:null, usuarios:[], qUsuarios:'', cuerpoUsuarios:'', subAud:'soporte', audCuerpo:'', audTipo:'', audTexto:'', admin:null };
+const mapaCuerpos = () => Object.fromEntries(S.cuerpos.map(c => [c.id, c]));
+
+/* ===================== acceso ===================== */
 async function verificarSuperAdmin(userId){
   const { data, error } = await sb.from('super_admins').select('nombre').eq('user_id', userId).maybeSingle();
   if(error || !data) return null;
   return data;
 }
-
 async function onSesionValida(session){
   const admin = await verificarSuperAdmin(session.user.id);
   if(!admin){
-    document.getElementById('loginMsg').textContent = 'Esta cuenta existe pero no tiene permiso de Super Admin (tabla super_admins).';
+    $('loginMsg').textContent = 'Esta cuenta existe pero no tiene permiso de Super Admin.';
     await sb.auth.signOut();
     return;
   }
-  document.getElementById('loginGate').classList.add('hidden');
-  document.getElementById('tabBar').classList.remove('hidden');
-  document.getElementById('appWrap').classList.remove('hidden');
-  document.getElementById('roleTag').textContent = admin.nombre + ' · ' + session.user.email;
-  document.getElementById('btnLogout').classList.remove('hidden');
-
-  await cargarKpiGlobal();
-  const cuerpoUrl = new URLSearchParams(location.search).get('cuerpo');
-  if(cuerpoUrl){
-    await abrirDetalleCuerpo(cuerpoUrl);
-  } else {
-    await mostrarListaCuerpos();
-  }
+  S.admin = admin;
+  $('loginGate').classList.add('hidden'); $('shell').classList.remove('hidden');
+  $('adminNombre').textContent = admin.nombre; $('adminEmail').textContent = session.user.email;
+  await Promise.all([cargarResumen(), cargarCatalogo()]);
+  const qs = new URLSearchParams(location.search);
+  const cuerpoUrl = qs.get('cuerpo'), tabUrl = qs.get('tab');
+  if(cuerpoUrl) await abrirFicha(cuerpoUrl); else irA(['resumen', 'clientes', 'usuarios', 'dispositivos', 'auditoria', 'licencias'].includes(tabUrl) ? tabUrl : 'resumen');
 }
-
-function setTab(nombre){
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('on', b.dataset.tab === nombre));
-  document.getElementById('panelCuerpos').classList.toggle('hidden', nombre !== 'cuerpos');
-  document.getElementById('panelLicencias').classList.toggle('hidden', nombre !== 'licencias');
-}
-
 async function iniciarSesion(){
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const msg = document.getElementById('loginMsg');
+  const email = $('loginEmail').value.trim(), password = $('loginPassword').value, msg = $('loginMsg');
   msg.textContent = '';
-  if(!email || !password){
-    msg.textContent = 'Completa email y contraseña.';
-    return;
-  }
-  const btn = document.getElementById('btnLogin');
-  btn.disabled = true;
+  if(!email || !password){ msg.textContent = 'Completa email y contraseña.'; return; }
+  const btn = $('btnLogin'); btn.disabled = true;
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   btn.disabled = false;
-  if(error){
-    msg.textContent = 'No se pudo iniciar sesión: ' + error.message;
-    return;
-  }
+  if(error){ msg.textContent = 'No se pudo iniciar sesión: ' + error.message; return; }
   await onSesionValida(data.session);
 }
-
 async function cerrarSesion(){
   await sb.auth.signOut();
-  document.getElementById('appWrap').classList.add('hidden');
-  document.getElementById('tabBar').classList.add('hidden');
-  document.getElementById('loginGate').classList.remove('hidden');
-  document.getElementById('roleTag').textContent = 'Sin sesión';
-  document.getElementById('btnLogout').classList.add('hidden');
-  document.getElementById('loginEmail').value = '';
-  document.getElementById('loginPassword').value = '';
+  $('shell').classList.add('hidden'); $('loginGate').classList.remove('hidden');
+  $('loginEmail').value = ''; $('loginPassword').value = '';
 }
 
-async function chequearSesionInicial(){
-  const { data } = await sb.auth.getSession();
-  if(data.session) await onSesionValida(data.session);
+/* ===================== navegación ===================== */
+function irA(tab){
+  S.tab = tab; S.fichaId = null; S.ficha = null;
+  document.querySelectorAll('.nav').forEach(b => b.classList.toggle('on', b.dataset.nav === tab));
+  render();
+  window.scrollTo(0, 0);
+}
+document.addEventListener('click', e => {
+  const nav = e.target.closest('[data-nav]'); if(nav){ irA(nav.dataset.nav); return; }
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const fn = ACCIONES[el.dataset.act]; if(fn){ e.stopPropagation(); fn(el.dataset, el); }
+});
+function render(){
+  const m = $('main');
+  if(S.tab === 'resumen') m.innerHTML = vistaResumen();
+  else if(S.tab === 'clientes') m.innerHTML = S.fichaId ? vistaFicha() : vistaClientes();
+  else if(S.tab === 'usuarios'){ m.innerHTML = vistaUsuarios(); buscarUsuarios(); }
+  else if(S.tab === 'dispositivos'){ m.innerHTML = vistaDispositivos(); cargarDispositivos(); }
+  else if(S.tab === 'auditoria'){ m.innerHTML = vistaAuditoria(); cargarAuditoria(); }
+  else if(S.tab === 'licencias'){ m.innerHTML = vistaLicencias(); cargarLicencias(); }
 }
 
-// --- Cuerpos reales instalados (multi-cliente) ---
-// La pestaña "Cuerpos de Bomberos" lista TODOS los Cuerpos registrados en
-// esta instalación de Vigor (puede haber muchos clientes). Al hacer clic en
-// uno se abre su desglose. ?cuerpo=<uuid> en la URL (wizard_inicial.html lo
-// pasa al terminar la puesta en marcha de un cliente nuevo) salta directo
-// al desglose de ese Cuerpo en vez de mostrar la lista primero.
-let cuerpoIdResuelto = null;
-
-async function cargarKpiGlobal(){
-  const [{ count: totalCuerpos }, { count: totalBomberos }, { count: licEmitidas }, { count: licActivas }] = await Promise.all([
-    sb.from('cuerpos').select('id', { count:'exact', head:true }),
-    sb.from('personal').select('id', { count:'exact', head:true }).neq('estado','dado_de_baja'),
-    sb.from('licencias').select('id', { count:'exact', head:true }),
-    sb.from('licencias').select('id', { count:'exact', head:true }).eq('estado','activada'),
-  ]);
-  document.getElementById('kpiGridGlobal').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Cuerpos de Bomberos (clientes)</div><div class="kpi-val">${totalCuerpos || 0}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Bomberos Totales — todos los clientes</div><div class="kpi-val">${totalBomberos || 0}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Licencias Emitidas</div><div class="kpi-val">${licEmitidas || 0}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Licencias Activadas</div><div class="kpi-val">${licActivas || 0}</div></div>
-  `;
+/* ===================== datos ===================== */
+async function cargarResumen(){
+  try { S.cuerpos = await rpc('soporte_resumen') || []; }
+  catch(e){ toast(msgErr(e), true); S.cuerpos = []; }
+  const n = S.cuerpos.reduce((t, c) => t + alertas(c).filter(a => a.n >= 2).length, 0);
+  const cnt = $('cntAtencion'); cnt.textContent = n; cnt.classList.toggle('hidden', n === 0);
+}
+function alertas(c){
+  const a = [];
+  if(c.estado === 'suspendido') a.push({ n:3, t:'Cuerpo suspendido — nadie puede ingresar' });
+  if(!c.lic_codigo) a.push({ n:2, t:'Sin licencia vinculada' });
+  else if(c.lic_estado === 'solo_lectura') a.push({ n:3, t:'Licencia vencida — la app está en solo lectura' });
+  else if(c.lic_estado === 'gracia') a.push({ n:3, t:'Licencia vencida el ' + fecha(c.lic_vence) + ' — en período de gracia' });
+  else if(c.lic_estado === 'revocada') a.push({ n:3, t:'Licencia revocada' });
+  else if(c.lic_vence){ const d = dias(c.lic_vence); if(d <= 30) a.push({ n:2, t:`La licencia vence en ${d} día${d === 1 ? '' : 's'}` }); }
+  if(!c.ultimo_ingreso) a.push({ n:2, t:'Nadie ha ingresado todavía' });
+  else { const d = Math.floor((Date.now() - new Date(c.ultimo_ingreso).getTime()) / 864e5); if(d >= 14) a.push({ n:2, t:`Sin ingresos hace ${d} días` }); }
+  if(c.central_sin_login) a.push({ n:1, t:'Sin cuenta de Central de Alarmas' });
+  if(c.n_cias_sin_pc > 0) a.push({ n:1, t:`${c.n_cias_sin_pc} compañía${c.n_cias_sin_pc === 1 ? '' : 's'} sin cuenta de PC` });
+  if(c.n_solicitudes > 0) a.push({ n:1, t:`${c.n_solicitudes} solicitud${c.n_solicitudes === 1 ? '' : 'es'} de alta pendiente${c.n_solicitudes === 1 ? '' : 's'}` });
+  return a;
+}
+function pillLicencia(c){
+  if(!c.lic_codigo) return pill('warn', 'Sin licencia');
+  if(c.lic_estado === 'solo_lectura') return pill('bad', 'Solo lectura');
+  if(c.lic_estado === 'revocada') return pill('bad', 'Licencia revocada');
+  if(c.lic_estado === 'gracia') return pill('warn', 'En gracia');
+  const plan = nombrePlan(c.lic_plan);
+  if(c.lic_vence && dias(c.lic_vence) <= 30) return pill('warn', plan + ' · vence en ' + dias(c.lic_vence) + ' d');
+  return pill('ok', plan);
 }
 
-async function mostrarListaCuerpos(){
-  cuerpoIdResuelto = null;
-  document.getElementById('vistaDetalleCuerpo').classList.add('hidden');
-  document.getElementById('vistaListaCuerpos').classList.remove('hidden');
-
-  const { data } = await sb.from('cuerpos').select('*').order('creado_en', { ascending:false });
-  const cuerpos = data || [];
-  document.getElementById('cuerposGrid').innerHTML = cuerpos.length ? cuerpos.map(c => {
-    const fecha = new Date(c.creado_en).toLocaleDateString('es-CL', { year:'numeric', month:'short', day:'numeric' });
-    return `
-    <div class="cuerpo-card" onclick="abrirDetalleCuerpo('${c.id}')">
-      <div class="cuerpo-card-top">
-        <span class="cuerpo-card-nombre">${c.nombre_oficial}</span>
-        <span class="cuerpo-real-pill ${c.estado}">${c.estado}</span>
-      </div>
-      <div class="cuerpo-card-meta">📍 ${c.comuna}, ${c.region}</div>
-      <div class="cuerpo-card-foot"><span class="mono">${c.codigo_cuerpo || '—'}</span><span>Instalado ${fecha}</span></div>
-    </div>`;
-  }).join('') : `<div style="color:var(--text-dim); font-size:12.5px; grid-column:1/-1;">Todavía no hay ningún Cuerpo real creado en esta base de datos. Ve a la pestaña "Licencias e Instalación" para generar una licencia, activarla, y correr el Asistente de Configuración Inicial.</div>`;
+/* ===================== Resumen ===================== */
+function tarjetaCliente(c){
+  return `<div class="card click" data-act="abrirFicha" data-id="${esc(c.id)}">
+    <div class="c-top"><div class="c-nom">${esc(c.nombre_oficial)}</div>${c.estado === 'suspendido' ? pill('bad', 'Suspendido') : pill('ok', 'Activo')}</div>
+    <div class="c-meta">${esc(c.comuna)}, ${esc(c.region)} · ${pillLicencia(c)}</div>
+    <div class="c-stats"><div><b>${c.n_companias}</b>Compañías</div><div><b>${c.n_personal}</b>Bomberos</div><div><b>${c.n_carros}</b>Carros</div></div>
+    <div class="c-foot"><span>Última actividad ${esc(rel(c.ultima_actividad))}</span><span class="mono">${esc(c.codigo_cuerpo || '—')}</span></div>
+  </div>`;
+}
+function vistaResumen(){
+  const cs = S.cuerpos;
+  const activos = cs.filter(c => c.estado === 'activo').length;
+  const bomberos = cs.reduce((t, c) => t + c.n_personal, 0);
+  const enLinea = cs.reduce((t, c) => t + c.n_unidades_en_linea, 0);
+  const lista = [];
+  cs.forEach(c => alertas(c).forEach(a => lista.push({ c, ...a })));
+  lista.sort((x, y) => y.n - x.n);
+  const criticas = lista.filter(a => a.n >= 2).length;
+  return `
+  <div class="titulo"><div><h2>Resumen</h2><div class="sub">Estado de todos los clientes</div></div><button class="btn sm" data-act="recargar">Actualizar</button></div>
+  <div class="kpis">
+    <div class="kpi ok"><div class="k">Clientes activos</div><div class="v">${activos} <small>de ${cs.length}</small></div></div>
+    <div class="kpi"><div class="k">Bomberos activos</div><div class="v">${bomberos}</div></div>
+    <div class="kpi ${criticas ? 'alerta' : 'ok'}"><div class="k">Requieren atención</div><div class="v">${criticas}</div></div>
+    <div class="kpi"><div class="k">Unidades en línea ahora</div><div class="v">${enLinea}</div></div>
+  </div>
+  <div class="sec">Requiere atención</div>
+  ${lista.length ? `<div class="atn">${lista.map(a => `<div class="atn-row n${a.n}" data-act="abrirFicha" data-id="${esc(a.c.id)}"><span class="q">${esc(a.t)}</span><span class="c">${esc(a.c.nombre_oficial)}</span></div>`).join('')}</div>` : `<div class="vacio ok">Todo en orden</div>`}
+  <div class="sec">Clientes</div>
+  ${cs.length ? `<div class="grid">${cs.map(tarjetaCliente).join('')}</div>` : `<div class="vacio">Todavía no hay clientes instalados.</div>`}`;
 }
 
-function volverAListaCuerpos(){
-  mostrarListaCuerpos();
+/* ===================== Clientes ===================== */
+function vistaClientes(){
+  return `
+  <div class="titulo"><div><h2>Clientes</h2><div class="sub">${S.cuerpos.length} Cuerpo${S.cuerpos.length === 1 ? '' : 's'} de Bomberos instalado${S.cuerpos.length === 1 ? '' : 's'}</div></div></div>
+  <div class="filtros"><input type="search" id="filtroClientes" placeholder="Buscar por nombre, comuna o código…" oninput="filtrarClientes()"></div>
+  <div class="grid" id="gridClientes">${S.cuerpos.map(tarjetaCliente).join('') || '<div class="vacio" style="grid-column:1/-1">Todavía no hay clientes instalados.</div>'}</div>`;
 }
+function filtrarClientes(){
+  const q = $('filtroClientes').value.trim().toLowerCase();
+  const lista = S.cuerpos.filter(c => !q || [c.nombre_oficial, c.comuna, c.region, c.codigo_cuerpo].join(' ').toLowerCase().includes(q));
+  $('gridClientes').innerHTML = lista.map(tarjetaCliente).join('') || '<div class="vacio" style="grid-column:1/-1">Sin resultados.</div>';
+}
+async function abrirFicha(id){
+  try {
+    const f = await rpc('soporte_ficha_cuerpo', { p_cuerpo_id:id });
+    if(!f || !f.cuerpo){ toast('No se encontró ese Cuerpo', true); return; }
+    S.ficha = f; S.fichaId = id; S.tab = 'clientes';
+    try { localStorage.setItem('vigor_cuerpo_id', id); } catch(e){}
+    document.querySelectorAll('.nav').forEach(b => b.classList.toggle('on', b.dataset.nav === 'clientes'));
+    $('main').innerHTML = vistaFicha(); window.scrollTo(0, 0);
+    cargarActividadFicha(id);
+  } catch(e){ toast(msgErr(e), true); }
+}
+function estadoCuenta(tiene, ultimo){
+  if(!tiene) return pill('mute', 'Sin cuenta');
+  return pill(ultimo ? 'ok' : 'warn', ultimo ? 'Ingresó ' + rel(ultimo) : 'Nunca ingresó');
+}
+function vistaFicha(){
+  const f = S.ficha, c = f.cuerpo, p = f.personal;
+  const licA = (f.licencias || []).find(l => l.codigo === (f.licencia || {}).codigo) || (f.licencias || [])[0];
+  const resumenC = S.cuerpos.find(x => x.id === c.id);
+  const filasCuentas = [];
+  filasCuentas.push(`<tr><td><b>Central de Alarmas</b><span class="sub">Cuenta del Cuerpo</span></td><td>${estadoCuenta(c.central_tiene_login, c.central_ultimo_ingreso)}</td><td class="num">${esc(rel(c.central_ultimo_ingreso))}</td><td>—</td>
+    <td style="text-align:right">${c.central_tiene_login ? `<button class="btn sm" data-act="resetInst" data-tipo="central" data-etq="Central de Alarmas">Restablecer contraseña</button>` : `<button class="btn sm" data-act="crearCentral">Crear cuenta</button>`}</td></tr>`);
+  (f.companias || []).forEach(co => filasCuentas.push(`<tr><td><b>PC — ${esc(co.nombre)}</b><span class="sub">Compañía N° ${co.numero}</span></td><td>${estadoCuenta(co.tiene_pc, co.pc_ultimo_ingreso)}</td><td class="num">${esc(rel(co.pc_ultimo_ingreso))}</td><td>—</td>
+    <td style="text-align:right">${co.tiene_pc ? `<button class="btn sm" data-act="resetInst" data-tipo="pc" data-id="${co.numero}" data-etq="PC — ${esc(co.nombre)}">Restablecer contraseña</button>` : `<button class="btn sm" data-act="crearPC" data-id="${esc(co.id)}" data-etq="${esc(co.nombre)}">Crear cuenta</button>`}</td></tr>`));
+  (f.carros || []).forEach(k => filasCuentas.push(`<tr><td><b>${esc(k.nomenclatura)}</b><span class="sub">${esc(k.tipo || 'Carro')}${k.compania_numero ? ' · Compañía ' + k.compania_numero : ''}</span></td><td>${estadoCuenta(k.tiene_login, k.ultimo_ingreso)}</td><td class="num">${esc(rel(k.ultimo_ingreso))}</td>
+    <td>${k.en_linea ? pill('ok', 'En línea') : (k.ultima_senal ? pill('mute', 'Señal ' + rel(k.ultima_senal)) : pill('mute', 'Sin señal'))}</td>
+    <td style="text-align:right">${k.tiene_login ? `<button class="btn sm" data-act="resetInst" data-tipo="carro" data-id="${esc(k.nomenclatura)}" data-etq="Carro ${esc(k.nomenclatura)}">Restablecer contraseña</button>` : '—'}</td></tr>`));
 
-async function abrirDetalleCuerpo(id){
-  const { data, error } = await sb.from('cuerpos').select('*').eq('id', id).maybeSingle();
-  if(error || !data){ toast('No se encontró ese Cuerpo'); return; }
-  cuerpoIdResuelto = data.id;
-  localStorage.setItem('vigor_cuerpo_id', data.id);
+  const filasCias = (f.companias || []).map(co => `<tr><td><b>${esc(co.nombre)}</b><span class="sub">N° ${co.numero}</span></td><td class="num">${co.bomberos}</td><td class="num">${co.carros}</td>
+    <td style="text-align:right"><button class="btn sm" data-act="entrarComo" data-id="${esc(co.id)}" data-etq="${esc(co.nombre)}">Entrar como Admin →</button></td></tr>`).join('');
 
-  document.getElementById('vistaListaCuerpos').classList.add('hidden');
-  document.getElementById('vistaDetalleCuerpo').classList.remove('hidden');
-
-  const fecha = new Date(data.creado_en).toLocaleDateString('es-CL', { year:'numeric', month:'long', day:'numeric' });
-  document.getElementById('cuerpoRealPanel').innerHTML = `
-    <div class="cuerpo-real-titulo">Cuerpo instalado</div>
-    <div class="cuerpo-real-nombre">${data.nombre_oficial}</div>
-    <div class="cuerpo-real-meta">
-      <span>📍 ${data.comuna}, ${data.region}</span>
-      <span>👤 Superintendente: ${data.superintendente}</span>
-      <span>🗓️ Instalado el ${fecha}</span>
-      <span class="cuerpo-real-pill ${data.estado}">${data.estado}</span>
-      <button onclick="alternarEstadoCuerpo('${data.id}','${data.estado}')" style="background:${data.estado==='activo' ? 'var(--burdeo)' : 'var(--servicio)'}; border:1.5px solid ${data.estado==='activo' ? 'var(--burdeo-bright)' : 'var(--servicio)'}; color:#fff; font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:6px 14px; border-radius:5px; cursor:pointer;">${data.estado==='activo' ? '⏸ Suspender Cuerpo' : '▶ Reactivar Cuerpo'}</button>
-      ${data.estado === 'suspendido' ? `<button onclick="eliminarCuerpo('${data.id}','${data.nombre_oficial.replace(/'/g,"\\'")}')" style="background:transparent; border:1.5px solid var(--burdeo-bright); color:var(--burdeo-bright); font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:6px 14px; border-radius:5px; cursor:pointer;">🗑 Eliminar Cuerpo</button>` : ''}
+  return `
+  <button class="back" data-act="volverClientes">← Todos los clientes</button>
+  <div class="ficha-head">
+    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+      <div><h2>${esc(c.nombre_oficial)}</h2>
+        <div class="ficha-meta"><span>${esc(c.comuna)}, ${esc(c.region)}</span><span>Superintendente: ${esc(c.superintendente || '—')}</span><span>Instalado el ${esc(fecha(c.creado_en))}</span></div></div>
+      ${c.estado === 'suspendido' ? pill('bad', 'Suspendido') : pill('ok', 'Activo')}
     </div>
-    <div class="cuerpo-real-meta" style="margin-top:8px;">
-      <span>🔑 Código de Cuerpo: <b class="mono" style="color:var(--master);">${data.codigo_cuerpo || '—'}</b> — entregáselo a cada bombero nuevo para que se registre en la app.</span>
+    <div class="ficha-meta" style="margin-bottom:14px;"><span class="codigo">Código de Cuerpo <b class="mono">${esc(c.codigo_cuerpo || '—')}</b><button class="btn sm" data-act="copiar" data-txt="${esc(c.codigo_cuerpo || '')}">Copiar</button></span></div>
+    <div class="acciones">
+      <button class="btn" data-act="editarCuerpo">Editar datos</button>
+      <button class="btn" data-act="verUsuariosCuerpo">Ver usuarios</button>
+      <button class="btn" data-act="exportarCuerpo">Exportar datos</button>
+      ${c.estado === 'activo' ? `<button class="btn bad" data-act="suspenderCuerpo">Suspender Cuerpo</button>` : `<button class="btn pri" data-act="reactivarCuerpo">Reactivar Cuerpo</button><button class="btn bad" data-act="eliminarCuerpo">Eliminar Cuerpo</button>`}
     </div>
-  `;
-  await cargarDetalleCuerpo();
+  </div>
+
+  <div class="sec">Estado</div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Bomberos activos</div><div class="v">${p.activos}</div></div>
+    <div class="kpi"><div class="k">Suspendidos · De baja</div><div class="v">${p.suspendidos} <small>· ${p.de_baja}</small></div></div>
+    <div class="kpi"><div class="k">Con notificaciones activas</div><div class="v">${p.con_push} <small>de ${p.activos}</small></div></div>
+    <div class="kpi"><div class="k">Solicitudes pendientes</div><div class="v">${resumenC ? resumenC.n_solicitudes : '—'}</div></div>
+  </div>
+
+  <div class="sec"><span>Plan y paquetes</span>${licA ? `<button class="btn sm" data-act="editarLicencia" data-codigo="${esc(licA.codigo)}">Cambiar plan o paquetes</button>` : ''}</div>
+  ${licA ? bloqueLicenciaFicha(f.licencia, licA) : `<div class="vacio">Este cliente no tiene una licencia vinculada.</div>`}
+
+  <div class="sec">Cuentas de acceso</div>
+  <div class="tabla-wrap"><table><thead><tr><th>Cuenta</th><th>Estado</th><th>Último ingreso</th><th>Señal</th><th></th></tr></thead><tbody>${filasCuentas.join('')}</tbody></table></div>
+
+  <div class="sec">Compañías</div>
+  ${filasCias ? `<div class="tabla-wrap"><table><thead><tr><th>Compañía</th><th>Bomberos</th><th>Carros</th><th></th></tr></thead><tbody>${filasCias}</tbody></table></div>` : `<div class="vacio">Este Cuerpo todavía no tiene Compañías.</div>`}
+
+  <div class="sec">Herramientas del Cuerpo</div>
+  <div class="tools">${HERRAMIENTAS.map(h => `<div class="tool" data-act="abrirHerramienta" data-url="${esc(h[2])}"><div class="ic">${h[0]}</div><div><b>${esc(h[1])}</b><span>${esc(h[3])}</span></div></div>`).join('')}</div>
+
+  <div class="sec">Actividad de soporte en este cliente</div>
+  <div id="actividadFicha"><div class="vacio">Cargando…</div></div>`;
+}
+const HERRAMIENTAS = [
+  ['📦','Inventario','inventario.html','Todas las Compañías'], ['📊','Estadísticas','estadisticas.html','Agregado del Cuerpo'], ['📡','Central de Alarmas','consola_despacho.html','Consola e historial'],
+  ['🎓','Capacitación','gestion_capacitacion.html','Todos los bomberos'], ['🏅','Especialidades','gestion_especialidades.html','Todos los bomberos'], ['📋','Hojas de Vida','ficha_bombero.html','Cualquier bombero'],
+  ['🏢','Crear / Eliminar Compañía','crear_compania.html','Este Cuerpo'], ['👥','Registro de Bomberos','usuarios_sistema.html','Todas las Compañías'], ['⚙️','Configuración del Sistema','configuracion_sistema.html','Variables de este Cuerpo'],
+  ['🗂️','Registro de Auditoría del Cuerpo','registro_auditoria.html','Cambios de este Cuerpo'], ['🔑','Restablecer Contraseñas','restablecer_passwords_global.html','Cuentas del Cuerpo'], ['🎨','Identidad de la Institución','identidad_final.html','Nombre, colores']
+];
+async function cargarActividadFicha(id){
+  const { data } = await sb.from('soporte_auditoria').select('*').eq('cuerpo_id', id).order('ocurrido_en', { ascending:false }).limit(8);
+  const el = $('actividadFicha'); if(!el) return;
+  el.innerHTML = (data && data.length) ? `<div class="tabla-wrap"><table><tbody>${data.map(a => `<tr><td style="white-space:nowrap">${esc(fechaHora(a.ocurrido_en))}</td><td>${esc(etiquetaAccion(a.accion))}</td><td>${esc(a.detalle || '')}</td><td>${esc(a.admin_nombre || '')}</td></tr>`).join('')}</tbody></table></div>` : `<div class="vacio">Sin acciones de soporte registradas.</div>`;
 }
 
-async function eliminarCuerpo(cuerpoId, nombre){
-  if(!confirm(`¿Eliminar definitivamente "${nombre}"? Se borran todas sus Compañías, personal, carros, PC del Cuartel y datos. Esta acción NO se puede deshacer.`)) return;
-  if(!confirm('Confirma de nuevo: esto borra TODO lo de este Cuerpo para siempre. ¿Continuar?')) return;
-  const { error } = await sb.rpc('eliminar_cuerpo', { p_cuerpo_id: cuerpoId });
-  if(error){
-    const mensajes = { CUERPO_NO_SUSPENDIDO: 'Solo se pueden eliminar Cuerpos suspendidos — suspéndelo primero.' };
-    toast(mensajes[error.message] || ('No se pudo eliminar — ' + error.message));
-    return;
+/* ===================== acciones ===================== */
+const ACCIONES = {
+  abrirFicha:(d) => abrirFicha(d.id),
+  recargar:async () => { await cargarResumen(); render(); toast('Actualizado'); },
+  volverClientes:() => { irA('clientes'); },
+  copiar:(d) => copiar(d.txt),
+  abrirHerramienta:(d) => { window.location.href = d.url; },
+  verUsuariosCuerpo:() => { S.cuerpoUsuarios = S.fichaId; S.qUsuarios = ''; irA('usuarios'); },
+  entrarComo:(d) => abrirModal({ titulo:'Entrar como Admin', html:`<p>Vas a ver Vigor como administrador de <b>${esc(d.etq)}</b>. La entrada queda registrada.</p>`,
+    botones:[{ txt:'Cancelar' }, { txt:'Entrar', cls:'pri', fn: async () => { await logSoporte('entrar_como_admin', 'Ingreso a ' + d.etq, S.fichaId); window.location.href = 'pc_compania.html?compania=' + encodeURIComponent(d.id); } }] }),
+  editarCuerpo:() => {
+    const c = S.ficha.cuerpo;
+    abrirModal({ titulo:'Editar datos del Cuerpo', html:`
+      <div class="field"><label>Nombre oficial</label><input id="eNombre" value="${esc(c.nombre_oficial)}"></div>
+      <div class="field"><label>Comuna</label><input id="eComuna" value="${esc(c.comuna)}"></div>
+      <div class="field"><label>Región</label><input id="eRegion" value="${esc(c.region)}"></div>
+      <div class="field"><label>Superintendente</label><input id="eSuper" value="${esc(c.superintendente || '')}"></div>`,
+      botones:[{ txt:'Cancelar' }, { txt:'Guardar', cls:'pri', fn: async () => {
+        const nuevo = { nombre_oficial:$('eNombre').value.trim(), comuna:$('eComuna').value.trim(), region:$('eRegion').value.trim(), superintendente:$('eSuper').value.trim() };
+        if(!nuevo.nombre_oficial || !nuevo.comuna || !nuevo.region){ toast('Nombre, comuna y región son obligatorios', true); return false; }
+        const cambios = Object.keys(nuevo).filter(k => (nuevo[k] || '') !== (c[k] || '')).map(k => `${k}: "${c[k] || ''}" → "${nuevo[k]}"`);
+        if(!cambios.length) return;
+        const { error } = await sb.from('cuerpos').update(nuevo).eq('id', c.id);
+        if(error) throw error;
+        await logSoporte('editar_cuerpo', cambios.join('; '), c.id, nuevo.nombre_oficial);
+        toast('Datos actualizados'); await cargarResumen(); await abrirFicha(c.id);
+      } }] });
+  },
+  suspenderCuerpo:() => {
+    const c = S.ficha.cuerpo;
+    abrirModal({ titulo:'Suspender Cuerpo', html:`<p>Nadie de <b>${esc(c.nombre_oficial)}</b> va a poder iniciar sesión hasta que lo reactives.</p><div class="field"><label>Motivo</label><input id="mMotivo" placeholder="Ej. licencia vencida, pedido del cliente"></div>`,
+      botones:[{ txt:'Cancelar' }, { txt:'Suspender', cls:'bad', fn: async () => {
+        const motivo = $('mMotivo').value.trim(); if(!motivo){ toast('Escribe el motivo', true); return false; }
+        await rpc('alternar_estado_cuerpo', { p_cuerpo_id:c.id, p_estado:'suspendido' });
+        await logSoporte('suspender_cuerpo', 'Motivo: ' + motivo, c.id, c.nombre_oficial);
+        toast('Cuerpo suspendido'); await cargarResumen(); await abrirFicha(c.id);
+      } }] });
+  },
+  reactivarCuerpo: async () => {
+    const c = S.ficha.cuerpo;
+    try { await rpc('alternar_estado_cuerpo', { p_cuerpo_id:c.id, p_estado:'activo' }); await logSoporte('reactivar_cuerpo', null, c.id, c.nombre_oficial); toast('Cuerpo reactivado'); await cargarResumen(); await abrirFicha(c.id); }
+    catch(e){ toast(msgErr(e), true); }
+  },
+  eliminarCuerpo:() => {
+    const c = S.ficha.cuerpo;
+    abrirModal({ titulo:'Eliminar Cuerpo', html:`<p>Se borra para siempre <b>${esc(c.nombre_oficial)}</b>: Compañías, personal, carros, cuentas y datos. No se puede deshacer. Antes conviene exportar sus datos.</p>
+      <div class="field"><label>Escribe el nombre exacto para confirmar</label><input id="mConfirma" autocomplete="off" data-nombre="${esc(c.nombre_oficial)}" placeholder="${esc(c.nombre_oficial)}" oninput="document.getElementById('btnElim').disabled = this.value.trim() !== this.dataset.nombre"></div>`,
+      botones:[{ txt:'Cancelar' }, { txt:'Eliminar definitivamente', cls:'bad', id:'btnElim', deshabilitado:true, fn: async () => {
+        await rpc('eliminar_cuerpo', { p_cuerpo_id:c.id });
+        await logSoporte('eliminar_cuerpo', 'Cuerpo eliminado', null, c.nombre_oficial);
+        toast('Cuerpo eliminado'); await cargarResumen(); irA('clientes');
+      } }] });
+  },
+  exportarCuerpo: async (d, el) => {
+    const c = S.ficha.cuerpo; el.disabled = true; const txt = el.textContent; el.textContent = 'Exportando…';
+    try {
+      const data = await rpc('soporte_exportar_cuerpo', { p_cuerpo_id:c.id });
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `vigor-${(c.codigo_cuerpo || 'cuerpo').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      toast('Datos exportados');
+    } catch(e){ toast(msgErr(e), true); }
+    el.disabled = false; el.textContent = txt;
+  },
+  resetInst:(d) => {
+    const c = S.ficha.cuerpo;
+    abrirModal({ titulo:'Restablecer contraseña', html:`<p>Se genera una contraseña nueva para <b>${esc(d.etq)}</b> y la actual deja de funcionar.</p>`,
+      botones:[{ txt:'Cancelar' }, { txt:'Restablecer', cls:'pri', fn: async () => {
+        const r = await rpc('resetear_password_institucional_admin', { p_tipo:d.tipo, p_codigo_cuerpo:c.codigo_cuerpo, p_identificador:d.id || null });
+        const fila = Array.isArray(r) ? r[0] : r;
+        await logSoporte('reset_password', 'Contraseña restablecida — ' + (fila.r_label || d.etq), c.id, c.nombre_oficial);
+        setTimeout(() => mostrarClave(fila.r_label || d.etq, [['Código de Cuerpo', c.codigo_cuerpo], ...(d.tipo === 'pc' ? [['Compañía N°', d.id]] : []), ...(d.tipo === 'carro' ? [['Carro', d.id]] : [])], fila.r_password_temporal), 50);
+      } }] });
+  },
+  crearCentral:() => {
+    const c = S.ficha.cuerpo;
+    abrirModal({ titulo:'Crear cuenta de Central', html:`<p>Se crea el acceso de la Central de Alarmas de <b>${esc(c.nombre_oficial)}</b>.</p>`,
+      botones:[{ txt:'Cancelar' }, { txt:'Crear cuenta', cls:'pri', fn: async () => {
+        const r = await rpc('crear_login_central', { p_cuerpo_id:c.id }); const fila = Array.isArray(r) ? r[0] : r;
+        await logSoporte('crear_cuenta', 'Cuenta de Central creada', c.id, c.nombre_oficial);
+        await abrirFicha(c.id); setTimeout(() => mostrarClave('Central de Alarmas', [['Código de Cuerpo', c.codigo_cuerpo]], fila.r_password_temporal), 50);
+      } }] });
+  },
+  crearPC:(d) => {
+    const c = S.ficha.cuerpo;
+    abrirModal({ titulo:'Crear cuenta de PC', html:`<p>Se crea el acceso del PC de <b>${esc(d.etq)}</b>.</p>`,
+      botones:[{ txt:'Cancelar' }, { txt:'Crear cuenta', cls:'pri', fn: async () => {
+        const r = await rpc('crear_login_pc_cuartel', { p_compania_id:d.id }); const fila = Array.isArray(r) ? r[0] : r;
+        await logSoporte('crear_cuenta', 'Cuenta de PC creada — ' + d.etq, c.id, c.nombre_oficial);
+        const co = (S.ficha.companias || []).find(x => x.id === d.id);
+        await abrirFicha(c.id); setTimeout(() => mostrarClave('PC — ' + d.etq, [['Código de Cuerpo', c.codigo_cuerpo], ['Compañía N°', co ? co.numero : '—']], fila.r_password_temporal), 50);
+      } }] });
+  },
+  /* ---- usuarios ---- */
+  abrirUsuario:(d) => abrirUsuario(d.id),
+};
+
+/* ===================== Usuarios ===================== */
+function vistaUsuarios(){
+  return `
+  <div class="titulo"><div><h2>Usuarios</h2><div class="sub">Búsqueda en todos los clientes</div></div></div>
+  <div class="filtros">
+    <input type="search" id="qUsuarios" placeholder="Nombre, N° de registro, RUT o teléfono…" value="${esc(S.qUsuarios)}" oninput="S.qUsuarios=this.value; programarBusqueda()">
+    <select id="cuerpoUsuarios" onchange="S.cuerpoUsuarios=this.value; buscarUsuarios()"><option value="">Todos los clientes</option>${S.cuerpos.map(c => `<option value="${esc(c.id)}" ${S.cuerpoUsuarios === c.id ? 'selected' : ''}>${esc(c.nombre_oficial)}</option>`).join('')}</select>
+  </div>
+  <div id="resUsuarios"><div class="vacio">Buscando…</div></div>`;
+}
+let _bt = null;
+function programarBusqueda(){ clearTimeout(_bt); _bt = setTimeout(buscarUsuarios, 280); }
+async function buscarUsuarios(){
+  const el = $('resUsuarios'); if(!el) return;
+  try {
+    const q = S.qUsuarios, cu = S.cuerpoUsuarios;
+    const data = await rpc('soporte_buscar_usuarios', { p_q:q || null, p_cuerpo_id:cu || null });
+    if(q !== S.qUsuarios || cu !== S.cuerpoUsuarios) return;
+    S.usuarios = data || [];
+    el.innerHTML = S.usuarios.length ? `<div class="tabla-wrap"><table><thead><tr><th>Persona</th><th>Cargo</th><th>Cliente · Compañía</th><th>Estado</th><th>Último ingreso</th><th>Notific.</th></tr></thead><tbody>
+      ${S.usuarios.map(u => `<tr class="fila-click" data-act="abrirUsuario" data-id="${esc(u.id)}"><td><b>${esc(u.nombre_completo)}</b><span class="sub">N° ${u.numero_registro}</span></td><td>${esc(u.cargo)}</td>
+        <td>${esc(u.cuerpo_nombre)}<span class="sub">${esc(u.compania_nombre || 'Comandancia / Cuerpo')}</span></td><td>${pillEstadoUsuario(u)}</td><td class="num">${esc(rel(u.ultimo_ingreso))}</td>
+        <td>${u.n_push > 0 ? pill('ok', 'Activas') : pill('mute', 'No')}</td></tr>`).join('')}</tbody></table></div>
+      ${S.usuarios.length >= 80 ? '<div class="sub" style="margin-top:10px;color:var(--text-dim);font-size:12px">Se muestran los primeros 80 resultados — afina la búsqueda.</div>' : ''}` : `<div class="vacio">Sin resultados.</div>`;
+  } catch(e){ el.innerHTML = `<div class="vacio">${esc(msgErr(e))}</div>`; }
+}
+function pillEstadoUsuario(u){
+  if(u.estado === 'dado_de_baja') return pill('mute', 'De baja');
+  if(u.estado === 'suspendido') return pill('bad', 'Suspendido');
+  if(!u.tiene_cuenta) return pill('warn', 'Sin cuenta');
+  if(u.debe_cambiar_password) return pill('warn', 'Clave temporal');
+  return pill('ok', 'Activo');
+}
+function abrirUsuario(id){
+  const u = S.usuarios.find(x => x.id === id); if(!u) return;
+  const puedeEstado = u.estado !== 'dado_de_baja';
+  abrirModal({ titulo:u.nombre_completo, ancho:560, html:`<dl class="kv">
+      <dt>N° de registro</dt><dd>${u.numero_registro}</dd><dt>Cargo</dt><dd>${esc(u.cargo)}</dd>
+      <dt>Cliente</dt><dd>${esc(u.cuerpo_nombre)}</dd><dt>Compañía</dt><dd>${esc(u.compania_nombre || 'Comandancia / Cuerpo')}</dd>
+      <dt>Estado</dt><dd>${pillEstadoUsuario(u)}</dd><dt>Último ingreso</dt><dd>${u.ultimo_ingreso ? esc(fechaHora(u.ultimo_ingreso)) + ' (' + esc(rel(u.ultimo_ingreso)) + ')' : 'Nunca'}</dd>
+      <dt>Notificaciones</dt><dd>${u.n_push > 0 ? u.n_push + ' dispositivo' + (u.n_push === 1 ? '' : 's') : 'Ninguno'}</dd>
+      <dt>RUT · Teléfono</dt><dd>${esc(u.rut || '—')} · ${esc(u.telefono || '—')}</dd>
+      ${u.debe_cambiar_password ? `<dt>Clave temporal</dt><dd>${u.password_temporal_expira_en ? 'vence ' + esc(fecha(u.password_temporal_expira_en)) : 'pendiente de cambio'}</dd>` : ''}</dl>
+    <div class="acciones">
+      <button class="btn" id="uReset" ${u.tiene_cuenta ? '' : 'disabled'}>Restablecer contraseña</button>
+      <button class="btn" id="uSesiones" ${u.tiene_cuenta ? '' : 'disabled'}>Cerrar sesiones</button>
+      ${puedeEstado ? (u.estado === 'suspendido' ? `<button class="btn pri" id="uEstado">Reactivar</button>` : `<button class="btn bad" id="uEstado">Suspender</button>`) : ''}
+      <button class="btn" id="uCliente">Ver cliente</button>
+    </div>`, botones:[{ txt:'Cerrar' }] });
+  const refrescar = async () => { await buscarUsuarios(); };
+  if($('uReset')) $('uReset').onclick = () => abrirModal({ titulo:'Restablecer contraseña', html:`<p>Se genera una contraseña temporal para <b>${esc(u.nombre_completo)}</b> (N° ${u.numero_registro}). Deberá cambiarla al ingresar y vence en 7 días.</p>`,
+    botones:[{ txt:'Cancelar' }, { txt:'Restablecer', cls:'pri', fn: async () => {
+      const r = await rpc('soporte_resetear_password_personal', { p_personal_id:u.id }); const fila = Array.isArray(r) ? r[0] : r;
+      setTimeout(() => mostrarClave(u.nombre_completo, [['N° de registro', u.numero_registro], ['Cliente', u.cuerpo_nombre]], fila.r_password_temporal), 50); refrescar();
+    } }] });
+  if($('uSesiones')) $('uSesiones').onclick = () => abrirModal({ titulo:'Cerrar sesiones', html:`<p>Se cierran todas las sesiones abiertas de <b>${esc(u.nombre_completo)}</b>. Tendrá que volver a ingresar.</p>`,
+    botones:[{ txt:'Cancelar' }, { txt:'Cerrar sesiones', cls:'pri', fn: async () => { const n = await rpc('soporte_cerrar_sesiones_personal', { p_personal_id:u.id }); toast(n + ' sesión' + (n === 1 ? '' : 'es') + ' cerrada' + (n === 1 ? '' : 's')); } }] });
+  if($('uEstado')) $('uEstado').onclick = () => {
+    const suspender = u.estado !== 'suspendido';
+    abrirModal({ titulo:suspender ? 'Suspender usuario' : 'Reactivar usuario', html:`<p><b>${esc(u.nombre_completo)}</b> (N° ${u.numero_registro})</p><div class="field"><label>Motivo</label><input id="uMotivo" placeholder="Obligatorio"></div>`,
+      botones:[{ txt:'Cancelar' }, { txt:suspender ? 'Suspender' : 'Reactivar', cls:suspender ? 'bad' : 'pri', fn: async () => {
+        const motivo = $('uMotivo').value.trim(); if(!motivo){ toast('Escribe el motivo', true); return false; }
+        await rpc('soporte_cambiar_estado_personal', { p_personal_id:u.id, p_estado:suspender ? 'suspendido' : 'activo', p_motivo:motivo });
+        toast(suspender ? 'Usuario suspendido' : 'Usuario reactivado'); refrescar();
+      } }] });
+  };
+  if($('uCliente')) $('uCliente').onclick = () => { cerrarModal(); irA('clientes'); abrirFicha(u.cuerpo_id); };
+}
+
+/* ===================== Auditoría ===================== */
+const ETQ_ACCION = { reset_password:'Contraseña restablecida', suspender_cuerpo:'Cuerpo suspendido', reactivar_cuerpo:'Cuerpo reactivado', eliminar_cuerpo:'Cuerpo eliminado', editar_cuerpo:'Datos editados',
+  exportar_datos:'Datos exportados', crear_licencia:'Licencia creada', licencia_plan:'Plan cambiado', licencia_extender:'Licencia extendida', licencia_revocar:'Licencia revocada', licencia_restaurar:'Licencia restaurada', licencia_vincular:'Licencia vinculada', entrar_como_admin:'Entró como Admin', crear_cuenta:'Cuenta creada', suspender_usuario:'Usuario suspendido', reactivar_usuario:'Usuario reactivado', cerrar_sesiones:'Sesiones cerradas' };
+const etiquetaAccion = a => ETQ_ACCION[a] || a;
+function vistaAuditoria(){
+  return `
+  <div class="titulo"><div><h2>Auditoría</h2><div class="sub">Qué se hizo y quién lo hizo</div></div></div>
+  <div class="subtabs"><button class="subtab ${S.subAud === 'soporte' ? 'on' : ''}" data-act="subAud" data-v="soporte">Acciones de soporte</button><button class="subtab ${S.subAud === 'cuerpos' ? 'on' : ''}" data-act="subAud" data-v="cuerpos">Actividad de los clientes</button></div>
+  <div class="filtros">
+    <select id="audCuerpo" onchange="S.audCuerpo=this.value; cargarAuditoria()"><option value="">Todos los clientes</option>${S.cuerpos.map(c => `<option value="${esc(c.id)}" ${S.audCuerpo === c.id ? 'selected' : ''}>${esc(c.nombre_oficial)}</option>`).join('')}</select>
+    ${S.subAud === 'cuerpos' ? `<select id="audTipo" onchange="S.audTipo=this.value; cargarAuditoria()"><option value="">Todos los tipos</option>${['critico', 'modificacion', 'creacion'].map(t => `<option value="${t}" ${S.audTipo === t ? 'selected' : ''}>${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('')}</select>` : ''}
+    <input type="search" id="audTexto" placeholder="Filtrar por texto…" value="${esc(S.audTexto)}" oninput="S.audTexto=this.value; pintarAuditoria()">
+  </div>
+  <div id="resAud"><div class="vacio">Cargando…</div></div>`;
+}
+ACCIONES.subAud = (d) => { S.subAud = d.v; S.audTipo = ''; render(); };
+let _aud = [];
+async function cargarAuditoria(){
+  const el = $('resAud'); if(!el) return;
+  try {
+    let q;
+    if(S.subAud === 'soporte'){ q = sb.from('soporte_auditoria').select('*').order('ocurrido_en', { ascending:false }).limit(300); if(S.audCuerpo) q = q.eq('cuerpo_id', S.audCuerpo); }
+    else { q = sb.from('registro_auditoria').select('*').order('ocurrido_en', { ascending:false }).limit(300); if(S.audCuerpo) q = q.eq('cuerpo_id', S.audCuerpo); if(S.audTipo) q = q.eq('tipo', S.audTipo); }
+    const { data, error } = await q; if(error) throw error;
+    _aud = data || []; pintarAuditoria();
+  } catch(e){ el.innerHTML = `<div class="vacio">${esc(msgErr(e))}</div>`; }
+}
+function pintarAuditoria(){
+  const el = $('resAud'); if(!el) return;
+  const mc = mapaCuerpos(), t = S.audTexto.trim().toLowerCase();
+  const lista = _aud.filter(a => !t || JSON.stringify(a).toLowerCase().includes(t));
+  if(!lista.length){ el.innerHTML = `<div class="vacio">Sin registros.</div>`; return; }
+  if(S.subAud === 'soporte'){
+    el.innerHTML = `<div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>Acción</th><th>Detalle</th><th>Cliente</th><th>Quién</th></tr></thead><tbody>${lista.map(a => `<tr><td style="white-space:nowrap">${esc(fechaHora(a.ocurrido_en))}</td><td>${pill(a.accion.includes('eliminar') || a.accion.includes('suspender') || a.accion.includes('revocar') ? 'bad' : 'mute', etiquetaAccion(a.accion))}</td><td>${esc(a.detalle || '')}</td><td>${esc(a.cuerpo_nombre || (mc[a.cuerpo_id] || {}).nombre_oficial || '—')}</td><td>${esc(a.admin_nombre || '—')}</td></tr>`).join('')}</tbody></table></div>`;
+  } else {
+    el.innerHTML = `<div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Cliente</th><th>Quién</th></tr></thead><tbody>${lista.map(a => `<tr><td style="white-space:nowrap">${esc(fechaHora(a.ocurrido_en))}</td><td>${pill(a.tipo === 'critico' ? 'bad' : a.tipo === 'creacion' ? 'ok' : 'mute', a.tipo)}</td><td>${esc(a.detalle || '')}</td><td>${esc((mc[a.cuerpo_id] || {}).nombre_oficial || '—')}</td><td>${esc(a.usuario_label || '—')}</td></tr>`).join('')}</tbody></table></div>`;
   }
-  toast(`${nombre} eliminado`);
-  await mostrarListaCuerpos();
-  setTab('cuerpos');
 }
 
-async function alternarEstadoCuerpo(cuerpoId, estadoActual){
-  const nuevoEstado = estadoActual === 'activo' ? 'suspendido' : 'activo';
-  if(nuevoEstado === 'suspendido' && !confirm('¿Suspender este Cuerpo? Nadie va a poder iniciar sesión hasta que lo reactives.')) return;
-  const { error } = await sb.rpc('alternar_estado_cuerpo', { p_cuerpo_id: cuerpoId, p_estado: nuevoEstado });
-  if(error){ toast('No se pudo cambiar el estado — ' + error.message); return; }
-  toast(nuevoEstado === 'suspendido' ? 'Cuerpo suspendido' : 'Cuerpo reactivado');
-  await abrirDetalleCuerpo(cuerpoId);
+/* ===================== Planes y paquetes ===================== */
+async function cargarCatalogo(){
+  try {
+    const [p, pl] = await Promise.all([sb.from('vigor_paquetes').select('*').order('orden'), sb.from('vigor_planes').select('*').order('orden')]);
+    S.paquetes = p.data || []; S.planes = pl.data || [];
+  } catch(e){ S.paquetes = []; S.planes = []; }
 }
-
-async function cargarDetalleCuerpo(){
-  if(!cuerpoIdResuelto) return;
-  const { data } = await sb.from('companias')
-    .select('id, nombre, personal(estado), carros(id)')
-    .eq('cuerpo_id', cuerpoIdResuelto).order('numero');
-  const companias = (data || []).map(c => ({
-    id: c.id, n: c.nombre,
-    bomberos: (c.personal || []).filter(p => p.estado !== 'dado_de_baja').length,
-    carros: (c.carros || []).length,
-  }));
-  document.getElementById('kpiCias').textContent = companias.length;
-
-  // Cuerpo-wide, no por suma de Compañías — así incluye también al
-  // personal/carros de Comandancia (compania_id nulo), que quedaría
-  // afuera si solo se sumaran las Compañías numeradas.
-  const [{ count: bomberos }, { count: carros }, { count: solicitudes }] = await Promise.all([
-    sb.from('personal').select('id', { count:'exact', head:true }).eq('cuerpo_id', cuerpoIdResuelto).neq('estado','dado_de_baja'),
-    sb.from('carros').select('id', { count:'exact', head:true }).eq('cuerpo_id', cuerpoIdResuelto),
-    sb.from('solicitudes_alta').select('id', { count:'exact', head:true }).eq('cuerpo_id', cuerpoIdResuelto).eq('estado','pendiente'),
-  ]);
-  document.getElementById('kpiBomberos').textContent = bomberos || 0;
-  document.getElementById('kpiCarros').textContent = carros || 0;
-  document.getElementById('kpiSolicitudes').textContent = solicitudes || 0;
-
-  document.getElementById('ciasGrid').innerHTML = companias.length ? companias.map(c => `
-    <div class="cia-card">
-      <div class="cia-card-top"><span class="cia-card-nombre">${c.n}</span></div>
-      <div class="cia-card-stats">${c.bomberos} bomberos · ${c.carros} carros</div>
-      <button class="btn-entrar" onclick="window.location.href='pc_compania.html?compania=${c.id}'">Entrar como Admin →</button>
+const nombrePlan = c => { const p = S.planes.find(x => x.codigo === c); return p ? p.nombre : (c ? String(c).toUpperCase() : 'Sin plan'); };
+const nombrePaq = c => { const p = S.paquetes.find(x => x.codigo === c); return p ? p.nombre : String(c).toUpperCase(); };
+const planDe = c => S.planes.find(x => x.codigo === c);
+function chipsPaquetes(lista, extras){
+  const ex = new Set(extras || []);
+  return `<span class="pill mute" title="Gestión de la compañía">STATION</span> ` + S.paquetes.filter(p => (lista || []).includes(p.codigo))
+    .map(p => `<span class="pill ${ex.has(p.codigo) ? 'ok' : 'mute'}" title="${esc(p.descripcion)}${ex.has(p.codigo) ? ' · suelto' : ''}">${esc(p.nombre)}</span>`).join(' ');
+}
+function estadoLicencia(l){
+  const ahora = Date.now();
+  let vence = null;
+  if(l.estado === 'revocada') vence = l.revocada_en ? new Date(l.revocada_en) : new Date();
+  else if(l.vigencia_meses){ vence = new Date(l.generada_en); vence.setMonth(vence.getMonth() + l.vigencia_meses); }
+  const gracia = vence ? new Date(vence.getTime() + 15 * 864e5) : null;
+  if(l.estado === 'generada') return { pill:pill('warn', 'Sin activar'), vence, gracia };
+  if(l.estado === 'revocada') return { pill:pill('bad', ahora <= gracia ? 'Revocada · en gracia' : 'Revocada · solo lectura'), vence, gracia };
+  if(!vence || ahora <= vence.getTime()) return { pill:pill('ok', 'Activa'), vence, gracia };
+  if(ahora <= gracia.getTime()) return { pill:pill('warn', 'En gracia'), vence, gracia };
+  return { pill:pill('bad', 'Solo lectura'), vence, gracia };
+}
+function bloqueLicenciaFicha(estadoLic, l){
+  const plan = planDe(l.plan);
+  const e = estadoLic && estadoLic.estado;
+  const txtEstado = e === 'activa' ? (estadoLic.revocada ? 'Revocada' : 'Activa') : e === 'gracia' ? 'En gracia' : e === 'solo_lectura' ? 'Solo lectura' : '—';
+  const vence = estadoLic && estadoLic.vence ? new Date(estadoLic.vence) : null;
+  const txtVence = !vence ? 'Sin vencimiento' : fecha(vence) + (e === 'activa' ? ' · ' + dias(vence) + ' d' : e === 'gracia' ? ' · gracia hasta ' + fecha(estadoLic.gracia_hasta) : ' · vencida');
+  return `<div class="lic-box">
+      <div>Plan<b>${esc(plan ? plan.nombre : 'Sin plan')}</b></div>
+      <div>Estado<b>${esc(txtEstado)}</b></div>
+      <div>Vence<b style="font-size:12.5px">${esc(txtVence)}</b></div>
+      <div>Código<b class="mono" style="font-size:12px">${esc(l.codigo)}</b></div>
     </div>
-  `).join('') : `<div style="color:var(--text-dim); font-size:12.5px; grid-column:1/-1;">Este Cuerpo todavía no tiene Compañías creadas.</div>`;
+    <div style="margin-top:12px; display:flex; gap:6px; flex-wrap:wrap;">${chipsPaquetes(estadoLic && estadoLic.paquetes, l.paquetes_extra)}</div>`;
 }
 
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2800);
+/* ===================== Licencias ===================== */
+let _lics = [];
+function vistaLicencias(){
+  return `
+  <div class="titulo"><div><h2>Licencias</h2><div class="sub">Planes, paquetes y vigencia de cada cliente</div></div>
+    <div class="acciones"><button class="btn pri" data-act="nuevaLicencia">Nueva licencia</button><button class="btn" data-act="abrirHerramienta" data-url="activar_licencia.html">Activar licencia</button><button class="btn" data-act="abrirHerramienta" data-url="wizard_inicial.html">Asistente de configuración</button></div></div>
+  <div class="sec">Planes</div>
+  <div class="grid">${S.planes.map(p => `<div class="card"><div class="c-top"><div class="c-nom">${esc(p.nombre)}</div>${pill('mute', p.nivel)}</div>
+      <div style="margin-top:12px; display:flex; gap:6px; flex-wrap:wrap;">${chipsPaquetes(p.paquetes)}</div></div>`).join('')}</div>
+  <div class="sec">Paquetes</div>
+  <div class="tabla-wrap"><table><thead><tr><th>Paquete</th><th>Función</th>${S.planes.map(p => `<th style="text-align:center">${esc(p.nombre.replace('VIGOR ', ''))}</th>`).join('')}<th>Requiere</th></tr></thead><tbody>
+    <tr><td><b>STATION</b></td><td>Gestión de la compañía (siempre incluido)</td>${S.planes.map(() => `<td style="text-align:center; color:var(--ok)">●</td>`).join('')}<td>—</td></tr>
+    ${S.paquetes.map(p => `<tr><td><b>${esc(p.nombre)}</b></td><td>${esc(p.descripcion)}</td>${S.planes.map(pl => `<td style="text-align:center; color:${(pl.paquetes || []).includes(p.codigo) ? 'var(--ok)' : 'var(--line-strong)'}">${(pl.paquetes || []).includes(p.codigo) ? '●' : '○'}</td>`).join('')}<td>${esc((p.requiere || []).map(nombrePaq).join(', ') || '—')}</td></tr>`).join('')}
+  </tbody></table></div>
+  <div class="sec">Licencias emitidas</div>
+  <div id="resLic"><div class="vacio">Cargando…</div></div>`;
+}
+async function cargarLicencias(){
+  const el = $('resLic'); if(!el) return;
+  const { data, error } = await sb.from('licencias').select('*').order('generada_en', { ascending:false });
+  if(error){ el.innerHTML = `<div class="vacio">${esc(msgErr(error))}</div>`; return; }
+  _lics = data || [];
+  const mc = mapaCuerpos();
+  el.innerHTML = _lics.length ? `<div class="tabla-wrap"><table><thead><tr><th>Cliente</th><th>Código</th><th>Plan</th><th>Estado</th><th>Vence</th><th>Cuerpo vinculado</th><th></th></tr></thead><tbody>${_lics.map(l => {
+    const e = estadoLicencia(l);
+    return `<tr><td><b>${esc(l.nombre_cliente)}</b>${l.contacto ? `<span class="sub">${esc(l.contacto)}</span>` : ''}</td><td class="mono" style="font-size:12px">${esc(l.codigo)}</td>
+      <td>${esc(nombrePlan(l.plan))}${(l.paquetes_extra || []).length ? `<span class="sub">+ ${esc(l.paquetes_extra.map(nombrePaq).join(', '))}</span>` : ''}</td>
+      <td>${e.pill}</td><td>${e.vence ? esc(fecha(e.vence)) : 'Sin vencimiento'}</td>
+      <td>${l.cuerpo_id ? esc((mc[l.cuerpo_id] || {}).nombre_oficial || '—') : pill('warn', 'Sin vincular')}</td>
+      <td style="text-align:right"><button class="btn sm" data-act="editarLicencia" data-codigo="${esc(l.codigo)}">Editar</button></td></tr>`;
+  }).join('')}</tbody></table></div>` : `<div class="vacio">Todavía no hay licencias emitidas.</div>`;
+}
+function selectorExtras(planCodigo, marcados){
+  const incluidos = new Set((planDe(planCodigo) || {}).paquetes || []);
+  const libres = S.paquetes.filter(p => !incluidos.has(p.codigo));
+  return libres.length ? libres.map(p => `<label class="chk"><input type="checkbox" class="chkExtra" value="${esc(p.codigo)}" ${(marcados || []).includes(p.codigo) ? 'checked' : ''}> <div><b>${esc(p.nombre)}</b> <span>· ${esc(p.descripcion)}</span></div></label>`).join('') : `<div style="font-size:12.5px; color:var(--text-dim)">Este plan ya incluye todos los paquetes.</div>`;
+}
+function previewPaquetes(planCodigo, extras){
+  const plan = new Set((planDe(planCodigo) || {}).paquetes || []);
+  const todos = new Set([...plan, ...(extras || [])]);
+  for(let i = 0; i < 3; i++) S.paquetes.forEach(p => { if(todos.has(p.codigo)) (p.requiere || []).forEach(r => todos.add(r)); });
+  const auto = new Set([...todos].filter(c => !plan.has(c) && !(extras || []).includes(c)));
+  const incluidos = S.paquetes.filter(p => todos.has(p.codigo));
+  const fuera = S.paquetes.filter(p => !todos.has(p.codigo));
+  return `<div style="background:var(--bg); border:1px solid var(--line-strong); border-radius:10px; padding:12px 14px;">
+    <div style="font-size:11px; color:var(--ok); font-weight:700; margin-bottom:8px;">ACCESO DEL CLIENTE</div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;"><span class="pill mute">STATION</span>${incluidos.map(p => `<span class="pill ${plan.has(p.codigo) ? 'mute' : 'ok'}" title="${esc(p.descripcion)}">${esc(p.nombre)}${auto.has(p.codigo) ? ' · requerido' : ''}</span>`).join('')}</div>
+    ${fuera.length ? `<div style="font-size:11px; color:var(--text-dim); font-weight:700; margin:12px 0 8px;">BLOQUEADO</div><div style="display:flex; gap:6px; flex-wrap:wrap;">${fuera.map(p => `<span class="pill" style="background:transparent; border:1px dashed var(--line-strong); color:var(--text-dim)">${esc(p.nombre)}</span>`).join('')}</div>` : ''}
+  </div>`;
+}
+function conectarPreview(idPlan, idPrev){
+  const act = () => { const el = $(idPrev); if(el) el.innerHTML = previewPaquetes($(idPlan).value, extrasMarcados()); };
+  $('modalCuerpo').addEventListener('change', act); act();
+}
+const extrasMarcados = () => [...document.querySelectorAll('.chkExtra:checked')].map(c => c.value);
+function opcionesPlanes(sel){ return S.planes.map(p => `<option value="${esc(p.codigo)}" ${p.codigo === sel ? 'selected' : ''}>${esc(p.nombre)} · ${esc(p.nivel)}</option>`).join(''); }
+
+ACCIONES.nuevaLicencia = () => {
+  abrirModal({ titulo:'Nueva licencia', ancho:560, html:`
+    <div class="field"><label>Nombre del Cuerpo cliente</label><input id="nlCliente" placeholder="Ej. Cuerpo de Bomberos de …"></div>
+    <div class="field"><label>Contacto / Email</label><input id="nlContacto" placeholder="contacto@cuerpo.cl"></div>
+    <div class="field"><label>Vigencia</label><select id="nlVigencia"><option value="12">12 meses</option><option value="24">24 meses</option><option value="0">Sin vencimiento (uso interno / demo)</option></select></div>
+    <div class="field"><label>Plan base</label><select id="nlPlan">${opcionesPlanes('enterprise')}</select></div>
+    <div class="field"><label>Paquetes sueltos (se suman al plan)</label><div id="nlExtras">${selectorExtras('enterprise', [])}</div></div>
+    <div id="nlPrev"></div>`,
+    botones:[{ txt:'Cancelar' }, { txt:'Crear licencia', cls:'pri', fn: async () => {
+      const cliente = $('nlCliente').value.trim(); if(!cliente){ toast('Escribe el nombre del cliente', true); return false; }
+      const vig = parseInt($('nlVigencia').value, 10);
+      const codigo = await rpc('soporte_crear_licencia', { p_cliente:cliente, p_contacto:$('nlContacto').value.trim() || null, p_vigencia_meses:vig === 0 ? null : vig, p_plan:$('nlPlan').value, p_extra:extrasMarcados() });
+      setTimeout(() => abrirModal({ titulo:'Licencia creada', html:`<p>Entrégale este código a <b>${esc(cliente)}</b> para activarlo.</p><div class="clave"><div class="l">Código de activación</div><div class="v mono" style="font-size:22px">${esc(codigo)}</div></div>`,
+        botones:[{ txt:'Copiar código', fn:() => { copiar(codigo); return false; } }, { txt:'Listo', cls:'pri' }] }), 50);
+      if(S.tab === 'licencias') cargarLicencias();
+    } }] });
+  $('nlPlan').onchange = () => { $('nlExtras').innerHTML = selectorExtras($('nlPlan').value, []); };
+  conectarPreview('nlPlan', 'nlPrev');
+};
+ACCIONES.editarLicencia = async (d) => {
+  let l = _lics.find(x => x.codigo === d.codigo);
+  if(!l){ const r = await sb.from('licencias').select('*').eq('codigo', d.codigo).maybeSingle(); l = r.data; }
+  if(!l){ toast('No se encontró la licencia', true); return; }
+  const revocada = l.estado === 'revocada', sinVigencia = l.vigencia_meses == null;
+  const mc = mapaCuerpos();
+  abrirModal({ titulo:l.nombre_cliente, ancho:580, html:`
+    <dl class="kv" style="margin-bottom:10px"><dt>Código</dt><dd class="mono">${esc(l.codigo)}</dd><dt>Estado</dt><dd>${estadoLicencia(l).pill}</dd>
+      <dt>Cuerpo vinculado</dt><dd>${l.cuerpo_id ? esc((mc[l.cuerpo_id] || {}).nombre_oficial || '—') : 'Sin vincular'}</dd></dl>
+    <div class="field"><label>Plan base</label><select id="elPlan">${opcionesPlanes(l.plan)}</select></div>
+    <div class="field"><label>Paquetes sueltos (se suman al plan)</label><div id="elExtras">${selectorExtras(l.plan, l.paquetes_extra)}</div></div>
+    <div id="elPrev"></div>
+    <div class="sec" style="margin-top:18px">Otras acciones</div>
+    <div class="acciones">
+      ${sinVigencia ? '' : `<button class="btn sm" id="elMas6">Extender 6 meses</button><button class="btn sm" id="elMas12">Extender 12 meses</button>`}
+      ${revocada ? `<button class="btn sm" id="elRestaurar">Restaurar licencia</button>` : `<button class="btn sm bad" id="elRevocar">Revocar</button>`}
+      ${l.cuerpo_id ? '' : `<select id="elCuerpo" style="background:var(--panel-alt);border:1.5px solid var(--line-strong);border-radius:8px;color:var(--text);padding:6px 10px;font-size:12px"><option value="">Vincular a un Cuerpo…</option>${S.cuerpos.map(c => `<option value="${esc(c.id)}">${esc(c.nombre_oficial)}</option>`).join('')}</select>`}
+    </div>`,
+    botones:[{ txt:'Cerrar' }, { txt:'Guardar plan', cls:'pri', fn: async () => {
+      await rpc('soporte_licencia_editar', { p_codigo:l.codigo, p_accion:'plan', p_plan:$('elPlan').value, p_extra:extrasMarcados() });
+      toast('Plan actualizado'); await refrescarLicencias();
+    } }] });
+  $('elPlan').onchange = () => { $('elExtras').innerHTML = selectorExtras($('elPlan').value, []); };
+  conectarPreview('elPlan', 'elPrev');
+  const accion = (id, args, msg, confirmar) => { const b = $(id); if(!b) return; b.onclick = async () => {
+    if(confirmar && !window.confirm(confirmar)) return;
+    try { await rpc('soporte_licencia_editar', Object.assign({ p_codigo:l.codigo }, args)); toast(msg); cerrarModal(); await refrescarLicencias(); } catch(e){ toast(msgErr(e), true); } }; };
+  accion('elMas6', { p_accion:'extender', p_meses:6 }, 'Licencia extendida 6 meses');
+  accion('elMas12', { p_accion:'extender', p_meses:12 }, 'Licencia extendida 12 meses');
+  accion('elRevocar', { p_accion:'revocar' }, 'Licencia revocada', 'Se revoca la licencia: el cliente tiene 15 días de gracia y luego pasa a solo lectura. ¿Continuar?');
+  accion('elRestaurar', { p_accion:'restaurar' }, 'Licencia restaurada');
+  if($('elCuerpo')) $('elCuerpo').onchange = async () => { const id = $('elCuerpo').value; if(!id) return;
+    try { await rpc('soporte_licencia_editar', { p_codigo:l.codigo, p_accion:'vincular', p_cuerpo_id:id }); toast('Licencia vinculada'); cerrarModal(); await refrescarLicencias(); } catch(e){ toast(msgErr(e), true); } };
+};
+async function refrescarLicencias(){
+  await cargarResumen();
+  if(S.tab === 'licencias') await cargarLicencias();
+  else if(S.tab === 'clientes' && S.fichaId) await abrirFicha(S.fichaId);
 }
 
-chequearSesionInicial();
+/* ===================== Dispositivos ===================== */
+const ETQ_DISP = { tablet:'Tablet', pc:'PC de cuartel', central:'Central', celular:'Celular' };
+const diasDesde = d => d ? Math.floor((Date.now() - new Date(d).getTime()) / 864e5) : null;
+function problemaDisp(x){ const lim = x.tipo === 'celular' ? 14 : 7; const dd = diasDesde(x.ultimo_ingreso); return dd === null || dd >= lim; }
+function vistaDispositivos(){
+  return `
+  <div class="titulo"><div><h2>Dispositivos</h2><div class="sub">Tablets, PC de cuartel, Central y celulares con notificaciones</div></div><button class="btn sm" data-act="recargarDisp">Actualizar</button></div>
+  <div class="kpis" id="kpisDisp"></div>
+  <div class="filtros" style="margin-top:18px">
+    <select id="dTipo" onchange="S.dispTipo=this.value; pintarDispositivos()"><option value="">Todos los tipos</option>${Object.keys(ETQ_DISP).map(t => `<option value="${t}" ${S.dispTipo === t ? 'selected' : ''}>${ETQ_DISP[t]}</option>`).join('')}</select>
+    <select id="dCuerpo" onchange="S.dispCuerpo=this.value; pintarDispositivos()"><option value="">Todos los clientes</option>${S.cuerpos.map(c => `<option value="${esc(c.id)}" ${S.dispCuerpo === c.id ? 'selected' : ''}>${esc(c.nombre_oficial)}</option>`).join('')}</select>
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); white-space:nowrap"><input type="checkbox" id="dProb" ${S.dispProblemas ? 'checked' : ''} onchange="S.dispProblemas=this.checked; pintarDispositivos()"> Solo con problemas</label>
+  </div>
+  <div id="resDisp"><div class="vacio">Cargando…</div></div>`;
+}
+ACCIONES.recargarDisp = () => cargarDispositivos(true);
+async function cargarDispositivos(forzar){
+  try { if(forzar || !S.disp.length) S.disp = await rpc('soporte_dispositivos') || []; } catch(e){ toast(msgErr(e), true); S.disp = []; }
+  pintarDispositivos();
+}
+function pintarDispositivos(){
+  const el = $('resDisp'); if(!el) return;
+  const todos = S.disp;
+  const tab = todos.filter(x => x.tipo === 'tablet'), pc = todos.filter(x => x.tipo === 'pc'), cel = todos.filter(x => x.tipo === 'celular');
+  const k = $('kpisDisp');
+  if(k) k.innerHTML = `
+    <div class="kpi ok"><div class="k">Tablets en línea ahora</div><div class="v">${tab.filter(x => x.en_linea).length} <small>de ${tab.length}</small></div></div>
+    <div class="kpi"><div class="k">PC con ingreso en 7 días</div><div class="v">${pc.filter(x => !problemaDisp(x)).length} <small>de ${pc.length}</small></div></div>
+    <div class="kpi"><div class="k">Celulares con notificaciones</div><div class="v">${cel.length}</div></div>
+    <div class="kpi ${todos.filter(problemaDisp).length ? 'alerta' : 'ok'}"><div class="k">Con problemas</div><div class="v">${todos.filter(problemaDisp).length}</div></div>`;
+  const mostrados = todos.filter(x => (!S.dispTipo || x.tipo === S.dispTipo) && (!S.dispCuerpo || x.cuerpo_id === S.dispCuerpo) && (!S.dispProblemas || problemaDisp(x)))
+    .sort((a, b) => (problemaDisp(b) - problemaDisp(a)) || String(a.cuerpo_nombre).localeCompare(String(b.cuerpo_nombre)) || String(a.tipo).localeCompare(String(b.tipo)) || String(a.nombre).localeCompare(String(b.nombre)));
+  el.innerHTML = mostrados.length ? `<div class="tabla-wrap"><table><thead><tr><th>Tipo</th><th>Dispositivo</th><th>Cliente</th><th>Último ingreso</th><th>Señal / Notificaciones</th><th>Estado</th></tr></thead><tbody>
+    ${mostrados.map(x => { const dd = diasDesde(x.ultimo_ingreso);
+      const senal = x.tipo === 'tablet' ? (x.en_linea ? pill('ok', 'En línea') : (x.ultima_senal ? pill('mute', 'Señal ' + rel(x.ultima_senal)) : pill('mute', 'Sin señal'))) : x.tipo === 'celular' ? (x.n_push + ' dispositivo' + (x.n_push === 1 ? '' : 's')) : '—';
+      return `<tr><td>${esc(ETQ_DISP[x.tipo])}</td><td><b>${esc(x.nombre)}</b>${x.detalle ? `<span class="sub">${esc(x.detalle)}</span>` : ''}</td><td>${esc(x.cuerpo_nombre)}</td><td class="num">${esc(rel(x.ultimo_ingreso))}</td><td>${senal}</td>
+        <td>${problemaDisp(x) ? pill('warn', dd === null ? 'Nunca ingresó' : 'Sin conexión hace ' + dd + ' d') : pill('ok', 'Conectado')}</td></tr>`; }).join('')}</tbody></table></div>` : `<div class="vacio">Sin dispositivos para mostrar.</div>`;
+}
+
+(async function(){ const { data } = await sb.auth.getSession(); if(data.session) await onSesionValida(data.session); })();
 </script>
 </body>
 </html>
