@@ -7,6 +7,13 @@
 <script>
 // Si ya hay una sesión guardada, se salta el acceso antes de que se dibuje la pantalla (sin parpadeo).
 (function(){ try{
+  // Enlace «?salir=1»: borra cualquier sesión recordada en este dispositivo y muestra siempre el acceso.
+  if(/[?&]salir=1(&|$)/.test(location.search)){
+    var ks = []; for(var j = 0; j < localStorage.length; j++){ var kk = localStorage.key(j); if(/^sb-.*-auth-token$/.test(kk) || kk.indexOf('vigor_destino') === 0) ks.push(kk); }
+    ks.forEach(function(k){ localStorage.removeItem(k); }); try{ sessionStorage.clear(); }catch(e){}
+    history.replaceState(null, '', location.pathname);
+    return;
+  }
   var d = localStorage.getItem('vigor_destino');
   if(!d || !/^[a-z_]+\.html$/.test(d)) return;
   var hay = false, uid = '';
