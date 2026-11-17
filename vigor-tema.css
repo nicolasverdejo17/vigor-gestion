@@ -1,7 +1,7 @@
 /* Vigor — tema visual compartido (colores, tipografía, botones y banner con logo).
    Se carga al final del <head> de cada pantalla: solo cambia la apariencia,
    nunca los textos ni el funcionamiento. */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
 
 :root{
   --bg:#030B13; --panel:#061520; --panel-alt:#091D2C; --line:#0F2A3B; --line-strong:#153A52;
@@ -11,11 +11,11 @@
   --vg-grad:linear-gradient(90deg,#34B8FF,#2DD3DB 35%,#3DEBC0 60%,#35F454);
   --banner-h:56px;
 }
-html, body, *{ font-family:'Montserrat','Segoe UI',sans-serif !important; }
+html, body, *{ font-family:'Inter','Segoe UI',sans-serif !important; }
 body{ background-color:#030B13 !important; }
 h1,h2,h3{ text-transform:none !important; letter-spacing:0 !important; font-weight:700; }
 button, .btn, [class*="btn-"]{ text-transform:none !important; letter-spacing:.01em !important; }
-input, select, textarea{ font-family:'Montserrat',sans-serif !important; }
+input, select, textarea{ font-family:'Inter',sans-serif !important; }
 input:focus, select:focus, textarea:focus{ border-color:#2DD3DB !important; }
 ::-webkit-scrollbar-thumb{ background:#153A52 !important; }
 
@@ -42,7 +42,7 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
 #vigor-banner .vg-volver{
   margin:0 0 0 auto !important; flex-shrink:0; width:auto !important; position:static !important;
   display:inline-flex; align-items:center; gap:6px; white-space:nowrap; cursor:pointer; text-decoration:none;
-  padding:8px 16px !important; border-radius:12px !important; font-size:13px !important; font-weight:600 !important;
+  padding:8px 16px !important; border-radius:0 !important; font-size:13px !important; font-weight:600 !important;
   color:#EAF6FB !important; background:rgba(45,211,219,.08) !important; border:1px solid #153A52 !important; line-height:1.2;
 }
 #vigor-banner .vg-volver:hover{ border-color:#2DD3DB !important; background:rgba(45,211,219,.16) !important; }
@@ -67,15 +67,15 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
 }
 .btn-pri:hover, .btn-primary:hover, .btn-guardar:hover, .btn-guardar-ft:hover, .btn-aprobar:hover, .btn-generar:hover,
 .modal-guardar:hover, .modal-generar:hover, .modal-close:hover, .vg-grad:hover{ filter:brightness(1.1); color:#fff !important; }
-.btn-pri, .btn-primary, .btn-guardar, .modal-guardar, .vg-grad{ border-radius:12px !important; }
+.btn-pri, .btn-primary, .btn-guardar, .modal-guardar, .vg-grad{ border-radius:0 !important; }
 
 /* Barra inferior del celular: la pestaña activa como píldora con degradado */
 .tabbar-real{ background:#04101A !important; border-top:1px solid var(--line) !important; }
-.tabbar-real a{ border-radius:12px; margin:6px 3px; padding-top:7px !important; padding-bottom:5px !important; }
+.tabbar-real a{ border-radius:0; margin:6px 3px; padding-top:7px !important; padding-bottom:5px !important; }
 .tabbar-real a.active svg{ color:#fff; }
 
 /* Tarjetas y paneles */
-.panel, .card, .resumen-card, .mi-estado-card{ border-radius:16px; }
+.panel, .card, .resumen-card, .mi-estado-card{ border-radius:0; }
 
 /* ---- Pantallas más despejadas: sin textos de ayuda ni explicaciones ---- */
 .intro, .intro-nota, .concepto-nota, .sync-note, .note-box, .offline-nota, .codigo-hint, .mi-estado-hint,
@@ -102,7 +102,7 @@ body.vg-banner{ padding-top:var(--banner-h) !important; box-sizing:border-box !i
 #vigor-banner .nameplate__clock{ display:flex; align-items:center; gap:14px; color:var(--text-muted); font-size:13px; line-height:1;}
 #vigor-banner .nameplate__clock #dateline{ order:1; white-space:nowrap;}
 #vigor-banner .nameplate__clock strong{ order:2; display:block; color:var(--cyan) !important; text-shadow:0 0 14px var(--cyan-glow); font-size:22px; font-weight:700; font-family:'JetBrains Mono',monospace !important; letter-spacing:.02em;}
-#vigor-banner .crisis-btn{ font-family:'Montserrat',sans-serif !important; text-transform:none !important; letter-spacing:.01em !important; font-size:13px; font-weight:700; padding:9px 16px; border-radius:12px !important;}
+#vigor-banner .crisis-btn{ font-family:'Rajdhani','Inter',sans-serif !important; text-transform:uppercase !important; letter-spacing:.06em !important; font-size:13px; font-weight:700; padding:9px 16px; border-radius:0 !important;}
 #vigor-banner .crisis-btn + .crisis-btn::before{ display:none;}
 #vigor-banner .crisis-btn + .crisis-btn:hover{ border-color:var(--cyan) !important; color:var(--text) !important;}
 
@@ -124,7 +124,7 @@ body.vg-crisis-body{ --banner-h:88px;}
 #vigor-banner .crisis-clock, #vigor-banner .crisis-timer{ display:flex; flex-direction:column; align-items:flex-end; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); line-height:1.2; border:none; padding:0;}
 #vigor-banner .crisis-clock strong{ color:var(--cyan); text-shadow:0 0 12px var(--cyan-glow); font-size:22px; letter-spacing:.02em; font-family:'JetBrains Mono',monospace !important;}
 #vigor-banner .crisis-timer strong{ color:#FFB3BC; font-size:22px; letter-spacing:.02em; font-family:'JetBrains Mono',monospace !important;}
-#vigor-banner .btn-desactivar{ background:transparent; border:1.5px solid #C99BA3; color:#F6DCE0; font-family:'Montserrat',sans-serif !important; text-transform:none !important; letter-spacing:.01em !important; font-size:13px; font-weight:700; padding:9px 16px; border-radius:12px; cursor:pointer;}
+#vigor-banner .btn-desactivar{ background:transparent; border:1.5px solid #C99BA3; color:#F6DCE0; font-family:'Rajdhani','Inter',sans-serif !important; text-transform:uppercase !important; letter-spacing:.06em !important; font-size:13px; font-weight:700; padding:9px 16px; border-radius:0 !important; cursor:pointer;}
 #vigor-banner .btn-desactivar:hover{ background:rgba(241,55,70,.12); border-color:#F13746;}
 @media (max-width:900px){ #vigor-banner .crisis-clock{ display:none;} #vigor-banner .vg-crisis-der{ gap:12px;} }
 
@@ -159,8 +159,8 @@ html body .central-tabs{
 @media (min-width:900px){ html body .central-tabs{ padding:10px 28px !important; } }
 html body .central-tabs .central-tab{
   flex:none; height:34px; display:inline-flex; align-items:center; margin:0; padding:0 14px !important; box-sizing:border-box;
-  font-family:'Montserrat',sans-serif !important; font-weight:700 !important; font-size:12px !important; letter-spacing:.04em !important; text-transform:uppercase !important;
-  border-radius:8px !important; border:1px solid var(--line-strong); background:var(--panel); color:var(--text-muted);
+  font-family:'Rajdhani','Inter',sans-serif !important; font-weight:700 !important; font-size:13px !important; letter-spacing:.06em !important; text-transform:uppercase !important;
+  border-radius:0 !important; border:1px solid var(--line-strong); background:var(--panel); color:var(--text-muted);
   white-space:nowrap; text-decoration:none; cursor:pointer;
 }
 html body .central-tabs .central-tab:hover{ border-color:var(--cyan); color:#fff; }

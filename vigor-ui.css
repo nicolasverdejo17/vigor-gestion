@@ -26,7 +26,9 @@ html body :is(#clk,#clock,#relojReal,.clock strong,.nameplate__clock strong,.cri
 }
 /* título del banner */
 html body #vigor-banner-titulo{ font-family:var(--ui-titulo) !important; font-weight:700; font-size:21px; letter-spacing:.04em; text-transform:uppercase; font-size-adjust:0.5; }
-html body h1{ font-size:26px; } html body h2{ font-size:22px; } html body h3{ font-size:16px; } html body :is(h1,h2,h3){ font-weight:700; line-height:1.15; }
+html body h1{ font-size:26px !important; } html body h2{ font-size:22px !important; } html body h3{ font-size:15px !important; } html body h4{ font-size:13px !important; }
+html body :is(h1,h2,h3,h4){ font-weight:700 !important; line-height:1.15; letter-spacing:.05em; }
+html body #vigor-banner-titulo{ font-size:21px !important; }
 
 /* ================= Esquinas rectas ================= */
 html body :is(button,input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea,table,.btn,[class*="btn-"],[class*="-btn"],a[class*="btn"],
@@ -38,12 +40,12 @@ html body :is(button,input:not([type=checkbox]):not([type=radio]):not([type=rang
 html body .mini-btn, html body .pill, html body [class*="pill"]{ border-radius:999px !important; }
 
 /* ================= Botones ================= */
-html body :is(button,input[type=button],input[type=submit],.btn,a[class*="btn"],[class*="btn-"]:not(.btn-back),.back-btn):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="remove"]):not([class*="close"]):not([class*="cat-tab-accion"]):not([class*="tipo-"]):not(.tab-btn):not(.nav-item):not(.nav):not([role=tab]):not(.subcat-chip):not(.cat-tab){
+html body :is(button,input[type=button],input[type=submit],.btn,a[class*="btn"],[class*="btn-"]:not(.btn-back),.back-btn):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="remove"]):not([class*="close"]):not([class*="cat-tab-accion"]):not([class*="tipo-"]):not(.tab-btn):not(.nav-item):not(.nav):not(.it):not([role=tab]):not(.subcat-chip):not(.cat-tab){
   font-weight:700 !important; font-size:14px !important; text-transform:uppercase !important; line-height:1.15;
   min-height:40px; padding:0 18px; display:inline-flex; align-items:center; justify-content:center; gap:8px; border-width:1.5px; border-style:solid;
 }
 /* secundario: contorno */
-html body :is(button,.btn,a[class*="btn"]):not(.vg-grad):not(.ui-pri):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="remove"]):not([class*="close"]):not([class*="cat-tab-accion"]):not([class*="tipo-"]):not(.tab-btn):not(.nav-item):not(.nav):not(.subcat-chip):not(.cat-tab):not(.crisis-btn):not([class*="peligro"]):not([class*="danger"]){
+html body :is(button,.btn,a[class*="btn"]):not(.vg-grad):not(.ui-pri):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="remove"]):not([class*="close"]):not([class*="cat-tab-accion"]):not([class*="tipo-"]):not(.tab-btn):not(.nav-item):not(.nav):not(.it):not(.subcat-chip):not(.cat-tab):not(.crisis-btn):not([class*="peligro"]):not([class*="danger"]){
   background-color:var(--ui-panel); border-color:var(--ui-line2); color:var(--ui-tx);
 }
 html body :is(button,.btn,a[class*="btn"]):not(.vg-grad):not(.ui-pri):not(.mini-btn):not(.estado-btn):not(.reg-add-btn):not([class*="peligro"]):not([class*="danger"]):hover{ border-color:var(--ui-cy); color:var(--ui-cy); }
@@ -93,3 +95,22 @@ html body :is(.pill,[class*="pill"],.tag,[class*="status-badge"],[class*="estado
 
 /* banner: botón Volver y accesos con esquina recta */
 html body #vigor-banner :is(.vg-volver,a,button){ border-radius:0 !important; }
+
+/* ================= Clima y Mapa Comunal: su banner y pestañas propios, con el formato estándar ================= */
+html body:not(.embed){ --bh:62px; }
+html body #ban{ padding:0 28px !important; background:linear-gradient(180deg,#07192A,#030B13) !important; border-bottom:1px solid var(--ui-line) !important; }
+html body #ban img{ height:42px !important; }
+html body #ban .sep{ width:1.5px; height:24px; background:var(--ui-line2); margin:0 14px 0 0; }
+html body #ban .t{ font-family:var(--ui-titulo) !important; font-size:21px !important; font-weight:700 !important; letter-spacing:.04em; text-transform:uppercase; font-size-adjust:0.5; }
+html body #ban .reloj{ order:2; margin-left:auto !important; }
+html body #ban .volver{ order:3; margin-left:18px !important; font-family:var(--ui-titulo) !important; font-weight:700; font-size:13px !important; letter-spacing:.06em; border:1.5px solid var(--ui-line2) !important; border-radius:0 !important; background:var(--ui-panel) !important; padding:0 16px !important; min-height:34px; display:inline-flex; align-items:center; }
+html body #ban .volver:hover{ border-color:var(--ui-cy) !important; color:var(--ui-cy); }
+html body #ctabs{ border-bottom:1px solid var(--ui-line) !important; }
+html body #ctabs a{ font-family:var(--ui-titulo) !important; font-weight:700 !important; font-size:13px !important; letter-spacing:.06em !important; border-radius:0 !important; border:1px solid var(--ui-line2) !important; background:var(--ui-panel) !important; color:var(--ui-mu) !important; }
+html body #ctabs a:hover{ border-color:var(--ui-cy) !important; color:#fff !important; }
+html body #ctabs a.on{ background:var(--ui-grad) !important; border-color:transparent !important; color:#04121C !important; }
+html body :is(.pn,.pn-h,.pn-b,.cap,.sw,#msg,#capas,#panel,#ptab,.leg,[class*="leyenda"],[class*="chip"]):not([class*="dot"]){ border-radius:0 !important; }
+
+/* últimos restos: iconos, selectores y avisos con esquina recta; las pastillas del modo crisis con la letra estándar */
+html body :is(.tool-ico-badge,.carro-badge,.sw-color,.foto-upload,[class*="radio-opt"],[class*="obs-item"],[class*="feed-item"],[class*="-item"]:not([class*="dot"]),.act-fecha,.cat-opt){ border-radius:0 !important; }
+html body span.estado-pill, html body .estado-pill{ font-family:var(--ui-texto) !important; }
