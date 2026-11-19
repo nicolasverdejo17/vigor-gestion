@@ -104,7 +104,6 @@
     }
     if(ops) der.appendChild(ops);
     if(con) der.appendChild(con);
-    var engranaje = franja.querySelector('.btn-engranaje'); if(engranaje) der.appendChild(engranaje);   // engranaje de «Sonidos del Cuerpo» (Consola de Despacho)
     der.appendChild(reloj);
     banner.appendChild(der);
     franja.classList.add('vg-franja-oculta');

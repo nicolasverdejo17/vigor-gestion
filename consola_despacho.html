@@ -266,10 +266,6 @@
   .subclave-btn.on{ background:var(--brass-dim); border-color:var(--brass-bright); color:#fff;}
 
 
-  .btn-engranaje{ width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted); cursor:pointer; padding:0; flex-shrink:0; }
-  html body .btn-engranaje{ padding:0 !important; min-height:40px; width:40px; }
-  .btn-engranaje:hover{ border-color:var(--cyan); color:var(--cyan); }
-  .btn-engranaje svg{ width:20px; height:20px; }
   .modal-box-sonidos{ background:var(--panel); border:1.5px solid var(--line-strong); padding:24px 26px; width:100%; max-width:640px; max-height:86vh; overflow-y:auto; }
   .modal-box-sonidos h3{ font-family:'Rajdhani',sans-serif; font-size:19px; margin:0 0 4px; letter-spacing:.04em; text-transform:uppercase; }
   .modal-box-sonidos .modal-sub{ font-size:12px; color:var(--text-muted); margin-bottom:16px; line-height:1.5; }
@@ -402,6 +398,50 @@
   html body .ubic-btn:hover{ border-color:#2DD3DB !important; }
   html body .ubic-btn.on{ background:rgba(45,211,219,.14) !important; border:1px solid #2DD3DB !important; color:#fff !important; }
   html body .field input[type=text]{ border-radius:0; border:1px solid #153A52; background:#091D2C; font-family:'Montserrat',sans-serif; }
+
+  /* ---- Selección clara: lo elegido queda VERDE (compañías, carros, tipos de emergencia, llamados); confirmar despacho en ROJO ---- */
+  html body .central-tabs .btn-sonidos{ margin-left:auto; flex:none; min-height:34px; height:34px; padding:0 14px; white-space:nowrap; }
+  html body .cia-btn.tiene, html body .cia-btn.on, html body .carro-btn.on, html body .emergencia-btn.on, html body .subclave-btn.on{
+    background:rgba(57,255,20,.16) !important; border:1px solid #39FF14 !important; border-left:3px solid #39FF14 !important; color:#fff !important;
+    box-shadow:0 0 0 1px rgba(57,255,20,.25) inset;
+  }
+  html body .carro-btn.on .code, html body .emergencia-btn.on .code{ color:#39FF14 !important; }
+  html body .carro-btn.on .desc, html body .emergencia-btn.on .desc{ color:#EAF6FB !important; }
+  html body button.btn-confirmar.btn-confirmar{ background:#F13746 !important; border:1px solid #F13746 !important; color:#fff !important; }
+  html body button.btn-confirmar.btn-confirmar:hover{ background:#FF4A58 !important; filter:none; }
+  /* alertas especiales: lo no elegido apagado, lo elegido verde sólido */
+  html body .alerta-cia-chip{ background:#07121B !important; border:1px solid #153A52 !important; color:#7B99A3 !important; border-radius:0 !important; opacity:.85; }
+  html body .alerta-cia-chip:hover{ border-color:#8FB0C2 !important; color:#fff !important; opacity:1; }
+  html body .alerta-cia-chip.on{ background:#39FF14 !important; border-color:#39FF14 !important; color:#0D2206 !important; opacity:1; font-weight:800; }
+  html body .selected-chip{ background:rgba(57,255,20,.14) !important; border:1px solid #39FF14 !important; color:#fff !important; }
+  html body .selected-chip button{ color:#39FF14 !important; }
+  html body .alerta-confirm{ background:#F13746 !important; border:none !important; color:#fff !important; border-radius:0 !important; }
+
+  html body .cia-btn.activa:not(.tiene){ border-color:#E3F0F6 !important; box-shadow:0 0 0 1px rgba(227,240,246,.35) inset; }
+  html body .cia-btn.activa.tiene{ box-shadow:0 0 0 2px rgba(57,255,20,.45) inset; }
+  html body .cia-btn .cia-n{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; margin-left:10px; padding:0 6px; background:#39FF14; color:#0D2206; font:800 12px 'Rajdhani',sans-serif; vertical-align:middle; }
+  /* tarjetas de carros y de tipos de emergencia: con aire, texto a la izquierda y el nombre sin apretarse */
+  html body .carro-select{ grid-template-columns:repeat(auto-fill,minmax(190px,1fr)) !important; gap:10px !important; margin-top:14px !important; }
+  html body .emergencia-grid{ grid-template-columns:repeat(auto-fill,minmax(230px,1fr)) !important; gap:10px !important; margin-top:10px !important; }
+  html body .carro-btn, html body .emergencia-btn{
+    min-height:84px !important; padding:16px 18px !important; gap:8px !important; text-align:left !important;
+    align-items:flex-start !important; justify-content:center !important; height:auto !important;
+  }
+  html body .carro-btn .code, html body .emergencia-btn .code{ font-size:24px !important; line-height:1.05 !important; }
+  html body .carro-btn .desc, html body .emergencia-btn .desc{ font-size:12px !important; line-height:1.35 !important; letter-spacing:.06em !important; text-align:left !important; white-space:normal !important; }
+  html body .selected-block{ padding:14px 16px !important; }
+
+  /* operadores en turno: nombre a la izquierda sin contorno, espacio amplio para el N° de registro; se marca solo con Enter */
+  html body .operador-row{ gap:16px !important; justify-content:flex-end; }
+  html body .operadores-lista{ gap:14px !important; max-width:360px !important; justify-content:flex-start !important; }
+  html body .operador-chip, html body #vigor-banner .operador-chip{ background:none !important; border:none !important; border-radius:0 !important; padding:0 !important; color:#EAF6FB !important; font-family:'Rajdhani',sans-serif !important; font-weight:700 !important; font-size:15px !important; letter-spacing:.04em; }
+  html body .operador-chip.vacio{ color:#7B99A3 !important; font-weight:600 !important; }
+  html body .operador-input, html body #vigor-banner .operador-input{ width:170px !important; min-width:170px; height:38px; padding:0 14px !important; font-size:14px !important; letter-spacing:.08em; border-radius:0 !important; }
+
+  /* chips de carros elegidos: ✕ pequeña y discreta, sin caja */
+  html body .selected-chip{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px 6px 12px !important; }
+  html body .selected-chip button{ background:none !important; border:none !important; box-shadow:none !important; min-width:0 !important; min-height:0 !important; width:auto !important; height:auto !important; padding:0 2px !important; margin:0 !important; font-size:12px !important; line-height:1 !important; color:#7FBF70 !important; opacity:.8; }
+  html body .selected-chip button:hover{ color:#fff !important; opacity:1; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -437,11 +477,9 @@
           <span class="operador-label">Operadores en turno</span>
           <div class="operador-row">
             <div class="operadores-lista" id="operadoresLista"></div>
-            <input type="text" class="operador-input" id="operadorInput" placeholder="N° reg." inputmode="numeric" onkeydown="if(event.key==='Enter') marcarOperador();">
-            <button type="button" class="operador-btn" onclick="marcarOperador()">Marcar</button>
+            <input type="text" class="operador-input" id="operadorInput" placeholder="N° de registro" inputmode="numeric" onkeydown="if(event.key==='Enter') marcarOperador();">
           </div>
         </div>
-        <button type="button" class="btn-engranaje" onclick="abrirSonidos()" title="Sonidos del Cuerpo" aria-label="Sonidos del Cuerpo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M4.6 7.4l2.1 1.2M17.3 15.4l2.1 1.2M4.6 16.6l2.1-1.2M17.3 8.6l2.1-1.2"/><circle cx="12" cy="12" r="7.6"/></svg></button>
         <div class="clock"><strong id="clk">—</strong><span id="fechaHoy">—</span></div>
       </div>
     </div>
@@ -455,6 +493,7 @@
     <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge" id="tabBadgeCoords" style="display:none;">0</span></a>
     <a href="puestos_mando_activos.html" class="central-tab">Modo Crisis Compañías</a>
     <a href="historial_despacho.html" class="central-tab">Historial de Despacho</a>
+    <button type="button" class="btn-config-claves btn-sonidos" onclick="abrirSonidos()">⚙ Sonidos</button>
   </div>
 
   <div class="wrap">
@@ -483,11 +522,10 @@
         </div>
 
         <div class="field">
-          <label>1. Seleccionar Compañía</label>
+          <label>1. Compañía y carros</label>
           <div class="cia-select" id="ciaSelect"></div>
           <div class="carro-select" id="carroSelect"></div>
-          <button class="btn-add-evento" onclick="addSeleccion()">+ Agregar a Este Despacho</button>
-          <div class="selected-block" id="seleccionados"><span style="color:var(--text-dim)">Sin Compañías/carros agregados a este despacho todavía.</span></div>
+          <div class="selected-block" id="seleccionados"><span style="color:var(--text-dim)">Elige una compañía y toca los carros que salen: quedan listos para despachar.</span></div>
         </div>
 
         <div class="field">
@@ -887,61 +925,58 @@ function renderCiaStrip(){
   })();
 }
 let ciaActiva = null;
-let carrosSel = [];
 let despachoActual = []; // [{compania_id, ciaNombre, carros:[{id,nom}]}]
 
+function carrosDe(ciaId){ const d = despachoActual.find(x => x.compania_id === ciaId); return d ? d.carros : []; }
 function renderCiaSelect(){
   const el = document.getElementById('ciaSelect');
-  el.innerHTML = CIAS_DATA.map(c =>
-    `<button class="cia-btn ${ciaActiva===c.id?'on':''}" onclick="selectCia('${c.id}')">${c.nombre}</button>`
-  ).join('');
+  el.innerHTML = CIAS_DATA.map(c => {
+    const n = carrosDe(c.id).length;
+    return `<button class="cia-btn ${n ? 'tiene' : ''} ${ciaActiva === c.id ? 'activa' : ''}" onclick="selectCia('${c.id}')">${c.nombre}${n ? `<span class="cia-n">${n}</span>` : ''}</button>`;
+  }).join('');
 }
 function selectCia(id){
   ciaActiva = id;
-  carrosSel = [];
   renderCiaSelect();
   renderCarroSelect();
 }
 function renderCarroSelect(){
   const el = document.getElementById('carroSelect');
-  if(!ciaActiva){ el.innerHTML=''; return; }
-  const cia = CIAS_DATA.find(c => c.id === ciaActiva);
-  // Un carro ya agregado a este despacho (en cualquier Compañía ya
-  // confirmada) no se puede volver a seleccionar — pedido explícito.
-  const carrosYaEnDespacho = despachoActual.flatMap(d => d.carros.map(x=>x.id));
-  el.innerHTML = cia.carros.map(car => {
-    const yaAgregado = carrosYaEnDespacho.includes(car.id);
-    const clase = `carro-btn ${carrosSel.includes(car.id)?'on':''} ${yaAgregado?'ya-agregado':''}`;
-    const onclick = yaAgregado ? '' : `onclick="toggleCarro('${car.id}')"`;
-    return `<button class="${clase}" ${onclick} ${yaAgregado?'disabled title="Ya agregado a este despacho"':''}><span class="code">${car.nomenclatura}</span><span class="desc">${yaAgregado ? 'Ya agregado' : car.tipo_descripcion}</span></button>`;
-  }).join('');
+  if(!ciaActiva){ el.innerHTML = ''; return; }
+  const cia = CIAS_DATA.find(c => c.id === ciaActiva); if(!cia){ el.innerHTML = ''; return; }
+  const elegidos = new Set(carrosDe(ciaActiva).map(x => x.id));
+  el.innerHTML = cia.carros.map(car =>
+    `<button class="carro-btn ${elegidos.has(car.id) ? 'on' : ''}" onclick="toggleCarro('${car.id}')"><span class="code">${car.nomenclatura}</span><span class="desc">${car.tipo_descripcion || ''}</span></button>`
+  ).join('');
 }
 function toggleCarro(id){
-  carrosSel = carrosSel.includes(id) ? carrosSel.filter(x=>x!==id) : [...carrosSel, id];
-  renderCarroSelect();
-}
-function addSeleccion(){
-  if(!ciaActiva || carrosSel.length===0){ toast('Elige una Compañía y al menos un carro'); return; }
-  const cia = CIAS_DATA.find(c => c.id === ciaActiva);
-  const carros = carrosSel.map(id => ({ id, nom: cia.carros.find(c=>c.id===id).nomenclatura }));
-  despachoActual.push({ compania_id: ciaActiva, ciaNombre: cia.nombre, carros });
-  ciaActiva = null; carrosSel = [];
+  const cia = CIAS_DATA.find(c => c.id === ciaActiva); if(!cia) return;
+  const car = cia.carros.find(c => c.id === id); if(!car) return;
+  let d = despachoActual.find(x => x.compania_id === ciaActiva);
+  if(d && d.carros.some(x => x.id === id)){
+    d.carros = d.carros.filter(x => x.id !== id);
+    if(!d.carros.length) despachoActual = despachoActual.filter(x => x !== d);
+  } else {
+    if(!d){ d = { compania_id: ciaActiva, ciaNombre: cia.nombre, carros: [] }; despachoActual.push(d); }
+    d.carros.push({ id, nom: car.nomenclatura });
+  }
   renderCiaSelect(); renderCarroSelect(); renderSeleccionados();
 }
-function quitarSeleccion(i){
-  despachoActual.splice(i,1);
-  renderSeleccionados();
-  renderCarroSelect();
+function quitarCarroDespacho(ciaId, carroId){
+  const d = despachoActual.find(x => x.compania_id === ciaId); if(!d) return;
+  d.carros = d.carros.filter(x => x.id !== carroId);
+  if(!d.carros.length) despachoActual = despachoActual.filter(x => x !== d);
+  renderCiaSelect(); renderCarroSelect(); renderSeleccionados();
 }
 function renderSeleccionados(){
   const el = document.getElementById('seleccionados');
-  if(despachoActual.length===0){
-    el.innerHTML = '<span style="color:var(--text-dim)">Sin Compañías/carros agregados a este despacho todavía.</span>';
+  if(despachoActual.length === 0){
+    el.innerHTML = '<span style="color:var(--text-dim)">Elige una compañía y toca los carros que salen: quedan listos para despachar.</span>';
     return;
   }
-  el.innerHTML = despachoActual.map((d,i) =>
-    `<span class="selected-chip">${d.ciaNombre} — ${d.carros.map(c=>c.nom).join(', ')} <button onclick="quitarSeleccion(${i})">✕</button></span>`
-  ).join('');
+  el.innerHTML = despachoActual.map(d => d.carros.map(c =>
+    `<span class="selected-chip">${c.nom} <button onclick="quitarCarroDespacho('${d.compania_id}','${c.id}')">✕</button></span>`
+  ).join('')).join('');
 }
 
 // Claves configurables — cada Cuerpo de Bomberos puede usar una
@@ -1109,8 +1144,8 @@ async function confirmarDespacho(){
   reproducirTono({ tipo:'despacho', clave: tipoSel });
   toast(`Despacho confirmado — ${despachoActual.map(d=>d.ciaNombre+': '+d.carros.map(c=>c.nom).join(',')).join(' | ')}`);
   document.getElementById('direccion').value=''; ubicQuitar();
-  despachoActual=[]; tipoSel=null;
-  renderSeleccionados(); renderEmergencias();
+  despachoActual=[]; tipoSel=null; ciaActiva=null;
+  renderSeleccionados(); renderEmergencias(); renderCiaSelect(); renderCarroSelect();
   await cargarEmergenciasEnCurso();
   renderEmergenciasEnCurso();
 }
