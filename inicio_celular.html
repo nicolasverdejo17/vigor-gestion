@@ -126,6 +126,7 @@
   }
   .mi-estado-hint{ font-size:10px; color:var(--text-dim); margin-top:9px; position:relative; z-index:1;}
 
+  .mi-estado-card{ margin-bottom:12px; }
   .section-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; font-weight:600; margin:14px 4px 8px;}
   .noti-row{ display:flex; gap:10px; background:var(--panel); border:1px solid var(--line-strong); border-radius:10px; padding:11px 13px; margin-bottom:7px;}
   .noti-ico{ font-size:16px; flex-shrink:0;}
@@ -180,30 +181,6 @@
     </div>
 
     <div class="content">
-      <div id="avisoCuotas" style="display:none; background:var(--panel); border:1px solid var(--line-strong); border-left:4px solid var(--alerta); padding:14px 16px; margin-bottom:12px;">
-        <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--alerta);" id="avisoCuotasTitulo">Cuotas pendientes</div>
-        <div style="font-size:13.5px; line-height:1.5; margin-top:4px;" id="avisoCuotasTexto"></div>
-        <div style="font-size:11.5px; color:var(--text-dim); margin-top:6px;" id="avisoCuotasVence"></div>
-      </div>
-      <div class="resumen-card">
-        <div class="resumen-title">Resumen de Guardia — Cuartel</div>
-        <div class="faro vacio" id="faro">
-          <div class="faro-haces"></div>
-          <div class="faro-orbita"></div>
-          <div id="faroAvatares"></div>
-          <div class="faro-nucleo"></div>
-        </div>
-        <div class="faro-estado" id="faroEstado"><b>—</b><span></span></div>
-        <div class="dot-titulo" id="dotTitulo" style="display:none;">Dotación por unidad</div>
-        <div class="dot-lista" id="resumenCarrosChips"></div>
-        <div class="ring-side">
-          <div class="ring-stat">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg>
-            <div class="ring-stat-txt"><div class="lbl">Al Mando</div><div class="val" id="alMandoTexto">—</div></div>
-          </div>
-        </div>
-      </div>
-
       <div class="mi-estado-card" id="miEstadoCard" onclick="window.location.href='compania_celular.html'">
         <div class="mi-estado-top" style="margin-bottom:0;">
           <div class="mi-foto" id="miIniciales">—</div>
@@ -216,8 +193,37 @@
         <div class="mi-estado-hint">Tocar para cambiar mi estado, en Compañía →</div>
       </div>
 
+      <div class="resumen-card">
+        <div class="resumen-title">Resumen de Guardia — Cuartel</div>
+        <div class="faro vacio" id="faro">
+          <div class="faro-haces"></div>
+          <div class="faro-orbita"></div>
+          <div id="faroAvatares"></div>
+          <div class="faro-nucleo"></div>
+        </div>
+        <div class="faro-estado" id="faroEstado"><b>—</b><span></span></div>
+        <div class="ring-side">
+          <div class="ring-stat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.2v1.5"/><path d="M7.5 8.6C7.5 5.4 9.5 3.6 12 3.6s4.5 1.8 4.5 5"/><path d="M5.8 8.6C5.8 10.4 8.5 11.4 12 11.4s6.2-1 6.2-2.8"/><path d="M5 21c0-4.5 3-7 7-7s7 2.5 7 7"/></svg>
+            <div class="ring-stat-txt"><div class="lbl">Al Mando</div><div class="val" id="alMandoTexto">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avisos personales (como el de cuotas): bajo el Resumen y sobre las notificaciones -->
+      <div id="avisosPersonales">
+        <div id="avisoCuotas" style="display:none; background:var(--panel); border:1px solid var(--line-strong); border-left:4px solid var(--alerta); padding:14px 16px; margin:12px 0 0;">
+          <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--alerta);" id="avisoCuotasTitulo">Cuotas pendientes</div>
+          <div style="font-size:13.5px; line-height:1.5; margin-top:4px;" id="avisoCuotasTexto"></div>
+          <div style="font-size:11.5px; color:var(--text-dim); margin-top:6px;" id="avisoCuotasVence"></div>
+        </div>
+      </div>
+
       <div class="section-label">Notificaciones recientes</div>
       <div id="notiList"><div class="noti-row"><div class="noti-txt"><span>Cargando…</span></div></div></div>
+
+      <div class="section-label" id="dotTitulo" style="display:none;">Dotación por unidad</div>
+      <div class="dot-lista" id="resumenCarrosChips"></div>
     </div>
     <div class="tabbar-real" id="tabbarReal"></div>
 

@@ -79,10 +79,19 @@
   .bombero-row .mini-btn{ font-size:9.5px; font-weight:700; text-transform:uppercase; padding:4px 8px; border-radius:9px; border:none; cursor:pointer; color:#fff;}
   .bombero-row .estado-pill{ font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.02em; padding:4px 8px; border-radius:9px; color:#fff; flex-shrink:0;}
 
-  .carros-row{ display:flex; gap:7px; flex-wrap:wrap; margin-bottom:6px;}
-  .carro-chip{ display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px; background:var(--panel); border:1.5px solid var(--servicio); padding:6px 11px; border-radius:6px; color:var(--text);}
-  .carro-chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--servicio); flex-shrink:0;}
-  .carro-chip.mant{ border-color:var(--alerta);}
+
+  .carros-row{ display:grid; grid-template-columns:repeat(auto-fill, minmax(128px, 1fr)); gap:8px; margin-bottom:6px;}
+  .carro-tile{ display:flex; flex-direction:column; gap:3px; background:var(--panel); border:1px solid var(--line-strong); border-left:3px solid var(--servicio); padding:8px 11px; min-width:0;}
+  .carro-tile .nom{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; letter-spacing:.04em; line-height:1; }
+  .carro-tile .est{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .carro-tile .est i{ width:7px; height:7px; border-radius:50%; background:var(--servicio); flex-shrink:0; }
+  .carro-tile.editable{ cursor:pointer; }
+  .carro-tile.editable:hover{ border-color:var(--cyan); }
+  .reg-preview{ min-height:0; font-size:12px; color:var(--text-muted); margin:-4px 2px 10px; }
+  .reg-preview b{ color:var(--text); }
+  .reg-preview.quitar{ color:#FF7A85; } .reg-preview.agregar{ color:var(--servicio); }
+  html body .reg-add-btn{ background:#39FF14 !important; border:1.5px solid #39FF14 !important; color:#0D2206 !important; width:48px; font-size:22px; line-height:1; }
+  html body .reg-add-btn.quitar{ background:rgba(241,55,70,.2) !important; border-color:var(--burdeo) !important; color:#FF7A85 !important; }
   .reg-add-row{ display:flex; gap:8px; margin-bottom:10px;}
   .reg-add-input{
     flex:1; background:var(--panel-alt); border:1.5px solid var(--line-strong); border-radius:8px;
@@ -93,7 +102,6 @@
     background:var(--cyan-dim); border:1.5px solid var(--cyan); color:#fff; width:38px; border-radius:8px;
     font-size:18px; font-weight:700; cursor:pointer; flex-shrink:0;
   }
-  .carro-chip{ cursor:pointer;}
   .estado-selector{
     display:none; position:fixed; z-index:130;
     background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:8px;
@@ -106,7 +114,6 @@
   }
   .estado-opt-carro:hover{ background:var(--panel-alt);}
   .estado-opt-carro .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0;}
-  .carro-chip.mant::before{ background:var(--alerta);}
 
   .toast{
     position:absolute; bottom:20px; left:16px; right:16px;
@@ -164,16 +171,18 @@
         <div class="mi-estado-opciones" id="miEstadoOpciones"></div>
       </div>
 
-      <div class="section-label">Guardia Activa <span class="count" id="guardiaCount">7</span></div>
-      <div class="reg-add-row" id="regAddRow" style="display:none;">
-        <input type="text" class="reg-add-input" id="regAddInput" placeholder="N° para agregar a Guardia" inputmode="numeric" onkeydown="if(event.key==='Enter') agregarPorRegistro();">
-        <button class="reg-add-btn" onclick="agregarPorRegistro()">+</button>
-      </div>
-      <div id="guardiaList"></div>
-
       <div class="section-label">Carros</div>
       <div class="carros-row" id="carrosRow"></div>
       <div class="estado-selector" id="selCarroCel"></div>
+
+      <div class="section-label">Guardia Activa <span class="count" id="guardiaCount">7</span></div>
+      <div class="reg-add-row" id="regAddRow" style="display:none;">
+        <input type="text" class="reg-add-input" id="regAddInput" placeholder="N° de registro" inputmode="numeric" oninput="previsualizarRegistro()" onkeydown="if(event.key==='Enter') agregarPorRegistro();">
+        <button class="reg-add-btn" id="regAddBtn" onclick="agregarPorRegistro()">+</button>
+      </div>
+      <div class="reg-preview" id="regPreview"></div>
+      <div id="guardiaList"></div>
+
     </div>
     <div class="tabbar-real" id="tabbarReal"></div>
 
@@ -288,8 +297,11 @@ async function cargarCarros(){
 function renderCarros(){
   const editable = rolActivo === 'oficial';
   document.getElementById('carrosRow').innerHTML = CARROS_CEL.map((c,i) => `
-    <span class="carro-chip ${c.estado!=='servicio'?'mant':''}" style="border-color:${COLOR_ESTADO_CARRO[c.estado]}"
-      ${editable ? `onclick="abrirSelectorEstadoCarro(event, ${i})"` : ''}>${c.nom} — ${ESTADO_LABEL_CARRO[c.estado]}</span>
+    <div class="carro-tile${editable ? ' editable' : ''}" style="border-left-color:${COLOR_ESTADO_CARRO[c.estado]}"
+      ${editable ? `onclick="abrirSelectorEstadoCarro(event, ${i})"` : ''}>
+      <span class="nom">${c.nom}</span>
+      <span class="est"><i style="background:${COLOR_ESTADO_CARRO[c.estado]}"></i>${ESTADO_LABEL_CARRO[c.estado]}</span>
+    </div>
   `).join('');
 }
 function abrirSelectorEstadoCarro(ev, i){
@@ -322,28 +334,41 @@ document.addEventListener('click', () => {
   if(sel) sel.classList.remove('open');
 });
 
-// Agregar a Guardia Activa por N° de Registro — mismo toggle que el PC
-// del Cuartel (pedido explícito, solo disponible en Vista Oficial).
+// El N° de registro sirve para AGREGAR o QUITAR de la Guardia Activa: si la persona ya está en la guardia
+// se la quita (pasa a «Fuera de Servicio»); si no está, se la agrega como Disponible. Solo en Vista Oficial.
+function buscarPorRegistro(val){ return GUARDIA.find(x => String(x.reg) === String(val).trim()); }
+function previsualizarRegistro(){
+  const val = document.getElementById('regAddInput').value.trim();
+  const btn = document.getElementById('regAddBtn'), pre = document.getElementById('regPreview');
+  const b = val ? buscarPorRegistro(val) : null;
+  const enGuardia = !!b && b.estado !== 'fuera';
+  btn.textContent = enGuardia ? '−' : '+';
+  btn.classList.toggle('quitar', enGuardia);
+  pre.className = 'reg-preview' + (b ? (enGuardia ? ' quitar' : ' agregar') : '');
+  pre.innerHTML = !val ? '' : (b ? (enGuardia ? `<b>${b.n}</b> está en la guardia — se quitará` : `<b>${b.n}</b> — se agregará a la guardia`) : 'N° de registro no encontrado');
+}
 async function agregarPorRegistro(){
   marcarAccionLocal();
   const input = document.getElementById('regAddInput');
   const val = input.value.trim();
   if(!val) return;
-  const b = GUARDIA.find(x => String(x.reg) === val);
+  const b = buscarPorRegistro(val);
   if(!b){
     input.style.borderColor = 'var(--emergencia)';
     setTimeout(()=>{ input.style.borderColor = ''; }, 900);
     toast('N° de Registro no encontrado');
     return;
   }
-  const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: 'disponible' });
+  const quitar = b.estado !== 'fuera';
+  const nuevo = quitar ? 'fuera' : 'disponible';
+  const { error } = await sb.rpc('cambiar_estado_servicio', { p_personal_id: b.id, p_estado: nuevo });
   if(error){ toast('No se pudo registrar: ' + error.message); return; }
-  b.estado = 'disponible';
-  input.value = '';
-  input.style.borderColor = 'var(--servicio)';
+  b.estado = nuevo;
+  input.value = ''; previsualizarRegistro();
+  input.style.borderColor = quitar ? 'var(--burdeo)' : 'var(--servicio)';
   setTimeout(()=>{ input.style.borderColor = ''; }, 900);
   renderGuardia();
-  toast(`${b.n} agregado a Guardia Activa`);
+  toast(quitar ? `${b.n} quitado de la Guardia Activa` : `${b.n} agregado a Guardia Activa`);
 }
 
 function iniciales(n){ return n.split(' ').map(p=>p[0]).join('').toUpperCase(); }
