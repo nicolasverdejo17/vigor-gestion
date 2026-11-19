@@ -534,7 +534,7 @@ function cerrarExportModal(){
 // de asignar los Roles Funcionales (Depto. Especialidad/Capacitación/Material)
 // que opciones_celular.html ya evalúa para dar acceso a otras pantallas.
 const CARGOS_LISTA_MODAL = Array.from(document.getElementById('cargoModalCargo').options).map(o => o.value).filter(v => v !== '__manual__');
-const ROLES_FUNCIONALES_DISPONIBLES = ['Depto. Material Menor','Depto. Material Mayor','Depto. Especialidad','Depto. Capacitación'];
+const ROLES_FUNCIONALES_DISPONIBLES = ['Depto. Material Menor','Depto. Material Mayor','Inspector de Máquinas','Depto. Especialidad','Depto. Capacitación'];
 let rolesSelModal = new Set();
 
 function abrirCargoModal(){

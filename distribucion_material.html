@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIGOR - Gestiona tu compañía de forma eficiente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --brass:#C97A2E; --brass-bright:#FF9A44; --brass-dim:#8A4E1E;
+    --cyan:#49E9FF; --servicio:#3CF29A; --alerta:#FFC94D; --burdeo:#F13746; --nodisp:#42555C;
+    --acento:#39FF14;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; display:flex; flex-direction:column; min-height:100vh; }
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .app-head{ background:var(--panel); border-bottom:1px solid var(--line); padding:12px 22px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .app-head h1{ font-size:20px; }
+  .back-btn{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12.5px; padding:8px 14px; cursor:pointer; }
+
+  .barra{ padding:14px 22px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--line); background:var(--panel); }
+  .barra select{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font:600 14px 'Inter',sans-serif; padding:9px 12px; min-width:220px; max-width:100%; }
+  .barra .carro-fijo{ font-family:'Rajdhani'; font-weight:700; font-size:18px; letter-spacing:.04em; text-transform:uppercase; }
+  .modo{ margin-left:auto; font-family:'Rajdhani'; font-weight:700; font-size:12px; letter-spacing:.08em; text-transform:uppercase; padding:6px 12px; border:1.5px solid var(--line-strong); color:var(--text-muted); }
+  .modo.edita{ border-color:rgba(57,255,20,.55); color:#E7F5FA; background:rgba(57,255,20,.08); }
+
+  .contenido{ flex:1; padding:18px 22px 28px; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:18px; align-items:start; align-content:start; max-width:1280px; width:100%; margin:0 auto; }
+  @media (max-width:880px){ .contenido{ grid-template-columns:1fr; padding:14px 14px 24px; } .app-head{ padding:10px 14px; } .barra{ padding:12px 14px; }
+    .caja{ padding:12px; } }
+
+  .caja{ background:var(--panel); border:1px solid var(--line-strong); padding:16px; }
+  .caja h2{ font-size:17px; }
+
+  .zonas{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .zona-tab{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; font-size:13px; letter-spacing:.05em; text-transform:uppercase; padding:8px 12px; cursor:pointer; }
+  .zona-tab .n{ font-family:'JetBrains Mono',monospace; opacity:.7; margin-left:5px; font-size:11px; }
+  .zona-tab .sh{ display:none; }
+  .zona-tab.on{ background:rgba(57,255,20,.1); border-color:rgba(57,255,20,.6); color:#fff; }
+
+  .camion-wrap{ background:linear-gradient(180deg,#07121B,#0A1722); border:1px solid var(--line); padding:6px 4px 2px; }
+  .camion-wrap svg{ display:block; width:100%; height:auto; max-height:330px; }
+  .camion-wrap .hot{ cursor:pointer; }
+  .camion-wrap .hot:hover .forma{ stroke:#E3F0F6; }
+  .vista-sel{ display:flex; justify-content:center; gap:6px; margin:8px 0 2px; }
+
+  .chips{ display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+  .chip{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font:600 13px 'Inter',sans-serif; padding:8px 12px; cursor:pointer; display:flex; align-items:center; gap:8px; }
+  .chip .n{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); }
+  .chip.on{ background:rgba(57,255,20,.1); border-color:rgba(57,255,20,.6); }
+  .chip.mas{ border-style:dashed; color:var(--text-muted); }
+
+  .panel-cab{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px; }
+  .panel-cab .sub{ font-size:11px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; margin-bottom:3px; }
+  .panel-cab h2{ font-size:22px; }
+  .acc-mini{ display:flex; gap:6px; }
+  .ico-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted); cursor:pointer; padding:0; }
+  .ico-btn:hover{ border-color:var(--cyan); color:var(--cyan); }
+  html body .ico-btn{ padding:0; min-height:36px; width:36px; }
+  .ico-btn svg{ width:17px; height:17px; flex-shrink:0; }
+
+  .lista{ border:1px solid var(--line); }
+  .fila{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-bottom:1px solid var(--line); }
+  .fila:last-child{ border-bottom:none; }
+  .fila:nth-child(even){ background:rgba(255,255,255,.02); }
+  .fila .cod{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted); min-width:74px; }
+  .fila .nom{ flex:1; font-size:14px; font-weight:600; min-width:0; overflow-wrap:anywhere; }
+  .est{ font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:3px 9px; border-radius:10px; background:var(--nodisp); color:#fff; white-space:nowrap; }
+  .est.bueno{ background:var(--servicio); color:#04121C; } .est.regular{ background:var(--alerta); color:#04121C; } .est.malo{ background:var(--burdeo); color:#fff; }
+  .vacio{ padding:26px 14px; text-align:center; color:var(--text-muted); font-size:13.5px; border:1px dashed var(--line-strong); }
+  .acciones{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .btn{ font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:13px; min-height:40px; padding:0 16px; cursor:pointer; border:1.5px solid var(--line-strong); background:var(--panel-alt); color:var(--text); }
+  .btn.btn-primary{ background:var(--acento); border-color:var(--acento); color:#0D2206; }
+  .btn.peligro{ border-color:rgba(241,55,70,.7); color:#FF7A85; background:transparent; }
+  .btn-sacar{ min-height:32px; padding:0 10px; font-size:12px; }
+
+  .estado-msg{ padding:60px 20px; text-align:center; color:var(--text-muted); grid-column:1 / -1; }
+  .estado-msg h2{ color:var(--text); margin-bottom:8px; }
+
+  .velo{ position:fixed; inset:0; background:rgba(2,8,13,.78); z-index:100; display:none; align-items:center; justify-content:center; padding:16px; }
+  .velo.show{ display:flex; }
+  .modal{ background:var(--panel); border:1.5px solid var(--line-strong); width:100%; max-width:520px; max-height:88vh; display:flex; flex-direction:column; }
+  .modal-h{ padding:16px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .modal-h h2{ font-size:19px; }
+  .modal-b{ padding:16px 18px; overflow-y:auto; }
+  .modal-f{ padding:12px 18px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:8px; }
+  .modal input[type=text], .modal input[type=search]{ width:100%; background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font:500 15px 'Inter',sans-serif; padding:11px 12px; }
+  .modal input:focus{ outline:none; border-color:var(--cyan); }
+  .pick{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .pick:hover{ background:rgba(255,255,255,.04); }
+  .pick .nom{ flex:1; font-size:14px; font-weight:600; min-width:0; overflow-wrap:anywhere; }
+  .pick .donde{ font-size:11.5px; color:var(--text-dim); display:block; font-weight:400; margin-top:2px; }
+  .pick-lista{ border:1px solid var(--line); margin-top:10px; max-height:46vh; overflow-y:auto; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9; padding:12px 22px; font-size:14px; opacity:0; pointer-events:none; transition:all .25s; z-index:140; max-width:92vw; text-align:center; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:880px){
+    html body .barra{ flex-wrap:nowrap; gap:8px; } .barra select{ flex:1; min-width:0; min-height:40px; font-size:13.5px; padding:8px 10px; } .barra .carro-fijo{ flex:1; font-size:16px; min-width:0; }
+    html body .modo{ margin-left:0; font-size:11px; padding:7px 8px; white-space:nowrap; }
+    html body .zonas{ display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
+    html body .zona-tab{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 2px; font-size:11px; letter-spacing:0; min-width:0; }
+    html body .zona-tab .lg{ display:none; } html body .zona-tab .sh{ display:inline; } .zona-tab .n{ margin:0; font-size:10.5px; } }
+</style>
+<link rel="manifest" href="manifest-tablet.json">
+<link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+<meta name="theme-color" content="#030B13">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<link rel="stylesheet" href="vigor-tema.css">
+<link rel="stylesheet" href="vigor-ui.css">
+<script src="vigor-errores.js"></script>
+<script src="vigor-licencia.js"></script>
+<script src="vigor-tema.js" defer></script>
+</head>
+<body>
+
+<header class="app-head">
+  <button class="back-btn" onclick="volver()">← Volver</button>
+  <h1>Material</h1>
+</header>
+
+<div class="barra" id="barra" style="display:none">
+  <select id="selCarro" onchange="elegirCarro(this.value)"></select>
+  <span class="carro-fijo" id="carroFijo" style="display:none"></span>
+  <span class="modo" id="modo">Solo lectura</span>
+</div>
+
+<main class="contenido" id="contenido">
+  <div class="estado-msg" id="cargando">Cargando…</div>
+</main>
+
+<div class="velo" id="velo" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal">
+    <div class="modal-h"><h2 id="modalTitulo"></h2><button class="ico-btn" onclick="cerrarModal()" aria-label="Cerrar">✕</button></div>
+    <div class="modal-b" id="modalCuerpo"></div>
+    <div class="modal-f" id="modalPie"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vigor-sesion.js"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+const ZONAS = [
+  { k:'cabina',   t:'Cabina', s:'Cabina' },
+  { k:'techo',    t:'Techo', s:'Techo' },
+  { k:'lado_izq', t:'Lado chofer', s:'Chofer' },
+  { k:'lado_der', t:'Lado copiloto', s:'Copiloto' },
+  { k:'trasero',  t:'Trasero', s:'Trasero' }
+];
+const ZONA_TXT = Object.fromEntries(ZONAS.map(z => [z.k, z.t]));
+const ERRORES = {
+  SIN_PERMISO:'No tienes permiso para modificar la distribución de este carro',
+  PAQUETE_NO_INCLUIDO:'Esta función no está incluida en el plan del Cuerpo',
+  LICENCIA_SOLO_LECTURA:'La licencia está vencida: solo lectura',
+  ITEM_NO_DISPONIBLE:'Ese ítem no está disponible (dado de baja)',
+  ITEM_OTRA_COMPANIA:'Ese ítem pertenece a otra Compañía',
+  NOMBRE_INVALIDO:'Escribe un nombre (hasta 60 caracteres)',
+  YA_EXISTE:'Este carro ya tiene distribución'
+};
+
+let esTablet = false, carros = [], companias = {}, carro = null, puedeEditar = false;
+let comps = [], material = [];            // compartimentos y material del carro elegido
+let zona = 'lado_izq', vista = 'lado_izq', compSel = null, canal = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+function errTxt(e){ const m = (e && e.message) || ''; for(const k in ERRORES) if(m.indexOf(k) >= 0) return ERRORES[k]; return m || 'No se pudo completar'; }
+function volver(){
+  if(esTablet){ location.href = 'tablet_carro.html'; return; }
+  if(history.length > 1) history.back(); else location.href = 'opciones_celular.html';
+}
+
+/* ---------- carga ---------- */
+async function iniciar(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ location.href = 'login_registro.html'; return; }
+  const uid = session.user.id;
+
+  // ¿Es la tablet de un carro?
+  const { data: tc } = await sb.rpc('tablet_obtener_carro');
+  const fila = Array.isArray(tc) ? tc[0] : tc;
+  if(fila && fila.t_id){
+    esTablet = true;
+    const { data: cr } = await sb.from('carros').select('compania_id').eq('id', fila.t_id).maybeSingle();
+    carros = [{ id:fila.t_id, nomenclatura:fila.t_nomenclatura, tipo_descripcion:fila.t_tipo_descripcion, compania_id:cr ? cr.compania_id : null }];
+    $('carroFijo').style.display = ''; $('carroFijo').textContent = 'Carro ' + fila.t_nomenclatura + ' — ' + (fila.t_tipo_descripcion || '');
+    $('selCarro').style.display = 'none';
+  } else {
+    const { data: cs, error } = await sb.from('carros').select('id, nomenclatura, tipo_descripcion, compania_id').order('nomenclatura');
+    if(error){ return mostrarMsg('No se pudo cargar', errTxt(error)); }
+    carros = cs || [];
+    const { data: cias } = await sb.from('companias').select('id, nombre');
+    (cias || []).forEach(c => companias[c.id] = c);
+    const optC = c => `<option value="${c.id}">${esc(c.nomenclatura)}${c.tipo_descripcion ? ' — ' + esc(c.tipo_descripcion) : ''}</option>`;
+    const grupos = {}; carros.forEach(c => { (grupos[c.compania_id || ''] = grupos[c.compania_id || ''] || []).push(c); });
+    $('selCarro').innerHTML = Object.keys(grupos).map(k => `<optgroup label="${esc(k && companias[k] ? companias[k].nombre : 'Comandancia')}">${grupos[k].map(optC).join('')}</optgroup>`).join('');
+  }
+  if(!carros.length) return mostrarMsg('Sin carros', 'Todavía no hay carros creados.');
+  $('barra').style.display = '';
+
+  // Carro inicial: el de la URL, si no el de mi Compañía, si no el primero.
+  let miCia = null;
+  if(!esTablet){
+    const { data: p } = await sb.from('personal').select('compania_id').eq('auth_user_id', uid).maybeSingle();
+    miCia = p && p.compania_id;
+    if(!miCia){ const { data: c } = await sb.from('companias').select('id').eq('auth_user_id', uid).maybeSingle(); miCia = c && c.id; }
+  }
+  const pedido = new URLSearchParams(location.search).get('carro');
+  const inicial = carros.find(c => c.id === pedido) || carros.find(c => miCia && c.compania_id === miCia) || carros[0];
+  $('selCarro').value = inicial.id;
+  await elegirCarro(inicial.id);
+}
+
+function mostrarMsg(titulo, texto){
+  $('contenido').innerHTML = `<div class="estado-msg"><h2>${esc(titulo)}</h2>${esc(texto)}</div>`;
+}
+
+async function elegirCarro(id){
+  carro = carros.find(c => c.id === id); if(!carro) return;
+  if(canal){ sb.removeChannel(canal); canal = null; }
+  const { data: pe } = await sb.rpc('puede_editar_material', { p_carro: id });
+  puedeEditar = pe === true;
+  const m = $('modo'); m.textContent = puedeEditar ? 'Puedes editar' : 'Solo lectura'; m.classList.toggle('edita', puedeEditar);
+  await recargar(true);
+  canal = sb.channel('material-' + id)
+    .on('postgres_changes', { event:'*', schema:'public', table:'carro_compartimentos', filter:'carro_id=eq.' + id }, () => recargar())
+    .on('postgres_changes', { event:'*', schema:'public', table:'carro_material', filter:'carro_id=eq.' + id }, () => recargar())
+    .subscribe();
+}
+
+async function recargar(primera){
+  const [rc, rm] = await Promise.all([
+    sb.from('carro_compartimentos').select('id, zona, nombre, orden').eq('carro_id', carro.id).order('orden'),
+    sb.from('carro_material').select('id, compartimento_id, item_id, inventario_items(codigo, nombre, estado)').eq('carro_id', carro.id)
+  ]);
+  if(rc.error || rm.error){ return mostrarMsg('No se pudo cargar la distribución', errTxt(rc.error || rm.error)); }
+  comps = rc.data || []; material = rm.data || [];
+  if(!compSel || !comps.some(c => c.id === compSel)){
+    const z = comps.filter(c => c.zona === zona)[0] || comps[0];
+    if(z){ compSel = z.id; zona = z.zona; if(zona === 'lado_izq' || zona === 'lado_der') vista = zona; } else compSel = null;
+  }
+  render();
+}
+
+/* ---------- dibujo del camión ---------- */
+const orden = z => comps.filter(c => c.zona === z).sort((a, b) => a.orden - b.orden);
+const cuenta = id => material.filter(m => m.compartimento_id === id).length;
+const cuentaZona = z => orden(z).reduce((s, c) => s + cuenta(c.id), 0);
+
+function svgCamion(){
+  // Estilo del camión de «Crear carro» (silueta con degradado azul→verde y detalles recortados en oscuro),
+  // dibujado a medida: escalera/techo, trasero, gavetas con persiana, panel de bomba, cabina y ruedas.
+  const izq = vista === 'lado_izq', W = 640;
+  const X = x => izq ? W - x : x;
+  const act = z => zona === z ? ' act' : '';
+  const txt = (x, y, t, cls, extra = '') => `<text x="${X(x)}" y="${y}" text-anchor="middle" class="${cls}" ${extra}>${t}</text>`;
+  const CAB = 'M440,206 V98 Q440,82 456,82 H560 L604,126 Q612,134 612,146 V206 Z';
+  let s = `<svg viewBox="0 40 640 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Camión de bomberos">
+  <defs><linearGradient id="gc" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="640" y2="0"><stop offset="0" stop-color="#34B8FF"/><stop offset=".5" stop-color="#2DD3DB"/><stop offset="1" stop-color="#35F454"/></linearGradient></defs>
+  <style>
+    .sil{ fill:url(#gc); } .osc{ fill:#07121B; } .tr{ fill:none; stroke:url(#gc); stroke-width:4; stroke-linejoin:round; }
+    .ln{ fill:none; stroke:#07121B; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; } .lf{ fill:none; stroke:#07121B; stroke-width:1.3; opacity:.5; }
+    .hot{ cursor:pointer; } .hot .ov{ fill:transparent; stroke:none; transition:fill .12s; } .hot:hover .ov{ fill:rgba(255,255,255,.2); }
+    .act .ov{ fill:rgba(255,255,255,.38) !important; stroke:#fff; stroke-width:3; }
+    .gav .ov{ fill:rgba(7,18,27,.08); stroke:#07121B; stroke-width:3.2; } .gav:hover .ov{ fill:rgba(255,255,255,.28); }
+    .gav.sel .ov{ fill:#39FF14 !important; stroke:#07121B; } .gav.off{ opacity:.85; }
+    .tg{ font:700 15px Rajdhani,sans-serif; fill:#fff; pointer-events:none; } .tc{ font:700 10px 'JetBrains Mono',monospace; fill:#8FB0C2; pointer-events:none; }
+    .tl{ font:700 12.5px Rajdhani,sans-serif; letter-spacing:.1em; fill:#07121B; pointer-events:none; text-transform:uppercase; }
+    .tk{ font:700 10.5px 'JetBrains Mono',monospace; fill:#07121B; pointer-events:none; }
+    .tx{ font:700 12.5px Rajdhani,sans-serif; letter-spacing:.1em; fill:#E3F0F6; pointer-events:none; text-transform:uppercase; }
+    .tag{ cursor:pointer; } .tag rect{ fill:#07121B; stroke:#2A4A5C; stroke-width:1.5; transition:stroke .12s; } .tag:hover rect{ stroke:#E3F0F6; }
+    .tag text{ font:700 13px Rajdhani,sans-serif; fill:#fff; letter-spacing:.07em; text-transform:uppercase; pointer-events:none; } .tag .c{ font:600 10.5px 'JetBrains Mono',monospace; fill:#8FB0C2; letter-spacing:0; }
+    .tag.on rect{ fill:rgba(57,255,20,.14); stroke:#39FF14; stroke-width:2; } .tag.off{ opacity:.8; }
+  </style>
+  <line x1="0" y1="246" x2="640" y2="246" stroke="#1C3B49" stroke-width="2"/>
+  <g transform="${izq ? 'translate(640,0) scale(-1,1)' : ''}">
+    <path class="sil" d="M32,86 H378 V206 H32 Z"/>
+    <path class="sil" d="M12,98 H34 V206 H12 Z"/>
+    <path class="sil" d="M382,72 H438 V206 H382 Z"/>
+    <path class="sil" d="${CAB}"/>
+    <rect class="sil" x="498" y="70" width="34" height="13" rx="3"/><path class="ln" d="M506,76 H524"/>
+    <path class="osc" d="M452,94 H514 Q518,94 518,98 V138 H452 Z M526,94 H556 L592,134 H526 Z"/>
+    <path class="ln" d="M520,92 V190 M450,190 H514"/><path class="ln" d="M462,152 H478"/>
+    <path class="sil" d="M598,100 H610 V124 H598 Z"/><path class="ln" d="M598,102 H610 V122 H598 Z M596,112 H590"/>
+    <path class="ln" d="M600,156 H610 M600,163 H610 M600,170 H610"/>
+    <rect x="606" y="138" width="6" height="12" fill="rgba(255,255,255,.8)"/><rect x="598" y="184" width="18" height="16" fill="rgba(255,255,255,.5)"/>
+    <path class="ln" d="M442,102 H446 M442,130 H446"/>
+    <path class="ln" d="M388,100 H432 V196 H388 Z M392,78 H428 V86 H392 Z M396,82 H400 M404,82 H408 M412,82 H416 M420,82 H424"/>
+    <circle class="ln" cx="402" cy="122" r="8"/><circle class="ln" cx="420" cy="122" r="8"/><path class="ln" d="M402,122 L405,118 M420,122 L417,118"/>
+    <path class="ln" d="M392,142 H400 M404,142 H412 M416,142 H424 M392,150 H400 M404,150 H412 M416,150 H424"/>
+    <circle class="osc" cx="396" cy="168" r="3"/><circle class="osc" cx="408" cy="168" r="3"/><circle class="osc" cx="420" cy="168" r="3"/><circle class="ln" cx="410" cy="184" r="6"/>
+    <path class="tr" d="M44,78 L60,56 L76,78 L92,56 L108,78 L124,56 L140,78 L156,56 L172,78 L188,56 L204,78 L220,56 L236,78 L252,56 L268,78 L284,56 L300,78 L316,56 L332,78 L348,56 L364,78"/>
+    <rect class="sil" x="38" y="52" width="336" height="6"/><rect class="sil" x="38" y="76" width="336" height="6"/><rect class="sil" x="36" y="52" width="6" height="30"/><rect class="sil" x="370" y="52" width="6" height="30"/>
+    <path class="ln" d="M38,176 H104 V200 H38 Z M198,176 H372 V200 H198 Z M16,104 H30 M16,196 H30"/>
+    <rect class="osc" x="16" y="108" width="10" height="8"/><rect class="osc" x="16" y="120" width="10" height="8"/>
+    <circle class="osc" cx="150" cy="206" r="40"/><circle class="osc" cx="520" cy="206" r="40"/>`;
+  [150, 520].forEach(cx => {
+    s += `<circle class="sil" cx="${cx}" cy="206" r="33"/><circle class="osc" cx="${cx}" cy="206" r="25"/><circle class="sil" cx="${cx}" cy="206" r="18"/>`;
+    for(let k = 0; k < 8; k++){ const an = k * Math.PI / 4; s += `<circle class="osc" cx="${(cx + 11 * Math.cos(an)).toFixed(1)}" cy="${(206 + 11 * Math.sin(an)).toFixed(1)}" r="2.2"/>`; }
+    s += `<circle class="osc" cx="${cx}" cy="206" r="4.5"/>`;
+  });
+  // zonas tocables: techo, cabina, trasero
+  s += `<g class="hot${act('techo')}" data-zona="techo"><rect class="ov" x="34" y="48" width="344" height="38"/></g>`
+    + `<g class="hot${act('cabina')}" data-zona="cabina"><path class="ov" d="${CAB}"/></g>`
+    + `<g class="hot${act('trasero')}" data-zona="trasero"><rect class="ov" x="12" y="98" width="22" height="108"/></g>`;
+  // gavetas del lado visible (la 1 queda junto a la cabina), con persiana y manilla
+  const g = orden(vista), n = g.length, dim = zona !== vista;
+  const pos = []; let rowsN = 1;
+  if(n){
+    const cols = n <= 4 ? n : n <= 8 ? Math.ceil(n / 2) : Math.ceil(n / 3), rows = Math.ceil(n / cols); rowsN = rows;
+    const x0 = 42, y0 = 92, Wd = 332, H = 74, gap = 5;
+    const w = (Wd - gap * (cols - 1)) / cols, h = (H - gap * (rows - 1)) / rows;
+    g.forEach((c, i) => {
+      const cx = x0 + (cols - 1 - (i % cols)) * (w + gap), cy = y0 + Math.floor(i / cols) * (h + gap);
+      s += `<g class="hot gav${compSel === c.id ? ' sel' : ''}${dim ? ' off' : ''}" data-comp="${c.id}"><rect class="ov" x="${cx}" y="${cy}" width="${w}" height="${h}"/>`;
+      if(h >= 60){ for(let k = 1; k <= 5; k++) s += `<line class="lf" x1="${cx + 4}" x2="${cx + w - 4}" y1="${(cy + h * k / 6).toFixed(1)}" y2="${(cy + h * k / 6).toFixed(1)}"/>`; }
+      s += `<rect class="osc" x="${cx + w / 2 - 9}" y="${cy + h - 9}" width="18" height="4" opacity=".75"/></g>`;
+      pos.push([cx + w / 2, cy + h / 2, h, i, c]);
+    });
+  }
+  s += '</g>';
+  return s + '</svg>';
+}
+
+/* ---------- pantalla ---------- */
+function render(){
+  const cz = orden(zona);
+  const actual = comps.find(c => c.id === compSel);
+  const items = material.filter(m => m.compartimento_id === compSel)
+    .sort((a, b) => ((a.inventario_items || {}).codigo || '').localeCompare((b.inventario_items || {}).codigo || ''));
+
+  if(!comps.length){
+    $('contenido').innerHTML = `<section class="caja" style="grid-column:1 / -1"><div class="vacio">Este carro aún no tiene distribución de material.</div>`
+      + (puedeEditar ? `<div class="acciones"><button class="btn btn-primary" onclick="crearEstandar()">Crear distribución estándar</button></div>` : '') + `</section>`;
+    return;
+  }
+  let izq = `<section class="caja">
+    <div class="zonas">${ZONAS.map(z => `<div role="button" tabindex="0" class="zona-tab${zona === z.k ? ' on' : ''}" onclick="irZona('${z.k}')"><span class="lg">${z.t}</span><span class="sh">${z.s}</span></div>`).join('')}</div>
+    <div class="camion-wrap" id="camion">${svgCamion()}</div>
+    <div class="chips">${cz.map(c => `<button class="chip${compSel === c.id ? ' on' : ''}" onclick="elegirComp('${c.id}')">${esc(c.nombre)}</button>`).join('')
+      + (puedeEditar ? `<button class="chip mas" onclick="modalNombre(null)">＋ Compartimento</button>` : '')}</div>
+    ${!cz.length && !puedeEditar ? '<div class="vacio" style="margin-top:12px">No hay compartimentos en esta zona.</div>' : ''}
+  </section>`;
+
+  let der;
+  if(!actual){
+    der = `<section class="caja"><div class="vacio">Toca un compartimento para ver su contenido.</div></section>`;
+  } else {
+    der = `<section class="caja">
+      <div class="panel-cab"><div><div class="sub">${esc(ZONA_TXT[actual.zona])}</div><h2>${esc(actual.nombre)}</h2></div>
+      ${puedeEditar ? `<div class="acc-mini">
+        <button class="ico-btn" title="Cambiar nombre" onclick="modalNombre('${actual.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg></button>
+        <button class="ico-btn" title="Eliminar compartimento" onclick="modalBorrar('${actual.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div>` : ''}</div>
+      ${items.length ? `<div class="lista">${items.map(m => { const it = m.inventario_items || {}; return `<div class="fila"><span class="cod">${esc(it.codigo || '—')}</span><span class="nom">${esc(it.nombre || '')}</span><span class="est ${esc(it.estado)}">${esc(it.estado || '')}</span>${puedeEditar ? `<button class="btn btn-sacar" onclick="sacar('${m.item_id}')">Sacar</button>` : ''}</div>`; }).join('')}</div>`
+        : `<div class="vacio">Este compartimento está vacío.</div>`}
+      ${puedeEditar ? `<div class="acciones"><button class="btn btn-primary" onclick="modalAgregar()">＋ Agregar material</button></div>` : ''}
+    </section>`;
+  }
+  $('contenido').innerHTML = izq + der;
+}
+
+function irZona(z){
+  zona = z; if(z === 'lado_izq' || z === 'lado_der') vista = z;
+  const p = orden(z)[0]; compSel = p ? p.id : null; render();
+}
+function elegirComp(id){ compSel = id; const c = comps.find(x => x.id === id); if(c){ zona = c.zona; if(zona === 'lado_izq' || zona === 'lado_der') vista = zona; } render(); }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('#camion [data-comp], #camion [data-zona]'); if(!t) return;
+  if(t.dataset.comp) elegirComp(t.dataset.comp); else irZona(t.dataset.zona);
+});
+
+/* ---------- acciones de edición ---------- */
+async function rpc(nombre, args, okMsg){
+  const { error } = await sb.rpc(nombre, args);
+  if(error){ toast(errTxt(error)); return false; }
+  if(okMsg) toast(okMsg);
+  await recargar(); return true;
+}
+async function crearEstandar(){ await rpc('material_crear_estandar', { p_carro: carro.id }, 'Distribución creada'); }
+async function sacar(itemId){ await rpc('material_quitar', { p_item: itemId }, 'Material retirado del carro'); }
+
+function abrirModal(titulo, cuerpo, pie){ $('modalTitulo').textContent = titulo; $('modalCuerpo').innerHTML = cuerpo; $('modalPie').innerHTML = pie || ''; $('velo').classList.add('show'); }
+function cerrarModal(){ $('velo').classList.remove('show'); }
+
+function modalNombre(id){
+  const c = id ? comps.find(x => x.id === id) : null;
+  abrirModal(c ? 'Cambiar nombre' : 'Nuevo compartimento — ' + ZONA_TXT[zona],
+    `<input type="text" id="inNombre" maxlength="60" placeholder="Ej. Gaveta 5, Equipos ERA…" value="${c ? esc(c.nombre) : ''}">`,
+    `<button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn btn-primary" onclick="guardarNombre(${c ? `'${c.id}'` : 'null'})">Guardar</button>`);
+  setTimeout(() => { const i = $('inNombre'); i.focus(); i.select(); i.onkeydown = e => { if(e.key === 'Enter') guardarNombre(c ? c.id : null); }; }, 50);
+}
+async function guardarNombre(id){
+  const nombre = $('inNombre').value.trim(); if(!nombre){ toast(ERRORES.NOMBRE_INVALIDO); return; }
+  const { data, error } = await sb.rpc('material_guardar_compartimento', { p_carro: carro.id, p_id: id, p_zona: zona, p_nombre: nombre });
+  if(error){ toast(errTxt(error)); return; }
+  cerrarModal(); if(!id && data) compSel = data; await recargar();
+}
+function modalBorrar(id){
+  const c = comps.find(x => x.id === id); const n = cuenta(id);
+  abrirModal('Eliminar compartimento',
+    `<p style="margin:0;font-size:14px;line-height:1.55;">Se eliminará «${esc(c.nombre)}»${n ? ` y sus ${n} ítem${n === 1 ? '' : 's'} quedarán «Sin ubicar» en el Inventario` : ''}.</p>`,
+    `<button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn peligro" onclick="borrar('${id}')">Eliminar</button>`);
+}
+async function borrar(id){ cerrarModal(); const ok = await rpc('material_borrar_compartimento', { p_id: id }, 'Compartimento eliminado'); if(ok) compSel = null, await recargar(); }
+
+/* Agregar material: se elige entre los ítems del Inventario */
+let inventario = [];
+async function modalAgregar(){
+  abrirModal('Agregar material', `<input type="search" id="inBuscar" placeholder="Buscar por código o nombre" autocomplete="off"><div class="pick-lista" id="pickLista"><div class="vacio" style="border:none">Cargando…</div></div>`, `<button class="btn" onclick="cerrarModal()">Cerrar</button>`);
+  let q = sb.from('inventario_items').select('id, codigo, nombre, estado, lugar_actual, compania_id').is('fecha_baja', null).neq('estado', 'baja').order('codigo').limit(2000);
+  const { data, error } = await q;
+  if(error){ $('pickLista').innerHTML = `<div class="vacio" style="border:none">${esc(errTxt(error))}</div>`; return; }
+  inventario = (data || []).filter(i => !i.compania_id || i.compania_id === carro.compania_id);
+  $('inBuscar').oninput = pintarPick; $('inBuscar').focus(); pintarPick();
+}
+function pintarPick(){
+  const f = ($('inBuscar').value || '').trim().toLowerCase();
+  const aqui = new Set(material.filter(m => m.compartimento_id === compSel).map(m => m.item_id));
+  const lista = inventario.filter(i => !aqui.has(i.id) && (!f || (i.codigo + ' ' + i.nombre).toLowerCase().includes(f))).slice(0, 80);
+  $('pickLista').innerHTML = lista.length ? lista.map(i => `<div class="pick" onclick="ubicar('${i.id}')"><span class="mono cod" style="font-size:12px;color:var(--text-muted);min-width:70px">${esc(i.codigo)}</span><span class="nom">${esc(i.nombre)}<span class="donde">${i.lugar_actual ? 'Ahora en: ' + esc(i.lugar_actual) : ''}</span></span><span class="est ${esc(i.estado)}">${esc(i.estado)}</span></div>`).join('')
+    : `<div class="vacio" style="border:none">${inventario.length ? 'No hay ítems que coincidan.' : 'No hay ítems disponibles en el Inventario.'}</div>`;
+}
+async function ubicar(itemId){
+  const { error } = await sb.rpc('material_ubicar', { p_item: itemId, p_comp: compSel });
+  if(error){ toast(errTxt(error)); return; }
+  toast('Material agregado'); await recargar(); pintarPick();
+}
+
+iniciar();
+</script>
+</body>
+</html>

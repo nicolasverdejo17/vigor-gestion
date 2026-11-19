@@ -30,6 +30,7 @@
     modo_crisis:'titan', puestos_mando_activos:'titan',
     inventario:'forge', ingreso_item:'forge', historial_movimientos:'forge', dar_de_baja:'forge',
     flota_comandancia:'maintainer', tablet_checklist:'maintainer', tablet_checklist_historial:'maintainer', tablet_bitacora:'maintainer',
+    distribucion_material:'maintainer',
     estadisticas:'intel',
     secretaria:'scribe', archivo_institucional_celular:'scribe'
   };

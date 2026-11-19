@@ -86,7 +86,8 @@
   /* ---- Menú operativo — 3 accesos grandes ---- */
   .ops-wrap{ flex:1; min-height:0; padding:24px 28px 28px; display:flex; flex-direction:column;}
   .ops-hint{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.1em; margin-bottom:14px; flex-shrink:0;}
-  .ops-grid{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  .ops-grid{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(5,1fr); gap:14px;}
+  @media (max-width:1100px){ .ops-grid{ grid-template-columns:repeat(3,1fr); } }
 
   .ops-btn{
     background:var(--panel); border:2px solid var(--line-strong); border-radius:10px;
@@ -113,6 +114,8 @@
   .ops-btn.dotacion:hover{ border-color:var(--cyan);}
   .ops-btn.checklist .ops-icon{ border-color:var(--servicio);}
   .ops-btn.checklist:hover{ border-color:var(--servicio);}
+  .ops-btn.material .ops-icon{ border-color:var(--alerta);}
+  .ops-btn.material:hover{ border-color:var(--alerta);}
 
   .demo-tag{
     text-align:center; font-size:11px; color:var(--text-dim); padding:8px 0 0; flex-shrink:0;
@@ -215,6 +218,14 @@
         </div>
         <h2>Checklist</h2>
         <p>Revisión periódica del carro: mecánica, equipamiento y niveles.</p>
+      </div>
+
+      <div class="ops-btn material" onclick="window.location.href='distribucion_material.html'">
+        <div class="ops-icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="11" height="8" stroke="#FFC94D" stroke-width="1.6"/><path d="M14 10h3.6L21 13v3h-7" stroke="#FFC94D" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.7" stroke="#FFC94D" stroke-width="1.6"/><circle cx="17" cy="17.5" r="1.7" stroke="#FFC94D" stroke-width="1.6"/><path d="M6 11.5h5" stroke="#FFC94D" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <h2>Material</h2>
+        <p>Qué lleva el carro y en qué compartimento está cada cosa.</p>
       </div>
     </div>
   </div>
