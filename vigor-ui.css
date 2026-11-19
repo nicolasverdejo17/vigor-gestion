@@ -114,3 +114,38 @@ html body :is(.pn,.pn-h,.pn-b,.cap,.sw,#msg,#capas,#panel,#ptab,.leg,[class*="le
 /* últimos restos: iconos, selectores y avisos con esquina recta; las pastillas del modo crisis con la letra estándar */
 html body :is(.tool-ico-badge,.carro-badge,.sw-color,.foto-upload,[class*="radio-opt"],[class*="obs-item"],[class*="feed-item"],[class*="-item"]:not([class*="dot"]),.act-fecha,.cat-opt){ border-radius:0 !important; }
 html body span.estado-pill, html body .estado-pill{ font-family:var(--ui-texto) !important; }
+
+/* ================= Estilo Soporte técnico: textos en blancos, verde solo en lo seleccionado y en el botón principal =================
+   Todo lo que era celeste pasa a una escala de blancos (más claro = más importante); el verde #39FF14 queda para el botón principal
+   y para lo seleccionado del menú y de las pestañas. */
+:root{
+  --ui-accent:#39FF14; --ui-accent-soft:rgba(57,255,20,.09); --ui-accent-line:rgba(57,255,20,.30);
+  --ui-blanco:#EAF6FB; --ui-blanco2:#C4D8E3; --ui-blanco3:#8FB0C2;
+  --ui-cy:#C4D8E3; --ui-grad:#39FF14; --vg-grad:linear-gradient(135deg,#8FB0C2,#E3F0F6);   /* el degradado de la marca pasa a ser decorativo y neutro (iniciales, nombres de unidad) */
+  --cyan:#E3F0F6; --cyan-dim:#6C8FA3; --cyan-glow:rgba(227,240,246,.16); --amber-glow:rgba(227,240,246,.12);
+  --brass:#C4D8E3; --brass-bright:#E3F0F6; --brass-dim:#3A5A6C;
+}
+html body{ background-image:radial-gradient(1100px 520px at 15% -10%, rgba(57,255,20,.035), transparent 60%) !important; background-repeat:no-repeat; background-attachment:fixed; }
+/* seleccionado = fondo verde muy oscuro + borde fino verde + letra blanca (el ícono sí va verde) */
+html body :is(.tabbar-real a.active,.tab-btn.on,.tab2-btn.on,.central-tab.on,#ctabs a.on,.role-switch-btn.on,.cat-opt.on,.cat-tab.on,.cat-btn.on,.periodo-btn.on,.filtro-btn.on,.cia-pill.on,.cia-btn.on,.tipo-opt.on,.tipo-mov-opt.on,.tipo-act-btn.on,.subcat-chip.on,.nav.on){
+  background:var(--ui-accent-soft) !important; border:1px solid var(--ui-accent-line) !important; color:var(--ui-blanco) !important;
+}
+html body .tabbar-real a.active svg, html body .tabbar-real a.active .ic{ color:var(--ui-accent) !important; }
+/* botón principal: verde sólido con letra oscura (solo los principales) */
+html body :is(.vg-grad,.ui-pri,.btn-pri,.btn-primary,.btn-guardar,.btn-guardar-ft,.btn-aprobar,.btn-generar,.btn-login,.btn-confirmar,.modal-guardar,.modal-generar,.btn-ingresar){
+  background:var(--ui-accent) !important; border-color:var(--ui-accent) !important; color:#0D2206 !important;
+}
+html body :is(.vg-grad,.ui-pri,.btn-pri,.btn-primary,.btn-guardar,.btn-aprobar,.btn-generar,.btn-login):hover{ filter:brightness(1.06); }
+html body :is(input,select,textarea):focus{ box-shadow:0 0 0 3px rgba(227,240,246,.12) !important; }
+
+/* ================= Listados con relieve (no planos): cabecera con fondo, filas alternadas, resalte al pasar y sombra suave ================= */
+html body table{ background:linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,.012)); border:1px solid var(--ui-line2); box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 10px 28px rgba(0,0,0,.28); }
+html body thead th{ background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035)) !important; border-bottom:1.5px solid var(--ui-line2) !important; color:var(--ui-blanco3, #8FB0C2) !important; }
+html body tbody tr:nth-child(even) td{ background:rgba(255,255,255,.026); }
+html body tbody tr:nth-child(odd) td{ background:rgba(255,255,255,.006); }
+html body tbody td{ border-bottom:1px solid rgba(255,255,255,.055) !important; transition:background .12s; }
+html body tbody tr:hover td{ background:rgba(57,255,20,.06) !important; }
+html body tbody tr:hover td:first-child{ box-shadow:inset 3px 0 0 var(--ui-accent); }
+html body tbody tr:last-child td{ border-bottom:none !important; }
+html body .tabla-wrap{ box-shadow:0 10px 28px rgba(0,0,0,.28); }
+html body .tabla-wrap table{ box-shadow:none; border:none; }

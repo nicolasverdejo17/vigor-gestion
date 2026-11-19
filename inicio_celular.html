@@ -325,7 +325,7 @@ const escD = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&
 const unaAsignacion = (v) => Array.isArray(v) ? (v[0] || null) : (v || null);
 function renderDotaciones(carros, personal, miId){
   const porId = {}; personal.forEach(p => { porId[p.id] = p; });
-  const av = (p) => p && p.foto_url ? `<span class="mini-av" style="background-image:url('${escD(p.foto_url)}')"></span>` : `<span class="mini-av">${escD((p ? p.nombre_completo : '?').split(' ').filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase())}</span>`;
+  const av = () => '';   // la dotación muestra solo los nombres, sin círculos de iniciales
   const corto = (n) => (n || '').split(' ').filter(Boolean).slice(0, 2).join(' ');
   const yo = miId ? `<span class="tu-tag">Tú</span>` : '';
   const persona = (id) => {
