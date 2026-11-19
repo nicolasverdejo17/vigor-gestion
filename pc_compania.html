@@ -1029,6 +1029,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-sonidos.js"></script>
 <script>
 
 (function(){
@@ -1163,6 +1164,7 @@
     renderMiniResumen();
     _bombGridObserver.observe(document.getElementById('bombGrid'));
     suscribirTonoDespacho();
+    try{ VigorSonidos.iniciar(sb, miCuerpoId); }catch(e){}
   }
 
   // Tono de despacho — mismo sintetizador local (Web Audio, sin archivos ni
@@ -1171,8 +1173,9 @@
   // que también tiene que reaccionar en vivo cuando Central confirma un
   // despacho para esta Compañía.
   let audioCtx = null;
-  function reproducirTono(url){
-    if(url){ new Audio(url).play().catch(()=>{}); return; }
+  function reproducirTono(ev){
+    // Suena el tono del Cuerpo (o el predeterminado de emergencias de Vigor); si falla, el sintetizado de siempre
+    if(window.VigorSonidos){ VigorSonidos.reproducir(ev && typeof ev === 'object' ? ev : { tipo:'despacho' }); return; }
     try{
       if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const ahora = audioCtx.currentTime;
@@ -1195,7 +1198,7 @@
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, async (payload) => {
         const { data: unidades } = await sb.from('despacho_unidades').select('compania_id').eq('despacho_id', payload.new.id);
         if((unidades || []).some(u => u.compania_id === miCompaniaId)){
-          reproducirTono(null);
+          reproducirTono({ tipo:'despacho', clave: payload.new.tipo_emergencia_id });
         }
         await cargarPizarra();
       })

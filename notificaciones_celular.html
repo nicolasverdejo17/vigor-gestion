@@ -90,6 +90,22 @@
   .pref-row.locked{ opacity:.85;}
   .pref-info b{ font-size:12.5px; display:block;}
   .pref-info span{ font-size:10.5px; color:var(--text-muted); display:block; margin-top:2px;}
+
+  .alerta-fila{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--panel); border:1px solid var(--line-strong); padding:13px 14px; margin-bottom:8px; }
+  .alerta-fila .info{ min-width:0; }
+  .alerta-fila .info b{ font-size:12.5px; display:block; }
+  .alerta-fila .info span{ font-size:11px; color:var(--text-muted); display:block; margin-top:3px; line-height:1.4; }
+  .alerta-fila .info span.ok{ color:var(--servicio); } .alerta-fila .info span.mal{ color:#FF7A85; } .alerta-fila .info span.am{ color:var(--alerta); }
+  .alerta-fila .botones{ display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+  html body .alerta-fila .botones button{ min-height:34px; padding:0 12px; font-size:12px !important; white-space:nowrap; }
+  .alerta-fila .botones button.pri{ background:#39FF14 !important; border-color:#39FF14 !important; color:#0D2206 !important; }
+  .velo-tono{ position:fixed; inset:0; background:rgba(2,8,13,.78); z-index:100; display:none; align-items:center; justify-content:center; padding:18px; }
+  .velo-tono.show{ display:flex; }
+  .modal-tono{ background:var(--panel); border:1.5px solid var(--line-strong); width:100%; max-width:380px; padding:18px; }
+  .modal-tono h3{ margin:0 0 12px; font-size:17px; }
+  .modal-tono ol{ margin:0 0 14px; padding-left:20px; font-size:13px; line-height:1.55; }
+  .modal-tono li{ margin-bottom:6px; }
+  .modal-tono .nota{ font-size:11.5px; color:var(--text-muted); margin:0 0 14px; line-height:1.45; }
   .toggle{ width:40px; height:23px; background:var(--line-strong); border-radius:12px; position:relative; cursor:pointer; flex-shrink:0;}
   .toggle::before{ content:""; position:absolute; width:17px; height:17px; border-radius:50%; background:var(--text); top:3px; left:3px; transition:all .2s;}
   .toggle.on{ background:var(--cyan-dim);}
@@ -129,9 +145,25 @@
         <div class="estado-aviso-texto"><b>Alertas de despacho silenciadas</b> — estás marcado como <span id="estadoAvisoTexto">Fuera de Servicio</span>, así que no vas a recibir tonos ni vibración de despachos mientras estés así.</div>
       </div>
 
-      <div class="estado-aviso" id="pushAviso" style="display:none; border-color:var(--cyan); cursor:pointer;" onclick="activarPush()">
-        <span class="estado-aviso-ico">🔔</span>
-        <div class="estado-aviso-texto"><b>Activar notificaciones push</b> — <span id="pushAvisoTexto">toca aquí para recibir el despacho aunque tengas la app cerrada o el celular bloqueado.</span></div>
+      <div class="section-label">Alertas en este celular</div>
+      <div class="alerta-fila">
+        <div class="info"><b>Notificaciones con la app cerrada</b><span id="pushEstado">Revisando…</span></div>
+        <div class="botones"><button class="pri" id="btnActivar" style="display:none" onclick="activarPush()">Activar</button></div>
+      </div>
+      <div class="alerta-fila">
+        <div class="info"><b>Probar alerta</b><span>Suena y vibra como un despacho</span></div>
+        <div class="botones">
+          <button onclick="probarAqui()">Probar aquí</button>
+          <button id="btnBloqueado" onclick="probarBloqueado()">Con pantalla bloqueada</button>
+        </div>
+      </div>
+      <div class="alerta-fila">
+        <div class="info"><b>Tonos de Central</b><span>Los de tu Cuerpo (o los de Vigor), para elegirlos como sonido de las notificaciones de Vigor</span></div>
+        <div class="botones">
+          <button onclick="descargarTonoCentral('emergencia')">Emergencias</button>
+          <button onclick="descargarTonoCentral('otras')">Otros avisos</button>
+          <button onclick="document.getElementById('veloTono').classList.add('show')">Cómo usarlos</button>
+        </div>
       </div>
 
       <div class="section-label">Despacho</div>
@@ -146,12 +178,16 @@
 
       <div class="section-label">Otros avisos</div>
       <div class="pref-row">
-        <div class="pref-info"><b>Pizarra</b><span>Avisos y citaciones nuevas</span></div>
+        <div class="pref-info"><b>Pizarra</b><span>Avisos nuevos en la pizarra de tu compañía</span></div>
         <div class="toggle on" id="tgPizarra" onclick="toggleAjuste('tgPizarra')"></div>
       </div>
       <div class="pref-row">
         <div class="pref-info"><b>Actividades</b><span>Nuevas actividades de la Compañía</span></div>
         <div class="toggle on" id="tgActividades" onclick="toggleAjuste('tgActividades')"></div>
+      </div>
+      <div class="pref-row">
+        <div class="pref-info"><b>Cuotas</b><span>Cuando el tesorero te avisa de una cuota atrasada</span></div>
+        <div class="toggle on" id="tgCuotas" onclick="toggleAjuste('tgCuotas')"></div>
       </div>
       <div class="pref-row">
         <div class="pref-info"><b>Hoja de Vida</b><span>Cuando se agrega una entrada a tu historial</span></div>
@@ -160,28 +196,44 @@
     </div>
     <div class="tabbar-real" id="tabbarReal"></div>
 
-    <div class="toast" id="toast"></div>
+    <div class="velo-tono" id="veloTono" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-tono">
+      <h3>Poner un tono de Central</h3>
+      <ol>
+        <li>Toca <b>Emergencias</b> u <b>Otros avisos</b> y guarda el archivo en tu celular.</li>
+        <li>Abre los <b>Ajustes de Android</b> → <b>Aplicaciones</b> → <b>Vigor</b> (o Chrome) → <b>Notificaciones</b>.</li>
+        <li>Entra a la categoría de las alertas de Vigor → <b>Sonido</b> y elige el tono descargado (si no aparece, usa «Agregar» y busca el archivo).</li>
+      </ol>
+      <p class="nota">Se puede en Android. En iPhone el sonido de las notificaciones es el del sistema y no se puede cambiar; con la app abierta siempre suena el tono de Central.</p>
+      <button class="btn-primary" style="width:100%; min-height:44px;" onclick="document.getElementById('veloTono').classList.remove('show')">Entendido</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-push.js"></script>
+<script src="vigor-sonidos.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
 const PILL_LABEL = { disponible:'Disponible', no_disponible:'No Disponible', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
-const TOGGLE_COL = { tgDespacho:'alertas_despacho', tgPizarra:'pizarra', tgActividades:'actividades', tgHojaVida:'hoja_vida' };
+const TOGGLE_COL = { tgDespacho:'alertas_despacho', tgPizarra:'pizarra', tgActividades:'actividades', tgCuotas:'cuotas', tgHojaVida:'hoja_vida' };
 let miPersonalId = null;
 
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal')
-    .select('id, nombre_completo, cargo, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .select('id, nombre_completo, cargo, cuerpo_id, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
     .eq('auth_user_id', session.user.id).single();
   if(!perfil) return;
   miPersonalId = perfil.id;
+  try{ VigorSonidos.iniciar(sb, perfil.cuerpo_id); }catch(e){}
   document.getElementById('nombreCompaniaCel').textContent = perfil.companias ? perfil.companias.nombre : 'Cuerpo General';
 
   const filaVigente = (perfil.personal_estado_historial || []).find(h => h.hora_fin === null);
@@ -206,57 +258,56 @@ async function cargarDatos(){
   actualizarAvisoPush();
 }
 
-// Notificaciones push reales (suenan y vibran aunque la app esté cerrada o
-// el celular bloqueado) — a diferencia del tono en vivo de Inicio, que solo
-// suena con la pantalla abierta. Requiere permiso del navegador una vez.
-const VAPID_PUBLIC_KEY = 'BItnU6VJq0_t-DSFaUYRTWZ7MaLuBIzhR9PYvqLnbgi_gYPWPol-ExVflEI98wzFeiwhapE5-4pxywF9vy9YoZ0';
-function urlBase64ToUint8Array(base64String){
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-}
-function soportaPush(){
-  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-}
+// Alertas con la app cerrada (notificaciones push) — el módulo vigor-push.js hace el trabajo; acá solo se muestra el estado.
 async function actualizarAvisoPush(){
-  const aviso = document.getElementById('pushAviso');
-  if(!soportaPush()){ aviso.style.display = 'none'; return; }
-  if(Notification.permission === 'denied'){
-    document.getElementById('pushAvisoTexto').textContent = 'Bloqueaste las notificaciones en el navegador — actívalas desde los ajustes del sitio para recibir despachos con la app cerrada.';
-    aviso.style.display = 'flex';
-    return;
+  const e = await VigorPush.estado();
+  const txt = document.getElementById('pushEstado'), btn = document.getElementById('btnActivar');
+  btn.style.display = 'none'; txt.className = '';
+  if(!e.soporta){
+    txt.className = 'mal';
+    txt.textContent = e.ios && !e.instalada ? 'En iPhone, agrega Vigor a la pantalla de inicio (Compartir → Agregar a inicio) y ábrela desde ahí.' : 'Este navegador no permite notificaciones.';
+  } else if(e.permiso === 'denied'){
+    txt.className = 'mal'; txt.textContent = 'Bloqueadas: actívalas en los ajustes del sitio del navegador.';
+  } else if(e.suscrito && e.permiso === 'granted'){
+    txt.className = 'ok'; txt.textContent = 'Activadas en este equipo';
+  } else {
+    txt.className = 'am'; txt.textContent = 'Sin activar: no recibirás el despacho con la app cerrada.';
+    btn.style.display = 'block';
   }
-  const reg = await navigator.serviceWorker.ready;
-  const sub = await reg.pushManager.getSubscription();
-  aviso.style.display = sub ? 'none' : 'flex';
 }
 async function activarPush(){
-  if(!soportaPush()){ toast('Tu navegador no soporta notificaciones push'); return; }
-  const permiso = await Notification.requestPermission();
-  if(permiso !== 'granted'){ toast('No se activaron — permiso denegado'); return; }
+  const r = await VigorPush.activar(sb, miPersonalId);
+  toast(r.msg);
+  actualizarAvisoPush();
+}
+async function probarAqui(){
+  try { await VigorPush.probarAqui(); toast('Prueba enviada: ¿sonó y vibró?'); }
+  catch(e){ toast('Activa primero las notificaciones'); }
+}
+let probando = false;
+async function probarBloqueado(){
+  if(probando) return;
+  const e = await VigorPush.estado();
+  if(!e.suscrito){ toast('Activa primero las notificaciones'); return; }
+  probando = true;
+  const btn = document.getElementById('btnBloqueado');
+  for(let i = 10; i > 0; i--){ btn.textContent = 'Bloquea el celular… ' + i; await new Promise(r => setTimeout(r, 1000)); }
+  const r = await VigorPush.probarDesdeServidor(sb);
+  btn.textContent = 'Con pantalla bloqueada'; probando = false;
+  toast(r.msg);
+}
+
+// Descarga el tono (del Cuerpo, o el de Vigor) para elegirlo como sonido de las notificaciones en Android
+async function descargarTonoCentral(grupo){
   try{
-    const reg = await navigator.serviceWorker.ready;
-    let sub = await reg.pushManager.getSubscription();
-    if(!sub){
-      sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-      });
-    }
-    const json = sub.toJSON();
-    const { error } = await sb.from('push_subscripciones').upsert({
-      personal_id: miPersonalId,
-      endpoint: json.endpoint,
-      p256dh: json.keys.p256dh,
-      auth: json.keys.auth,
-    }, { onConflict: 'endpoint' });
-    if(error){ toast('No se pudo guardar — ' + error.message); return; }
-    toast('Notificaciones activadas');
-    document.getElementById('pushAviso').style.display = 'none';
-  } catch(e){
-    toast('No se pudo activar — ' + e.message);
-  }
+    const r = VigorSonidos.resolver(grupo === 'emergencia' ? { tipo:'despacho' } : { tipo:'otras' });
+    const resp = await fetch(r.descarga || r.url); if(!resp.ok) throw new Error('x');
+    const blob = await resp.blob();
+    const ext = ((r.descarga || r.url).split('?')[0].split('.').pop() || 'wav').slice(0, 4);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = (grupo === 'emergencia' ? 'Tono emergencias Vigor.' : 'Tono avisos Vigor.') + ext;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }catch(e){ toast('No se pudo descargar el tono'); }
 }
 
 async function toggleAjuste(id){

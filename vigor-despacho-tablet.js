@@ -34,7 +34,7 @@ function estilos(){
   @media (prefers-reduced-motion:reduce){#vdt .cab .lat{animation:none}}`;
   document.head.appendChild(s);
 }
-function tono(){
+function tonoSintetico(){
   try{
     const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
     const c = new AC(); if(c.state === 'suspended' && c.resume) c.resume();
@@ -46,7 +46,23 @@ function tono(){
     }
     setTimeout(() => { try{ c.close(); }catch(e){} }, 3200);
   }catch(e){}
+}
+// Suena el tono del Cuerpo para ese tipo de emergencia (o el predeterminado de emergencias de Vigor); si algo falla, el sintetizado de siempre
+function cargarSonidos(){
+  return new Promise((ok) => {
+    if(window.VigorSonidos) return ok(true);
+    const s = document.createElement('script'); s.src = 'vigor-sonidos.js'; s.onload = () => ok(true); s.onerror = () => ok(false); document.head.appendChild(s);
+  });
+}
+async function tono(d){
   try{ if(navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 400]); }catch(e){}
+  try{
+    if(!await cargarSonidos() || !window.VigorSonidos) throw new Error('sin módulo');
+    let clave = null;
+    try{ if(d && d.codigo){ const { data } = await DT.sb.from('claves_emergencia').select('id').eq('codigo', d.codigo).limit(1).maybeSingle(); clave = data && data.id; } }catch(e){}
+    if(!DT.sonidosListos){ DT.sonidosListos = true; try{ await VigorSonidos.iniciar(DT.sb, null); }catch(e){} }
+    await VigorSonidos.reproducir({ tipo:'despacho', clave });
+  }catch(e){ tonoSintetico(); }
 }
 function cerrar(){ if(DT.ovl) DT.ovl.classList.remove('on'); }
 function mostrar(d){
@@ -60,7 +76,7 @@ function mostrar(d){
       ${d.referencia ? `<div class="rf">${esc(d.referencia)}</div>` : ''}
     </div>
     <div class="bt"><button class="go" id="vdtGo">Entendido</button></div>`;
-  DT.ovl.classList.add('on'); marcar(d.id); tono();
+  DT.ovl.classList.add('on'); marcar(d.id); tono(d);
   DT.ovl.querySelector('#vdtGo').onclick = cerrar;
 }
 

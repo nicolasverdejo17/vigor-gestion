@@ -193,6 +193,15 @@
         <div class="mi-estado-hint">Tocar para cambiar mi estado, en Compañía →</div>
       </div>
 
+      <div id="avisoPush" style="display:none; background:var(--panel); border:1px solid var(--line-strong); border-left:4px solid var(--cyan); padding:14px 16px; margin-bottom:12px;">
+        <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:.06em; text-transform:uppercase;">Activa las alertas de despacho</div>
+        <div style="font-size:13px; line-height:1.5; margin-top:4px; color:var(--text-muted);" id="avisoPushTexto"></div>
+        <div style="display:flex; gap:8px; margin-top:10px;" id="avisoPushBotones">
+          <button id="avisoPushActivar" class="btn-primary" style="min-height:38px; padding:0 16px;" onclick="activarAlertasDesdeInicio()">Activar</button>
+          <button style="min-height:38px; padding:0 14px;" onclick="ocultarAvisoPush()">Ahora no</button>
+        </div>
+      </div>
+
       <div class="resumen-card">
         <div class="resumen-title">Resumen de Guardia — Cuartel</div>
         <div class="faro vacio" id="faro">
@@ -232,6 +241,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-push.js"></script>
+<script src="vigor-sonidos.js"></script>
 <script>
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
@@ -386,6 +397,37 @@ async function cargarAvisoCuotas(){
   }catch(e){ caja.style.display = 'none'; }
 }
 
+// Alertas con la app cerrada: solo se ofrece cuando este equipo todavía no las tiene activadas
+let _personalPush = null;
+async function mostrarAvisoPush(personalId){
+  _personalPush = personalId;
+  const caja = document.getElementById('avisoPush');
+  try {
+    if(sessionStorage.getItem('vigor_push_ahora_no') === '1'){ caja.style.display = 'none'; return; }
+    const e = await VigorPush.estado();
+    if(e.permiso === 'denied' || (e.suscrito && e.permiso === 'granted')){ caja.style.display = 'none'; return; }
+    const txt = document.getElementById('avisoPushTexto'), activar = document.getElementById('avisoPushActivar');
+    if(!e.soporta){
+      if(e.ios && !e.instalada){
+        txt.textContent = 'Para recibir el despacho con el celular bloqueado, agrega Vigor a la pantalla de inicio (Compartir → Agregar a inicio) y ábrela desde ahí.';
+        activar.style.display = 'none'; caja.style.display = 'block';
+      } else caja.style.display = 'none';
+      return;
+    }
+    txt.textContent = 'Así te llega el despacho con sonido y vibración aunque la app esté cerrada o el celular bloqueado.';
+    activar.style.display = ''; caja.style.display = 'block';
+  } catch(e){ caja.style.display = 'none'; }
+}
+async function activarAlertasDesdeInicio(){
+  const r = await VigorPush.activar(sb, _personalPush);
+  toast(r.msg);
+  mostrarAvisoPush(_personalPush);
+}
+function ocultarAvisoPush(){
+  try { sessionStorage.setItem('vigor_push_ahora_no', '1'); } catch(e){}
+  document.getElementById('avisoPush').style.display = 'none';
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
@@ -442,6 +484,7 @@ async function cargarDatos(){
   renderMiEstadoChip();
   renderNotificaciones(perfil);
   cargarAvisoCuotas();
+  mostrarAvisoPush(perfil.id);
 
   if(!suscritoInicioCelular){
     suscritoInicioCelular = true;
@@ -497,33 +540,21 @@ function desbloquearAudioCelular(){
 document.addEventListener('touchstart', desbloquearAudioCelular, { once:true, passive:true });
 document.addEventListener('click', desbloquearAudioCelular, { once:true });
 
-function reproducirTonoDespacho(){
-  try{
-    if(!audioCtxCelular) audioCtxCelular = new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtxCelular.state === 'suspended') audioCtxCelular.resume().catch(()=>{});
-    const ahora = audioCtxCelular.currentTime;
-    [0, 0.42, 0.84, 1.26].forEach((offset, i) => {
-      const osc = audioCtxCelular.createOscillator();
-      const gain = audioCtxCelular.createGain();
-      osc.type = 'square';
-      osc.frequency.value = i % 2 === 0 ? 900 : 1300;
-      gain.gain.setValueAtTime(0.0001, ahora + offset);
-      gain.gain.exponentialRampToValueAtTime(0.25, ahora + offset + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ahora + offset + 0.38);
-      osc.connect(gain).connect(audioCtxCelular.destination);
-      osc.start(ahora + offset);
-      osc.stop(ahora + offset + 0.4);
-    });
-  } catch(e){}
+function reproducirTonoDespacho(ev){
+  // Tono del Cuerpo (o el predeterminado de Vigor para emergencias / avisos de Central); si falla, el sintetizado de siempre
+  try{ VigorSonidos.reproducir(ev || { tipo:'despacho' }); }catch(e){}
   if(navigator.vibrate) navigator.vibrate([600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 900]);
 }
 function suscribirAlertaDespacho(perfil){
+  try{ VigorSonidos.iniciar(sb, perfil.cuerpo_id); }catch(e){}
   sb.channel('despacho-alerta-celular-' + perfil.compania_id)
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despacho_unidades', filter: `compania_id=eq.${perfil.compania_id}` }, async () => {
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despacho_unidades', filter: `compania_id=eq.${perfil.compania_id}` }, async (payload) => {
       if(miEstado === 'fuera') return;
       const { data: prefs } = await sb.from('notificaciones_preferencias').select('alertas_despacho').eq('personal_id', perfil.id).maybeSingle();
       if(prefs && prefs.alertas_despacho === false) return;
-      reproducirTonoDespacho();
+      let clave = null;
+      try{ const { data: d } = await sb.from('despachos').select('tipo_emergencia_id').eq('id', payload.new.despacho_id).maybeSingle(); clave = d && d.tipo_emergencia_id; }catch(e){}
+      reproducirTonoDespacho({ tipo:'despacho', clave });
       toast('Despacho para tu Compañía — revisa la Pizarra');
     })
     .subscribe();
@@ -546,7 +577,7 @@ function suscribirAlertaEspecial(perfil){
       if(miEstado === 'fuera') return;
       const { data: prefs } = await sb.from('notificaciones_preferencias').select('alertas_despacho').eq('personal_id', perfil.id).maybeSingle();
       if(prefs && prefs.alertas_despacho === false) return;
-      reproducirTonoDespacho();
+      reproducirTonoDespacho({ tipo:'llamado', id: payload.new.tipo });
       toast(payload.new.tipo === 'batallon' ? `${ETIQUETA_ALERTA_ESPECIAL.batallon}${payload.new.detalle ? ' — ' + payload.new.detalle : ''}` : `${ETIQUETA_ALERTA_ESPECIAL[payload.new.tipo] || 'Alerta de Central'} — revisa la app`);
     })
     .subscribe();

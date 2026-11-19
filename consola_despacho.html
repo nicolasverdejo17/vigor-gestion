@@ -265,6 +265,24 @@
   }
   .subclave-btn.on{ background:var(--brass-dim); border-color:var(--brass-bright); color:#fff;}
 
+
+  .btn-engranaje{ width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted); cursor:pointer; padding:0; flex-shrink:0; }
+  html body .btn-engranaje{ padding:0 !important; min-height:40px; width:40px; }
+  .btn-engranaje:hover{ border-color:var(--cyan); color:var(--cyan); }
+  .btn-engranaje svg{ width:20px; height:20px; }
+  .modal-box-sonidos{ background:var(--panel); border:1.5px solid var(--line-strong); padding:24px 26px; width:100%; max-width:640px; max-height:86vh; overflow-y:auto; }
+  .modal-box-sonidos h3{ font-family:'Rajdhani',sans-serif; font-size:19px; margin:0 0 4px; letter-spacing:.04em; text-transform:uppercase; }
+  .modal-box-sonidos .modal-sub{ font-size:12px; color:var(--text-muted); margin-bottom:16px; line-height:1.5; }
+  .son-grupo{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin:18px 0 8px; padding-bottom:6px; border-bottom:1px solid var(--line-strong); }
+  .son-fila{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .son-fila .nom{ flex:1; min-width:0; }
+  .son-fila .nom b{ font-size:13px; font-weight:600; display:block; }
+  .son-fila .nom span{ font-size:11px; color:var(--text-muted); display:block; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .son-fila .nom span.propio{ color:var(--servicio); }
+  .son-fila button{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; padding:6px 10px; cursor:pointer; white-space:nowrap; }
+  .son-fila button:hover{ border-color:var(--cyan); }
+  .son-fila button.del{ border-color:rgba(241,55,70,.6); color:#FF7A85; }
+  .son-fila.sub{ padding-left:22px; }
   .modal-box-claves{
     background:var(--panel); border:1.5px solid var(--brass-dim); border-radius:12px;
     padding:24px 26px; width:100%; max-width:560px; max-height:82vh; overflow-y:auto; position:relative;
@@ -423,6 +441,7 @@
             <button type="button" class="operador-btn" onclick="marcarOperador()">Marcar</button>
           </div>
         </div>
+        <button type="button" class="btn-engranaje" onclick="abrirSonidos()" title="Sonidos del Cuerpo" aria-label="Sonidos del Cuerpo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M4.6 7.4l2.1 1.2M17.3 15.4l2.1 1.2M4.6 16.6l2.1-1.2M17.3 8.6l2.1-1.2"/><circle cx="12" cy="12" r="7.6"/></svg></button>
         <div class="clock"><strong id="clk">—</strong><span id="fechaHoy">—</span></div>
       </div>
     </div>
@@ -512,6 +531,16 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="sonidosModal" onclick="if(event.target===this)cerrarSonidos()">
+    <div class="modal-box-sonidos">
+      <h3>Sonidos del Cuerpo</h3>
+      <div class="modal-sub">Vigor trae dos tonos: uno para emergencias y otro para los demás avisos de Central. Si el Cuerpo tiene sus propios tonos (mp3 o wav, hasta 2 MB y 20 segundos), se pueden asignar a cada tipo de emergencia y a cada llamado.</div>
+      <div id="sonidosLista"></div>
+      <input type="file" id="sonidoArchivo" accept="audio/*" style="display:none" onchange="archivoSonidoElegido(this)">
+      <div style="display:flex; justify-content:flex-end; margin-top:18px;"><button class="btn-nueva-clave" style="width:auto; padding:9px 22px;" onclick="cerrarSonidos()">Cerrar</button></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="configClavesModal">
     <div class="modal-box-claves">
       <h3>Configurar Claves</h3>
@@ -529,6 +558,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-sonidos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="vigor-atribucion.js"></script>
 <script src="vigor-config.js"></script>
@@ -556,11 +586,10 @@ function esEcoPropio(){ return Date.now() - ultimaAccionLocalMs < 2500; }
 // Cuando haya archivos de tono reales por tipo de emergencia
 // (claves_emergencia.tono_url), reproducirTono() los usa en su lugar.
 let audioCtx = null;
-function reproducirTono(url){
-  if(url){
-    new Audio(url).play().catch(()=>{});
-    return;
-  }
+function reproducirTono(ev){
+  // ev = { tipo:'despacho', clave } | { tipo:'llamado', id } — suena el tono del Cuerpo o el predeterminado de Vigor.
+  // Si el módulo no está o falla, suena el tono sintetizado de siempre (la Consola debe sonar aunque todo lo demás falle).
+  if(window.VigorSonidos){ VigorSonidos.reproducir(ev && typeof ev === 'object' ? ev : { tipo:'despacho' }); return; }
   try{
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const ahora = audioCtx.currentTime;
@@ -602,6 +631,7 @@ async function cargarSesion(){
     document.getElementById('cuerpoLabel').textContent = (perfil.cuerpos ? perfil.cuerpos.nombre_oficial : 'Cuerpo') + ' · Vigor';
   }
 
+  try{ VigorSonidos.iniciar(sb, miCuerpoId); }catch(e){ console.warn('sonidos:', e && e.message); }   // sonidos del Cuerpo (si no cargan, suena el predeterminado)
   try{ ubicInit(); }catch(e){ console.warn('mapa de ubicación:', e && e.message); }
   await Promise.all([cargarClaves(), cargarCiasYCarros(), cargarEmergenciasEnCurso(), cargarOperadorTurno(), actualizarBadgeCoordenadas()]);
   renderCiaStrip(); renderCiaSelect(); renderEmergencias(); renderSeleccionados(); renderAlertas(); renderEmergenciasEnCurso();
@@ -626,8 +656,8 @@ async function actualizarBadgeCoordenadas(){
 
 function suscribirRealtime(){
   sb.channel('despachos-tono')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, () => {
-      reproducirTono(null);
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'despachos', filter: `cuerpo_id=eq.${miCuerpoId}` }, (payload) => {
+      if(!esEcoPropio()) reproducirTono({ tipo:'despacho', clave: payload.new && payload.new.tipo_emergencia_id });   // si lo lanzó esta misma Consola, ya sonó al confirmar
       cargarEmergenciasEnCurso().then(renderEmergenciasEnCurso);
     })
     // Un despacho se puede terminar desde OTRA Consola (dos Operadores
@@ -959,6 +989,46 @@ function toggleExpandirClave(id){
 }
 function selectTipo(id){ tipoSel = id; renderEmergencias(); }
 
+
+// ---- Sonidos del Cuerpo (engranaje) ----
+let sonidoPendiente = null;
+const LLAMADOS_SON = [['acuartelamiento', 'Llamado general'], ['12_10', 'Llamado a Maquinistas'], ['6_6', 'Llamado a Voluntarios'], ['batallon', 'Batallón en emergencia']];
+const escS = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+function filaSonido(evento, titulo, ev, sub){
+  const r = VigorSonidos.resolver(ev), propio = r.propio && r.evento === evento;
+  const detalle = propio ? 'Tono del Cuerpo: ' + escS(r.nombre) : (evento === 'emergencia' || evento === 'otras' ? escS(r.nombre) : 'Usa el predeterminado (' + (r.evento === 'emergencia' ? 'emergencias' : 'avisos') + (r.propio ? ' del Cuerpo' : ' de Vigor') + ')');
+  return `<div class="son-fila${sub ? ' sub' : ''}"><div class="nom"><b>${titulo}</b><span class="${propio ? 'propio' : ''}">${detalle}</span></div>
+    <button type="button" onclick="probarSonido('${evento}')">▶ Probar</button>
+    <button type="button" onclick="elegirSonido('${evento}')">Subir tono</button>
+    ${propio ? `<button type="button" class="del" onclick="quitarSonido('${evento}')">Quitar</button>` : ''}</div>`;
+}
+const evDe = evento => evento === 'emergencia' ? { tipo:'despacho' } : evento === 'otras' ? { tipo:'otras' }
+  : evento.startsWith('clave:') ? { tipo:'despacho', clave:evento.slice(6) } : { tipo:'llamado', id:evento.slice(8) };
+function renderSonidos(){
+  let h = '<div class="son-grupo" style="margin-top:4px">Predeterminados</div>'
+    + filaSonido('emergencia', 'Emergencias', { tipo:'despacho' })
+    + filaSonido('otras', 'Otras notificaciones de Central', { tipo:'otras' });
+  h += '<div class="son-grupo">Por tipo de emergencia</div>';
+  h += TIPOS.length ? TIPOS.map(t => filaSonido('clave:' + t.id, escS(t.code) + ' — ' + escS(t.name), { tipo:'despacho', clave:t.id })
+      + t.subs.map(x => filaSonido('clave:' + x.id, escS(x.code) + ' — ' + escS(x.name), { tipo:'despacho', clave:x.id }, true)).join('')).join('')
+    : '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">Todavía no hay claves de emergencia.</div>';
+  h += '<div class="son-grupo">Llamados de Central</div>' + LLAMADOS_SON.map(([id, nom]) => filaSonido('llamado:' + id, nom, { tipo:'llamado', id })).join('');
+  document.getElementById('sonidosLista').innerHTML = h;
+}
+function abrirSonidos(){ VigorSonidos.desbloquear(); renderSonidos(); document.getElementById('sonidosModal').classList.add('show'); }
+function cerrarSonidos(){ document.getElementById('sonidosModal').classList.remove('show'); }
+function probarSonido(evento){ VigorSonidos.reproducir(evDe(evento)); }
+function elegirSonido(evento){ sonidoPendiente = evento; const i = document.getElementById('sonidoArchivo'); i.value = ''; i.click(); }
+async function archivoSonidoElegido(input){
+  const f = input.files && input.files[0]; if(!f || !sonidoPendiente) return;
+  try { await VigorSonidos.asignar(sonidoPendiente, f); toast('Tono guardado'); renderSonidos(); }
+  catch(e){ toast(/row-level|policy|permission/i.test(e.message || '') ? 'Solo la Central o la Comandancia pueden cambiar los sonidos' : (e.message || 'No se pudo guardar el tono')); }
+  sonidoPendiente = null;
+}
+async function quitarSonido(evento){
+  try { await VigorSonidos.quitar(evento); toast('Vuelve el tono predeterminado'); renderSonidos(); } catch(e){ toast(e.message || 'No se pudo quitar'); }
+}
+
 // ---- Configuración de Claves (persiste en vivo contra claves_emergencia) ----
 function abrirConfigClaves(){
   renderConfigClaves();
@@ -1036,7 +1106,7 @@ async function confirmarDespacho(){
     : await sb.rpc('confirmar_despacho', { p_direccion: dir, p_tipo_emergencia_id: tipoSel, p_unidades: unidades });
   if(error){ toast(mensajeErrorOperador(error) || 'No se pudo confirmar el despacho — ' + error.message); return; }
 
-  reproducirTono(null);
+  reproducirTono({ tipo:'despacho', clave: tipoSel });
   toast(`Despacho confirmado — ${despachoActual.map(d=>d.ciaNombre+': '+d.carros.map(c=>c.nom).join(',')).join(' | ')}`);
   document.getElementById('direccion').value=''; ubicQuitar();
   despachoActual=[]; tipoSel=null;
@@ -1104,7 +1174,7 @@ async function confirmarAlerta(id){
     p_tipo: id, p_companias_destino: todas ? null : sel
   });
   if(error){ toast(mensajeErrorOperador(error) || 'No se pudo lanzar la alerta — ' + error.message); return; }
-  reproducirTono(null);
+  reproducirTono({ tipo:'llamado', id });
   const nombresCias = sel.map(ciaId => CIAS_DATA.find(c=>c.id===ciaId).nombre).join(', ');
   toast(`${a.title} lanzado a: ${nombresCias}`);
   alertaCiasSel[id] = []; alertaOpen[id] = false;

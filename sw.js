@@ -59,33 +59,46 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Notificación push de Central (despacho o Llamado general/Maquinistas/
-// Voluntarios) — llega aunque la app esté cerrada o el celular bloqueado.
-// El mensaje viaja sin contenido (push "vacío", sin encriptar) porque solo
-// se usa para despertar al navegador, así que el texto es genérico a
-// propósito: no hay forma de saber acá cuál de los dos disparó el aviso.
+// Notificación push de Central (despacho, Llamado general/Maquinistas/Voluntarios, Batallón) — llega aunque la app
+// esté cerrada o el celular bloqueado. El servidor manda el contenido cifrado ({ tipo, titulo, cuerpo, tag, url }):
+// así la notificación dice qué emergencia es, dónde y con qué carro. Si llega vacía (equipos registrados antes),
+// se muestra el texto genérico de siempre.
+const PATRON_ALERTA = [600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 900];
+// Avisos que no son despacho (pizarra, actividades, cuota atrasada): sonido y vibración cortos, para que el despacho se distinga
+const PATRON_AVISO = [200, 100, 200];
+const TIPOS_URGENTES = ['despacho', 'especial', 'prueba'];
+
 self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = {}; }
+  const titulo = d.titulo || 'Vigor — Alerta de Central';
+  // Sin contenido (equipos antiguos) se trata como alerta de Central
+  const urgente = !d.tipo || TIPOS_URGENTES.includes(d.tipo);
   event.waitUntil(
-    self.registration.showNotification('Vigor — Alerta de Central', {
-      body: 'Central emitió una alerta para tu Compañía — abre la app para ver los detalles.',
+    self.registration.showNotification(titulo, {
+      body: d.cuerpo || 'Central emitió una alerta para tu Compañía — abre la app para ver los detalles.',
       icon: 'icons/apple-touch-icon.png',
       badge: 'icons/favicon-32.png',
-      vibrate: [600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 600, 250, 900],
-      tag: 'alerta-central',
+      vibrate: urgente ? PATRON_ALERTA : PATRON_AVISO,
+      tag: d.tag || 'alerta-central',
       renotify: true,
-      requireInteraction: true,
+      silent: false,
+      requireInteraction: urgente && d.tipo !== 'prueba',
+      timestamp: Date.now(),
+      data: { url: d.url || 'inicio_celular.html', tipo: d.tipo || 'alerta' },
     })
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const destino = (event.notification.data && event.notification.data.url) || 'inicio_celular.html';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((lista) => {
       for (const c of lista) {
         if ('focus' in c) return c.focus();
       }
-      if (self.clients.openWindow) return self.clients.openWindow('inicio_celular.html');
+      if (self.clients.openWindow) return self.clients.openWindow(destino);
     })
   );
 });
