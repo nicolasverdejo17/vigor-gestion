@@ -213,14 +213,37 @@ let CARROS_CEL = [];
 const ESTADO_LABEL_CARRO = { servicio:'En Servicio', mant:'En Mantención', fuera:'Fuera de Servicio', emergencia:'En Emergencia' };
 const COLOR_ESTADO_CARRO = { servicio:'#3CF29A', mant:'#FFC94D', fuera:'#42555C', emergencia:'#F13746' };
 
+// Lo último que se vio queda guardado en el equipo: al volver a esta pantalla se dibuja al tiro y luego se actualiza con los datos reales.
+const CACHE_CIA = uid => 'vigor_cache_compania_' + uid;
+function pintarDesdeCache(uid){
+  let c = null;
+  try{ c = JSON.parse(localStorage.getItem(CACHE_CIA(uid)) || 'null'); }catch(e){}
+  if(!c || !c.perfil) return false;
+  miEstado = c.miEstado || 'fuera'; rolActivo = c.rolActivo || 'raso';
+  miPersonalId = c.miPersonalId || null; miCompaniaId = c.miCompaniaId || null;
+  GUARDIA = c.guardia || []; CARROS_CEL = c.carros || [];
+  const pf = c.perfil;
+  document.getElementById('nombreCompaniaCel').textContent = pf.compania;
+  document.getElementById('roleLabel').textContent = `${pf.nombre} — ${pf.cargo}`;
+  pintarFotoOIniciales(document.getElementById('miIniciales'), pf.foto, pf.nombre);
+  document.getElementById('miNombre').textContent = pf.nombre;
+  document.getElementById('miCargoReg').textContent = `${pf.cargo} · N° ${pf.reg}`;
+  document.getElementById('regAddRow').style.display = rolActivo === 'oficial' ? 'flex' : 'none';
+  document.getElementById('phoneWrap').style.display = 'flex';
+  renderMiEstadoOpciones(); renderGuardia(); renderCarros();
+  return true;
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
     document.getElementById('sinSesion').style.display = 'block';
     return;
   }
+  pintarDesdeCache(session.user.id);
   const { data: perfil } = await sb.from('personal')
     .select('id, numero_registro, nombre_completo, cargo, compania_id, foto_url, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .is('personal_estado_historial.hora_fin', null)
     .eq('auth_user_id', session.user.id).single();
   if(!perfil || !perfil.compania_id){
     document.getElementById('sinSesion').style.display = 'block';
@@ -246,6 +269,8 @@ async function cargarDatos(){
   renderMiEstadoOpciones();
   renderGuardia();
   renderCarros();
+  try{ localStorage.setItem(CACHE_CIA(session.user.id), JSON.stringify({ miEstado, rolActivo, miPersonalId, miCompaniaId, guardia:GUARDIA, carros:CARROS_CEL,
+    perfil:{ compania:perfil.companias.nombre, nombre:perfil.nombre_completo, cargo:perfil.cargo, reg:perfil.numero_registro, foto:perfil.foto_url } })); }catch(e){}
   suscribirRealtime();
 }
 
@@ -277,6 +302,7 @@ function suscribirRealtime(){
 async function cargarGuardia(){
   const { data } = await sb.from('personal')
     .select('id, numero_registro, nombre_completo, cargo, foto_url, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .is('personal_estado_historial.hora_fin', null)
     .eq('compania_id', miCompaniaId)
     .neq('id', miPersonalId);
   GUARDIA = (data || []).map(p => {

@@ -428,14 +428,50 @@ function ocultarAvisoPush(){
   document.getElementById('avisoPush').style.display = 'none';
 }
 
+// Lo último que se vio queda guardado en el equipo: al volver a Inicio se dibuja al tiro y luego se actualiza con los datos reales.
+const CACHE_INI = uid => 'vigor_cache_inicio_' + uid;
+const CARGO_ABREV_INI = { 'Director':'Director','Capitán':'Cap.','Teniente 1°':'Tte. 1°','Teniente 2°':'Tte. 2°','Teniente 3°':'Tte. 3°','Teniente 4°':'Tte. 4°','Ayudante Cía.':'Ayte. Cía.' };
+function textoAlMando(almando){
+  if(almando && almando.personal){
+    const suf = almando.tipo_mando === 'situacional' ? ' (Comando Situacional)' : '';
+    const pre = almando.tipo_mando === 'situacional' ? '' : (CARGO_ABREV_INI[almando.personal.cargo] || almando.personal.cargo) + ' ';
+    return pre + almando.personal.nombre_completo + suf;
+  }
+  return '— Sin personal en el Cuartel —';
+}
+function pintarInicioBase(perfil, companeros, carros, almando){
+  const filaVigente = (perfil.personal_estado_historial || []).find(h => h.hora_fin === null);
+  miEstado = filaVigente ? filaVigente.estado : 'fuera';
+  document.getElementById('nombreCompaniaCel').textContent = perfil.companias.nombre;
+  document.getElementById('roleLabel').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
+  actualizarBannerInstitucional(perfil.cargo);
+  pintarFotoOIniciales(document.getElementById('miIniciales'), perfil.foto_url, perfil.nombre_completo);
+  document.getElementById('miNombre').textContent = perfil.nombre_completo;
+  document.getElementById('miCargoReg').textContent = `${perfil.cargo} · N° ${perfil.numero_registro}`;
+  const presentes = (companeros || []).map(p => {
+    const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
+    return fv && fv.estado !== 'fuera' ? { ...p, estado: fv.estado } : null;
+  }).filter(Boolean);
+  renderFaro(presentes, carros || []);
+  renderDotaciones(carros || [], companeros || [], perfil.id);
+  document.getElementById('alMandoTexto').textContent = textoAlMando(almando);
+  document.getElementById('phoneWrap').style.display = 'flex';
+  renderMiEstadoChip();
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
     document.getElementById('sinSesion').style.display = 'block';
     return;
   }
+  try{
+    const c = JSON.parse(localStorage.getItem(CACHE_INI(session.user.id)) || 'null');
+    if(c && c.perfil) pintarInicioBase(c.perfil, c.companeros, c.carros, c.almando);
+  }catch(e){}
   const { data: perfil } = await sb.from('personal')
     .select('id, numero_registro, nombre_completo, cargo, compania_id, cuerpo_id, foto_url, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
+    .is('personal_estado_historial.hora_fin', null)
     .eq('auth_user_id', session.user.id).single();
   if(!perfil){
     // La sesión es de una cuenta institucional (PC del Cuartel, carro, Central): se limpia lo recordado y el acceso la lleva a su pantalla
@@ -448,40 +484,14 @@ async function cargarDatos(){
     document.getElementById('sinSesion').textContent = 'Esta sesión no pertenece a ninguna Compañía.';
     return;
   }
-  const filaVigente = (perfil.personal_estado_historial || []).find(h => h.hora_fin === null);
-  miEstado = filaVigente ? filaVigente.estado : 'fuera';
-
-  document.getElementById('nombreCompaniaCel').textContent = perfil.companias.nombre;
-  document.getElementById('roleLabel').textContent = `${perfil.nombre_completo} — ${perfil.cargo}`;
-  actualizarBannerInstitucional(perfil.cargo);
-  pintarFotoOIniciales(document.getElementById('miIniciales'), perfil.foto_url, perfil.nombre_completo);
-  document.getElementById('miNombre').textContent = perfil.nombre_completo;
-  document.getElementById('miCargoReg').textContent = `${perfil.cargo} · N° ${perfil.numero_registro}`;
-
   const [{ data: companeros }, { data: carros }, { data: almando }] = await Promise.all([
-    sb.from('personal').select('id, nombre_completo, cargo, foto_url, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)').eq('compania_id', perfil.compania_id),
+    sb.from('personal').select('id, nombre_completo, cargo, foto_url, personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)').is('personal_estado_historial.hora_fin', null).eq('compania_id', perfil.compania_id),
     sb.from('carros').select('id, nomenclatura, tipo_descripcion, estado, asignacion_dotacion(conductor_id, oficial_a_cargo_id, asignacion_dotacion_tripulantes(personal_id))').eq('compania_id', perfil.compania_id).order('nomenclatura'),
     sb.from('compania_al_mando').select('tipo_mando, personal(nombre_completo, cargo)').eq('compania_id', perfil.compania_id).maybeSingle()
   ]);
 
-  const presentes = (companeros || []).map(p => {
-    const fv = (p.personal_estado_historial || []).find(h => h.hora_fin === null);
-    return fv && fv.estado !== 'fuera' ? { ...p, estado: fv.estado } : null;
-  }).filter(Boolean);
-  renderFaro(presentes, carros || []);
-  renderDotaciones(carros || [], companeros || [], perfil.id);
-
-  const CARGO_ABREV = { 'Director':'Director','Capitán':'Cap.','Teniente 1°':'Tte. 1°','Teniente 2°':'Tte. 2°','Teniente 3°':'Tte. 3°','Teniente 4°':'Tte. 4°','Ayudante Cía.':'Ayte. Cía.' };
-  if(almando && almando.personal){
-    const suf = almando.tipo_mando === 'situacional' ? ' (Comando Situacional)' : '';
-    const pre = almando.tipo_mando === 'situacional' ? '' : (CARGO_ABREV[almando.personal.cargo] || almando.personal.cargo) + ' ';
-    document.getElementById('alMandoTexto').textContent = pre + almando.personal.nombre_completo + suf;
-  } else {
-    document.getElementById('alMandoTexto').textContent = '— Sin personal en el Cuartel —';
-  }
-
-  document.getElementById('phoneWrap').style.display = 'flex';
-  renderMiEstadoChip();
+  pintarInicioBase(perfil, companeros, carros, almando);
+  try{ localStorage.setItem(CACHE_INI(session.user.id), JSON.stringify({ perfil, companeros, carros, almando })); }catch(e){}
   renderNotificaciones(perfil);
   cargarAvisoCuotas();
   mostrarAvisoPush(perfil.id);

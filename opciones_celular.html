@@ -296,6 +296,7 @@ function renderTodo(){ renderPerfil(); renderFilas(); }
 
 async function ir(msg){
   toast(msg, false);
+  try{ Object.keys(localStorage).filter(k => k.indexOf('vigor_cache_') === 0).forEach(k => localStorage.removeItem(k)); }catch(e){}   // lo guardado para dibujar rápido se borra al salir
   await sb.auth.signOut();
   setTimeout(()=>window.location.href = 'login_registro.html', 700);
 }

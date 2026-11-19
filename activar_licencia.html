@@ -287,7 +287,7 @@ label {
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
-  // Mismo catálogo de módulos que generador_licencias.html, para poder
+  // Mismo catálogo de módulos que usaba el antiguo generador de licencias, para poder
   // mostrar el nombre del paquete y el conteo de módulos a partir del
   // array de códigos que devuelve la base (la tabla no guarda "paquete").
   const OPCIONALES = [
