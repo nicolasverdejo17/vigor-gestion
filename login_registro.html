@@ -365,14 +365,9 @@ const ROLES_COMANDANCIA_REAL = ['Comandante','Segundo Comandante','Tercer Comand
 const ROLES_ADMIN_GENERAL_REAL = ['Superintendente','Vicesuperintendente','Secretario General','Tesorero General'];
 
 async function resolverCuerpoActivo(){
-  // Conveniencia de dispositivo: si este celular ya verificó un código
-  // antes (p.ej. otro bombero de la misma Compañía se registró acá), lo
-  // recuerda — pero siempre puede escribirse uno distinto y re-verificar.
-  const guardado = localStorage.getItem('vigor_codigo_cuerpo');
-  if(guardado){
-    codigoCuerpoTexto = guardado;
-    await verificarCodigoCuerpo(true);
-  }
+  // El Código de Cuerpo ya no se recuerda en el dispositivo: el registro parte vacío y las compañías
+  // aparecen recién cuando se escribe y verifica el código.
+  try{ localStorage.removeItem('vigor_codigo_cuerpo'); }catch(e){}
 }
 
 async function verificarCodigoCuerpo(silencioso){
@@ -393,7 +388,6 @@ async function verificarCodigoCuerpo(silencioso){
   cuerpoActivo = match.r_cuerpo_id;
   nombreCuerpoActivo = match.r_nombre_oficial;
   codigoCuerpoTexto = codigo.toUpperCase();
-  localStorage.setItem('vigor_codigo_cuerpo', codigoCuerpoTexto);
   const { data: comps } = await sb.rpc('listar_companias_publico', { p_cuerpo_id: cuerpoActivo });
   companiasActivas = (comps || []).map(c => ({ id: c.c_id, nombre: c.c_nombre, numero: c.c_numero }));
   render();
