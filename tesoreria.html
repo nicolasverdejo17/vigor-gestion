@@ -27,6 +27,13 @@
   .barra{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
   .barra .esp{ flex:1; }
   .tabs{ display:flex; gap:6px; flex-wrap:wrap; }
+  .anio{ display:inline-flex; align-items:stretch; border:1.5px solid var(--line-strong); background:var(--panel-alt); height:38px; }
+  html body .anio button{ min-height:0 !important; height:100%; width:32px; padding:0 !important; border:none !important; background:transparent !important; color:var(--text-muted) !important; display:inline-flex; align-items:center; justify-content:center; }
+  html body .anio button:hover:not(:disabled){ background:rgba(255,255,255,.07) !important; color:#fff !important; }
+  html body .anio button:disabled{ opacity:.3; cursor:default; }
+  .anio span{ min-width:58px; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:.06em; border-left:1px solid var(--line-strong); border-right:1px solid var(--line-strong); }
+  [role=button], button{ cursor:pointer; user-select:none; }
+  html body .tabs .cat-tab{ font-family:'Rajdhani',sans-serif !important; font-weight:700; font-size:13px; letter-spacing:.06em !important; text-transform:uppercase !important; min-height:38px; padding:0 18px; display:inline-flex; align-items:center; justify-content:center; }
   .cat-tab.on{ background:rgba(57,255,20,.1) !important; border-color:rgba(57,255,20,.6) !important; color:#fff !important; }
   select, input[type=number], input[type=text], input[type=date]{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font:500 14px 'Inter',sans-serif; padding:9px 11px; }
   select:focus, input:focus{ outline:none; border-color:var(--cyan); }
@@ -44,6 +51,8 @@
   table.g th{ font-family:'Rajdhani'; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); padding:9px 4px; text-align:center; background:var(--panel-alt); border-bottom:1px solid var(--line-strong); position:sticky; top:0; z-index:1; }
   table.g th.n, table.g td.n{ text-align:left; padding-left:12px; position:sticky; left:0; background:var(--panel); z-index:2; min-width:200px; }
   table.g th.n{ background:var(--panel-alt); z-index:3; }
+  html body table.g thead th{ background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035)), #0E1D28 !important; }
+  html body table.g thead th.n{ background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.035)), #0E1D28 !important; }
   table.g td{ padding:4px; text-align:center; border-bottom:1px solid var(--line); }
   table.g tr:nth-child(even) td.n{ background:#0B1822; }
   table.g td.n b{ font-weight:600; font-size:13.5px; display:block; cursor:pointer; }
@@ -56,7 +65,7 @@
   .c.futuro{ color:var(--text-dim); border-color:var(--line); }
   .c.na{ color:var(--line-strong); cursor:default; }
   .c:not(.na):hover{ border-color:#E3F0F6; }
-  .leyenda{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--text-muted); margin:10px 2px 0; }
+  .leyenda{ display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--text-muted); margin:0 2px 10px; }
   .leyenda i{ display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-2px; border:1px solid; }
 
   table.l{ width:100%; border-collapse:collapse; }
@@ -94,7 +103,8 @@
     .wrap{ padding:12px 12px 32px; } .app-head{ padding:10px 14px; }
     .kpis{ grid-template-columns:1fr 1fr; } .fila2{ grid-template-columns:1fr; }
     table.g td.n, table.g th.n{ min-width:150px; }
-    html body .tabs{ flex-wrap:nowrap; width:100%; } html body .tabs .cat-tab{ flex:1; min-height:36px; padding:0 4px; font-size:11px; text-align:center; display:flex; align-items:center; justify-content:center; }
+    .leyenda{ font-size:11px; gap:6px 12px; } .leyenda i{ width:10px; height:10px; margin-right:4px; }
+    html body .tabs{ flex-wrap:nowrap; width:100%; } html body .tabs .cat-tab{ flex:1; min-height:38px; padding:0 4px; font-size:11px; letter-spacing:.03em; }
   }
 </style>
 <link rel="manifest" href="manifest-tablet.json">
@@ -112,7 +122,7 @@
 
 <header class="app-head">
   <button class="back-btn" onclick="volver()">← Volver</button>
-  <h1>Tesorería</h1>
+  <h1>Cuotas</h1>
 </header>
 
 <main class="wrap" id="contenido"><div class="msg">Cargando…</div></main>
@@ -137,7 +147,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MES3 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const ERRORES = {
-  SIN_PERMISO:'Solo el Director y el Tesorero/a de la compañía pueden modificar la tesorería',
+  SIN_PERMISO:'Solo el Director y el Tesorero/a de la compañía pueden modificar las cuotas',
   PAQUETE_NO_INCLUIDO:'Esta función no está incluida en el plan del Cuerpo',
   LICENCIA_SOLO_LECTURA:'La licencia está vencida: solo lectura',
   MONTO_INVALIDO:'Escribe un monto válido', DIA_INVALIDO:'El día de vencimiento debe estar entre 1 y 28',
@@ -162,7 +172,7 @@ async function iniciar(){
   if(!session){ location.href = 'login_registro.html'; return; }
   const { data: p } = await sb.from('personal').select('id, nombre_completo, cargo, compania_id, companias(nombre)').eq('auth_user_id', session.user.id).maybeSingle();
   if(!p || !p.compania_id || !['Director', 'Tesorero/a'].includes(p.cargo)){
-    $('contenido').innerHTML = '<div class="msg"><h2>Acceso restringido</h2>Tesorería es solo para el Director y el Tesorero/a de la compañía.</div>'; return;
+    $('contenido').innerHTML = '<div class="msg"><h2>Acceso restringido</h2>Cuotas es solo para el Director y el Tesorero/a de la compañía.</div>'; return;
   }
   perfil = p; await cargar();
 }
@@ -204,9 +214,9 @@ const totalAdeudado = m => (m.adeudados || []).reduce((s, a) => s + Number(a.mon
 function render(){
   const tabs = [['cuotas', 'Cuotas'], ['deudores', 'Deudores'], ['config', 'Configuración'], ['historial', 'Historial']];
   const anios = []; for(let a = new Date().getFullYear() + 1; a >= new Date().getFullYear() - 5; a--) anios.push(a);
-  let h = `<div class="barra"><div class="tabs">${tabs.map(t => `<div role="button" tabindex="0" class="cat-tab${tab === t[0] ? ' on' : ''}" onclick="irTab('${t[0]}')">${t[1]}</div>`).join('')}</div>
+  let h = `<div class="barra"><div class="tabs">${tabs.map(t => `<button class="cat-tab${tab === t[0] ? ' on' : ''}" onclick="irTab('${t[0]}')">${t[1]}</button>`).join('')}</div>
     <div class="esp"></div>
-    ${tab === 'cuotas' ? `<select onchange="cambiarAnio(this.value)">${anios.map(a => `<option${a === anio ? ' selected' : ''}>${a}</option>`).join('')}</select>` : ''}
+    ${tab === 'cuotas' ? `<div class="anio"><button aria-label="Año anterior" ${anio <= anios[anios.length - 1] ? 'disabled' : ''} onclick="cambiarAnio(${anio - 1})"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span>${anio}</span><button aria-label="Año siguiente" ${anio >= anios[0] ? 'disabled' : ''} onclick="cambiarAnio(${anio + 1})"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button></div>` : ''}
     ${est.config && tab !== 'config' ? `<button class="btn" onclick="modalExportar()">Exportar</button>` : ''}</div>`;
   if(!est.config && tab !== 'config'){
     h += `<div class="caja"><div class="vacio">Aún no se configura la cuota mensual de la compañía.</div><div class="acciones"><button class="btn btn-primary" onclick="irTab('config')">Configurar cuota</button></div></div>`;
@@ -230,6 +240,8 @@ function vistaCuotas(){
     <div class="kpi rojo"><div class="l">Adeudado (total)</div><div class="v">${clp(deuda)}</div></div>
     <div class="kpi"><div class="l">Con atraso</div><div class="v">${deudores}</div></div>
     <div class="kpi"><div class="l">Al día</div><div class="v">${ms.length - deudores}</div></div></div>`;
+  h += `<div class="leyenda"><span><i style="background:rgba(60,242,154,.3);border-color:#3CF29A"></i>Pagado</span><span><i style="background:rgba(241,55,70,.3);border-color:#F13746"></i>Atrasado</span>
+    <span><i style="background:rgba(255,201,77,.2);border-color:#FFC94D"></i>Del mes (aún sin vencer)</span><span><i style="border-color:#516E78"></i>EX: exento</span></div>`;
   h += `<div class="scroll"><table class="g"><thead><tr><th class="n">Bombero</th>${MES3.map(m => `<th>${m}</th>`).join('')}</tr></thead><tbody>`;
   ms.forEach(m => {
     h += `<tr><td class="n"><b onclick="modalExcepcion('${m.id}')">${esc(m.nombre)}</b><span>N° ${m.numero} · ${esc(m.cargo)}${m.excepcion != null ? ' · cuota ' + clp(m.excepcion) : ''}</span></td>`;
@@ -240,9 +252,7 @@ function vistaCuotas(){
     }
     h += '</tr>';
   });
-  h += `</tbody></table></div>
-    <div class="leyenda"><span><i style="background:rgba(60,242,154,.3);border-color:#3CF29A"></i>Pagado</span><span><i style="background:rgba(241,55,70,.3);border-color:#F13746"></i>Atrasado</span>
-    <span><i style="background:rgba(255,201,77,.2);border-color:#FFC94D"></i>Del mes (aún sin vencer)</span><span><i style="border-color:#516E78"></i>EX: exento</span></div>`;
+  h += `</tbody></table></div>`;
   return ms.length ? h : '<div class="vacio">No hay bomberos activos en la compañía.</div>';
 }
 
@@ -416,11 +426,11 @@ function seccionesHistorial(){
 }
 function exportarPDF(que){
   const unico = que.length === 1 ? que[0] : null;
-  const TIT = { cuotas:['Cuotas de la compañía', 'Año ' + anio, 'cuotas_' + anio], deudores:['Deudores de cuotas', 'Al ' + diaTxt(est.hoy), 'deudores_cuotas'], historial:['Historial de tesorería', 'Últimos ' + historial.length + ' movimientos', 'historial_tesoreria'] };
+  const TIT = { cuotas:['Cuotas de la compañía', 'Año ' + anio, 'cuotas_' + anio], deudores:['Deudores de cuotas', 'Al ' + diaTxt(est.hoy), 'deudores_cuotas'], historial:['Historial de cuotas', 'Últimos ' + historial.length + ' movimientos', 'historial_tesoreria'] };
   const secciones = [];
   que.forEach(k => secciones.push(...(k === 'cuotas' ? seccionesCuotas() : k === 'deudores' ? seccionesDeudores() : seccionesHistorial())));
   secciones.push({ firmas:['Tesorero/a', 'Director'] });
-  VigorInforme.generar({ sb, titulo:unico ? TIT[unico][0] : 'Informe de tesorería', subtitulo:unico ? TIT[unico][1] : 'Año ' + anio + ' · al ' + diaTxt(est.hoy), archivo:unico ? TIT[unico][2] : 'tesoreria_' + anio,
+  VigorInforme.generar({ sb, titulo:unico ? TIT[unico][0] : 'Informe de cuotas', subtitulo:unico ? TIT[unico][1] : 'Año ' + anio + ' · al ' + diaTxt(est.hoy), archivo:unico ? TIT[unico][2] : 'tesoreria_' + anio,
     orientacion:que.includes('cuotas') ? 'horizontal' : 'vertical', secciones });
 }
 

@@ -152,7 +152,7 @@
     'guardia_nocturna':'Guardia Nocturna', 'libro_guardia':'Libro de Guardia', 'notificaciones_celular':'Notificaciones',
     'solicitudes_alta':'Solicitudes de Ingreso', 'asignacion_dotacion_celular':'Dotación de Unidades',
     'usuarios_sistema':'Registro de Bomberos', 'estadisticas':'Estadísticas', 'inventario':'Inventario',
-    'auditoria_eliminaciones':'Registro de Auditoría', 'gestion_especialidades':'Especialidades', 'crear_carro':'Crear Carro', 'distribucion_material':'Material', 'tesoreria':'Tesorería'
+    'auditoria_eliminaciones':'Registro de Auditoría', 'gestion_especialidades':'Especialidades', 'crear_carro':'Crear Carro', 'distribucion_material':'Material', 'tesoreria':'Cuotas'
   };
   function tituloDeOpciones(archivo){
     var q = new URLSearchParams(location.search);
