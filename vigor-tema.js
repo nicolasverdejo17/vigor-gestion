@@ -144,7 +144,7 @@
   }
 
   // El nombre de la pantalla va en el banner, a continuación del logo.
-  var ESPECIALES = { 'consola_despacho.html':'Central de Alarmas', 'visual_companias.html':'Central de Alarmas', 'puestos_mando_activos.html':'Central de Alarmas', 'historial_despacho.html':'Central de Alarmas', 'terminal_coordenadas.html':'Central de Alarmas', 'wizard_inicial.html':'Asistente de configuración inicial', 'identidad_final.html':'Identidad visual',
+  var ESPECIALES = { 'consola_despacho.html':'Central de Alarmas', 'visual_companias.html':'Central de Alarmas', 'puestos_mando_activos.html':'Central de Alarmas', 'historial_despacho.html':'Central de Alarmas', 'terminal_coordenadas.html':'Central de Alarmas', 'wizard_inicial.html':'Asistente de configuración inicial', 'definir_nueva_password.html':'Nueva contraseña', 'alta_personal_rentado.html':'Alta de Personal', 'identidad_final.html':'Identidad visual',
     'tablet_parte.html':'Parte de Emergencia', 'tablet_bitacora.html':'Bitácora', 'tablet_checklist.html':'Checklist', 'tablet_checklist_historial.html':'Historial de Checklist', 'tablet_dotacion.html':'Dotación Asignada' };
   // Las pantallas del menú Opciones se titulan exactamente como su botón en Opciones.
   var TITULOS_OPCIONES = {
