@@ -27,7 +27,7 @@
     --burdeo:#F13746;
     --burdeo-bright:#F13746;
 
-    --estado-disponible:#3CF29A;
+    --estado-disponible:#39FF14;
     --estado-nodisponible:#FFC94D;
     --estado-fueraservicio:#42555C;
     --estado-emergencia:#F13746;
@@ -903,6 +903,39 @@
   .pcp-peligro:hover{ background:var(--burdeo); color:#fff;}
   .pcp-ok{ border:none; color:#030B13; font-weight:800; background:var(--vg-grad);}
   .pcp-ok:hover{ filter:brightness(1.1);}
+
+  /* ---- Colores y botones al estándar de Vigor: verde #39FF14 = activo/disponible, rojo #F13746 = crisis/salir, ámbar = no disponible/mantención, gris = fuera de servicio; esquinas rectas ---- */
+  html body .bomb-card__estado-pill{
+    border-radius:0 !important; background:color-mix(in srgb, var(--b-color, #5E7480) 18%, #061520) !important;
+    border:1px solid var(--b-color, #5E7480) !important; color:var(--b-color, #8FA4AE) !important; font-family:'Rajdhani',sans-serif; font-weight:800 !important; letter-spacing:.08em;
+  }
+  html body .bomb-card__estado-pill.oscuro{ color:var(--b-color) !important; }
+  html body .carro-btn{
+    border-radius:0 !important; border:1px solid var(--c-color) !important; border-left:4px solid var(--c-color) !important;
+    background:color-mix(in srgb, var(--c-color) 14%, #061520) !important;
+  }
+  html body .carro-btn::before{ display:none !important; }
+  html body .carro-btn__nom{ color:#fff !important; text-shadow:none !important; -webkit-text-stroke:0 !important; }
+  html body .carro-btn__estado-pill, html body .carro-btn.oscuro .carro-btn__estado-pill{
+    border-radius:0 !important; background:transparent !important; color:var(--c-color) !important; padding:0 !important; font-family:'Rajdhani',sans-serif; font-weight:800; letter-spacing:.1em; font-size:11px;
+  }
+  html body .carro-btn__dot-zone, html body .carro-btn.oscuro .carro-btn__dot-zone{ border-radius:0 !important; color:#fff !important; border-left:1px solid color-mix(in srgb, var(--c-color) 45%, transparent) !important; }
+  html body .carro-btn__dot-zone:hover, html body .carro-btn.oscuro .carro-btn__dot-zone:hover{ background:color-mix(in srgb, var(--c-color) 30%, transparent) !important; }
+  html body .resumen__carros .chip{
+    border-radius:0 !important; background:color-mix(in srgb, var(--c-color, #5E7480) 16%, #061520) !important; border:1px solid var(--c-color, #5E7480);
+    color:var(--c-color, #8FA4AE) !important; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:12px; letter-spacing:.08em;
+  }
+  html body .resumen__carros .chip::before{ background:var(--c-color, #5E7480) !important; border-radius:0; }
+  html body .crisis-btn.clima-btn{ background:transparent !important; border:1px solid #153A52 !important; color:#EAF6FB !important; border-radius:0 !important; }
+  html body .crisis-btn.clima-btn::before{ background:#EAF6FB !important; }
+  html body .crisis-btn.btn-salir{ background:transparent !important; border:1px solid #F13746 !important; color:#F13746 !important; border-radius:0 !important; }
+  html body .crisis-btn.btn-salir::before{ display:none; }
+  html body .crisis-btn.btn-salir:hover{ background:#F13746 !important; color:#fff !important; filter:none; }
+  html body .crisis-btn:not(.clima-btn):not(.btn-salir){ border-radius:0 !important; }
+  html body .btn-obs-mas{ background:rgba(57,255,20,.14) !important; border:1px solid #39FF14 !important; color:#39FF14 !important; border-radius:0 !important; min-width:36px; font:800 18px 'Rajdhani',sans-serif; cursor:pointer; }
+  html body .btn-obs-mas:hover{ background:#39FF14 !important; color:#0D2206 !important; }
+  html body .mini-reg-entry input, html body .resumen__item--reg input{ border-radius:0 !important; }
+  html body .mini-reg-entry input:focus, html body .resumen__item--reg input:focus{ border-color:#39FF14 !important; }
 </style>
 </head>
 <body data-rectos>
@@ -923,7 +956,7 @@
         </div>
         <button class="crisis-btn" onclick="window.location.href='modo_crisis.html'">Modo Crisis</button>
         <button class="crisis-btn clima-btn" onclick="window.location.href='clima.html?volver=pc_compania.html'">Clima</button>
-        <button class="crisis-btn" style="background:transparent; border-color:var(--line-strong); color:var(--text-muted);" onclick="vigorCerrarSesion()">Cerrar sesión</button>
+        <button class="crisis-btn btn-salir" onclick="vigorCerrarSesion()">Cerrar sesión</button>
       </div>
     </div>
   </div>
@@ -993,7 +1026,7 @@
               <h3>Observaciones</h3>
               <div style="display:flex; gap:6px; margin-bottom:8px; flex-shrink:0;">
                 <input type="text" id="nuevaObsInput" placeholder="Nueva observación…" style="flex:1; background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:5px; padding:6px 9px; font-size:11.5px; color:var(--text);" onkeydown="if(event.key==='Enter') agregarObservacion()">
-                <button onclick="agregarObservacion()" style="background:var(--cyan-dim); border:1px solid var(--cyan); color:#fff; border-radius:5px; padding:0 10px; font-size:11.5px; cursor:pointer;">+</button>
+                <button class="btn-obs-mas" onclick="agregarObservacion()">+</button>
               </div>
               <div id="obsList"></div>
             </div>
@@ -1053,7 +1086,7 @@
   // explícito del cliente): Disponible/En Servicio=verde, No Disponible/En
   // Mantención=ámbar, Fuera de Servicio=gris, En Emergencia=rojo.
   const COLOR_ESTADO = {
-    disponible:'#3CF29A', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#F13746',
+    disponible:'#39FF14', no_disponible:'#FFC94D', fuera:'#42555C', emergencia:'#F13746',
   };
   const ESP = { R:'#FF5A4E', T:'#4FA3FF', H:'#FFC94D', F:'#3CF29A', M:'#B77CFF', C:'#E08A5C' };
   // Pedido explícito: las letras de Especialidad se veían muy chicas y
@@ -1930,7 +1963,7 @@
     // real ni el estado real del bloque de Carros/Dotación de abajo. Ahora
     // se genera de verdad, con el mismo color exacto de cada estado.
     document.getElementById('resumenCarros').innerHTML = carros.map(c =>
-      `<span class="chip" style="background:${COLOR_ESTADO_CARRO[c.estado]}; color:${c.estado==='mant' ? '#241505' : '#fff'};">${c.nom}</span>`
+      `<span class="chip" style="--c-color:${COLOR_ESTADO_CARRO[c.estado]};">${c.nom}</span>`
     ).join('');
   }
 

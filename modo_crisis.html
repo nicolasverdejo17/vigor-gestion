@@ -210,6 +210,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Vigor">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="vigor-tema.css">
 <link rel="stylesheet" href="vigor-ui.css">
 <script src="vigor-errores.js"></script>
@@ -315,6 +316,90 @@
     .rp-bat h3{ font-size:14px; margin:0 0 6px; text-transform:none; letter-spacing:0; color:#000;}
     .rp-linea{ font-size:12px; margin:3px 0; color:#000;}
   }
+
+  /* ---- Estándar Vigor: esquinas rectas, Rajdhani, verde #39FF14 = activo/disponible, rojo #F13746 = emergencia/peligro, ámbar = rancho ---- */
+  html body .btn-reporte, html body .btn-crear, html body .bm-est, html body .bm-rol, html body .bm-mas, html body .bm-peligro, html body .bm-sec-btn, html body .bm-listo, html body .btn-desactivar, html body .estado-pill, html body .bm-sec-t, html body .bm-grupo-t{
+    font-family:'Rajdhani',sans-serif !important; text-transform:uppercase !important; letter-spacing:.1em !important; font-weight:800 !important; border-radius:0 !important;
+  }
+  html body .btn-reporte, html body .btn-crear, html body .bm-mas, html body .bm-peligro, html body .bm-sec-btn, html body .bm-listo, html body .btn-desactivar{ font-size:13.5px !important; }
+  html body .toolbar h2, html body .bc-top h3, html body .bm-nombre{ font-family:'Rajdhani',sans-serif !important; text-transform:uppercase !important; letter-spacing:.04em !important; font-weight:800 !important; }
+  html body .bc-top h3{ font-size:20px !important; } html body .bm-nombre{ font-size:26px !important; }
+  html body .btn-reporte{ background:transparent !important; border:1px solid #153A52 !important; color:#EAF6FB !important; }
+  html body .btn-reporte:hover{ border-color:#8FB0C2 !important; }
+  html body .btn-crear, html body .bm-mas, html body .bm-listo{ background:rgba(57,255,20,.14) !important; border:1px solid #39FF14 !important; color:#39FF14 !important; }
+  html body .btn-crear:hover, html body .bm-mas:hover, html body .bm-listo:hover{ background:#39FF14 !important; color:#0D2206 !important; filter:none; }
+  html body .btn-desactivar, html body .bm-peligro, html body .modal-confirm{ background:#F13746 !important; border:1px solid #F13746 !important; color:#fff !important; border-radius:0 !important; }
+  html body .bm-peligro.suave{ background:transparent !important; color:#F13746 !important; }
+  html body .bm-peligro:hover{ background:#F13746 !important; color:#fff !important; }
+  html body .bm-sec-btn, html body .modal-cancel{ background:transparent !important; border:1px solid #153A52 !important; color:#EAF6FB !important; border-radius:0 !important; }
+  /* tarjetas de batallón */
+  html body .bcard, html body .bm-box, html body .bm-sec, html body .vacio-crisis, html body .modal-box{ border-radius:0 !important; }
+  html body .bcard{ border:1px solid #153A52; border-left:4px solid #39FF14; background:linear-gradient(90deg, rgba(57,255,20,.07), #061520 40%); }
+  html body .bcard::before{ display:none; }
+  html body .bcard.emergencia{ border-left-color:#F13746; background:linear-gradient(90deg, rgba(241,55,70,.10), #061520 40%); }
+  html body .bcard.rancho{ border-left-color:#FFC94D; background:linear-gradient(90deg, rgba(255,201,77,.09), #061520 40%); }
+  html body .bcard:hover{ border-color:#8FB0C2; transform:none; }
+  html body .bc-nums b{ font-family:'Rajdhani',sans-serif; font-size:30px; }
+  html body .bc-carro{ border-radius:0 !important; font-family:'Rajdhani',sans-serif !important; font-weight:800; font-size:13px; letter-spacing:.08em; color:#EAF6FB !important; border:1px solid #153A52 !important; background:#07121B; padding:3px 10px; }
+  html body .bc-abrir{ color:#39FF14; font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.12em; font-size:12.5px; }
+  html body .estado-pill{ background:rgba(57,255,20,.14) !important; border:1px solid #39FF14; color:#39FF14 !important; padding:3px 10px !important; font-size:11px !important; }
+  html body .estado-pill.emergencia{ background:rgba(241,55,70,.16) !important; border-color:#F13746; color:#F13746 !important; }
+  html body .estado-pill.rancho{ background:rgba(255,201,77,.14) !important; border-color:#FFC94D; color:#FFC94D !important; }
+  /* detalle del batallón */
+  html body .bm-est{ background:#07121B; border:1px solid #153A52; color:#8FB0C2; padding:13px 8px; }
+  html body .bm-est:hover{ border-color:#8FB0C2; color:#fff; }
+  html body .bm-est.disponible.on{ background:#39FF14 !important; border-color:#39FF14 !important; color:#0D2206 !important; }
+  html body .bm-est.emergencia.on{ background:#F13746 !important; border-color:#F13746 !important; color:#fff !important; }
+  html body .bm-est.rancho.on{ background:#FFC94D !important; border-color:#FFC94D !important; color:#241505 !important; }
+  html body .bm-rol{ background:#07121B; border:1px solid #153A52; color:#8FB0C2; padding:10px 6px; }
+  html body .bm-rol.on{ background:rgba(57,255,20,.16) !important; border:1px solid #39FF14 !important; color:#39FF14 !important; }
+  html body .bm-campo input, html body .bm-add input, html body .bm-sec{ border-radius:0 !important; border-color:#153A52; }
+  html body .bm-campo input:focus, html body .bm-add input:focus, html body .bm-nombre:focus{ border-color:#39FF14 !important; }
+  html body .bm-sec-t{ color:#39FF14; }
+  html body .bm-sec-t span, html body .bm-grupo-t span{ border-radius:0 !important; }
+  html body .bm-chip{ border-radius:0 !important; background:#07121B; border:1px solid #153A52; padding:5px 6px 5px 10px; font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.04em; font-size:14px; }
+  html body .bm-chip.carro{ border-color:#39FF14; background:rgba(57,255,20,.10); }
+  html body .bm-chip.carro b{ color:#39FF14; font-family:'Rajdhani',sans-serif; font-size:15px; }
+  html body .bm-av{ border-radius:0 !important; background:#153A52; color:#EAF6FB; }
+  html body .bm-chip button, html body .bm-x{ background:none !important; border:none !important; box-shadow:none !important; min-width:0; min-height:0; width:auto; height:auto; }
+
+  /* ---- Ubicación del batallón (mapa, igual que la Consola de Despacho) ---- */
+  html body .ubic-bar{ display:flex; gap:8px; }
+  html body .ubic-bar input[type=text]{ flex:1; min-width:0; }
+  html body .ubic-btn{ background:#07121B; border:1px solid #153A52; color:#EAF6FB; border-radius:0 !important; padding:0 16px; font-family:'Rajdhani',sans-serif; font-weight:800; font-size:13.5px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; }
+  html body .ubic-btn:hover{ border-color:#8FB0C2; }
+  html body .ubic-btn.on{ border-color:#39FF14; background:rgba(57,255,20,.14); color:#39FF14; }
+  .ubic-pos{ position:relative; }
+  .ubic-sug{ position:absolute; left:0; right:0; top:100%; z-index:30; background:#061520; border:1px solid #39FF14; border-top:none; display:none; max-height:260px; overflow:auto; box-shadow:0 12px 28px rgba(0,0,0,.5); }
+  .ubic-sug.on{ display:block; }
+  html body .ubic-sug button{ display:block; width:100%; text-align:left; background:none !important; border:none !important; border-bottom:1px solid #0F2A3B !important; border-radius:0 !important; padding:10px 14px; color:#EAF6FB; cursor:pointer; font-family:'Inter',sans-serif; font-size:13.5px; text-transform:none; letter-spacing:0; }
+  .ubic-sug button:last-child{ border-bottom:none !important; }
+  html body .ubic-sug button:hover, html body .ubic-sug button.sel{ background:#0B2233 !important; }
+  .ubic-sug small{ display:block; color:#7B99A3; font-size:12px; margin-top:2px; font-weight:400; }
+  .ubic-estado{ display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:#8FB0C2; }
+  .ubic-estado.on{ display:flex; }
+  .ubic-estado .pin-dot{ width:10px; height:10px; background:#F13746; flex:none; }
+  .ubic-estado .mono{ color:#EAF6FB; font-family:'JetBrains Mono',monospace; }
+  .ubic-estado .chip{ background:#07121B; border:1px solid #153A52; padding:2px 9px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#8FB0C2; font-family:'Rajdhani',sans-serif; font-weight:700; }
+  html body .ubic-estado button{ margin-left:auto; background:none; border:1px solid #153A52; color:#8FB0C2; border-radius:0 !important; padding:3px 10px; cursor:pointer; font-size:12px; }
+  html body .ubic-estado button:hover{ border-color:#F13746; color:#fff; }
+  .ubic-map{ margin-top:12px; height:280px; border:1px solid #153A52; overflow:hidden; position:relative; background:#030B13; }
+  .ubic-map.off{ display:none; }
+  #bmUbicMap{ position:absolute; inset:0; }
+  .ubic-pin{ width:34px; height:34px; cursor:grab; }
+  .ubic-pin b{ position:absolute; left:3px; top:0; width:28px; height:28px; background:#F13746; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid #030B13; display:grid; place-items:center; }
+  .ubic-pin svg{ width:15px; height:15px; transform:rotate(45deg); }
+  .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right{ display:none; }
+  html body .bm-sec-t .bm-sync{ margin-left:auto; font-style:normal; color:#F13746; font-size:11.5px; letter-spacing:.1em; }
+  html body .bm-sub{ font-family:'Rajdhani',sans-serif; font-weight:800; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#7B99A3; margin:14px 0 8px; }
+  .bm-tipos{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:8px; }
+  html body .bm-tipo{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left; background:#07121B; border:1px solid #153A52; border-radius:0 !important; color:#8FB0C2; padding:10px 12px; cursor:pointer; font-family:'Inter',sans-serif; text-transform:none; letter-spacing:0; }
+  html body .bm-tipo b{ font-family:'Rajdhani',sans-serif; font-size:19px; letter-spacing:.04em; color:#EAF6FB; }
+  html body .bm-tipo span{ font-size:11px; font-weight:500; line-height:1.25; }
+  html body .bm-tipo:hover{ border-color:#8FB0C2; }
+  html body .bm-tipo.on{ background:rgba(57,255,20,.14); border-color:#39FF14; color:#EAF6FB; }
+  html body .bm-tipo.on b{ color:#39FF14; }
+  .bm-campos.uno{ grid-template-columns:1fr; }
 </style>
 </head>
 <body>
@@ -369,6 +454,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="vigor-atribucion.js"></script>
+<script src="vigor-config.js"></script>
+<script src="vigor-mapa.js"></script>
 <script src="vigor-informe.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
@@ -414,7 +503,8 @@ async function cargarDatos(){
   elapsedBaseMs = Math.max(0, Date.now() - fechaActivacion.getTime());
   elapsedRefPerf = performance.now();
 
-  await cargarBatallones();
+  await Promise.all([cargarBatallones(), cargarClaves()]);
+  render(true);
   cargarSugerencias();
   suscribirRealtime();
 }
@@ -434,10 +524,11 @@ function suscribirRealtime(){
 
 async function cargarBatallones(forzar){
   const { data } = await sb.from('batallones')
-    .select('id, nombre, estado, frente_zona, responsable, batallon_carros(id, nomenclatura, procedencia), batallon_bomberos(id, nombre, rol)')
+    .select('id, nombre, estado, frente_zona, responsable, lat, lng, ubicacion_origen, referencia, tipo_emergencia_id, despacho_id, batallon_carros(id, nomenclatura, procedencia), batallon_bomberos(id, nombre, rol)')
     .eq('puesto_mando_id', miPuestoMandoId).order('creado_en');
   batallones = (data || []).map(b => ({
     id: b.id, nombre: b.nombre, estado: b.estado, frente: b.frente_zona || '', responsable: b.responsable || '',
+    lat: b.lat, lng: b.lng, origen: b.ubicacion_origen, ref: b.referencia || '', tipo: b.tipo_emergencia_id, despacho: b.despacho_id,
     carros: b.batallon_carros || [], bomberos: b.batallon_bomberos || []
   }));
   render(forzar);
@@ -485,14 +576,15 @@ async function eliminarBatallon(id){
 async function setEstado(id, estado){
   const b = batallones.find(x => x.id === id); if(!b || b.estado === estado) return;
   const antes = b.estado;
+  b.estado = estado; render(true);   // el botón toma su color al tiro; si el servidor falla, vuelve al estado anterior
   const { data, error } = await sb.rpc('batallon_cambiar_estado', { p_batallon_id: id, p_estado: estado });
-  if(error){ toast('No se pudo cambiar el estado — ' + error.message); return; }
-  b.estado = estado; render(true);
+  if(error){ b.estado = antes; render(true); toast('No se pudo cambiar el estado — ' + error.message); return; }
   if(estado === 'emergencia' && antes !== 'emergencia' && data){
     const partes = [];
     if(data.carros) partes.push(data.carros + (data.carros === 1 ? ' carro' : ' carros'));
     if(data.bomberos) partes.push(data.bomberos + (data.bomberos === 1 ? ' bombero' : ' bomberos'));
     let msg = 'Batallón en emergencia' + (partes.length ? ': ' + partes.join(' y ') + ' pasaron a emergencia' : '') + (data.alertados ? ' · ' + data.alertados + (data.alertados === 1 ? ' celular alertado' : ' celulares alertados') : '');
+    if(data.despacho) msg += ' · Despacho registrado en Central';
     if(data.sin_resolver && data.sin_resolver.length) msg += ' · No se encontraron en el sistema: ' + data.sin_resolver.join(', ');
     toast(msg);
   }
@@ -578,6 +670,207 @@ function renderTarjetas(){
     </div>`).join('');
 }
 
+
+// ---- Ubicación del batallón (buscar, tocar el mapa o pegar coordenadas — igual que la Consola de Despacho) y tipo de emergencia ----
+let CLAVES = [];
+async function cargarClaves(){
+  try{
+    const { data } = await sb.from('claves_emergencia').select('id, codigo, nombre').eq('activo', true).is('parent_clave_id', null).order('orden', { nullsFirst:false }).order('codigo');
+    CLAVES = data || [];
+  }catch(e){ CLAVES = []; }
+}
+const UB = { nodo:null, batId:null, pin:null, origen:null, referencia:'', auto:false, mapa:null, marker:null, centro:null, bounds:null, contorno:null, timer:null, sug:[], seq:0, iniciando:false };
+const UB_ORIGEN = { mapa:'Mapa', busqueda:'Búsqueda', coordenadas:'Coordenadas' };
+const ubFmt = (a, b) => a.toFixed(5) + ', ' + b.toFixed(5);
+const ubMapaOk = () => typeof maplibregl !== 'undefined' && typeof vigorEstiloMapa === 'function';
+const $ub = id => document.getElementById(id);
+
+function ubCrearNodo(){
+  const d = document.createElement('div');
+  d.className = 'ubic-wrap'; d.id = 'bmUbic';
+  d.innerHTML = `
+    <div class="ubic-pos">
+      <div class="ubic-bar">
+        <input type="text" id="bmUbicInput" placeholder="Dirección, lugar o coordenadas…" autocomplete="off">
+        <button type="button" class="ubic-btn" id="bmUbicBuscar">Buscar</button>
+        <button type="button" class="ubic-btn on" id="bmUbicMapa">Mapa</button>
+      </div>
+      <div class="ubic-sug" id="bmUbicSug"></div>
+    </div>
+    <div class="ubic-estado" id="bmUbicEstado"></div>
+    <div class="ubic-map" id="bmUbicMapWrap"><div id="bmUbicMap"></div></div>`;
+  return d;
+}
+
+// Coloca el nodo (que vive aparte para que el mapa no se recree) dentro del detalle y lo sincroniza con el batallón abierto
+function ubMontar(b){
+  if(!UB.nodo){ UB.nodo = ubCrearNodo(); ubEnlazar(); }
+  const slot = $ub('bmUbicSlot'); if(!slot) return;
+  slot.appendChild(UB.nodo);
+  const inp = $ub('bmUbicInput');
+  const cambio = UB.batId !== b.id;
+  if(cambio || document.activeElement !== inp){
+    UB.batId = b.id;
+    if(cambio || inp.value !== b.frente) inp.value = b.frente || '';
+    const hay = b.lat != null && b.lng != null;
+    UB.pin = hay ? { lat:b.lat, lng:b.lng } : null; UB.origen = hay ? (b.origen || 'mapa') : null; UB.referencia = b.ref || ''; UB.auto = false;
+    ubCerrarSug(); ubPintarEstado(); ubPintarPin();
+    if(cambio) setTimeout(ubEncuadrar, 40);
+  }
+  if(!UB.mapa && !UB.iniciando) ubIniciarMapa();
+  else if(UB.mapa && !cambio) setTimeout(() => UB.mapa.resize(), 30);
+}
+
+function ubEnlazar(){
+  const inp = UB.nodo.querySelector('#bmUbicInput');
+  inp.addEventListener('input', ubAlEscribir);
+  inp.addEventListener('change', () => ubGuardar());
+  inp.addEventListener('keydown', ev => {
+    const cont = UB.nodo.querySelector('#bmUbicSug'); const items = [...cont.querySelectorAll('button')];
+    if(ev.key === 'Escape'){ ubCerrarSug(); return; }
+    if(ev.key === 'Enter' && !(items.length && cont.classList.contains('on'))){ ev.preventDefault(); ubCerrarSug(); inp.blur(); return; }
+    if(!items.length || !cont.classList.contains('on')) return;
+    let i = items.findIndex(b => b.classList.contains('sel'));
+    if(ev.key === 'ArrowDown'){ ev.preventDefault(); i = (i + 1) % items.length; }
+    else if(ev.key === 'ArrowUp'){ ev.preventDefault(); i = (i - 1 + items.length) % items.length; }
+    else if(ev.key === 'Enter'){ ev.preventDefault(); ubElegir(i >= 0 ? i : 0); return; }
+    else return;
+    items.forEach((b, k) => b.classList.toggle('sel', k === i));
+  });
+  document.addEventListener('click', ev => { if(!ev.target.closest('.ubic-pos')) ubCerrarSug(); });
+  UB.nodo.querySelector('#bmUbicBuscar').onclick = () => ubBuscar();
+  UB.nodo.querySelector('#bmUbicMapa').onclick = () => {
+    const w = UB.nodo.querySelector('#bmUbicMapWrap'); w.classList.toggle('off'); UB.nodo.querySelector('#bmUbicMapa').classList.toggle('on', !w.classList.contains('off'));
+    if(UB.mapa) setTimeout(() => UB.mapa.resize(), 30);
+  };
+}
+
+async function ubIniciarMapa(){
+  UB.iniciando = true;
+  if(!ubMapaOk()){ $ub('bmUbicMapWrap').classList.add('off'); $ub('bmUbicMapa').style.display = 'none'; return; }   // sin internet o sin librería: solo texto
+  let centro = (window.VIGOR_CONFIG && window.VIGOR_CONFIG.CENTRO_DEFECTO) || [-72.6636, -36.8236], contorno = null;
+  try{
+    const r = await sb.rpc('mi_cuerpo_info'); const f = Array.isArray(r.data) ? r.data[0] : r.data;
+    if(f){ if(f.c_centro_lat != null && f.c_centro_lng != null) centro = [f.c_centro_lng, f.c_centro_lat];
+      if(window.vigorLimiteComunal) contorno = await vigorLimiteComunal({ comuna:f.c_comuna, region:f.c_region, limite:f.c_limite }, g => sb.rpc('guardar_limite_comunal', { p_geojson:g })); }
+  }catch(e){}
+  let bb = null;
+  if(contorno){
+    const f0 = (contorno.features || []).find(x => x.geometry && /Polygon/.test(x.geometry.type));
+    if(f0){ const polis = f0.geometry.type === 'MultiPolygon' ? f0.geometry.coordinates : [f0.geometry.coordinates]; let x0 = 180, x1 = -180, y0 = 90, y1 = -90;
+      polis.forEach(po => po[0].forEach(c => { x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]); }));
+      if(x1 > x0 && y1 > y0){ bb = [[x0, y0], [x1, y1]]; centro = [(x0 + x1)/2, (y0 + y1)/2]; } }
+  }
+  UB.centro = centro; UB.bounds = bb;
+  UB.mapa = new maplibregl.Map(Object.assign({ container:'bmUbicMap', style:vigorEstiloMapa(), minZoom:6, maxZoom:19, attributionControl:false, fadeDuration:0, dragRotate:false, pitchWithRotate:false, doubleClickZoom:false }, bb ? { bounds:bb, fitBoundsOptions:{ padding:24 } } : { center:centro, zoom:12.5 }));
+  UB.mapa.touchZoomRotate.disableRotation();
+  UB.mapa.getCanvas().style.cursor = 'crosshair';
+  UB.mapa.on('click', ev => ubPoner(ev.lngLat.lat, ev.lngLat.lng, 'mapa'));
+  UB.mapa.on('load', () => {
+    if(contorno){
+      UB.mapa.addSource('lim', { type:'geojson', data:contorno });
+      UB.mapa.addLayer({ id:'lim-linea', type:'line', source:'lim', filter:['==', ['geometry-type'], 'Polygon'], paint:{ 'line-color':'#49E9FF', 'line-width':2, 'line-opacity':.85 } });
+    }
+    ubPintarPin(); ubEncuadrar();
+  });
+  setTimeout(ubEncuadrar, 80);
+}
+
+function ubEncuadrar(){
+  if(!UB.mapa) return;
+  UB.mapa.resize();
+  if(UB.pin) UB.mapa.jumpTo({ center:[UB.pin.lng, UB.pin.lat], zoom:15 });
+  else if(UB.bounds) UB.mapa.fitBounds(UB.bounds, { padding:24, duration:0 });
+  else UB.mapa.jumpTo({ center:UB.centro, zoom:12.5 });
+}
+function ubCerrarSug(){ const c = $ub('bmUbicSug'); if(c) c.classList.remove('on'); }
+function ubEsc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+
+function ubAlEscribir(){
+  UB.auto = false; clearTimeout(UB.timer);
+  const inp = $ub('bmUbicInput');
+  if(inp.value.trim().length < 3){ ubCerrarSug(); return; }
+  UB.timer = setTimeout(() => {
+    const t = inp.value.trim();
+    const c = window.vigorParseCoord ? vigorParseCoord(t) : null;
+    if(c){ ubCerrarSug(); ubPoner(c.lat, c.lng, 'coordenadas'); } else ubBuscar();
+  }, 650);
+}
+async function ubBuscar(){
+  const t = $ub('bmUbicInput').value.trim(); if(t.length < 2 || !window.vigorBuscarLugar) return;
+  const n = ++UB.seq;
+  const res = await vigorBuscarLugar(t, UB.centro);
+  if(n !== UB.seq) return;
+  UB.sug = res.slice(0, 6);
+  const cont = $ub('bmUbicSug');
+  if(!UB.sug.length){ cont.classList.remove('on'); return; }
+  cont.innerHTML = UB.sug.map((x, i) => `<button type="button" data-i="${i}"><b>${ubEsc(x.principal)}</b>${x.lugar ? '<small>' + ubEsc(x.lugar) + '</small>' : ''}</button>`).join('');
+  cont.querySelectorAll('button').forEach(b => b.onclick = () => ubElegir(+b.dataset.i));
+  cont.classList.add('on');
+}
+function ubElegir(i){ const x = UB.sug[i]; if(!x) return; ubCerrarSug(); ubPoner(x.lat, x.lng, 'busqueda', { texto:x.texto, referencia:x.referencia }); }
+
+async function ubPoner(lat, lng, origen, op){
+  op = op || {}; UB.pin = { lat, lng }; UB.origen = origen; if(op.referencia != null) UB.referencia = op.referencia;
+  const bat = UB.batId;
+  ubPintarPin(); ubPintarEstado();
+  const inp = $ub('bmUbicInput');
+  if(op.texto){ inp.value = op.texto; UB.auto = true; }
+  else {
+    const puedeLlenar = !inp.value.trim() || UB.auto || (origen === 'coordenadas' && window.vigorParseCoord && vigorParseCoord(inp.value));
+    if(puedeLlenar){ inp.value = 'Coordenadas ' + ubFmt(lat, lng); UB.auto = true; }
+    ubGuardar();   // se guarda al tiro con las coordenadas; la dirección más cercana se completa enseguida
+    const n = ++UB.seq;
+    const lugar = window.vigorLugarDe ? await vigorLugarDe(lat, lng) : null;
+    if(n !== UB.seq || bat !== UB.batId) return;
+    if(lugar){ UB.referencia = lugar.referencia || lugar.lugar || ''; if(puedeLlenar && UB.auto){ inp.value = lugar.texto; } }
+  }
+  ubPintarEstado(); ubGuardar();
+}
+function ubPintarPin(){
+  if(!UB.mapa) return;
+  if(!UB.pin){ if(UB.marker){ UB.marker.remove(); UB.marker = null; } return; }
+  const ll = [UB.pin.lng, UB.pin.lat];
+  if(!UB.marker){
+    const el = document.createElement('div'); el.className = 'ubic-pin';
+    el.innerHTML = '<b><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></b>';
+    UB.marker = new maplibregl.Marker({ element:el, anchor:'bottom', draggable:true }).setLngLat(ll).addTo(UB.mapa);
+    UB.marker.on('dragend', () => { const p = UB.marker.getLngLat(); ubPoner(p.lat, p.lng, 'mapa'); });
+  } else UB.marker.setLngLat(ll);
+  const b = UB.mapa.getBounds(), dentro = b.contains(ll);
+  if(UB.origen !== 'mapa' || !dentro) UB.mapa.easeTo({ center:ll, zoom:Math.max(UB.mapa.getZoom(), UB.origen === 'mapa' ? 0 : 15), duration:500 });
+}
+function ubPintarEstado(){
+  const e = $ub('bmUbicEstado'); if(!e) return;
+  if(!UB.pin){ e.classList.remove('on'); e.innerHTML = ''; return; }
+  e.classList.add('on');
+  e.innerHTML = `<span class="pin-dot"></span><span class="mono">${ubFmt(UB.pin.lat, UB.pin.lng)}</span><span class="chip">${UB_ORIGEN[UB.origen] || ''}</span>${UB.referencia ? '<span>' + ubEsc(UB.referencia) + '</span>' : ''}<button type="button" id="bmUbicQuitar">Quitar pin</button>`;
+  $ub('bmUbicQuitar').onclick = () => ubQuitar();
+}
+function ubQuitar(){
+  UB.pin = null; UB.origen = null; UB.referencia = ''; UB.auto = false;
+  if(UB.marker){ UB.marker.remove(); UB.marker = null; }
+  ubPintarEstado(); ubGuardar();
+}
+// Guarda en el batallón: texto, coordenadas y referencia. Si el batallón ya está en emergencia, el despacho en Central se actualiza solo.
+async function ubGuardar(){
+  const id = UB.batId; const b = batallones.find(x => x.id === id); if(!b) return;
+  const texto = $ub('bmUbicInput').value.trim();
+  const fila = { frente_zona:texto, lat:UB.pin ? UB.pin.lat : null, lng:UB.pin ? UB.pin.lng : null, ubicacion_origen:UB.pin ? UB.origen : null, referencia:UB.pin ? (UB.referencia || null) : null };
+  b.frente = texto; b.lat = fila.lat; b.lng = fila.lng; b.origen = fila.ubicacion_origen; b.ref = fila.referencia || '';
+  renderTarjetas();
+  const { error } = await sb.from('batallones').update(fila).eq('id', id);
+  if(error) toast('No se pudo guardar la ubicación — ' + error.message);
+}
+
+async function setTipo(id, tipoId){
+  const b = batallones.find(x => x.id === id); if(!b) return;
+  b.tipo = tipoId;
+  document.querySelectorAll('.bm-tipo').forEach(x => x.classList.toggle('on', x.dataset.id === tipoId));
+  const { error } = await sb.from('batallones').update({ tipo_emergencia_id: tipoId }).eq('id', id);
+  if(error) toast('No se pudo guardar el tipo de emergencia — ' + error.message);
+}
+
 // ---- Detalle del batallón ----
 function renderModal(forzar){
   const b = batallones.find(x => x.id === abiertoId);
@@ -600,8 +893,12 @@ function renderModal(forzar){
       <div class="bm-estados">
         ${['emergencia', 'disponible', 'rancho'].map(e => `<button class="bm-est ${e} ${b.estado === e ? 'on' : ''}" onclick="setEstado('${b.id}','${e}')">${ESTADO_TXT[e]}</button>`).join('')}
       </div>
-      <div class="bm-campos">
-        <div class="bm-campo"><label>Frente / Zona</label><input value="${esc(b.frente)}" placeholder="Ej. Sector Norte" onchange="setMeta('${b.id}','frente',this.value)" onkeydown="enter(event, () => this.blur())"></div>
+      <div class="bm-sec">
+        <div class="bm-sec-t">Ubicación${b.estado === 'emergencia' && b.despacho ? '<em class="bm-sync">● Despacho activo en Central</em>' : ''}</div>
+        <div id="bmUbicSlot"></div>
+        ${CLAVES.length ? `<div class="bm-sub">Tipo de emergencia</div><div class="bm-tipos">${CLAVES.map(c => `<button class="bm-tipo ${(b.tipo || CLAVES[0].id) === c.id ? 'on' : ''}" data-id="${c.id}" onclick="setTipo('${b.id}','${c.id}')"><b>${esc(c.codigo)}</b><span>${esc(c.nombre)}</span></button>`).join('')}</div>` : ''}
+      </div>
+      <div class="bm-campos uno">
         <div class="bm-campo"><label>Responsable</label><input value="${esc(b.responsable)}" placeholder="Ej. Cap. R. Salinas" onchange="setMeta('${b.id}','responsable',this.value)" onkeydown="enter(event, () => this.blur())"></div>
       </div>
 
@@ -632,6 +929,7 @@ function renderModal(forzar){
       </div>
     </div>`;
   ov.classList.add('show');
+  ubMontar(b);
 }
 document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && abiertoId) cerrarBatallon(); });
 
