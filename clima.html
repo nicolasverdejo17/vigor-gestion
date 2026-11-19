@@ -56,10 +56,11 @@ body.con-tabs #ctabs{display:flex}
 .pn-b{padding:12px}
 #capas{left:16px;top:16px;width:214px}
 .cap{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--c);border:1px solid var(--l2);border-left:3px solid var(--l2);color:var(--tx);padding:10px 12px;margin-bottom:6px;font:700 12.5px 'Montserrat',sans-serif;letter-spacing:.04em;cursor:pointer}
-.cap i{font-size:18px;color:var(--mu)}
+.cap i{font-size:18px;color:var(--mu);width:20px;flex:none;text-align:center}
 .cap:hover{border-color:var(--cy)}
 .cap.on{background:rgba(45,211,219,.14);border-color:var(--cy);border-left-color:var(--vd)}
 .cap.on i{color:var(--cy)}
+html body .cap{justify-content:flex-start !important;text-align:left !important}
 .sw{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--l2);font-size:11.5px;font-weight:600;color:var(--mu)}
 .sw button{background:var(--c);border:1px solid var(--l2);color:var(--mu);font:700 10.5px 'Montserrat',sans-serif;letter-spacing:.1em;padding:5px 10px;cursor:pointer}
 .sw button.on{color:#fff;border-color:var(--cy);background:rgba(45,211,219,.14)}

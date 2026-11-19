@@ -229,14 +229,36 @@ function toast(msg, esError){
 }
 function pill(tipo, txt){ return `<span class="pill ${tipo}">${esc(txt)}</span>`; }
 const MENSAJES = {
-  SIN_PERMISO:'Tu cuenta no tiene permiso para esto', USUARIO_NO_ENCONTRADO:'No se encontró a la persona', USUARIO_SIN_CUENTA:'Esta persona todavía no tiene cuenta de acceso',
+  SESION_CAMBIADA:'La sesión cambió a otra cuenta', SIN_PERMISO:'Tu cuenta no tiene permiso para esto', USUARIO_NO_ENCONTRADO:'No se encontró a la persona', USUARIO_SIN_CUENTA:'Esta persona todavía no tiene cuenta de acceso',
   USUARIO_DADO_DE_BAJA:'La persona está dada de baja', MOTIVO_REQUERIDO:'Escribe el motivo', CUERPO_NO_SUSPENDIDO:'Primero hay que suspender el Cuerpo',
   CUENTA_NO_ENCONTRADA:'Esa cuenta no existe todavía', CUERPO_NO_ENCONTRADO:'No se encontró el Cuerpo', CLIENTE_REQUERIDO:'Escribe el nombre del cliente', PLAN_INVALIDO:'Elige un plan', SIN_VENCIMIENTO:'Esta licencia no tiene vencimiento', MESES_INVALIDOS:'Meses no válidos', NO_ESTA_REVOCADA:'La licencia no está revocada'
 };
 const msgErr = e => MENSAJES[e && e.message] || ('No se pudo completar — ' + ((e && e.message) || 'error desconocido'));
+/* El navegador guarda UNA sola sesión para todas las pestañas: si en otra pestaña se inicia sesión con otra cuenta
+   (por ejemplo la de un Director para probar la app), esta pestaña pasa a ser esa cuenta y Soporte deja de funcionar.
+   En ese caso se avisa claramente en vez de mostrar «no tienes permiso». No se cierra la sesión de la otra pestaña. */
+let _vigilando = false;
+function sesionCambiada(){
+  S.admin = null; S.adminId = null;
+  $('shell').classList.add('hidden'); $('loginGate').classList.remove('hidden');
+  $('loginMsg').textContent = 'La sesión de este navegador cambió a otra cuenta (se inició sesión en otra pestaña). Entra de nuevo como Super Admin. Para usar Soporte y la app a la vez, abre Soporte en una ventana de incógnito o en otro navegador.';
+}
+function vigilarCuenta(){
+  if(_vigilando) return; _vigilando = true;
+  sb.auth.onAuthStateChange((ev, ses) => {
+    if(!S.adminId) return;
+    if(ev === 'SIGNED_OUT' || (ses && ses.user && ses.user.id !== S.adminId)) sesionCambiada();
+  });
+}
 async function rpc(nombre, args){
   const { data, error } = await sb.rpc(nombre, args || {});
-  if(error) throw error;
+  if(error){
+    if(/SIN_PERMISO/.test(error.message || '') && S.adminId){
+      const { data: u } = await sb.auth.getUser();
+      if(!u || !u.user || u.user.id !== S.adminId){ sesionCambiada(); const e = new Error('SESION_CAMBIADA'); e.silencioso = true; throw e; }
+    }
+    throw error;
+  }
   return data;
 }
 function logSoporte(accion, detalle, cuerpoId, cuerpoNombre){
@@ -293,7 +315,7 @@ async function onSesionValida(session){
     await sb.auth.signOut();
     return;
   }
-  S.admin = admin;
+  S.admin = admin; S.adminId = session.user.id; vigilarCuenta();
   $('loginGate').classList.add('hidden'); $('shell').classList.remove('hidden');
   $('adminNombre').textContent = admin.nombre; $('adminEmail').textContent = session.user.email;
   await Promise.all([cargarResumen(), cargarCatalogo()]);
