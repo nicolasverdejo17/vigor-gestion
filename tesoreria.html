@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VIGOR - Gestiona tu compañía de forma eficiente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
+    --text:#E7F5FA; --text-muted:#7B99A3; --text-dim:#516E78;
+    --cyan:#49E9FF; --servicio:#3CF29A; --alerta:#FFC94D; --burdeo:#F13746; --nodisp:#42555C; --acento:#39FF14;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+  h1,h2,h3{font-family:'Rajdhani',sans-serif; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin:0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .app-head{ background:var(--panel); border-bottom:1px solid var(--line); padding:12px 22px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .app-head h1{ font-size:20px; }
+  .back-btn{ background:transparent; border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:12.5px; padding:8px 14px; cursor:pointer; }
+
+  .wrap{ max-width:1280px; margin:0 auto; padding:16px 22px 40px; }
+  .barra{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .barra .esp{ flex:1; }
+  .tabs{ display:flex; gap:6px; flex-wrap:wrap; }
+  .cat-tab.on{ background:rgba(57,255,20,.1) !important; border-color:rgba(57,255,20,.6) !important; color:#fff !important; }
+  select, input[type=number], input[type=text], input[type=date]{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font:500 14px 'Inter',sans-serif; padding:9px 11px; }
+  select:focus, input:focus{ outline:none; border-color:var(--cyan); }
+
+  .kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+  .kpi{ background:var(--panel); border:1px solid var(--line-strong); padding:12px 14px; }
+  .kpi .l{ font-size:10.5px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; }
+  .kpi .v{ font-family:'Rajdhani'; font-weight:700; font-size:24px; margin-top:2px; }
+  .kpi.rojo .v{ color:#FF7A85; } .kpi.verde .v{ color:var(--servicio); }
+
+  .caja{ background:var(--panel); border:1px solid var(--line-strong); padding:16px; margin-bottom:14px; }
+  .caja h2{ font-size:17px; margin-bottom:10px; }
+  .scroll{ overflow-x:auto; border:1px solid var(--line-strong); background:var(--panel); }
+  table.g{ border-collapse:separate; border-spacing:0; width:100%; min-width:900px; }
+  table.g th{ font-family:'Rajdhani'; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); padding:9px 4px; text-align:center; background:var(--panel-alt); border-bottom:1px solid var(--line-strong); position:sticky; top:0; z-index:1; }
+  table.g th.n, table.g td.n{ text-align:left; padding-left:12px; position:sticky; left:0; background:var(--panel); z-index:2; min-width:200px; }
+  table.g th.n{ background:var(--panel-alt); z-index:3; }
+  table.g td{ padding:4px; text-align:center; border-bottom:1px solid var(--line); }
+  table.g tr:nth-child(even) td.n{ background:#0B1822; }
+  table.g td.n b{ font-weight:600; font-size:13.5px; display:block; cursor:pointer; }
+  table.g td.n span{ font-size:11px; color:var(--text-dim); }
+  .c{ display:flex; align-items:center; justify-content:center; width:100%; min-width:54px; height:34px; font:700 12px 'JetBrains Mono',monospace; border:1px solid transparent; cursor:pointer; user-select:none; }
+  .c.pagado{ background:rgba(60,242,154,.16); border-color:rgba(60,242,154,.55); color:var(--servicio); }
+  .c.atrasada{ background:rgba(241,55,70,.16); border-color:rgba(241,55,70,.6); color:#FF7A85; }
+  .c.pendiente{ background:rgba(255,201,77,.08); border-color:rgba(255,201,77,.35); color:var(--alerta); }
+  .c.exento{ color:var(--text-dim); background:rgba(255,255,255,.03); }
+  .c.futuro{ color:var(--text-dim); border-color:var(--line); }
+  .c.na{ color:var(--line-strong); cursor:default; }
+  .c:not(.na):hover{ border-color:#E3F0F6; }
+  .leyenda{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--text-muted); margin:10px 2px 0; }
+  .leyenda i{ display:inline-block; width:12px; height:12px; margin-right:6px; vertical-align:-2px; border:1px solid; }
+
+  table.l{ width:100%; border-collapse:collapse; }
+  table.l th{ text-align:left; font-family:'Rajdhani'; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); padding:9px 10px; background:var(--panel-alt); border-bottom:1px solid var(--line-strong); }
+  table.l td{ padding:10px; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:top; }
+  table.l tr:nth-child(even) td{ background:rgba(255,255,255,.02); }
+  .der{ text-align:right !important; }
+  .pill{ font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:3px 9px; border-radius:10px; background:var(--nodisp); color:#fff; white-space:nowrap; }
+  .pill.ok{ background:var(--servicio); color:#04121C; } .pill.mal{ background:var(--burdeo); } .pill.am{ background:var(--alerta); color:#04121C; }
+  .vacio{ padding:28px 14px; text-align:center; color:var(--text-muted); font-size:13.5px; border:1px dashed var(--line-strong); }
+  .acciones{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .btn{ font-family:'Rajdhani'; font-weight:700; letter-spacing:.05em; text-transform:uppercase; font-size:13px; min-height:40px; padding:0 16px; cursor:pointer; border:1.5px solid var(--line-strong); background:var(--panel-alt); color:var(--text); }
+  .btn.btn-primary{ background:var(--acento); border-color:var(--acento); color:#0D2206; }
+  .btn.peligro{ border-color:rgba(241,55,70,.7); color:#FF7A85; background:transparent; }
+  .btn.chico{ min-height:32px; padding:0 10px; font-size:12px; }
+  .campo{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .campo label{ font-size:11.5px; color:var(--text-dim); letter-spacing:.08em; text-transform:uppercase; font-weight:600; }
+  .fila2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .chips{ display:flex; gap:6px; flex-wrap:wrap; }
+  .chip{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text); font:600 13px 'Inter',sans-serif; padding:8px 12px; cursor:pointer; }
+  .chip.on{ background:rgba(57,255,20,.1); border-color:rgba(57,255,20,.6); }
+  .msg{ padding:60px 20px; text-align:center; color:var(--text-muted); }
+  .msg h2{ color:var(--text); margin-bottom:8px; }
+
+  .velo{ position:fixed; inset:0; background:rgba(2,8,13,.78); z-index:100; display:none; align-items:center; justify-content:center; padding:16px; }
+  .velo.show{ display:flex; }
+  .modal{ background:var(--panel); border:1.5px solid var(--line-strong); width:100%; max-width:480px; max-height:90vh; display:flex; flex-direction:column; }
+  .modal-h{ padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .modal-h h2{ font-size:18px; }
+  .modal-b{ padding:16px 18px; overflow-y:auto; }
+  .modal-f{ padding:12px 18px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:var(--panel-alt); border:1px solid var(--cyan); color:#DFF7F9; padding:12px 22px; font-size:14px; opacity:0; pointer-events:none; transition:all .25s; z-index:140; max-width:92vw; text-align:center; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (max-width:760px){
+    .wrap{ padding:12px 12px 32px; } .app-head{ padding:10px 14px; }
+    .kpis{ grid-template-columns:1fr 1fr; } .fila2{ grid-template-columns:1fr; }
+    table.g td.n, table.g th.n{ min-width:150px; }
+    html body .tabs{ flex-wrap:nowrap; width:100%; } html body .tabs .cat-tab{ flex:1; min-height:36px; padding:0 4px; font-size:11px; text-align:center; display:flex; align-items:center; justify-content:center; }
+  }
+</style>
+<link rel="manifest" href="manifest-tablet.json">
+<link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+<meta name="theme-color" content="#030B13">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<link rel="stylesheet" href="vigor-tema.css">
+<link rel="stylesheet" href="vigor-ui.css">
+<script src="vigor-errores.js"></script>
+<script src="vigor-licencia.js"></script>
+<script src="vigor-tema.js" defer></script>
+</head>
+<body>
+
+<header class="app-head">
+  <button class="back-btn" onclick="volver()">← Volver</button>
+  <h1>Tesorería</h1>
+</header>
+
+<main class="wrap" id="contenido"><div class="msg">Cargando…</div></main>
+
+<div class="velo" id="velo" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal">
+    <div class="modal-h"><h2 id="modalTitulo"></h2><button class="btn chico" onclick="cerrarModal()" aria-label="Cerrar">✕</button></div>
+    <div class="modal-b" id="modalCuerpo"></div>
+    <div class="modal-f" id="modalPie"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vigor-sesion.js"></script>
+<script src="vigor-informe.js"></script>
+<script>
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MES3 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const ERRORES = {
+  SIN_PERMISO:'Solo el Director y el Tesorero/a de la compañía pueden modificar la tesorería',
+  PAQUETE_NO_INCLUIDO:'Esta función no está incluida en el plan del Cuerpo',
+  LICENCIA_SOLO_LECTURA:'La licencia está vencida: solo lectura',
+  MONTO_INVALIDO:'Escribe un monto válido', DIA_INVALIDO:'El día de vencimiento debe estar entre 1 y 28',
+  FORMA_INVALIDA:'Elige la forma de pago', NO_ENCONTRADO:'No se encontró el registro'
+};
+const FORMAS = { efectivo:'Efectivo', transferencia:'Transferencia', otro:'Otro' };
+
+let perfil = null, est = null, anio = new Date().getFullYear(), tab = 'cuotas', historial = [], formaSel = 'efectivo';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const clp = n => '$' + Number(n || 0).toLocaleString('es-CL');
+const iso = (a, m) => a + '-' + String(m + 1).padStart(2, '0') + '-01';
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+function errTxt(e){ const m = (e && e.message) || ''; for(const k in ERRORES) if(m.indexOf(k) >= 0) return ERRORES[k]; return m || 'No se pudo completar'; }
+function volver(){ if(history.length > 1) history.back(); else location.href = 'opciones_celular.html'; }
+function mesTxt(p){ const d = p.split('-'); return MESES[Number(d[1]) - 1] + ' ' + d[0]; }
+function diaTxt(f){ if(!f) return '—'; const d = String(f).slice(0, 10).split('-'); return d[2] + '-' + d[1] + '-' + d[0]; }
+
+/* ---------- carga ---------- */
+async function iniciar(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ location.href = 'login_registro.html'; return; }
+  const { data: p } = await sb.from('personal').select('id, nombre_completo, cargo, compania_id, companias(nombre)').eq('auth_user_id', session.user.id).maybeSingle();
+  if(!p || !p.compania_id || !['Director', 'Tesorero/a'].includes(p.cargo)){
+    $('contenido').innerHTML = '<div class="msg"><h2>Acceso restringido</h2>Tesorería es solo para el Director y el Tesorero/a de la compañía.</div>'; return;
+  }
+  perfil = p; await cargar();
+}
+async function cargar(){
+  const { data, error } = await sb.rpc('tesoreria_estado', { p_compania: perfil.compania_id, p_anio: anio });
+  if(error){ $('contenido').innerHTML = `<div class="msg"><h2>No se pudo cargar</h2>${esc(errTxt(error))}</div>`; return; }
+  est = data;
+  if(tab === 'historial') await cargarHistorial();
+  render();
+}
+async function cargarHistorial(){
+  const { data } = await sb.from('tesoreria_historial').select('*').eq('compania_id', perfil.compania_id).order('creado_en', { ascending:false }).limit(200);
+  historial = data || [];
+}
+
+/* ---------- reglas (las mismas que aplica la base de datos) ---------- */
+const hoyMes = () => est.hoy.slice(0, 7) + '-01';
+function montoDe(m, p){
+  if(m.excepcion != null && m.excepcion_desde <= p) return Number(m.excepcion);
+  const f = (est.montos || []).find(x => x.vigente_desde <= p);
+  return f ? Number(f.monto) : null;
+}
+function pagoDe(m, p){ return (est.pagos || []).find(g => g.personal_id === m.id && g.periodo === p); }
+function estadoCelda(m, p){
+  if(!est.config) return 'na';
+  const ing = m.ingreso ? m.ingreso.slice(0, 7) + '-01' : est.config.inicio_cobro;
+  const ini = ing > est.config.inicio_cobro ? ing : est.config.inicio_cobro;
+  if(p < ini) return 'na';
+  if(pagoDe(m, p)) return 'pagado';
+  const due = montoDe(m, p); if(due === null) return 'na'; if(due === 0) return 'exento';
+  const hm = hoyMes();
+  if(p > hm) return 'futuro';
+  if(p === hm && Number(est.hoy.slice(8, 10)) <= est.config.dia_vencimiento) return 'pendiente';
+  return 'atrasada';
+}
+const totalAdeudado = m => (m.adeudados || []).reduce((s, a) => s + Number(a.monto), 0);
+
+/* ---------- pantalla ---------- */
+function render(){
+  const tabs = [['cuotas', 'Cuotas'], ['deudores', 'Deudores'], ['config', 'Configuración'], ['historial', 'Historial']];
+  const anios = []; for(let a = new Date().getFullYear() + 1; a >= new Date().getFullYear() - 5; a--) anios.push(a);
+  let h = `<div class="barra"><div class="tabs">${tabs.map(t => `<div role="button" tabindex="0" class="cat-tab${tab === t[0] ? ' on' : ''}" onclick="irTab('${t[0]}')">${t[1]}</div>`).join('')}</div>
+    <div class="esp"></div>
+    ${tab === 'cuotas' ? `<select onchange="cambiarAnio(this.value)">${anios.map(a => `<option${a === anio ? ' selected' : ''}>${a}</option>`).join('')}</select>` : ''}
+    ${est.config && tab !== 'config' ? `<button class="btn" onclick="modalExportar()">Exportar</button>` : ''}</div>`;
+  if(!est.config && tab !== 'config'){
+    h += `<div class="caja"><div class="vacio">Aún no se configura la cuota mensual de la compañía.</div><div class="acciones"><button class="btn btn-primary" onclick="irTab('config')">Configurar cuota</button></div></div>`;
+  } else if(tab === 'cuotas') h += vistaCuotas();
+  else if(tab === 'deudores') h += vistaDeudores();
+  else if(tab === 'config') h += vistaConfig();
+  else h += vistaHistorial();
+  $('contenido').innerHTML = h;
+  const sc = document.querySelector('.scroll');
+  if(sc && tab === 'cuotas' && anio === Number(est.hoy.slice(0, 4))){ const th = sc.querySelectorAll('thead th')[Number(est.hoy.slice(5, 7))]; if(th) sc.scrollLeft = Math.max(0, th.offsetLeft - sc.clientWidth + th.offsetWidth + 20); }
+}
+async function irTab(t){ tab = t; if(t === 'historial') await cargarHistorial(); render(); }
+async function cambiarAnio(a){ anio = Number(a); await cargar(); }
+
+function vistaCuotas(){
+  const ms = est.miembros || [];
+  const recaudado = (est.pagos || []).reduce((s, g) => s + Number(g.monto), 0);
+  const deuda = ms.reduce((s, m) => s + totalAdeudado(m), 0), deudores = ms.filter(m => (m.adeudados || []).length).length;
+  let h = `<div class="kpis">
+    <div class="kpi verde"><div class="l">Recaudado ${anio}</div><div class="v">${clp(recaudado)}</div></div>
+    <div class="kpi rojo"><div class="l">Adeudado (total)</div><div class="v">${clp(deuda)}</div></div>
+    <div class="kpi"><div class="l">Con atraso</div><div class="v">${deudores}</div></div>
+    <div class="kpi"><div class="l">Al día</div><div class="v">${ms.length - deudores}</div></div></div>`;
+  h += `<div class="scroll"><table class="g"><thead><tr><th class="n">Bombero</th>${MES3.map(m => `<th>${m}</th>`).join('')}</tr></thead><tbody>`;
+  ms.forEach(m => {
+    h += `<tr><td class="n"><b onclick="modalExcepcion('${m.id}')">${esc(m.nombre)}</b><span>N° ${m.numero} · ${esc(m.cargo)}${m.excepcion != null ? ' · cuota ' + clp(m.excepcion) : ''}</span></td>`;
+    for(let i = 0; i < 12; i++){
+      const p = iso(anio, i), st = estadoCelda(m, p);
+      const txt = { pagado:'✓', atrasada:'DEBE', pendiente:'●', exento:'EX', futuro:'', na:'–' }[st];
+      h += `<td><div class="c ${st}" ${st === 'na' ? '' : `onclick="modalCelda('${m.id}','${p}')"`}>${txt}</div></td>`;
+    }
+    h += '</tr>';
+  });
+  h += `</tbody></table></div>
+    <div class="leyenda"><span><i style="background:rgba(60,242,154,.3);border-color:#3CF29A"></i>Pagado</span><span><i style="background:rgba(241,55,70,.3);border-color:#F13746"></i>Atrasado</span>
+    <span><i style="background:rgba(255,201,77,.2);border-color:#FFC94D"></i>Del mes (aún sin vencer)</span><span><i style="border-color:#516E78"></i>EX: exento</span></div>`;
+  return ms.length ? h : '<div class="vacio">No hay bomberos activos en la compañía.</div>';
+}
+
+function vistaDeudores(){
+  const ds = (est.miembros || []).filter(m => (m.adeudados || []).length).sort((a, b) => totalAdeudado(b) - totalAdeudado(a));
+  if(!ds.length) return '<div class="caja"><div class="vacio">Nadie tiene cuotas atrasadas.</div></div>';
+  const sinAviso = ds.filter(m => !m.aviso_activo).length;
+  let h = `<div class="caja"><table class="l"><thead><tr><th>N°</th><th>Bombero</th><th>Meses atrasados</th><th class="der">Total</th><th>Aviso</th><th></th></tr></thead><tbody>`;
+  ds.forEach(m => {
+    const n = m.adeudados.length;
+    h += `<tr><td class="mono">${m.numero}</td><td><b style="font-weight:600">${esc(m.nombre)}</b><div style="font-size:11px;color:var(--text-dim)">${esc(m.cargo)}</div></td>
+      <td>${n} · <span style="color:var(--text-muted)">${m.adeudados.map(a => MES3[Number(a.periodo.slice(5, 7)) - 1] + (a.periodo.slice(0, 4) !== String(new Date().getFullYear()) ? ' ' + a.periodo.slice(2, 4) : '')).join(', ')}</span></td>
+      <td class="der"><b>${clp(totalAdeudado(m))}</b></td>
+      <td>${m.aviso_activo ? '<span class="pill am">Avisado</span>' : '<span class="pill">Sin aviso</span>'}</td>
+      <td class="der"><button class="btn chico" ${m.aviso_activo ? 'disabled style="opacity:.4"' : ''} onclick="avisar(['${m.id}'])">Avisar</button></td></tr>`;
+  });
+  h += `</tbody></table><div class="acciones"><button class="btn btn-primary" ${sinAviso ? '' : 'disabled style="opacity:.5"'} onclick="modalAvisarTodos()">Avisar a todos los deudores${sinAviso ? ' (' + sinAviso + ')' : ''}</button></div></div>`;
+  return h;
+}
+
+function selMes(id, valor){
+  const [a, m] = (valor || iso(new Date().getFullYear(), new Date().getMonth())).split('-').map(Number);
+  const anios = []; for(let x = new Date().getFullYear() + 1; x >= new Date().getFullYear() - 8; x--) anios.push(x);
+  return `<div class="fila2"><select id="${id}M">${MESES.map((n, i) => `<option value="${i}"${i === m - 1 ? ' selected' : ''}>${n}</option>`).join('')}</select><select id="${id}A">${anios.map(x => `<option${x === a ? ' selected' : ''}>${x}</option>`).join('')}</select></div>`;
+}
+const valMes = id => iso(Number($(id + 'A').value), Number($(id + 'M').value));
+
+function vistaConfig(){
+  const c = est.config, vig = (est.montos || [])[0];
+  let h = `<div class="caja"><h2>${c ? 'Cuota mensual' : 'Configurar cuota mensual'}</h2>
+    <div class="fila2"><div class="campo"><label>Valor de la cuota ($)</label><input type="number" id="cfMonto" inputmode="numeric" min="0" step="500" value="${vig ? Number(vig.monto) : ''}" placeholder="Ej. 10000"></div>
+    <div class="campo"><label>Vence el día de cada mes</label><input type="number" id="cfDia" inputmode="numeric" min="1" max="28" value="${c ? c.dia_vencimiento : 10}"></div></div>
+    <div class="campo"><label>${c ? 'El nuevo valor rige desde' : 'Empezar a cobrar desde'}</label>${selMes('cfDesde')}</div>
+    <div class="acciones"><button class="btn btn-primary" onclick="guardarConfig(${c ? 'false' : 'true'})">Guardar</button></div></div>`;
+  if(c){
+    h += `<div class="caja"><h2>Valores anteriores</h2>${(est.montos || []).map(m => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;"><span>Desde ${mesTxt(m.vigente_desde)}</span><b>${clp(m.monto)}</b></div>`).join('')}</div>`;
+    const esp = (est.miembros || []).filter(m => m.excepcion != null);
+    h += `<div class="caja"><h2>Cuotas especiales</h2>${esp.length ? esp.map(m => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;"><span>${esc(m.nombre)}<br><span style="font-size:11.5px;color:var(--text-dim)">Desde ${mesTxt(m.excepcion_desde)}${m.nota_excepcion ? ' · ' + esc(m.nota_excepcion) : ''}</span></span><span style="display:flex;align-items:center;gap:10px"><b>${clp(m.excepcion)}</b><button class="btn chico" onclick="modalExcepcion('${m.id}')">Editar</button></span></div>`).join('') : '<div class="vacio">Todos pagan el valor de la compañía.</div>'}</div>`;
+  }
+  return h;
+}
+async function guardarConfig(nueva){
+  const monto = $('cfMonto').value, dia = Number($('cfDia').value), desde = valMes('cfDesde');
+  if(monto === '' || Number(monto) < 0){ toast(ERRORES.MONTO_INVALIDO); return; }
+  const { error } = await sb.rpc('tesoreria_guardar_config', { p_compania: perfil.compania_id, p_monto: Number(monto), p_vigente_desde: desde, p_dia: dia, p_inicio: nueva ? desde : null });
+  if(error){ toast(errTxt(error)); return; }
+  toast('Cuota guardada'); tab = nueva ? 'cuotas' : 'config'; await cargar();
+}
+
+function vistaHistorial(){
+  if(!historial.length) return '<div class="caja"><div class="vacio">Todavía no hay movimientos.</div></div>';
+  const nom = id => { const m = (est.miembros || []).find(x => x.id === id); return m ? m.nombre : ''; };
+  const T = { pago:['Pago', 'ok'], anulacion:['Anulación', 'mal'], config:['Cuota', ''], excepcion:['Cuota especial', 'am'], aviso:['Aviso', 'am'] };
+  return `<div class="caja"><table class="l"><thead><tr><th>Fecha</th><th>Movimiento</th><th>Detalle</th><th class="der">Monto</th><th>Por</th></tr></thead><tbody>${historial.map(x => {
+    const t = T[x.accion] || [x.accion, ''];
+    return `<tr><td class="mono" style="white-space:nowrap">${new Date(x.creado_en).toLocaleString('es-CL', { dateStyle:'short', timeStyle:'short' })}</td><td><span class="pill ${t[1]}">${t[0]}</span></td>
+      <td>${esc(x.detalle || '')}${x.periodo && x.accion !== 'config' ? `<div style="font-size:11.5px;color:var(--text-dim)">${mesTxt(x.periodo)}</div>` : ''}</td><td class="der">${x.monto != null ? clp(x.monto) : ''}</td><td>${esc(x.por || '')}</td></tr>`; }).join('')}</tbody></table></div>`;
+}
+
+/* ---------- modales ---------- */
+function abrirModal(t, c, p){ $('modalTitulo').textContent = t; $('modalCuerpo').innerHTML = c; $('modalPie').innerHTML = p || ''; $('velo').classList.add('show'); }
+function cerrarModal(){ $('velo').classList.remove('show'); }
+function pickForma(f){ formaSel = f; document.querySelectorAll('#formas .chip').forEach(c => c.classList.toggle('on', c.dataset.f === f)); }
+
+function modalCelda(mid, p){
+  const m = est.miembros.find(x => x.id === mid), g = pagoDe(m, p), due = montoDe(m, p);
+  formaSel = g ? g.forma : 'efectivo';
+  const hoy = est.hoy;
+  abrirModal(m.nombre + ' — ' + mesTxt(p),
+    `${g ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Pago registrado el ${diaTxt(g.fecha)} por ${esc(g.por || '—')}.</div>` : `<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Cuota del mes: <b style="color:var(--text)">${clp(due)}</b></div>`}
+     <div class="fila2"><div class="campo"><label>Monto pagado ($)</label><input type="number" id="pgMonto" inputmode="numeric" min="0" value="${g ? Number(g.monto) : (due || 0)}"></div>
+     <div class="campo"><label>Fecha de pago</label><input type="date" id="pgFecha" value="${g ? String(g.fecha).slice(0, 10) : hoy}"></div></div>
+     <div class="campo"><label>Forma de pago</label><div class="chips" id="formas">${Object.keys(FORMAS).map(f => `<div role="button" tabindex="0" class="chip${f === formaSel ? ' on' : ''}" data-f="${f}" onclick="pickForma('${f}')">${FORMAS[f]}</div>`).join('')}</div></div>
+     <div class="campo"><label>Nota (opcional)</label><input type="text" id="pgNota" maxlength="120" value="${g ? esc(g.nota || '') : ''}"></div>`,
+    `${g ? `<button class="btn peligro" onclick="anularPago('${mid}','${p}')">Anular pago</button>` : ''}<button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn btn-primary" onclick="guardarPago('${mid}','${p}')">${g ? 'Guardar cambios' : 'Registrar pago'}</button>`);
+}
+async function guardarPago(mid, p){
+  const monto = $('pgMonto').value; if(monto === '' || Number(monto) < 0){ toast(ERRORES.MONTO_INVALIDO); return; }
+  const { error } = await sb.rpc('tesoreria_marcar_pago', { p_compania: perfil.compania_id, p_personal: mid, p_periodo: p, p_monto: Number(monto), p_fecha: $('pgFecha').value || null, p_forma: formaSel, p_nota: $('pgNota').value });
+  if(error){ toast(errTxt(error)); return; }
+  cerrarModal(); toast('Pago registrado'); await cargar();
+}
+async function anularPago(mid, p){
+  const { error } = await sb.rpc('tesoreria_anular_pago', { p_compania: perfil.compania_id, p_personal: mid, p_periodo: p });
+  if(error){ toast(errTxt(error)); return; }
+  cerrarModal(); toast('Pago anulado'); await cargar();
+}
+
+function modalExcepcion(mid){
+  const m = est.miembros.find(x => x.id === mid), base = (est.montos || [])[0];
+  abrirModal('Cuota de ' + m.nombre,
+    `<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Valor de la compañía: <b style="color:var(--text)">${clp(base ? base.monto : 0)}</b>. Si acordaron otro valor con esta persona, indícalo aquí (0 = exenta).</div>
+     <div class="campo"><label>Cuota mensual acordada ($)</label><input type="number" id="exMonto" inputmode="numeric" min="0" value="${m.excepcion != null ? Number(m.excepcion) : ''}" placeholder="${base ? Number(base.monto) : ''}"></div>
+     <div class="campo"><label>Rige desde</label>${selMes('exDesde', m.excepcion_desde || hoyMes())}</div>
+     <div class="campo"><label>Nota (opcional)</label><input type="text" id="exNota" maxlength="120" value="${esc(m.nota_excepcion || '')}" placeholder="Ej. Acuerdo con el Directorio"></div>`,
+    `${m.excepcion != null ? `<button class="btn peligro" onclick="guardarExcepcion('${mid}', true)">Quitar cuota especial</button>` : ''}<button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn btn-primary" onclick="guardarExcepcion('${mid}', false)">Guardar</button>`);
+}
+async function guardarExcepcion(mid, quitar){
+  let monto = null, desde = null, nota = null;
+  if(!quitar){ const v = $('exMonto').value; if(v === '' || Number(v) < 0){ toast(ERRORES.MONTO_INVALIDO); return; } monto = Number(v); desde = valMes('exDesde'); nota = $('exNota').value; }
+  const { error } = await sb.rpc('tesoreria_excepcion', { p_compania: perfil.compania_id, p_personal: mid, p_monto: monto, p_desde: desde, p_nota: nota });
+  if(error){ toast(errTxt(error)); return; }
+  cerrarModal(); toast(quitar ? 'Cuota especial quitada' : 'Cuota especial guardada'); await cargar();
+}
+
+async function avisar(ids){
+  const { data, error } = await sb.rpc('tesoreria_avisar', { p_compania: perfil.compania_id, p_personales: ids });
+  if(error){ toast(errTxt(error)); return; }
+  cerrarModal(); toast(data ? 'Aviso enviado: le aparece en su Inicio por 5 días' : 'Ya tenía un aviso activo'); await cargar();
+}
+function modalAvisarTodos(){
+  const n = (est.miembros || []).filter(m => (m.adeudados || []).length && !m.aviso_activo).length;
+  abrirModal('Avisar a los deudores', `<p style="margin:0;font-size:14px;line-height:1.55;">Se avisará a ${n} ${n === 1 ? 'persona' : 'personas'}. A cada una le aparece una tarjeta en su Inicio, solo a ella, durante 5 días.</p>`,
+    `<button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn btn-primary" onclick="avisar(null)">Avisar</button>`);
+}
+
+/* ---------- exportar ---------- */
+let expSel = new Set(['cuotas']), expFormato = 'pdf';
+function celdaTxt(m, i){ const p = iso(anio, i), st = estadoCelda(m, p), g = pagoDe(m, p); return { st, g }; }
+const OPC_EXP = [['cuotas', 'Cuotas del año', 'Cada bombero mes a mes'], ['deudores', 'Deudores', 'Meses atrasados y total adeudado'], ['historial', 'Historial', 'Pagos, anulaciones, cambios y avisos']];
+function modalExportar(){
+  expSel = new Set([tab === 'deudores' ? 'deudores' : tab === 'historial' ? 'historial' : 'cuotas']); expFormato = 'pdf';
+  abrirModal('Exportar',
+    `<div class="campo"><label>¿Qué quieres exportar? (puedes elegir varios)</label><div id="expQue" style="display:flex;flex-direction:column;gap:6px"></div></div>
+     <div class="campo"><label>Formato</label><div class="chips" id="expFormato"><div role="button" tabindex="0" class="chip on" data-v="pdf" onclick="pickExp('pdf')">PDF</div><div role="button" tabindex="0" class="chip" data-v="excel" onclick="pickExp('excel')">Excel</div></div></div>`,
+    `<button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn btn-primary" id="btnExp" onclick="ejecutarExportar()">Exportar</button>`);
+  pintarExp();
+}
+function pintarExp(){
+  $('expQue').innerHTML = OPC_EXP.map(o => `<div role="button" tabindex="0" class="chip${expSel.has(o[0]) ? ' on' : ''}" onclick="toggleExp('${o[0]}')" style="text-align:left;display:flex;gap:10px;align-items:flex-start">
+    <span style="width:18px;height:18px;border:1.5px solid ${expSel.has(o[0]) ? '#39FF14' : '#516E78'};background:${expSel.has(o[0]) ? '#39FF14' : 'transparent'};color:#0D2206;font-size:13px;line-height:15px;text-align:center;flex-shrink:0;margin-top:2px">${expSel.has(o[0]) ? '✓' : ''}</span>
+    <span><b>${o[1]}${o[0] === 'cuotas' ? ' ' + anio : ''}</b><br><span style="font-size:12px;color:var(--text-muted);font-weight:400">${o[2]}</span></span></div>`).join('');
+  const b = $('btnExp'); if(b){ b.disabled = !expSel.size; b.style.opacity = expSel.size ? '' : '.45'; }
+}
+function toggleExp(k){ if(expSel.has(k)) expSel.delete(k); else expSel.add(k); pintarExp(); }
+function pickExp(v){ expFormato = v; document.querySelectorAll('#expFormato .chip').forEach(c => c.classList.toggle('on', c.dataset.v === v)); }
+
+const deudoresOrdenados = () => (est.miembros || []).filter(m => (m.adeudados || []).length).sort((a, b) => totalAdeudado(b) - totalAdeudado(a));
+const nomMiembro = id => { const m = (est.miembros || []).find(x => x.id === id); return m ? m.nombre : ''; };
+const ETQ_MOV = { pago:'Pago', anulacion:'Anulación', config:'Cuota', excepcion:'Cuota especial', aviso:'Aviso' };
+const fechaHora = x => new Date(x).toLocaleString('es-CL', { dateStyle:'short', timeStyle:'short' });
+
+async function ejecutarExportar(){
+  if(!expSel.size) return;
+  const que = OPC_EXP.map(o => o[0]).filter(k => expSel.has(k));
+  cerrarModal();
+  if(que.includes('historial') && !historial.length) await cargarHistorial();
+  try{
+    if(expFormato === 'pdf') exportarPDF(que); else await exportarExcel(que);
+  }catch(e){ toast(expFormato === 'excel' ? 'No se pudo generar el Excel (revisa tu conexión)' : 'No se pudo exportar'); }
+}
+
+/* ---- PDF: un solo documento con las secciones elegidas ---- */
+function seccionesCuotas(){
+  const ms = est.miembros || [], ds = deudoresOrdenados();
+  const recaudado = (est.pagos || []).reduce((s, g) => s + Number(g.monto), 0), deuda = ms.reduce((s, m) => s + totalAdeudado(m), 0);
+  const filas = ms.map(m => [{ t:m.nombre, b:true }, ...MES3.map((_, i) => { const { st } = celdaTxt(m, i); return st === 'pagado' ? { t:'Pag.', tag:'verde' } : st === 'atrasada' ? { t:'Debe', tag:'rojo' } : st === 'exento' ? { t:'Ex.', tag:'gris' } : st === 'pendiente' ? { t:'·', tag:'ambar' } : '—'; }), { t:clp(totalAdeudado(m)), a:'r' }]);
+  return [
+    { titulo:'Resumen ' + anio, kpis:[['Recaudado ' + anio, clp(recaudado)], ['Adeudado (total)', clp(deuda)], ['Con atraso', ds.length], ['Al día', ms.length - ds.length]] },
+    { titulo:'Cuotas por mes', tabla:{ columnas:[{ t:'Bombero', w:'22%' }, ...MES3.map(m => ({ t:m, a:'c' })), { t:'Adeudado', a:'r', w:'10%' }], filas }, vacio:'Sin bomberos activos.' }
+  ];
+}
+function seccionesDeudores(){
+  const ds = deudoresOrdenados(), deuda = ds.reduce((s, m) => s + totalAdeudado(m), 0);
+  return [{ titulo:'Deudores al ' + diaTxt(est.hoy), tabla:{ columnas:[{ t:'N°', w:'8%' }, { t:'Bombero' }, { t:'Meses atrasados' }, { t:'Cant.', a:'r', w:'8%' }, { t:'Total adeudado', a:'r', w:'16%' }],
+      filas:ds.map(m => [m.numero, m.nombre, m.adeudados.map(a => mesTxt(a.periodo)).join(', '), m.adeudados.length, clp(totalAdeudado(m))]), total:ds.length ? ['', 'Total', '', '', clp(deuda)] : null }, vacio:'Nadie tiene cuotas atrasadas.' }];
+}
+function seccionesHistorial(){
+  return [{ titulo:'Historial de movimientos', tabla:{ columnas:[{ t:'Fecha', w:'15%' }, { t:'Movimiento', w:'14%' }, { t:'Detalle' }, { t:'Monto', a:'r', w:'12%' }, { t:'Por', w:'20%' }],
+      filas:historial.map(x => [fechaHora(x.creado_en), ETQ_MOV[x.accion] || x.accion, (x.detalle || '') + (x.periodo && x.accion !== 'config' ? ' · ' + mesTxt(x.periodo) : ''), x.monto != null ? clp(x.monto) : '', x.por || '']) }, vacio:'Todavía no hay movimientos.' }];
+}
+function exportarPDF(que){
+  const unico = que.length === 1 ? que[0] : null;
+  const TIT = { cuotas:['Cuotas de la compañía', 'Año ' + anio, 'cuotas_' + anio], deudores:['Deudores de cuotas', 'Al ' + diaTxt(est.hoy), 'deudores_cuotas'], historial:['Historial de tesorería', 'Últimos ' + historial.length + ' movimientos', 'historial_tesoreria'] };
+  const secciones = [];
+  que.forEach(k => secciones.push(...(k === 'cuotas' ? seccionesCuotas() : k === 'deudores' ? seccionesDeudores() : seccionesHistorial())));
+  secciones.push({ firmas:['Tesorero/a', 'Director'] });
+  VigorInforme.generar({ sb, titulo:unico ? TIT[unico][0] : 'Informe de tesorería', subtitulo:unico ? TIT[unico][1] : 'Año ' + anio + ' · al ' + diaTxt(est.hoy), archivo:unico ? TIT[unico][2] : 'tesoreria_' + anio,
+    orientacion:que.includes('cuotas') ? 'horizontal' : 'vertical', secciones });
+}
+
+/* ---- Excel: un libro con una hoja por cada elegida; pagado en verde, atrasado en rojo ---- */
+function cargarExcelJS(){
+  return new Promise((ok, mal) => {
+    if(window.ExcelJS) return ok();
+    const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+    s.onload = ok; s.onerror = () => mal(new Error('sin conexión')); document.head.appendChild(s);
+  });
+}
+const rell = c => ({ type:'pattern', pattern:'solid', fgColor:{ argb:'FF' + c } });
+const BORDE = { style:'thin', color:{ argb:'FFBFC9CF' } };
+function cabeceraExcel(ws, titulos, anchos){
+  const r = ws.addRow(titulos); r.height = 22;
+  r.eachCell(c => { c.font = { bold:true, color:{ argb:'FFFFFFFF' }, name:'Calibri' }; c.fill = rell('1C3B49'); c.alignment = { vertical:'middle', horizontal:'center' }; });
+  anchos.forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+}
+function hojaCuotas(wb){
+  const ws = wb.addWorksheet('Cuotas ' + anio, { views:[{ state:'frozen', xSplit:3, ySplit:1 }] });
+  cabeceraExcel(ws, ['N°', 'Bombero', 'Cargo', ...MESES.map(m => m.slice(0, 3)), 'Adeudado'], [7, 32, 18, ...MESES.map(() => 11), 14]);
+  (est.miembros || []).forEach(m => {
+    const fila = ws.addRow([m.numero, m.nombre, m.cargo, ...MES3.map(() => ''), totalAdeudado(m)]);
+    MES3.forEach((_, i) => {
+      const { st, g } = celdaTxt(m, i), c = fila.getCell(4 + i);
+      c.alignment = { horizontal:'center' };
+      if(st === 'pagado'){ c.value = Number(g.monto); c.numFmt = '"$"#,##0'; c.fill = rell('C6EFCE'); c.font = { bold:true, color:{ argb:'FF006100' } }; }
+      else if(st === 'atrasada'){ c.value = 'DEBE'; c.fill = rell('FFC7CE'); c.font = { bold:true, color:{ argb:'FF9C0006' } }; }
+      else if(st === 'pendiente'){ c.value = '·'; c.fill = rell('FFEB9C'); c.font = { color:{ argb:'FF9C5700' } }; }
+      else if(st === 'exento'){ c.value = 'EX'; c.fill = rell('EDEDED'); c.font = { color:{ argb:'FF7F7F7F' } }; }
+      else if(st === 'na'){ c.value = '—'; c.font = { color:{ argb:'FFBFBFBF' } }; }
+    });
+    const ad = fila.getCell(4 + 12); ad.numFmt = '"$"#,##0'; ad.font = { bold:true, color:{ argb:totalAdeudado(m) > 0 ? 'FF9C0006' : 'FF006100' } };
+    fila.eachCell({ includeEmpty:true }, c => { c.border = { top:BORDE, bottom:BORDE, left:BORDE, right:BORDE }; });
+  });
+  ws.addRow([]);
+  const l = ws.addRow(['', 'Verde: pagado · Rojo: atrasado · Amarillo: del mes, aún sin vencer · EX: exento']); l.getCell(2).font = { italic:true, color:{ argb:'FF666666' } };
+}
+function hojaDeudores(wb){
+  const ws = wb.addWorksheet('Deudores', { views:[{ state:'frozen', ySplit:1 }] });
+  cabeceraExcel(ws, ['N°', 'Bombero', 'Cargo', 'Meses atrasados', 'Cant.', 'Total adeudado'], [7, 32, 18, 54, 8, 18]);
+  const ds = deudoresOrdenados();
+  ds.forEach(m => {
+    const f = ws.addRow([m.numero, m.nombre, m.cargo, m.adeudados.map(a => mesTxt(a.periodo)).join(', '), m.adeudados.length, totalAdeudado(m)]);
+    f.getCell(6).numFmt = '"$"#,##0'; f.getCell(6).font = { bold:true, color:{ argb:'FF9C0006' } }; f.getCell(6).fill = rell('FFC7CE'); f.getCell(4).alignment = { wrapText:true, vertical:'top' };
+    f.eachCell(c => { c.border = { top:BORDE, bottom:BORDE, left:BORDE, right:BORDE }; });
+  });
+  if(ds.length){ const t = ws.addRow(['', 'Total', '', '', '', ds.reduce((s, m) => s + totalAdeudado(m), 0)]); t.font = { bold:true }; t.getCell(6).numFmt = '"$"#,##0'; }
+  else ws.addRow(['', 'Nadie tiene cuotas atrasadas.']);
+}
+function hojaHistorial(wb){
+  const ws = wb.addWorksheet('Historial', { views:[{ state:'frozen', ySplit:1 }] });
+  cabeceraExcel(ws, ['Fecha', 'Movimiento', 'Bombero', 'Mes', 'Detalle', 'Monto', 'Por'], [18, 16, 30, 16, 50, 14, 26]);
+  const COL = { pago:['C6EFCE', '006100'], anulacion:['FFC7CE', '9C0006'], excepcion:['FFEB9C', '9C5700'], aviso:['FFEB9C', '9C5700'] };
+  historial.forEach(x => {
+    const f = ws.addRow([fechaHora(x.creado_en), ETQ_MOV[x.accion] || x.accion, nomMiembro(x.personal_id), x.periodo ? mesTxt(x.periodo) : '', x.detalle || '', x.monto != null ? Number(x.monto) : '', x.por || '']);
+    f.getCell(6).numFmt = '"$"#,##0'; const c = COL[x.accion]; if(c){ f.getCell(2).fill = rell(c[0]); f.getCell(2).font = { bold:true, color:{ argb:'FF' + c[1] } }; }
+    f.eachCell(cc => { cc.border = { top:BORDE, bottom:BORDE, left:BORDE, right:BORDE }; });
+  });
+  if(!historial.length) ws.addRow(['Todavía no hay movimientos.']);
+}
+async function exportarExcel(que){
+  await cargarExcelJS();
+  const wb = new ExcelJS.Workbook(); wb.creator = 'Vigor'; wb.created = new Date();
+  que.forEach(k => (k === 'cuotas' ? hojaCuotas : k === 'deudores' ? hojaDeudores : hojaHistorial)(wb));
+  const buf = await wb.xlsx.writeBuffer();
+  const nombre = que.length === 1 ? { cuotas:'cuotas_' + anio, deudores:'deudores_cuotas', historial:'historial_tesoreria' }[que[0]] : 'tesoreria_' + anio;
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })); a.download = nombre + '.xlsx';
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+
+iniciar();
+</script>
+</body>
+</html>

@@ -180,6 +180,11 @@
     </div>
 
     <div class="content">
+      <div id="avisoCuotas" style="display:none; background:var(--panel); border:1px solid var(--line-strong); border-left:4px solid var(--alerta); padding:14px 16px; margin-bottom:12px;">
+        <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--alerta);" id="avisoCuotasTitulo">Cuotas pendientes</div>
+        <div style="font-size:13.5px; line-height:1.5; margin-top:4px;" id="avisoCuotasTexto"></div>
+        <div style="font-size:11.5px; color:var(--text-dim); margin-top:6px;" id="avisoCuotasVence"></div>
+      </div>
       <div class="resumen-card">
         <div class="resumen-title">Resumen de Guardia — Cuartel</div>
         <div class="faro vacio" id="faro">
@@ -357,6 +362,24 @@ function renderDotaciones(carros, personal, miId){
   }).join('');
 }
 
+// Aviso de cuotas atrasadas: lo ve solo el propio deudor, dura 5 días y se quita solo (o al pagar)
+const MESES_CUOTA = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+async function cargarAvisoCuotas(){
+  const caja = document.getElementById('avisoCuotas');
+  try{
+    const { data, error } = await sb.rpc('tesoreria_mi_aviso');
+    if(error || !data || !data.meses || !data.meses.length){ caja.style.display = 'none'; return; }
+    const nombres = data.meses.map(m => { const d = new Date(m.periodo + 'T00:00:00'); return MESES_CUOTA[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : ''); });
+    const lista = nombres.length > 1 ? nombres.slice(0, -1).join(', ') + ' y ' + nombres[nombres.length - 1] : nombres[0];
+    const n = data.meses.length;
+    document.getElementById('avisoCuotasTitulo').textContent = n === 1 ? 'Cuota pendiente' : 'Cuotas pendientes';
+    document.getElementById('avisoCuotasTexto').innerHTML = 'Tienes <b>' + n + (n === 1 ? ' cuota atrasada' : ' cuotas atrasadas') + '</b> (' + lista + ') por un total de <b>$' + Number(data.total).toLocaleString('es-CL') + '</b>.';
+    const v = new Date(data.vence_en);
+    document.getElementById('avisoCuotasVence').textContent = 'Este aviso se quita solo el ' + v.getDate() + ' de ' + MESES_CUOTA[v.getMonth()].toLowerCase() + '.';
+    caja.style.display = 'block';
+  }catch(e){ caja.style.display = 'none'; }
+}
+
 async function cargarDatos(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){
@@ -412,6 +435,7 @@ async function cargarDatos(){
   document.getElementById('phoneWrap').style.display = 'flex';
   renderMiEstadoChip();
   renderNotificaciones(perfil);
+  cargarAvisoCuotas();
 
   if(!suscritoInicioCelular){
     suscritoInicioCelular = true;

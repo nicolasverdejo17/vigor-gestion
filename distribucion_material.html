@@ -185,6 +185,7 @@ function volver(){
 
 /* ---------- carga ---------- */
 async function iniciar(){
+  let miCia = null;
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ location.href = 'login_registro.html'; return; }
   const uid = session.user.id;
@@ -199,9 +200,14 @@ async function iniciar(){
     $('carroFijo').style.display = ''; $('carroFijo').textContent = 'Carro ' + fila.t_nomenclatura + ' — ' + (fila.t_tipo_descripcion || '');
     $('selCarro').style.display = 'none';
   } else {
+    // La Comandancia (cuenta del Cuerpo o personas sin compañía) solo ve los carros de la Comandancia;
+    // los demás ven todos los del Cuerpo (la base de datos aplica la misma regla).
+    const { data: p } = await sb.from('personal').select('compania_id').eq('auth_user_id', uid).maybeSingle();
+    miCia = p && p.compania_id;
+    if(!miCia){ const { data: c } = await sb.from('companias').select('id').eq('auth_user_id', uid).maybeSingle(); miCia = c && c.id; }
     const { data: cs, error } = await sb.from('carros').select('id, nomenclatura, tipo_descripcion, compania_id').order('nomenclatura');
     if(error){ return mostrarMsg('No se pudo cargar', errTxt(error)); }
-    carros = cs || [];
+    carros = (cs || []).filter(c => miCia || !c.compania_id);
     const { data: cias } = await sb.from('companias').select('id, nombre');
     (cias || []).forEach(c => companias[c.id] = c);
     const optC = c => `<option value="${c.id}">${esc(c.nomenclatura)}${c.tipo_descripcion ? ' — ' + esc(c.tipo_descripcion) : ''}</option>`;
@@ -212,12 +218,6 @@ async function iniciar(){
   $('barra').style.display = '';
 
   // Carro inicial: el de la URL, si no el de mi Compañía, si no el primero.
-  let miCia = null;
-  if(!esTablet){
-    const { data: p } = await sb.from('personal').select('compania_id').eq('auth_user_id', uid).maybeSingle();
-    miCia = p && p.compania_id;
-    if(!miCia){ const { data: c } = await sb.from('companias').select('id').eq('auth_user_id', uid).maybeSingle(); miCia = c && c.id; }
-  }
   const pedido = new URLSearchParams(location.search).get('carro');
   const inicial = carros.find(c => c.id === pedido) || carros.find(c => miCia && c.compania_id === miCia) || carros[0];
   $('selCarro').value = inicial.id;
