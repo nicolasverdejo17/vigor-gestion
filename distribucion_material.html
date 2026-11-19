@@ -42,6 +42,8 @@
   .zona-tab{ background:var(--panel-alt); border:1.5px solid var(--line-strong); color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; font-size:13px; letter-spacing:.05em; text-transform:uppercase; padding:8px 12px; cursor:pointer; }
   .zona-tab .n{ font-family:'JetBrains Mono',monospace; opacity:.7; margin-left:5px; font-size:11px; }
   .zona-tab .sh{ display:none; }
+  html body .zona-tab span{ font-family:inherit !important; font-size:inherit !important; font-weight:inherit !important; letter-spacing:inherit !important; text-transform:inherit !important; font-size-adjust:inherit; }
+  html body .zona-tab{ font-family:'Rajdhani','Inter',sans-serif !important; font-weight:700 !important; font-size:14px !important; font-size-adjust:0.5; text-transform:uppercase; letter-spacing:.01em !important; line-height:1.15; }
   .zona-tab.on{ background:rgba(57,255,20,.1); border-color:rgba(57,255,20,.6); color:#fff; }
 
   .camion-wrap{ background:linear-gradient(180deg,#07121B,#0A1722); border:1px solid var(--line); padding:6px 4px 2px; }
@@ -105,7 +107,7 @@
     html body .barra{ flex-wrap:nowrap; gap:8px; } .barra select{ flex:1; min-width:0; min-height:40px; font-size:13.5px; padding:8px 10px; } .barra .carro-fijo{ flex:1; font-size:16px; min-width:0; }
     html body .modo{ margin-left:0; font-size:11px; padding:7px 8px; white-space:nowrap; }
     html body .zonas{ display:grid; grid-template-columns:repeat(5,1fr); gap:4px; }
-    html body .zona-tab{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 2px; font-size:11px; letter-spacing:0; min-width:0; }
+    html body .zona-tab{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:9px 2px; font-size:12.5px !important; letter-spacing:.01em; min-width:0; }
     html body .zona-tab .lg{ display:none; } html body .zona-tab .sh{ display:inline; } .zona-tab .n{ margin:0; font-size:10.5px; } }
 </style>
 <link rel="manifest" href="manifest-tablet.json">
