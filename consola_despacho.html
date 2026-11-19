@@ -442,6 +442,11 @@
   html body .selected-chip{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px 6px 12px !important; }
   html body .selected-chip button{ background:none !important; border:none !important; box-shadow:none !important; min-width:0 !important; min-height:0 !important; width:auto !important; height:auto !important; padding:0 2px !important; margin:0 !important; font-size:12px !important; line-height:1 !important; color:#7FBF70 !important; opacity:.8; }
   html body .selected-chip button:hover{ color:#fff !important; opacity:1; }
+
+  /* cerrar sesión: al final de la página */
+  .cerrar-sesion-fila{ display:flex; justify-content:center; padding:28px 0 44px; }
+  html body .btn-cerrar-sesion{ background:transparent !important; border:1px solid #F13746 !important; color:#F13746 !important; border-radius:0 !important; font-family:'Rajdhani',sans-serif !important; font-weight:700 !important; font-size:14px !important; letter-spacing:.14em; text-transform:uppercase; padding:12px 34px !important; cursor:pointer; }
+  html body .btn-cerrar-sesion:hover{ background:#F13746 !important; color:#fff !important; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -556,6 +561,11 @@
       <div class="frame-body" id="emergenciasBody"></div>
     </div>
 
+    <!-- Cerrar sesión (al final de todo) -->
+    <div class="cerrar-sesion-fila">
+      <button type="button" class="btn-cerrar-sesion" onclick="vigorCerrarSesion()">Cerrar sesión</button>
+    </div>
+
   </div>
 
   <div class="modal-overlay" id="terminarModal">
@@ -651,6 +661,11 @@ function reproducirTono(ev){
 // Compañía — se prueba primero porque es la puerta de entrada real de
 // esta pantalla. Si no es una sesión de Central, cae al viejo camino de
 // "persona" (compatibilidad con roles que llegaban acá por default).
+async function vigorCerrarSesion(){
+  try{ await sb.auth.signOut(); }catch(e){}
+  window.location.href = 'login_registro.html';
+}
+
 async function cargarSesion(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ toast('Debes iniciar sesión primero'); return; }
