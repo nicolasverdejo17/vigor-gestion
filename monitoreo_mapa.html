@@ -47,6 +47,9 @@ button{font-family:inherit;color:inherit}
 #ban .cnt{display:flex;gap:8px;margin-left:8px}
 .chip{display:flex;align-items:center;gap:7px;border:1px solid var(--l2);background:var(--p);padding:4px 10px;font-size:12px;font-weight:600;white-space:nowrap}
 .chip i.d{width:9px;height:9px;border-radius:50%;background:var(--k);display:inline-block}
+#ban .volver{margin-left:6px;text-decoration:none;border:1px solid var(--l2);background:var(--p);color:var(--tx);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;white-space:nowrap;border-radius:0}
+#ban .volver:hover{border-color:var(--cy)}
+#ban .volver[hidden]{display:none}
 #ban .reloj{margin-left:auto;display:flex;align-items:center;gap:14px;flex-shrink:0;color:var(--mu);font-size:13px;line-height:1;text-align:right}
 #ban .reloj span{white-space:nowrap}
 #ban .reloj strong{display:block;font-size:22px;margin:0;letter-spacing:.02em;font-weight:700;text-shadow:0 0 12px rgba(45,211,219,.35)}
@@ -214,9 +217,10 @@ body.pp-abierto #ctl{display:none}
 <div id="ban">
   <img src="img/logo.png" alt="Vigor">
   <div class="sep"></div>
-  <span class="t">Central de Alarmas</span>
+  <span class="t" id="tit">Central de Alarmas</span>
   <div class="cnt" id="cnt"></div>
   <div class="reloj"><span id="fechaHoy">—</span><strong class="dseg" id="clock">--:--:--</strong></div>
+  <a class="volver" id="volver" href="#" hidden>← Volver</a>
 </div>
 
 <div id="ctabs"></div>
@@ -663,12 +667,16 @@ const R={ carros:new Map(), pos:new Map(), desp:[], du:[], claves:new Map(), sin
 function armarPestanas(central){
   if(EMBED) return;   // dentro del celular no lleva banner ni pestañas
   const t=$('ctabs');
-  t.innerHTML = central
-    ? '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="monitoreo_mapa.html" class="on">Mapa Comunal</a><a href="clima.html">Clima</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a>'
-    : (/^[a-z0-9_]+\.html$/.test(PARAMS.get('volver') || '') && PARAMS.get('volver') !== 'monitoreo_mapa.html'
-        ? '<a href="' + PARAMS.get('volver') + '" class="on">← Volver</a>'
-        : '<a href="comandancia.html" class="on">← Volver a Comandancia</a>');
-  document.body.classList.add('con-tabs'); setTimeout(()=>mapa&&mapa.resize(),50);
+  if(central){
+    t.innerHTML = '<a href="consola_despacho.html">Consola de Despacho</a><a href="visual_companias.html">Visual de Compañías</a><a href="monitoreo_mapa.html" class="on">Mapa Comunal</a><a href="clima.html">Clima</a><a href="terminal_coordenadas.html">Terminal de Coordenadas</a><a href="puestos_mando_activos.html">Modo Crisis Compañías</a><a href="historial_despacho.html">Historial de Despacho</a>';
+    document.body.classList.add('con-tabs');
+  } else {
+    // PC del Cuartel o Comandancia: el nombre de la pantalla y «← Volver» van en el banner, como en Clima
+    const v = PARAMS.get('volver'), a = $('volver');
+    $('tit').textContent = 'Mapa Comunal';
+    a.href = /^[a-z0-9_]+\.html$/.test(v || '') && v !== 'monitoreo_mapa.html' ? v : 'comandancia.html'; a.hidden = false;
+  }
+  setTimeout(()=>mapa&&mapa.resize(),50);
 }
 async function iniciarReal(){
   const sb=window.supabase.createClient(SB_URL,SB_KEY,{ auth:{ persistSession:true, autoRefreshToken:true } });
