@@ -31,7 +31,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>VIGOR - Gestiona tu compañía de forma eficiente</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#060A0F; --panel:#0A131C; --panel-alt:#0E1D28; --line:#132734; --line-strong:#1C3B49;
@@ -195,6 +195,45 @@
     .login-credito{ left:26px; bottom:26px; }
     .card{ max-width:none;}
   }
+
+  #instalarModal .modal-box{ max-width:400px; }
+  #instalarModal p{ text-align:left; }
+  html body #instalarModal .modal-close{ min-height:46px; background:#39FF14 !important; border:1.5px solid #39FF14 !important; color:#0D2206 !important; font-size:14px !important; letter-spacing:.06em; }
+  html body #instalarModal #btnAcceso{ background:transparent !important; border:1.5px solid var(--line-strong) !important; color:#fff !important; margin-bottom:10px; }
+  html body #instalarModal #btnAcceso:hover{ border-color:var(--cyan) !important; }
+  .pasos{ list-style:none; margin:0 0 16px; padding:0; counter-reset:p; }
+  .pasos li{ counter-increment:p; display:flex; gap:12px; align-items:flex-start; font-size:13.5px; line-height:1.5; color:var(--text); padding:7px 0; text-align:left; }
+  .pasos li::before{ content:counter(p); flex:0 0 24px; height:24px; display:flex; align-items:center; justify-content:center; background:var(--acento,#39FF14); color:#0D2206; font:700 13px 'Rajdhani',sans-serif; }
+  .pasos b{ color:#fff; }
+  .mac-menu{ margin:4px 0 16px; border:1px solid var(--line-strong); background:#07121B; }
+  .mac-menu .barra{ display:flex; gap:16px; padding:7px 12px; font-size:12px; color:var(--text-muted); border-bottom:1px solid var(--line-strong); }
+  .mac-menu .barra span.on{ color:#0D2206; background:#39FF14; padding:0 7px; font-weight:700; }
+  .mac-menu .item{ padding:7px 14px; font-size:12px; color:var(--text-muted); }
+  .mac-menu .item.on{ background:rgba(57,255,20,.18); color:#fff; font-weight:700; }
+  /* ---- Reestructura del acceso (PC): formulario sin marco y con aire, logo grande, lema grande, botón de instalar ---- */
+  html body .login-panel .card{ background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; width:100%; max-width:440px; }
+  html body .login-panel .brand-block{ padding:0 0 30px !important; align-items:flex-start; }
+  html body .login-panel .brand-sub.grande{ font-size:36px !important; font-weight:800; line-height:1.1; }
+  html body .login-panel .tabs{ margin-bottom:30px !important; padding:4px; gap:4px; background:transparent !important; border:1.5px solid var(--line-strong) !important; }
+  html body .login-panel .tab-btn{ min-height:46px; font-size:14px !important; }
+  html body .login-panel .field{ margin-bottom:24px !important; }
+  html body .login-panel .field label{ display:block; margin-bottom:10px !important; font-size:12px !important; letter-spacing:.12em; color:var(--text-muted); }
+  html body .login-panel .field input, html body .login-panel .field select{ min-height:56px; padding:0 18px !important; font-size:15px; background:rgba(255,255,255,.04); border:1.5px solid var(--line-strong); }
+  html body .login-panel .field input:focus{ border-color:var(--cyan); background:rgba(255,255,255,.06); }
+  html body .login-panel .btn-primary{ min-height:58px; margin-top:12px; font-size:16px !important; letter-spacing:.08em; }
+  html body .login-panel .link-row{ margin-top:26px; font-size:13.5px; }
+  html body .login-logo{ left:64px; top:44px; height:88px; }
+  html body .login-hero .hero-texto h2.lema{ font:800 84px/1 'Montserrat','Inter',sans-serif !important; letter-spacing:-.025em !important; text-transform:none !important; font-size-adjust:none !important; }
+  html body .hero-texto p{ font:500 25px/1.4 'Montserrat','Inter',sans-serif !important; margin-top:22px; }
+  html body .btn-instalar{ display:none !important; align-items:center; justify-content:center; gap:10px; width:100%; max-width:440px; margin-top:34px; min-height:52px; background:transparent; border:1.5px solid var(--line-strong); color:var(--text); font:700 14px 'Rajdhani',sans-serif; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
+  .btn-instalar:hover{ border-color:var(--cyan); color:#fff; background:rgba(255,255,255,.04); }
+  .btn-instalar svg{ width:20px; height:20px; }
+  @media (min-width:900px) and (hover:hover){ html body .btn-instalar.ver{ display:flex !important; } }
+  @media (max-width:899px){
+    html body .login-logo{ left:20px; top:20px; height:58px; }
+    html body .login-hero .hero-texto h2.lema{ font-size:42px !important; } html body .hero-texto p{ font-size:16px !important; margin-top:10px; }
+    html body .login-panel .brand-sub.grande{ font-size:30px !important; }
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -219,6 +258,7 @@
     <section class="login-panel">
       <div class="card">
         <div class="content" id="content"></div>
+        <button class="btn-instalar" id="btnInstalar" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>Descargar app</button>
       </div>
     </section>
     <section class="login-hero">
@@ -226,7 +266,7 @@
       <div class="hero-shade"></div>
       <img class="hero-icono" src="img/icono.png" alt="">
       <div class="hero-texto">
-        <h2>Siempre listos.</h2>
+        <h2 class="lema">Siempre listos.</h2>
         <p>Gestiona tu compañía de forma eficiente.</p>
       </div>
     </section>
@@ -241,8 +281,57 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="instalarModal">
+    <div class="modal-box">
+      <div class="modal-icon">⬇</div>
+      <h3>Descargar app</h3>
+      <div id="instalarTexto"></div>
+      <button class="modal-close" id="btnAcceso" style="display:none;margin-bottom:10px;background:transparent;border:1.5px solid var(--line-strong);" onclick="descargarAcceso()">Descargar acceso directo</button>
+      <button class="modal-close" onclick="document.getElementById('instalarModal').classList.remove('show')">Entendido</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
+<script>
+// Instalar Vigor en el PC: Chrome/Edge lo permiten con el aviso nativo (crea el acceso directo en el escritorio)
+(function(){
+  var btn = document.getElementById('btnInstalar'), prompt0 = null;
+  var instalada = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if(!btn || instalada) return;
+  btn.classList.add('ver');
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); prompt0 = e; });
+  window.addEventListener('appinstalled', function(){ btn.classList.remove('ver'); prompt0 = null; });
+  btn.addEventListener('click', function(){
+    if(prompt0){ prompt0.prompt(); prompt0.userChoice.then(function(){ prompt0 = null; }); }
+    else {
+      var ua = navigator.userAgent, t, acceso = false;
+      if(/firefox/i.test(ua)){ t = '<p>Firefox no permite instalar aplicaciones. Abre Vigor en <b>Chrome</b> o <b>Edge</b> y usa este mismo botón, o descarga un acceso directo para dejar en el escritorio.</p>'; acceso = true; }
+      else if(/safari/i.test(ua) && !/chrome|chromium|crios|edg|opr/i.test(ua)){
+        t = '<ol class="pasos"><li><span>En la barra de menú de Safari (arriba de la pantalla) abre <b>Archivo</b>.</span></li><li><span>Elige <b>Agregar al Dock…</b></span></li><li><span>Toca <b>Agregar</b>. Vigor queda en el Dock como una app.</span></li></ol>'
+          + '<div class="mac-menu"><div class="barra"><span>Safari</span><span class="on">Archivo</span><span>Edición</span><span>Visualización</span></div><div class="item">Nueva ventana</div><div class="item on">Agregar al Dock…</div><div class="item">Imprimir…</div></div>'
+          + '<p style="font-size:12px;color:var(--text-muted);margin:0 0 14px;">Requiere macOS Sonoma o más nuevo. También puedes descargar un acceso directo para dejar en el escritorio (abre Vigor en Safari).</p>'; acceso = true;
+      }
+      else t = '<ol class="pasos"><li><span>Abre el menú <b>⋮</b> del navegador (arriba a la derecha).</span></li><li><span>Elige <b>Guardar y compartir</b> → <b>Instalar Vigor</b>.</span></li><li><span>Acepta. Queda un acceso directo en tu escritorio.</span></li></ol>';
+      document.getElementById('instalarTexto').innerHTML = t;
+      document.getElementById('btnAcceso').style.display = acceso ? 'block' : 'none';
+      document.getElementById('instalarModal').classList.add('show');
+    }
+  });
+  // Acceso directo descargable (Mac: .webloc, Windows: .url): se deja en el escritorio y abre Vigor
+  window.descargarAcceso = function(){
+    var url = location.href.split('?')[0].split('#')[0].replace(/[^\/]*$/, '') + 'login_registro.html';
+    var mac = /Mac/i.test(navigator.platform || navigator.userAgent);
+    var contenido = mac
+      ? ['<?xml version="1.0" encoding="UTF-8"?>', '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">', '<plist version="1.0"><dict><key>URL</key><string>' + url + '</string></dict></plist>', ''].join('\n')
+      : ['[InternetShortcut]', 'URL=' + url, ''].join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([contenido], { type:'application/octet-stream' }));
+    a.download = 'Vigor' + (mac ? '.webloc' : '.url');
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  };
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
 <script>
