@@ -162,7 +162,7 @@ const clp = n => '$' + Number(n || 0).toLocaleString('es-CL');
 const iso = (a, m) => a + '-' + String(m + 1).padStart(2, '0') + '-01';
 function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
 function errTxt(e){ const m = (e && e.message) || ''; for(const k in ERRORES) if(m.indexOf(k) >= 0) return ERRORES[k]; return m || 'No se pudo completar'; }
-function volver(){ if(history.length > 1) history.back(); else location.href = 'opciones_celular.html'; }
+function volver(){ if(history.length > 1) history.back(); else location.href = 'inicio_celular.html'; }
 function mesTxt(p){ const d = p.split('-'); return MESES[Number(d[1]) - 1] + ' ' + d[0]; }
 function diaTxt(f){ if(!f) return '—'; const d = String(f).slice(0, 10).split('-'); return d[2] + '-' + d[1] + '-' + d[0]; }
 

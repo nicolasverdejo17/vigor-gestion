@@ -310,7 +310,7 @@ function toast(msg, error){ const t = document.getElementById('toast'); t.textCo
 let enLista = false;   // true cuando se está viendo el listado de todos los libros
 function volver(){
   // Desde el listado siempre se sale a Opciones; desde un libro, a la pantalla donde se entró.
-  let destino = 'opciones_celular.html';
+  let destino = 'inicio_celular.html';
   if(!enLista){ try{ destino = sessionStorage.getItem('libro_origen') || destino; }catch(e){} }
   window.location.href = destino;
 }
@@ -639,7 +639,7 @@ const TABS_NAV = [
   {href:'mapa_celular.html', ic:'gps', label:'Mapa'}, {href:'opciones_celular.html', ic:'opciones', label:'Opciones'},
 ];
 document.getElementById('tabbarReal').innerHTML = TABS_NAV.map(t =>
-  `<a href="${t.href}" class="${t.href==='opciones_celular.html'?'active':''}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONOS_TAB[t.ic]}</svg></span><span>${t.label}</span></a>`
+  `<a href="${t.href}" class="${t.href==='inicio_celular.html'?'active':''}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONOS_TAB[t.ic]}</svg></span><span>${t.label}</span></a>`
 ).join('');
 
 iniciar();

@@ -182,7 +182,7 @@ function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add(
 function errTxt(e){ const m = (e && e.message) || ''; for(const k in ERRORES) if(m.indexOf(k) >= 0) return ERRORES[k]; return m || 'No se pudo completar'; }
 function volver(){
   if(esTablet){ location.href = 'tablet_carro.html'; return; }
-  if(history.length > 1) history.back(); else location.href = 'opciones_celular.html';
+  if(history.length > 1) history.back(); else location.href = 'inicio_celular.html';
 }
 
 /* ---------- carga ---------- */

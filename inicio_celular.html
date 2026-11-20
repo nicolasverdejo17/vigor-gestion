@@ -243,6 +243,7 @@
 <script src="vigor-sesion.js"></script>
 <script src="vigor-push.js"></script>
 <script src="vigor-sonidos.js"></script>
+<script src="vigor-menu-celular.js"></script>
 <script>
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
@@ -468,6 +469,7 @@ async function cargarDatos(){
   try{
     const c = JSON.parse(localStorage.getItem(CACHE_INI(session.user.id)) || 'null');
     if(c && c.perfil) pintarInicioBase(c.perfil, c.companeros, c.carros, c.almando);
+    if(c && c.perfil && window.VigorMenu) VigorMenu.iniciar({ sb, uid: session.user.id, personalId: c.perfil.id, cargo: c.perfil.cargo });
   }catch(e){}
   const { data: perfil } = await sb.from('personal')
     .select('id, numero_registro, nombre_completo, cargo, compania_id, cuerpo_id, foto_url, companias(nombre), personal_estado_historial!personal_estado_historial_personal_id_fkey(estado, hora_fin)')
@@ -491,6 +493,7 @@ async function cargarDatos(){
   ]);
 
   pintarInicioBase(perfil, companeros, carros, almando);
+  if(window.VigorMenu) VigorMenu.iniciar({ sb, uid: session.user.id, personalId: perfil.id, cargo: perfil.cargo });
   try{ localStorage.setItem(CACHE_INI(session.user.id), JSON.stringify({ perfil, companeros, carros, almando })); }catch(e){}
   renderNotificaciones(perfil);
   cargarAvisoCuotas();

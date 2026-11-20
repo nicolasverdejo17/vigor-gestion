@@ -197,7 +197,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:
 // (Administración General).
 function volverCrearCarro(){
   if(window.history.length > 1){ history.back(); return; }
-  window.location.href = window.innerWidth <= 760 ? 'opciones_celular.html' : 'administracion_general.html';
+  window.location.href = window.innerWidth <= 760 ? 'inicio_celular.html' : 'administracion_general.html';
 }
 
 // La Compañía queda fija a la de la sesión real — ya no es un selector de

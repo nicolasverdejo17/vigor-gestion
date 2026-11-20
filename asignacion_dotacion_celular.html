@@ -155,7 +155,7 @@
 
   <div id="phoneWrap">
     <div class="app-head">
-      <button class="back-btn" onclick="window.location.href='opciones_celular.html'">← Volver</button>
+      <button class="back-btn" onclick="window.location.href='inicio_celular.html'">← Volver</button>
       <div class="titulo">
         <div class="eyebrow" id="ciaLabel">—</div>
         <h1>Asignación de Dotación</h1>
@@ -473,7 +473,7 @@ const TABS_NAV = [
 ];
 (function renderTabbarReal(){
   document.getElementById('tabbarReal').innerHTML = TABS_NAV.map(t =>
-    `<a href="${t.href}" class="${t.href==='opciones_celular.html'?'active':''}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONOS_TAB[t.ic]}</svg></span><span>${t.label}</span></a>`
+    `<a href="${t.href}" class="${t.href==='inicio_celular.html'?'active':''}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONOS_TAB[t.ic]}</svg></span><span>${t.label}</span></a>`
   ).join('');
 })();
 

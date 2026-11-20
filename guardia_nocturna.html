@@ -879,7 +879,7 @@ async function guardarConfig(){
 
 function volver(){
   if(window.history.length > 1){ history.back(); return; }
-  window.location.href = 'opciones_celular.html';
+  window.location.href = 'inicio_celular.html';
 }
 function toast(msg, error){
   const t = document.getElementById('toast');
@@ -904,7 +904,7 @@ const TABS_NAV = [
   {href:'opciones_celular.html', ic:'opciones', label:'Opciones'},
 ];
 document.getElementById('tabbarReal').innerHTML = TABS_NAV.map(t =>
-  `<a href="${t.href}" class="${t.href==='opciones_celular.html'?'active':''}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONOS_TAB[t.ic]}</svg></span><span>${t.label}</span></a>`
+  `<a href="${t.href}" class="${t.href==='inicio_celular.html'?'active':''}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ICONOS_TAB[t.ic]}</svg></span><span>${t.label}</span></a>`
 ).join('');
 
 iniciar();
