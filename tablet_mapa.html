@@ -312,6 +312,14 @@ mantenerEncendida();
 (async function(){ try{ const { data } = await sb.rpc('tablet_obtener_carro'); const c = Array.isArray(data) ? data[0] : data; if(c && c.t_nomenclatura) nombreCarro = c.t_nomenclatura; }catch(e){} })();
 setInterval(leerGps, 1000); leerGps();
 setTimeout(cargarSiniestro, 1500); setInterval(cargarSiniestro, 20000);
+// el despacho llega en vivo: el banner y el punto del siniestro aparecen (o se quitan) al tiro, igual que la alerta
+try{
+  let td = null;
+  sb.channel('tablet-mapa-despacho-' + Math.random().toString(36).slice(2, 8))
+    .on('postgres_changes', { event:'*', schema:'public', table:'despacho_unidades' }, () => { clearTimeout(td); td = setTimeout(cargarSiniestro, 400); })
+    .on('postgres_changes', { event:'*', schema:'public', table:'despachos' }, () => { clearTimeout(td); td = setTimeout(cargarSiniestro, 400); })
+    .subscribe();
+}catch(e){}
 setTimeout(() => { cargarPuntos(); suscribirPuntos(); }, 1200);
 setInterval(tiempo, 1000);
 window.__E = E;

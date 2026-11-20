@@ -954,6 +954,33 @@
   html body .pc-menu-item.salir .pc-menu-ico, html body .pc-menu-item.salir{ color:#F13746 !important; }
   html body .pc-menu-item.salir:hover{ background:rgba(241,55,70,.12) !important; border-left-color:#F13746 !important; }
   .pc-menu-sep{ height:1px; background:#0F2A3B; margin:6px 0; }
+
+  /* ---- Pantalla roja de despacho: aparece 10 segundos cuando despachan a esta Compañía ---- */
+  #pcDesp{ position:fixed; inset:0; z-index:99999; display:none; flex-direction:column; color:#fff; cursor:pointer;
+    background:#5A0B15; overflow:hidden; font-family:var(--ui-titulo, Rajdhani, sans-serif); }
+
+  #pcDesp::before{ content:""; position:absolute; inset:-20%; z-index:0; pointer-events:none;
+    background:radial-gradient(circle at 50% 50%, #FF3A4C 0%, #D9202F 22%, #A3141F 48%, rgba(90,11,21,0) 72%); animation:pcDespPulso 1.5s ease-in-out infinite; }
+  @keyframes pcDespPulso{ 0%,100%{ opacity:.55; transform:scale(.82); } 50%{ opacity:1; transform:scale(1.12); } }
+  #pcDesp > *{ position:relative; z-index:1; }
+  #pcDesp.on{ display:flex; animation:pcDespIn .25s ease-out; }
+  @keyframes pcDespIn{ from{ opacity:0; transform:scale(1.02); } to{ opacity:1; transform:none; } }
+  #pcDesp .pd-cab{ display:flex; align-items:center; justify-content:center; gap:16px; padding:22px 44px; border-bottom:3px solid rgba(255,255,255,.35); }
+  #pcDesp .pd-lat{ width:20px; height:20px; background:#fff; border-radius:50%; animation:pcDespLat 1s ease-in-out infinite; flex:none; }
+  @keyframes pcDespLat{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.3; transform:scale(.7); } }
+  #pcDesp .pd-cab b{ font-weight:800; font-size:34px; letter-spacing:.22em; text-transform:uppercase; }
+  #pcDesp .pd-cab span{ margin-left:30px; font:700 28px 'JetBrains Mono', monospace; letter-spacing:.04em; }
+  #pcDesp .pd-cu{ flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:14px; padding:20px 60px 106px; min-height:0; }
+  #pcDesp .pd-clave{ font-weight:800; font-size:clamp(90px, 16vw, 210px); line-height:.95; letter-spacing:.02em; text-shadow:0 6px 40px rgba(0,0,0,.35); }
+  #pcDesp .pd-tipo{ font-weight:700; font-size:clamp(34px, 5vw, 68px); letter-spacing:.06em; text-transform:uppercase; line-height:1.05; }
+  #pcDesp .pd-dir{ font-family:'Inter', sans-serif; font-weight:800; font-size:clamp(30px, 4.6vw, 62px); line-height:1.1; margin-top:10px; }
+  #pcDesp .pd-ref{ font-family:'Inter', sans-serif; font-size:clamp(18px, 2vw, 28px); color:#FFD0D4; }
+  #pcDesp .pd-carros{ display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap; margin-top:clamp(40px, 8vh, 110px); }
+    #pcDesp .pd-carro{ border:3px solid #fff; background:rgba(255,255,255,.12); padding:6px 26px; font-weight:800; font-size:clamp(40px, 5.4vw, 72px); letter-spacing:.06em; line-height:1.1; }
+  #pcDesp .pd-barra{ height:10px; background:rgba(255,255,255,.2); flex:none; }
+  #pcDesp .pd-barra i{ display:block; height:100%; width:100%; background:#fff; transform-origin:left; animation:pcDespBarra 10s linear forwards; }
+  @keyframes pcDespBarra{ from{ transform:scaleX(1); } to{ transform:scaleX(0); } }
+  @media (prefers-reduced-motion:reduce){ #pcDesp .pd-lat, #pcDesp.on, #pcDesp::before{ animation:none; } }
 </style>
 </head>
 <body data-rectos>
@@ -1232,6 +1259,38 @@
   // el que en la práctica está cableado a la base de radio del Cuartel, así
   // que también tiene que reaccionar en vivo cuando Central confirma un
   // despacho para esta Compañía.
+  // ---- Pantalla roja de despacho: clave, nombre, dirección y carros de esta Compañía, durante 10 segundos ----
+  let pdTimer = null;
+  async function mostrarPantallaDespacho(despachoId){
+    try{
+      const { data: d } = await sb.from('despachos')
+        .select('id, direccion, referencia, fecha_hora_despacho, claves_emergencia(codigo, nombre), despacho_unidades(compania_id, carros(nomenclatura))')
+        .eq('id', despachoId).maybeSingle();
+      if(!d) return;
+      const mios = (d.despacho_unidades || []).filter(u => u.compania_id === miCompaniaId).map(u => u.carros && u.carros.nomenclatura).filter(Boolean);
+      const carros = [...new Set(mios)].sort();
+      const clave = d.claves_emergencia || {};
+      const esc2 = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+      let el = document.getElementById('pcDesp');
+      if(!el){ el = document.createElement('div'); el.id = 'pcDesp'; el.setAttribute('role', 'alertdialog'); el.setAttribute('aria-live', 'assertive'); el.onclick = cerrarPantallaDespacho; document.body.appendChild(el); }
+      const hora = new Date(d.fecha_hora_despacho || Date.now()).toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false });
+      el.innerHTML = `
+        <div class="pd-cab"><div class="pd-lat"></div><b>Despacho</b><span>${hora}</span></div>
+        <div class="pd-cu">
+          <div class="pd-clave">${esc2(clave.codigo || '—')}</div>
+          <div class="pd-tipo">${esc2(clave.nombre || 'Emergencia')}</div>
+          <div class="pd-dir">${esc2(d.direccion || 'Sin dirección')}</div>
+          ${d.referencia ? `<div class="pd-ref">${esc2(d.referencia)}</div>` : ''}
+          ${carros.length ? `<div class="pd-carros">${carros.map(c => `<div class="pd-carro">${esc2(c)}</div>`).join('')}</div>` : ''}
+        </div>
+        <div class="pd-barra"><i></i></div>`;
+      el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');   // reinicia la barra si llega otro despacho
+      clearTimeout(pdTimer); pdTimer = setTimeout(cerrarPantallaDespacho, 10000);
+    }catch(e){ console.warn('pantalla de despacho:', e && e.message); }
+  }
+  function cerrarPantallaDespacho(){ clearTimeout(pdTimer); const el = document.getElementById('pcDesp'); if(el) el.classList.remove('on'); }
+  document.addEventListener('keydown', ev => { if(ev.key === 'Escape') cerrarPantallaDespacho(); });
+
   let audioCtx = null;
   function reproducirTono(ev){
     // Suena el tono del Cuerpo (o el predeterminado de emergencias de Vigor); si falla, el sintetizado de siempre
@@ -1259,6 +1318,7 @@
         const { data: unidades } = await sb.from('despacho_unidades').select('compania_id').eq('despacho_id', payload.new.id);
         if((unidades || []).some(u => u.compania_id === miCompaniaId)){
           reproducirTono({ tipo:'despacho', clave: payload.new.tipo_emergencia_id });
+          mostrarPantallaDespacho(payload.new.id);
         }
         await cargarPizarra();
       })
