@@ -63,15 +63,15 @@
     + '#vgm-panel{position:fixed;top:0;right:0;bottom:0;z-index:901;width:max(50vw,208px);max-width:340px;background:#061520;border-left:1px solid #153A52;transform:translateX(102%);transition:transform .25s ease;display:flex;flex-direction:column}'
     + '#vgm-panel.on{transform:none}'
     + '#vgm-panel .vgm-cab{flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 16px;height:62px;border-bottom:1px solid #0F2A3B}'
-    + '#vgm-panel .vgm-tit{font:800 15px Rajdhani,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#fff}'
+    + '#vgm-panel .vgm-tit{font-family:var(--ui-titulo,Rajdhani,sans-serif) !important;font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;color:#fff;font-size-adjust:0.5}'
     + '#vgm-panel .vgm-x{background:none;border:none;color:#8FB0C2;font-size:22px;line-height:1;width:42px;height:42px;cursor:pointer}'
     + '#vgm-panel .vgm-cuerpo{flex:1;overflow-y:auto;padding:6px 0 28px;-webkit-overflow-scrolling:touch}'
-    + '#vgm-panel .vgm-sec{font:800 10.5px Rajdhani,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#7B99A3;padding:16px 16px 6px}'
+    + '#vgm-panel .vgm-sec{font-family:var(--ui-titulo,Rajdhani,sans-serif) !important;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7B99A3;padding:16px 16px 6px}'
     + '#vgm-panel .vgm-fila{display:flex;align-items:center;gap:12px;padding:12px 16px;color:#EAF6FB;text-decoration:none;border-left:3px solid transparent}'
     + '#vgm-panel .vgm-fila:active,#vgm-panel .vgm-fila:hover{background:#0B2233;border-left-color:#8FB0C2}'
     + '#vgm-panel .vgm-ico{flex:none;width:22px;height:22px;color:#8FB0C2}'
     + '#vgm-panel .vgm-ico svg{width:22px;height:22px;display:block}'
-    + '#vgm-panel .vgm-nom{font:700 14.5px Rajdhani,sans-serif;letter-spacing:.05em;text-transform:uppercase;line-height:1.15}'
+    + '#vgm-panel .vgm-nom{font-family:var(--ui-titulo,Rajdhani,sans-serif) !important;font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase;line-height:1.15;font-size-adjust:0.5}'
     + '#vgm-panel .vgm-carga{padding:20px 16px;color:#7B99A3;font:500 13px Inter,sans-serif}';
 
   function pintar(){
