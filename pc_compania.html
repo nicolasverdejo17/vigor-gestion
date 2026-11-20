@@ -936,6 +936,24 @@
   html body .btn-obs-mas:hover{ background:#3FC66B !important; color:#0D2206 !important; }
   html body .mini-reg-entry input, html body .resumen__item--reg input{ border-radius:0 !important; }
   html body .mini-reg-entry input:focus, html body .resumen__item--reg input:focus{ border-color:#3FC66B !important; }
+
+  /* ---- Menú de tres rayas del PC del Cuartel (Modo Crisis, Clima, Mapa y Cerrar sesión) ---- */
+  .pc-menu{ position:relative; flex:none; }
+  html body .pc-menu-btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; background:transparent !important; border:1px solid #153A52 !important; color:#EAF6FB !important; border-radius:0 !important; cursor:pointer; padding:0 !important; min-height:0 !important; }
+  html body .pc-menu-btn:hover, html body .pc-menu-btn.on{ border-color:#8FB0C2 !important; background:rgba(143,176,194,.10) !important; }
+  .pc-menu-btn svg{ width:24px; height:24px; }
+  .pc-menu-panel{ display:none; position:fixed; top:calc(var(--banner-h, 62px) + 6px); right:24px; z-index:300; width:264px; background:#061520; border:1px solid #153A52; box-shadow:0 18px 40px rgba(0,0,0,.55); padding:6px 0; }
+  .pc-menu-panel.on{ display:block; }
+  html body .pc-menu-item{ display:flex !important; align-items:center !important; justify-content:flex-start !important; gap:14px; width:100%; text-align:left !important; background:transparent !important; border:none !important; border-left:3px solid transparent !important; border-radius:0 !important; color:#EAF6FB !important; cursor:pointer; padding:14px 18px !important; min-height:0 !important;
+    font-family:var(--ui-titulo, Rajdhani, sans-serif) !important; font-weight:700 !important; font-size:17px !important; letter-spacing:.04em !important; text-transform:uppercase !important; font-size-adjust:0.5; }
+  html body .pc-menu-item:hover, html body .pc-menu-item:focus-visible{ background:#0B2233 !important; border-left-color:#8FB0C2 !important; outline:none; }
+  .pc-menu-ico{ flex:none; width:24px; height:24px; color:#8FB0C2; }
+  .pc-menu-ico svg{ width:24px; height:24px; display:block; }
+  html body .pc-menu-item.crisis .pc-menu-ico, html body .pc-menu-item.crisis{ color:#F13746 !important; }
+  html body .pc-menu-item.crisis:hover{ background:rgba(241,55,70,.12) !important; border-left-color:#F13746 !important; }
+  html body .pc-menu-item.salir .pc-menu-ico, html body .pc-menu-item.salir{ color:#F13746 !important; }
+  html body .pc-menu-item.salir:hover{ background:rgba(241,55,70,.12) !important; border-left-color:#F13746 !important; }
+  .pc-menu-sep{ height:1px; background:#0F2A3B; margin:6px 0; }
 </style>
 </head>
 <body data-rectos>
@@ -954,10 +972,18 @@
           <strong id="clock">--:--:--</strong>
           <span id="dateline">—</span>
         </div>
-        <button class="crisis-btn" onclick="window.location.href='modo_crisis.html'">Modo Crisis</button>
-        <button class="crisis-btn clima-btn" onclick="window.location.href='clima.html?volver=pc_compania.html'">Clima</button>
-        <button class="crisis-btn clima-btn" onclick="window.location.href='monitoreo_mapa.html?volver=pc_compania.html'">Mapa</button>
-        <button class="crisis-btn btn-salir" onclick="vigorCerrarSesion()">Cerrar sesión</button>
+        <div class="pc-menu">
+          <button type="button" class="pc-menu-btn" id="pcMenuBtn" onclick="togglePcMenu(event)" aria-label="Menú" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div class="pc-menu-panel" id="pcMenuPanel" role="menu">
+            <button type="button" class="pc-menu-item crisis" role="menuitem" onclick="window.location.href='modo_crisis.html'"><span class="pc-menu-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 2.8 19.5h18.4L12 3.5z"/><path d="M12 10v4.5M12 17.2v.1"/></svg></span>Modo Crisis</button>
+            <button type="button" class="pc-menu-item" role="menuitem" onclick="window.location.href='clima.html?volver=pc_compania.html'"><span class="pc-menu-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 8.9 4.6 4.6 0 0 0 7 18z"/></svg></span>Clima</button>
+            <button type="button" class="pc-menu-item" role="menuitem" onclick="window.location.href='monitoreo_mapa.html?volver=pc_compania.html'"><span class="pc-menu-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg></span>Mapa</button>
+            <div class="pc-menu-sep"></div>
+            <button type="button" class="pc-menu-item salir" role="menuitem" onclick="vigorCerrarSesion()"><span class="pc-menu-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M15 8l4 4-4 4"/><path d="M19 12H9"/></svg></span>Cerrar sesión</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2041,6 +2067,17 @@
   cargarDatos();
 
 })();
+</script>
+<script>
+// Menú de tres rayas del banner: se abre y se cierra tocando el botón, afuera o con Escape
+function togglePcMenu(ev){
+  if(ev) ev.stopPropagation();
+  const p = document.getElementById('pcMenuPanel'), b = document.getElementById('pcMenuBtn');
+  const abrir = !p.classList.contains('on');
+  p.classList.toggle('on', abrir); b.classList.toggle('on', abrir); b.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+}
+document.addEventListener('click', ev => { const p = document.getElementById('pcMenuPanel'); if(p && p.classList.contains('on') && !ev.target.closest('.pc-menu')) togglePcMenu(); });
+document.addEventListener('keydown', ev => { const p = document.getElementById('pcMenuPanel'); if(ev.key === 'Escape' && p && p.classList.contains('on')) togglePcMenu(); });
 </script>
 </body>
 </html>
