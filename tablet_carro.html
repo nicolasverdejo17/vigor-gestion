@@ -86,7 +86,7 @@
   /* ---- Menú operativo — 3 accesos grandes ---- */
   .ops-wrap{ flex:1; min-height:0; padding:24px 28px 28px; display:flex; flex-direction:column;}
   .ops-hint{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.1em; margin-bottom:14px; flex-shrink:0;}
-  .ops-grid{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(5,1fr); gap:14px;}
+  .ops-grid{ flex:1; min-height:0; display:grid; grid-template-columns:repeat(6,1fr); gap:14px;}
   @media (max-width:1100px){ .ops-grid{ grid-template-columns:repeat(3,1fr); } }
 
   .ops-btn{
@@ -116,6 +116,8 @@
   .ops-btn.checklist:hover{ border-color:var(--servicio);}
   .ops-btn.material .ops-icon{ border-color:var(--alerta);}
   .ops-btn.material:hover{ border-color:var(--alerta);}
+  .ops-btn.mapa .ops-icon{ border-color:var(--cyan);}
+  .ops-btn.mapa:hover{ border-color:var(--cyan);}
 
   .demo-tag{
     text-align:center; font-size:11px; color:var(--text-dim); padding:8px 0 0; flex-shrink:0;
@@ -226,6 +228,14 @@
         </div>
         <h2>Material</h2>
         <p>Qué lleva el carro y en qué compartimento está cada cosa.</p>
+      </div>
+
+      <div class="ops-btn mapa" onclick="window.location.href='tablet_mapa.html'">
+        <div class="ops-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z" stroke="#49E9FF" stroke-width="1.6"/><circle cx="12" cy="9" r="2.4" stroke="#49E9FF" stroke-width="1.6"/></svg>
+        </div>
+        <h2>Mapa</h2>
+        <p>Vista inclinada que sigue al carro: ver por dónde va, sin ruta.</p>
       </div>
     </div>
   </div>

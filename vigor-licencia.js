@@ -25,7 +25,7 @@
   // Pantalla → paquete. Lo que no figura aquí es STATION (siempre incluido).
   var PANTALLAS = {
     consola_despacho:'spartan', visual_companias:'spartan', historial_despacho:'spartan',
-    monitoreo_mapa:'sentinel', mapa_celular:'sentinel', clima:'sentinel', terminal_coordenadas:'sentinel', coordenadas_celular:'sentinel',
+    monitoreo_mapa:'sentinel', mapa_celular:'sentinel', tablet_mapa:'sentinel', clima:'sentinel', terminal_coordenadas:'sentinel', coordenadas_celular:'sentinel',
     tablet_parte:'vanguard',
     modo_crisis:'titan', puestos_mando_activos:'titan',
     inventario:'forge', ingreso_item:'forge', historial_movimientos:'forge', dar_de_baja:'forge',

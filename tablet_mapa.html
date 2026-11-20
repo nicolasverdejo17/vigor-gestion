@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VIGOR - Gestiona tu compañía de forma eficiente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="manifest" href="manifest-tablet.json">
+<link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png?v=2" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+<meta name="theme-color" content="#030B13">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vigor">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<style>
+/* Mapa de la tablet del carro — vista inclinada que sigue al vehículo (mismo diseño de la navegación). Muestra por dónde va;
+   NO traza rutas: solo marca el punto de la emergencia y los puntos que marcó el Cuerpo. */
+@font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+:root{
+  --bg:#030B13;--p:#061520;--c:#091D2C;--l:#0F2A3B;--l2:#153A52;
+  --cy:#2DD3DB;--rj:#F13746;--vd:#3CF29A;--az:#34B8FF;--am:#FFC247;--tx:#EAF6FB;--mu:#8FB0C2;--bl:#1C6EE6;
+  --pw:min(510px,46vw);
+  --tam:1;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;font-family:'Montserrat','Segoe UI',sans-serif}
+button{font-family:inherit;color:inherit}
+#stage{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+#map{position:absolute;inset:0}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
+#fade{position:absolute;left:0;right:0;top:0;height:40%;background:linear-gradient(to bottom,var(--bg) 8%,rgba(3,11,19,0));pointer-events:none;z-index:850}
+
+.meMk{width:86px;height:86px;z-index:5;pointer-events:none}
+.meMk svg{width:86px;height:86px;overflow:visible}
+.meMk .onda{transform-box:fill-box;transform-origin:center;animation:late 1.6s ease-out infinite;opacity:0}
+.meMk .o2{animation-delay:.8s}
+.meMk .punto{transform-box:fill-box;transform-origin:center;animation:latido 1.6s ease-in-out infinite}
+@keyframes late{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.2);opacity:0}}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+.dseg{font-family:'DSEG7',monospace;font-weight:700;letter-spacing:.06em;color:var(--cy)}
+.lab{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);font-weight:600}
+.num{font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.num small{font-size:.42em;font-weight:600;margin-left:.2em;color:var(--mu)}
+
+
+/* ---- gotas del mapa ---- */
+.mk{width:34px;height:34px;pointer-events:none}   /* sin position: la fija MapLibre (absolute) y así cada punto queda sobre su coordenada */
+.g{position:absolute;inset:0}
+.g b{position:absolute;left:3px;top:0;width:28px;height:28px;background:var(--k);border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #030B13;display:grid;place-items:center}
+.g b i{transform:rotate(45deg);font-size:15px;color:#030B13;line-height:1}
+.g.big{width:46px;height:46px;inset:auto;left:-6px;top:-12px}
+.g.big b{left:4px;width:38px;height:38px}.g.big b i{font-size:21px}
+.mk .lb{position:absolute;left:50%;top:38px;transform:translateX(-50%);font:600 10px 'Montserrat',sans-serif;color:var(--tx);background:rgba(3,11,19,.88);border:1px solid var(--l2);padding:1px 7px;white-space:nowrap}
+.mk .lb:empty{display:none}
+/* los íconos se achican al alejar el zoom y, muy lejos, quedan como puntos de su color */
+.mk .g{transform:scale(calc(var(--esc,1) * var(--tam,1)));transform-origin:50% 100%}
+.mk .lb{opacity:calc((var(--esc,1) - .62) * 5)}
+.pt{display:none;position:absolute;left:50%;bottom:-5px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--k);border:1.5px solid #030B13}
+.pt.gr{width:16px;height:16px;margin-left:-8px;bottom:-8px}
+.lejos .mk .g,.lejos .mk .lb,.lejos .pul{display:none}
+.lejos .mk .pt{display:block}
+.pul{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-34px 0 0 -30px;border-radius:50%;background:var(--rj);opacity:.3;animation:pu 1.6s ease-out infinite;pointer-events:none}
+@keyframes pu{0%{transform:scale(.4);opacity:.5}100%{transform:scale(1.5);opacity:0}}
+
+
+/* ---- banner de despacho (panel recogido) ---- */
+#ban{position:absolute;left:0;right:0;top:0;height:88px;z-index:1000;display:flex;align-items:center;gap:18px;padding:0 22px;
+  background:linear-gradient(180deg,#B21F2E 0%,#74101B 62%,#4D0A13 100%);border-bottom:3px solid var(--rj);box-shadow:0 8px 34px rgba(241,55,70,.30)}
+#ban img{height:46px;width:auto;display:block}
+#ban .sep{width:2px;height:34px;background:rgba(255,194,200,.35);flex:none}
+#ban .t1{font-weight:800;font-size:24px;text-shadow:0 0 18px rgba(241,55,70,.55);line-height:1.1}
+#ban .t2{font-size:14px;color:#ffd0d4;margin-top:3px}
+#ban .tr{margin-left:auto;text-align:right;flex:none}
+#ban .tr .lab{color:#ffc2c8}
+#ban .tr .dseg{font-size:30px;color:#fff;display:block;margin-top:2px}
+#ban .txt{min-width:0}#ban .t1,#ban .t2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+
+/* ---- botones ---- */
+#btns{position:absolute;z-index:1000;display:flex;flex-direction:column;gap:8px}
+.bt{width:50px;height:50px;display:grid;place-items:center;background:rgba(6,21,32,.94);border:1px solid var(--l2);cursor:pointer;padding:0;color:var(--tx)}
+.bt:hover{border-color:var(--cy)}.bt:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.bt i{font-size:22px}.bt.rep{color:var(--am)}
+.bt[hidden]{display:none}
+.bt.ctr{border-color:var(--cy);color:var(--cy);background:rgba(6,21,32,.98)}
+#btns{left:24px;bottom:24px}
+
+
+#vlibre{position:absolute;right:24px;bottom:24px;z-index:1000;display:none;align-items:baseline;gap:8px;background:var(--p);padding:12px 18px}
+#vlibre .num{font-size:34px}#vlibre span{font-size:11px;letter-spacing:.14em;color:var(--mu);font-weight:600}
+#vlibre{display:flex}
+@media (max-aspect-ratio:1/1){#vlibre{right:10px;bottom:10px;padding:9px 14px}#vlibre .num{font-size:26px}}
+/* ---- mensaje ---- */
+#msg{position:absolute;left:50%;top:18px;transform:translateX(-50%);max-width:min(560px,92vw);text-align:center;font-weight:600;font-size:14px;background:rgba(6,21,32,.96);border:1px solid var(--l2);border-top:3px solid var(--cy);padding:11px 18px;display:none;z-index:1300}
+#msg.show{display:block}
+#msg small{display:block;color:var(--mu);font-size:12px;margin-top:3px;font-weight:500}
+
+
+/* el banner rojo solo aparece cuando este carro está despachado */
+body:not(.desp) #ban{display:none}
+body.desp #btns{bottom:24px}
+@media (max-aspect-ratio:1/1){
+  :root{--tam:.85}
+  #ban{height:70px;padding:0 14px;gap:12px}#ban img{height:34px}#ban .t1{font-size:17px}#ban .t2{font-size:11px}#ban .tr .dseg{font-size:20px}
+  .bt{width:44px;height:44px}.bt i{font-size:20px}
+  #btns{gap:6px;left:10px;bottom:10px}
+}
+@media (min-aspect-ratio:1/1) and (max-height:520px){
+  #ban{height:56px;padding:0 14px;gap:12px}#ban img{height:32px}#ban .t1{font-size:17px}#ban .t2{font-size:11px}#ban .tr .dseg{font-size:20px}#ban .tr .lab{display:none}
+  .bt{width:42px;height:42px}.bt i{font-size:20px}
+  #btns{gap:6px;left:14px;bottom:14px}
+}
+@media (prefers-reduced-motion:reduce){.pul,.meMk .onda,.meMk .punto{animation:none}}
+
+</style>
+<script src="vigor-errores.js"></script>
+<script src="vigor-licencia.js"></script>
+</head>
+<body>
+<div id="stage">
+  <div id="map"></div>
+  <div id="fade"></div>
+
+  <!-- banner rojo de despacho (solo cuando este carro está despachado) -->
+  <div id="ban">
+    <img src="img/logo.png" alt="Vigor">
+    <div class="sep"></div>
+    <div class="txt"><div class="t1" id="bT1">Despacho</div><div class="t2" id="bT2">—</div></div>
+    <div class="tr"><div class="lab">Tiempo desde el despacho</div><span class="dseg" id="bTiempo">00:00:00</span></div>
+  </div>
+
+  <div id="btns">
+    <button class="bt" id="b5" aria-label="Norte arriba / rumbo arriba"><i class="ti ti-compass"></i></button>
+    <button class="bt ctr" id="b4" aria-label="Volver a centrar el mapa en tu vehículo" hidden><i class="ti ti-current-location"></i></button>
+    <button class="bt" id="b1" aria-label="Inicio"><i class="ti ti-home"></i></button>
+  </div>
+
+  <div id="vlibre" aria-label="Velocidad"><b class="num" id="vlibreN">0</b><span>km/h</span></div>
+  <div id="msg" role="status"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vigor-sesion.js"></script>
+<script src="vigor-despacho-tablet.js" data-auto></script>
+<script src="vigor-gps-tablet.js" data-auto></script>
+<script src="vigor-atribucion.js"></script>
+<script src="vigor-config.js"></script>
+<script src="vigor-mapa.js"></script>
+<script>
+(function(){
+'use strict';
+const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
+window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+const sb = window.sb;
+
+const $ = id => document.getElementById(id);
+const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const FAM = {
+  agua:['Agua','#34B8FF'], salud:['Salud','#3CF29A'], auto:['Autoridades y emergencia','#DCE8F5'], sensible:['Lugares sensibles','#B58CFF'],
+  riesgo:['Riesgo','#FF8A3D'], vial:['Vialidad','#FFC247'], terr:['Territorio','#3DEBC0'], com:['Comercio y servicios','#8DA1C3'],
+  desp:['Despacho','#F13746'], pers:['Personalizados','#FF6FB5']
+};
+const TIPOS = {};
+[
+ ['grifo','agua','fire-hydrant','Grifo',80],['fuente_agua','agua','ripple','Fuente de agua',80],['estanque','agua','cylinder','Estanque',0],['toma_agua','agua','droplet-half-2','Toma en río o canal',0],['piscina','agua','pool','Piscina',0],['laguna','agua','droplet','Laguna o embalse',0],
+ ['hospital','salud','building-hospital','Hospital',150,'Hospital cerca. Reduce el ruido'],['posta','salud','first-aid-kit','Posta o Cesfam',0],['clinica','salud','stethoscope','Clínica',0],['ambulancia','salud','ambulance','Ambulancia base',0],['farmacia','salud','pill','Farmacia',0],
+ ['cuartel','auto','building-community','Cuartel de bomberos',0],['carabineros','auto','shield-check','Carabineros',0],['pdi','auto','shield','PDI',0],['municipalidad','auto','flag','Municipalidad',0],['proteccion_civil','auto','alert-octagon','Protección civil',0],['helipuerto','auto','helicopter','Helipuerto',0],
+ ['escuela','sensible','school','Escuela',160,'Escuela cerca. Baja la velocidad'],['jardin','sensible','baby-carriage','Jardín infantil',160,'Jardín infantil cerca. Baja la velocidad'],['universidad','sensible','books','Universidad',0],['hogar_ancianos','sensible','wheelchair','Hogar de ancianos',120],['iglesia','sensible','building-church','Iglesia',0],['estadio','sensible','ball-football','Estadio o gimnasio',0],['carcel','sensible','lock','Cárcel',0],['hotel','sensible','bed','Hotel o residencial',0],
+ ['bodega_riesgo','riesgo','building-warehouse','Bodega de riesgo',420,'Bodega de riesgo cerca'],['bencinera','riesgo','gas-station','Bencinera',300],['gas','riesgo','flame','Gas',300,'Depósito de gas cerca'],['industria','riesgo','building-factory-2','Industria',250],['aserradero','riesgo','trees','Aserradero',250],['polvorin','riesgo','bomb','Polvorín',450,'Polvorín cerca. Precaución'],['alta_tension','riesgo','bolt','Alta tensión',200,'Líneas de alta tensión cerca'],['agroquimicos','riesgo','flask','Agroquímicos',400,'Agroquímicos cerca. Precaución'],
+ ['puente','vial','building-bridge-2','Puente con límite de peso',320,'Puente con límite de peso'],['tunel','vial','arrows-vertical','Túnel o paso bajo',300,'Paso bajo. Revisa la altura'],['paso_nivel','vial','train','Paso a nivel',300,'Paso a nivel adelante'],['vado','vial','wave-sine','Vado',250,'Vado adelante'],['calle_angosta','vial','arrows-horizontal','Calle angosta',200,'Calle angosta adelante'],['cuesta','vial','trending-up','Cuesta fuerte',250,'Cuesta fuerte adelante'],['porton','vial','lock-access','Portón o barrera',150,'Portón o barrera adelante'],
+ ['poblado','terr','building-cottage','Poblado',0],['fundo','terr','plant-2','Fundo o sector rural',0],['condominio','terr','building-skyscraper','Condominio',0],['sin_cobertura','terr','antenna-bars-off','Sin cobertura',0],['cerro','terr','mountain','Cerro o mirador',0],['punto_encuentro','terr','users-group','Punto de encuentro',0],
+ ['negocio','com','building-store','Negocio',0],['supermercado','com','shopping-cart','Supermercado',0],['ferreteria','com','tool','Ferretería',0],['restaurante','com','tools-kitchen-2','Restaurante',0],['banco','com','coin','Banco',0],['antena','com','antenna','Antena',0],
+ ['siniestro','desp','flame','Siniestro',0],['unidad','desp','truck','Unidad en ruta',0],['zona_trabajo','desp','barrier-block','Zona de trabajo',0],
+ ['personalizado','pers','map-pin-plus','Punto personalizado',0]
+].forEach(a=>{ TIPOS[a[0]]={ fam:a[1], icono:a[2], nombre:a[3], radio:a[4], aviso:a[5]||'', color:FAM[a[1]][1] }; });
+const AGUA = new Set(['grifo','fuente_agua','estanque','toma_agua','piscina','laguna']);
+TIPOS.personalizado = TIPOS.personalizado || { fam:'pers', icono:'map-pin-plus', nombre:'Punto personalizado', color:FAM.pers };
+function gota(color, icono, grande){ return `<div class="g${grande?' big':''}" style="--k:${color}"><b><i class="ti ti-${icono}"></i></b></div><div class="pt${grande?' gr':''}" style="--k:${color}"></div>`; }
+function elem(html, cls){ const d = document.createElement('div'); d.className = 'mk' + (cls ? ' ' + cls : ''); d.innerHTML = html; return d; }
+const MEHTML='<svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="cono" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#F13746" stop-opacity=".7"/><stop offset="1" stop-color="#F13746" stop-opacity="0"/></linearGradient></defs><path d="M50 50 -12 -58Q50 -80 112 -58Z" fill="url(#cono)"/><circle class="onda" cx="50" cy="50" r="15" fill="#F13746"/><circle class="onda o2" cx="50" cy="50" r="15" fill="#F13746"/><circle class="punto" cx="50" cy="50" r="15" fill="#F13746" stroke="#fff" stroke-width="5"/></svg>';
+
+const PITCH = 58;
+const E = { mapa:null, mkMe:null, meSvg:null, mkSin:null, pos:null, rum:0, vel:0, sigue:true, rumboArriba:true, esc:1, lejos:false, ultimaLectura:0, t0Desp:null, puntos:[] };
+
+function avisar(t, sub, ms){ const m = $('msg'); m.innerHTML = t + (sub ? '<small>' + sub + '</small>' : ''); m.classList.add('show'); clearTimeout(avisar._t); if(ms) avisar._t = setTimeout(() => m.classList.remove('show'), ms); }
+function ocultarAviso(){ $('msg').classList.remove('show'); }
+
+/* ---- mapa ---- */
+function iniciarMapa(){
+  if(typeof maplibregl === 'undefined' || typeof vigorEstiloMapa !== 'function'){ avisar('No se pudo cargar el mapa', 'Sin internet o sin compatibilidad', 0); return; }
+  const C = window.VIGOR_CONFIG || {};
+  try{
+    E.mapa = new maplibregl.Map({ container:'map', style:vigorEstiloMapa(), center:C.CENTRO_DEFECTO || [-72.6636, -36.8236], zoom:16.7, pitch:PITCH, bearing:0,
+      interactive:true, minZoom:10, maxZoom:19, attributionControl:false, keyboard:false, doubleClickZoom:false, fadeDuration:0, pixelRatio:Math.min(2, window.devicePixelRatio || 1) });
+  }catch(e){ avisar('Este dispositivo no puede dibujar el mapa', 'Falta compatibilidad con WebGL', 0); return; }
+  if(E.mapa.touchPitch) E.mapa.touchPitch.disable();
+  // si la persona mueve el mapa con el dedo, la cámara deja de seguir al vehículo hasta que apriete «volver a centrar»
+  E.mapa.on('dragstart', () => { if(E.sigue){ E.sigue = false; $('b4').hidden = false; } });
+  E.mapa.on('zoom', escalaIconos);
+  E.mapa.on('error', ev => console.warn('mapa:', ev && ev.error && ev.error.message));
+  $('b4').onclick = () => { E.sigue = true; $('b4').hidden = true; mover(true); };
+  $('b5').onclick = () => { E.rumboArriba = !E.rumboArriba; $('b5').classList.toggle('ctr', !E.rumboArriba); mover(true); };
+  $('b1').onclick = () => { location.href = 'tablet_carro.html'; };
+  escalaIconos();
+}
+/* tamaño de los íconos según el zoom: completos desde zoom 16; se achican hasta 14,5 y más lejos quedan como puntos */
+function escalaIconos(){
+  const z = E.mapa.getZoom(), esc = z >= 16 ? 1 : (z <= 14.5 ? .62 : .62 + (z - 14.5) / 1.5 * .38), lejos = z < 14.5;
+  if(Math.abs(esc - E.esc) > .015){ E.esc = esc; E.mapa.getContainer().style.setProperty('--esc', esc.toFixed(3)); }
+  if(lejos !== E.lejos){ E.lejos = lejos; E.mapa.getContainer().classList.toggle('lejos', lejos); }
+  if(E.meSvg) E.meSvg.style.transform = 'rotate(' + Math.round(E.rum - E.mapa.getBearing()) + 'deg) scale(' + ((E.lejos ? .45 : E.esc)) + ')';
+}
+
+/* ---- el vehículo y la cámara (detrás del carro, mirando hacia donde avanza) ---- */
+function vehiculo(){
+  if(!E.mkMe){ const d = document.createElement('div'); d.className = 'meMk'; d.innerHTML = MEHTML; E.meSvg = d.firstChild; E.mkMe = new maplibregl.Marker({ element:d, anchor:'center' }).setLngLat(E.pos).addTo(E.mapa); }
+  else E.mkMe.setLngLat(E.pos);
+  E.meSvg.style.transform = 'rotate(' + Math.round(E.rum - E.mapa.getBearing()) + 'deg) scale(' + (E.lejos ? .45 : E.esc) + ')';
+}
+function mover(salto){
+  if(!E.mapa || !E.pos) return;
+  vehiculo();
+  if(!E.sigue) return;
+  const alto = E.mapa.getContainer().clientHeight;
+  const opc = { center:E.pos, bearing:E.rumboArriba ? E.rum : 0, pitch:PITCH, zoom:17.3 - Math.min(1.2, E.vel / 60), padding:{ top:Math.round(alto * 0.34), bottom:0, left:0, right:0 } };
+  if(salto) E.mapa.jumpTo(opc); else E.mapa.easeTo(Object.assign(opc, { duration:900, easing:t => t }));
+}
+
+/* ---- posición: la que ya informa el GPS de la tablet (vigor-gps-tablet.js) ---- */
+function leerGps(){
+  const g = window.VigorGpsTablet && VigorGpsTablet.ultima && VigorGpsTablet.ultima();
+  if(!g){
+    if(!navigator.geolocation) avisar('Este equipo no tiene GPS', '', 0);
+    else if(!E.pos) avisar('Esperando la señal del GPS…', 'Revisa que la ubicación esté activada', 0);
+    return;
+  }
+  if(Date.now() - g.t > 20000) avisar('Sin señal del GPS', '', 0); else ocultarAviso();
+  if(g.t === E.ultimaLectura) return;
+  const primera = !E.pos;
+  E.ultimaLectura = g.t; E.pos = g.pos; E.vel = g.vel || 0;
+  if(g.vel >= 5 || primera) E.rum = g.rum || 0;       // con el carro detenido el rumbo no salta
+  $('vlibreN').textContent = Math.round(E.vel);
+  mover(primera);
+}
+
+/* ---- puntos que marcó el Cuerpo (los mismos del Mapa Comunal), en vivo ---- */
+async function cargarPuntos(){
+  if(!E.mapa) return;
+  try{
+    const r = await sb.from('puntos_cuerpo').select('tipo, nombre, lat, lng, icono, color').order('creado_en');
+    if(r.error) return;
+    E.puntos.forEach(m => m.remove()); E.puntos = [];
+    (r.data || []).forEach(f => {
+      if(f.lat == null || f.lng == null) return;
+      const t0 = TIPOS[f.tipo] || TIPOS.personalizado, icono = f.icono || t0.icono, color = f.color || t0.color;
+      E.puntos.push(new maplibregl.Marker({ element:elem(gota(color, icono) + '<div class="lb">' + esc(f.nombre || t0.nombre) + '</div>'), anchor:'bottom' }).setLngLat([f.lng, f.lat]).addTo(E.mapa));
+    });
+  }catch(e){}
+}
+function suscribirPuntos(){
+  try{
+    let t = null;
+    sb.channel('tablet-puntos-' + Math.random().toString(36).slice(2, 8)).on('postgres_changes', { event:'*', schema:'public', table:'puntos_cuerpo' }, () => { clearTimeout(t); t = setTimeout(cargarPuntos, 400); }).subscribe();
+  }catch(e){}
+}
+
+/* ---- emergencia: si este carro está despachado, banner rojo y el punto del siniestro (sin ruta) ---- */
+let nombreCarro = '';
+async function cargarSiniestro(){
+  try{
+    const { data } = await sb.rpc('tablet_obtener_despacho_activo');
+    const d = Array.isArray(data) ? data[0] : data;
+    if(!d || d.d_lat == null || d.d_lng == null || !E.mapa){
+      document.body.classList.remove('desp'); E.t0Desp = null;
+      if(E.mkSin){ E.mkSin.remove(); E.mkSin = null; }
+      return;
+    }
+    const tipo = [d.d_tipo_codigo, d.d_tipo_nombre].filter(Boolean).join(' — ') || 'Emergencia';
+    $('bT1').textContent = tipo;
+    $('bT2').textContent = [d.d_direccion, nombreCarro].filter(Boolean).join(' · ');
+    E.t0Desp = d.d_fecha ? new Date(d.d_fecha).getTime() : Date.now();
+    document.body.classList.add('desp');
+    const ll = [d.d_lng, d.d_lat];
+    if(!E.mkSin) E.mkSin = new maplibregl.Marker({ element:elem('<div class="pul"></div>' + gota('#F13746', 'flame', true)), anchor:'bottom' }).setLngLat(ll).addTo(E.mapa);
+    else E.mkSin.setLngLat(ll);
+  }catch(e){}
+}
+function tiempo(){
+  if(!E.t0Desp) return;
+  const s = Math.max(0, Math.floor((Date.now() - E.t0Desp) / 1000)), p = n => String(n).padStart(2, '0');
+  $('bTiempo').textContent = p(Math.floor(s / 3600)) + ':' + p(Math.floor(s % 3600 / 60)) + ':' + p(s % 60);
+}
+
+/* ---- la pantalla no se apaga mientras el mapa está abierto ---- */
+let wake = null;
+async function mantenerEncendida(){ try{ if(navigator.wakeLock) wake = await navigator.wakeLock.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') mantenerEncendida(); });
+
+iniciarMapa();
+mantenerEncendida();
+(async function(){ try{ const { data } = await sb.rpc('tablet_obtener_carro'); const c = Array.isArray(data) ? data[0] : data; if(c && c.t_nomenclatura) nombreCarro = c.t_nomenclatura; }catch(e){} })();
+setInterval(leerGps, 1000); leerGps();
+setTimeout(cargarSiniestro, 1500); setInterval(cargarSiniestro, 20000);
+setTimeout(() => { cargarPuntos(); suscribirPuntos(); }, 1200);
+setInterval(tiempo, 1000);
+window.__E = E;
+})();
+</script>
+</body>
+</html>
