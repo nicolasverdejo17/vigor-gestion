@@ -184,6 +184,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-imagen.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -236,6 +237,7 @@ async function cargarDatos(){
 function agregarFotos(input){
   if(!input.files || !input.files.length) return;
   Array.from(input.files).forEach(file => {
+    if(window.VigorImagen && !VigorImagen.aceptar(file, toast)) return;
     const reader = new FileReader();
     reader.onload = (e) => {
       fotosAdjuntas.push({ nombre: file.name, src: e.target.result, file });
@@ -279,9 +281,10 @@ async function confirmarBaja(){
   if(error){ toast('No se pudo registrar la baja — ' + error.message); document.getElementById('btnConfirmar').disabled=false; document.getElementById('btnConfirmar').textContent='Confirmar Baja Definitiva'; return; }
 
   for(const f of fotosAdjuntas){
-    const ext = (f.file.name.split('.').pop() || 'jpg').toLowerCase();
+    const archivo = window.VigorImagen ? await VigorImagen.reducir(f.file) : f.file;
+    const ext = (archivo.name.split('.').pop() || 'jpg').toLowerCase();
     const path = `${miCuerpoId}/inventario/baja/${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await sb.storage.from('vigor-fotos').upload(path, f.file);
+    const { error: upErr } = await sb.storage.from('vigor-fotos').upload(path, archivo);
     if(upErr) continue;
     const fotoUrl = sb.storage.from('vigor-fotos').getPublicUrl(path).data.publicUrl;
     await sb.from('inventario_movimiento_fotos').insert({ movimiento_id: mov.id, foto_url: fotoUrl });

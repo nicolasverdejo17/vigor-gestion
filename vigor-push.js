@@ -36,12 +36,35 @@
     try {
       var reg = await navigator.serviceWorker.ready;
       var sub = await reg.pushManager.getSubscription();
-      if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64aBytes(VAPID_PUBLIC_KEY) });
+      if(!sub) sub = await suscribir(reg);
       var j = sub.toJSON();
       var r = await sb.from('push_subscripciones').upsert({ personal_id:personalId, endpoint:j.endpoint, p256dh:j.keys.p256dh, auth:j.keys.auth }, { onConflict:'endpoint' });
       if(r.error) return { ok:false, msg:'No se pudo guardar: ' + r.error.message };
       return { ok:true, msg:'Alertas activadas' };
-    } catch(x){ return { ok:false, msg:'No se pudo activar: ' + (x && x.message || x) }; }
+    } catch(x){ try { console.warn('push:', x); } catch(e){} return { ok:false, msg:explicar(x) }; }
+  }
+
+  /* El servicio de mensajes del navegador (Google, en Android) a veces falla un instante: se reintenta una vez limpiando cualquier suscripción vieja */
+  function suscribir(reg){
+    var pedir = function(){ return reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64aBytes(VAPID_PUBLIC_KEY) }); };
+    return pedir().catch(function(){
+      return new Promise(function(ok){ setTimeout(ok, 1500); })
+        .then(function(){ return reg.pushManager.getSubscription(); })
+        .then(function(v){ return v ? v.unsubscribe().catch(function(){}) : null; })
+        .then(pedir);
+    });
+  }
+  /* Mensaje claro cuando el celular no logra conectarse al servicio de notificaciones */
+  function explicar(x){
+    var m = String((x && (x.name + ' ' + x.message)) || x || '');
+    if(navigator.onLine === false) return 'Sin internet: conéctate y vuelve a intentar';
+    if(/push service|AbortError|Registration failed/i.test(m)){
+      var brave = !!(navigator.brave);
+      return 'El celular no pudo conectarse al servicio de notificaciones. Revisa que tenga internet (prueba con datos móviles) y que Google Play Services esté actualizado' +
+        (brave ? '. En Brave: Ajustes → Privacidad y seguridad → activa «Usar los servicios de Google para mensajes push»' : '') + '. Luego vuelve a intentar.';
+    }
+    if(/NotAllowed|permission/i.test(m)) return 'El permiso de notificaciones está bloqueado: actívalo en los ajustes del navegador para este sitio';
+    return 'No se pudo activar: ' + ((x && x.message) || x);
   }
 
   /* Tono de Central (el mismo que suena en Inicio): cuatro pitidos alternados 900 / 1300 Hz */

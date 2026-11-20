@@ -186,6 +186,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-imagen.js"></script>
 <script>
 // --- Conexión real a Supabase ---
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
@@ -386,6 +387,7 @@ let fotoArchivo = null;
 function previsualizarFoto(input){
   if(!input.files || !input.files[0]) return;
   const file = input.files[0];
+  if(window.VigorImagen && !VigorImagen.aceptar(file, toast)){ input.value = ''; return; }
   fotoArchivo = file;
   const reader = new FileReader();
   reader.onload = (e) => {

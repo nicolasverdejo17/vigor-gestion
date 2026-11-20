@@ -120,6 +120,18 @@
   .ops-btn.mapa:hover{ border-color:var(--cyan);}
   .ops-btn.clima .ops-icon{ border-color:#34B8FF;}
   .ops-btn.clima:hover{ border-color:#34B8FF;}
+  .ops-btn.salir .ops-icon{ border-color:var(--burdeo);}
+  .ops-btn.salir:hover{ border-color:var(--burdeo);}
+  .ops-btn.salir h2{ color:#F13746;}
+  #salirOv{ position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:rgba(3,11,19,.82); padding:24px; }
+  #salirOv.on{ display:flex; }
+  #salirOv .caja{ width:min(460px,100%); background:#061520; border:1px solid #153A52; border-top:3px solid #F13746; padding:28px 28px 22px; text-align:center; }
+  #salirOv h3{ font-size:22px; margin:0 0 8px; color:#fff; }
+  #salirOv p{ font-size:14px; color:#8FB0C2; margin:0 0 22px; line-height:1.5; }
+  #salirOv .acc{ display:flex; gap:12px; }
+  #salirOv button{ flex:1; padding:15px 10px; font:700 15px 'Rajdhani',sans-serif; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; border-radius:0; border:1px solid #153A52; background:transparent; color:#EAF6FB; }
+  #salirOv button.si{ background:#F13746; border-color:#F13746; color:#fff; }
+
 
   .demo-tag{
     text-align:center; font-size:11px; color:var(--text-dim); padding:8px 0 0; flex-shrink:0;
@@ -247,11 +259,26 @@
         <h2>Clima</h2>
         <p>Viento, temperatura, humedad y peligro de incendio.</p>
       </div>
+
+      <div class="ops-btn salir" onclick="pedirSalir()">
+        <div class="ops-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M10 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4" stroke="#F13746" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 8l4 4-4 4M19 12H9" stroke="#F13746" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Cerrar sesión</h2>
+        <p>Desconecta esta tablet. Para volver a entrar se necesita la clave del carro.</p>
+      </div>
     </div>
   </div>
 
 
 
+  <div id="salirOv" role="alertdialog" aria-modal="true" onclick="if(event.target===this) cancelarSalir()">
+    <div class="caja">
+      <h3>¿Cerrar la sesión de esta tablet?</h3>
+      <p>La tablet dejará de recibir despachos y de informar su posición hasta que vuelvan a entrar con la clave del carro.</p>
+      <div class="acc"><button type="button" onclick="cancelarSalir()">Cancelar</button><button type="button" class="si" onclick="cerrarSesionTablet()">Cerrar sesión</button></div>
+    </div>
+  </div>
   <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -388,6 +415,15 @@ async function setEstadoCarro(estado){
 document.addEventListener('click', () => {
   document.getElementById('selEstadoCarro').classList.remove('open');
 });
+
+function pedirSalir(){ document.getElementById('salirOv').classList.add('on'); }
+function cancelarSalir(){ document.getElementById('salirOv').classList.remove('on'); }
+async function cerrarSesionTablet(){
+  try{ Object.keys(localStorage).filter(k => k.indexOf('vigor_cache_') === 0 || k.indexOf('vigor_destino') === 0).forEach(k => localStorage.removeItem(k)); }catch(e){}
+  try{ await sb.auth.signOut(); }catch(e){}
+  window.location.href = 'login_registro.html';
+}
+document.addEventListener('keydown', ev => { if(ev.key === 'Escape') cancelarSalir(); });
 
 function toast(msg){
   const t = document.getElementById('toast');

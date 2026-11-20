@@ -220,6 +220,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-imagen.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -282,6 +283,7 @@ cargarSesion();
 function previsualizarFoto(input){
   if(!input.files || !input.files[0]) return;
   const file = input.files[0];
+  if(window.VigorImagen && !VigorImagen.aceptar(file, toast)){ input.value = ''; return; }
   fotoFileSeleccionado = file;
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -332,9 +334,10 @@ async function guardarCambios(){
   // acá, recién al confirmar, y se manda junto con el resto de los datos.
   let fotoUrl = null;
   if(fotoFileSeleccionado){
-    const ext = (fotoFileSeleccionado.name.split('.').pop() || 'jpg').toLowerCase();
+    const fotoLista = window.VigorImagen ? await VigorImagen.reducir(fotoFileSeleccionado, { lado:640 }) : fotoFileSeleccionado;   // una foto enorme pega el deslizar de la pantalla
+    const ext = (fotoLista.name.split('.').pop() || 'jpg').toLowerCase();
     const path = `${miCuerpoId}/perfil/${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await sb.storage.from('vigor-fotos').upload(path, fotoFileSeleccionado);
+    const { error: upErr } = await sb.storage.from('vigor-fotos').upload(path, fotoLista);
     if(upErr){ toast('No se pudo subir la foto — ' + upErr.message); return; }
     fotoUrl = sb.storage.from('vigor-fotos').getPublicUrl(path).data.publicUrl;
   }
