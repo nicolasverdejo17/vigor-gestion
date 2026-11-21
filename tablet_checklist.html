@@ -175,27 +175,28 @@
   }
   .btn-ver-historial:hover{ border-color:var(--cyan); color:var(--cyan);}
 
-  .chk-categoria{ margin-bottom:22px;}
-  .chk-categoria:last-child{ margin-bottom:0;}
-  .chk-categoria-titulo{
-    font-family:'Rajdhani'; font-weight:700; font-size:12.5px; letter-spacing:.05em; text-transform:uppercase;
-    color:var(--brass-bright); margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid var(--line);
+  .chk-categoria{ margin-bottom:6px;}
+  .chk-hint{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--text-muted); margin-bottom:6px;}
+  .chk-resumen{ margin-left:auto; font-size:14px; color:var(--text-muted); white-space:nowrap;}
+  .chk-resumen b{ color:var(--text);} .chk-resumen b.ko{ color:var(--emergencia);}
+  .chk-cat-head{ display:flex; align-items:center; gap:14px; margin:18px 0 10px;}
+  .chk-categoria-titulo{ font-family:'Rajdhani'; font-weight:700; font-size:15px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-muted);}
+  .chk-cat-cont{ font-size:12.5px; color:var(--text-dim);} .chk-cat-cont.ko{ color:var(--emergencia);}
+  .chk-todo{ margin-left:auto; border:1.5px solid var(--servicio); color:var(--servicio); font-family:'Rajdhani'; font-weight:700; font-size:13px; letter-spacing:.08em; text-transform:uppercase; padding:8px 16px; cursor:pointer; user-select:none;}
+  .chk-todo:active{ background:rgba(60,242,154,.15);}
+  .chk-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; grid-auto-flow:dense;}
+  .chk-chip{
+    display:flex; align-items:center; gap:12px; min-height:62px; padding:0 14px; border:1.5px solid; color:var(--text);
+    font-size:14.5px; font-weight:600; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
   }
-  .chk-item{ padding:9px 0; border-bottom:1px solid var(--line);}
-  .chk-item:last-child{ border-bottom:none;}
-  .chk-item-nombre{ font-size:13.5px; margin-bottom:8px;}
-  .chk-item-opts{ display:flex; gap:6px;}
-  .chk-opt{
-    flex:1; padding:8px 4px; border-radius:5px; border:1.5px solid var(--line-strong); background:var(--panel-alt);
-    color:var(--text-muted); font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.02em;
-    text-transform:uppercase; cursor:pointer;
-  }
-  .chk-opt.on.ok{ background:var(--servicio); border-color:var(--servicio); color:#fff;}
-  .chk-opt.on.falla{ background:var(--emergencia); border-color:var(--emergencia); color:#fff;}
-  .chk-opt.on.na{ background:var(--nodisp); border-color:var(--nodisp); color:#fff;}
+  .chk-chip i{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; flex:none; font-style:normal; font-weight:800; font-size:16px; color:#04121C;}
+  .chk-chip.ok{ border-color:#1B7A52; background:rgba(60,242,154,.08);} .chk-chip.ok i{ background:var(--servicio);}
+  .chk-chip.falla{ border-color:var(--emergencia); background:rgba(241,55,70,.14); grid-column:span 2; padding:8px 14px;} .chk-chip.falla i{ background:var(--emergencia); color:#fff;}
+  .chk-chip.na{ border-color:#34515f; background:rgba(108,143,163,.08); color:var(--text-muted);} .chk-chip.na i{ background:var(--text-dim);}
+  .chk-chip .nm{ flex:0 1 auto;}
   .chk-comentario{
-    width:100%; margin-top:8px; background:var(--bg); border:1.5px solid var(--emergencia); border-radius:5px;
-    padding:9px 12px; font-size:13px; color:var(--text); font-family:'Inter';
+    flex:1; min-width:0; background:var(--bg); border:1.5px solid var(--emergencia); border-radius:0;
+    padding:10px 12px; font-size:14px; color:var(--text); font-family:'Inter'; margin-left:6px;
   }
   .chk-comentario:focus{ outline:none;}
 </style>
@@ -359,11 +360,14 @@ document.addEventListener('click', (e) => {
 // contra-incendio, y Niveles — cada ítem se marca OK / Falla / No Aplica.
 // Cualquier ítem en "Falla" exige un comentario antes de poder guardar.
 const CATEGORIAS = [
-  { nombre: 'Revisión Mecánica', items: [
-    'Nivel de aceite', 'Nivel de refrigerante', 'Nivel de líquido de frenos', 'Nivel de combustible',
-    'Estado de batería', 'Estado de correas', 'Estado de mangueras', 'Neumáticos y presión',
-    'Fugas de aceite/refrigerante', 'Frenos', 'Dirección', 'Luces', 'Arranque y funcionamiento del motor',
-    'Kilometraje',
+  { nombre: 'Motor y niveles', items: [
+    'Aceite', 'Refrigerante', 'Líquido de frenos', 'Combustible', 'Batería', 'Fugas', 'Arranque del motor',
+  ]},
+  { nombre: 'Chasis y seguridad', items: [
+    'Neumáticos y presión', 'Frenos', 'Dirección', 'Luces y balizas', 'Sirena', 'Espejos y parabrisas', 'Cinturones de seguridad',
+  ]},
+  { nombre: 'Bomba y agua', items: [
+    'Nivel de agua del estanque', 'Funcionamiento de la bomba', 'Válvulas y llaves de paso', 'Nivel de espuma',
   ]},
 ];
 
@@ -374,35 +378,42 @@ CATEGORIAS.forEach(cat => cat.items.forEach(item => { estadoItems[item] = { esta
 
 const ESTADOS = ['ok', 'falla', 'na'];
 const ESTADO_LABEL = { ok:'OK', falla:'Falla', na:'No Aplica' };
+const ICONO = { ok:'✓', falla:'✕', na:'—' };
+const escH = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
 function renderChecklist(){
-  document.getElementById('checklistCategorias').innerHTML = CATEGORIAS.map(cat => `
-    <div class="chk-categoria">
-      <div class="chk-categoria-titulo">${cat.nombre}</div>
-      ${cat.items.map(item => {
-        const est = estadoItems[item];
-        return `
-          <div class="chk-item">
-            <div class="chk-item-nombre">${item}</div>
-            <div class="chk-item-opts">
-              ${ESTADOS.map(e => `<button class="chk-opt ${e} ${est.estado===e?'on':''}" onclick="setEstadoItem('${item}','${e}')">${ESTADO_LABEL[e]}</button>`).join('')}
-            </div>
-            ${est.estado==='falla' ? `
-              <input type="text" class="chk-comentario" placeholder="Describe la falla…" value="${est.comentario}" onchange="setComentarioItem('${item}', this.value)">
-            ` : ''}
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `).join('');
+  let nOk = 0, nFalla = 0, nNa = 0;
+  const bloques = CATEGORIAS.map((cat, ci) => {
+    const ests = cat.items.map(it => estadoItems[it].estado);
+    const f = ests.filter(e => e === 'falla').length, o = ests.filter(e => e === 'ok').length, n = ests.filter(e => e === 'na').length;
+    nOk += o; nFalla += f; nNa += n;
+    const cont = f ? `${f} ${f === 1 ? 'falla' : 'fallas'} · ${o} en orden` : (n ? `${o} en orden · ${n} no aplica` : `${o} de ${cat.items.length} en orden`);
+    const chips = cat.items.map((item, ii) => {
+      const est = estadoItems[item];
+      const comentario = est.estado === 'falla'
+        ? `<input type="text" class="chk-comentario" id="cm_${ci}_${ii}" placeholder="Describe la falla…" value="${escH(est.comentario)}" oninput="setComentarioItem('${ci}','${ii}', this.value)" onclick="event.stopPropagation()">`
+        : '';
+      return `<div class="chk-chip ${est.estado}" role="button" onclick="tocarItem(${ci},${ii})"><i>${ICONO[est.estado]}</i><span class="nm">${escH(item)}</span>${comentario}</div>`;
+    }).join('');
+    return `<div class="chk-categoria"><div class="chk-cat-head"><div class="chk-categoria-titulo">${escH(cat.nombre)}</div><span class="chk-cat-cont ${f ? 'ko' : ''}">${cont}</span><div class="chk-todo" role="button" onclick="todoOk(${ci})">✓ Todo OK</div></div><div class="chk-grid">${chips}</div></div>`;
+  }).join('');
+  const resumen = `<span class="chk-resumen"><b class="${nFalla ? 'ko' : ''}">${nFalla} ${nFalla === 1 ? 'falla' : 'fallas'}</b> · ${nOk} OK${nNa ? ' · ' + nNa + ' no aplica' : ''}</span>`;
+  document.getElementById('checklistCategorias').innerHTML =
+    `<div class="chk-hint"><span>Todo viene en OK. Toca solo lo que <b>no</b> esté bien: 1 toque = Falla · 2 toques = No aplica · 3 toques = vuelve a OK</span>${resumen}</div>${bloques}`;
 }
 
-function setEstadoItem(item, estado){
-  estadoItems[item].estado = estado;
+function tocarItem(ci, ii){
+  const item = CATEGORIAS[ci].items[ii], est = estadoItems[item];
+  est.estado = ESTADOS[(ESTADOS.indexOf(est.estado) + 1) % ESTADOS.length];
+  renderChecklist();
+  if(est.estado === 'falla'){ const inp = document.getElementById(`cm_${ci}_${ii}`); if(inp) inp.focus(); }
+}
+function todoOk(ci){
+  CATEGORIAS[ci].items.forEach(item => { estadoItems[item] = { estado:'ok', comentario:'' }; });
   renderChecklist();
 }
-function setComentarioItem(item, val){
-  estadoItems[item].comentario = val;
+function setComentarioItem(ci, ii, val){
+  estadoItems[CATEGORIAS[ci].items[ii]].comentario = val;
 }
 
 async function guardarChecklist(){

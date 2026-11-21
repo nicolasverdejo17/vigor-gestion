@@ -1,0 +1,134 @@
+/* Vigor — formularios de la tablet (Bitácora y Parte de Emergencia): bloques por tema, campos grandes y botones de toque.
+   Mismo estilo del Checklist: esquinas rectas, verde para lo correcto, rojo para lo que falla. Solo cambia la presentación. */
+
+html body .form-body{ padding:20px 24px 26px !important; }
+
+/* datos que se completan solos (carro, fecha, número…) */
+html body .fx-info{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:16px; align-items:start; }
+html body .fx-tile .lista-conductor{ position:absolute; left:-1px; right:-1px; top:100%; z-index:30; margin-top:0; box-shadow:0 12px 30px rgba(0,0,0,.55); }
+html body .fx-tile{ background:var(--panel-alt); border:1px solid var(--line-strong); padding:10px 16px 11px; min-width:0; position:relative; }
+html body .fx-tile .fx-k{ display:block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px; font-weight:600; }
+html body .fx-tile input{ background:transparent !important; border:none !important; padding:0 !important; font-size:16px !important; font-weight:600; color:var(--text) !important; width:100%; min-height:0 !important; box-shadow:none !important; }
+html body .fx-tile .auto-field-wrap{ position:static; }
+html body .fx-tile .auto-field-icon{ display:none; }
+html body .fx-tile.tocar{ cursor:pointer; border-color:var(--cyan); }
+html body .fx-tile.tocar .fx-k{ color:var(--cyan); }
+html body .fx-tile.tocar::after{ content:'Tocar para cambiar'; display:block; margin-top:3px; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); }
+html body .fx-info.c6{ grid-template-columns:repeat(6,1fr); }
+html body .fx-tile.s2{ grid-column:span 2; } html body .fx-tile.s3{ grid-column:span 3; }
+html body .fx-tile input{ text-overflow:ellipsis; }
+html body .fx-tile .fx-link{ display:block; margin-top:3px; font-size:11.5px; color:var(--cyan); text-decoration:none; }
+
+/* bloques */
+html body .fx-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start; }
+html body .fx-card{ background:var(--panel); border:1px solid var(--line-strong); padding:16px 20px 20px; min-width:0; }
+html body .fx-card.full{ grid-column:1 / -1; }
+html body .fx-tit{ display:flex; align-items:center; gap:10px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
+html body .fx-tit .n{ width:24px; height:24px; border-radius:50%; background:var(--cyan); color:#04121C; display:grid; place-items:center; font-size:13px; letter-spacing:0; flex:none; }
+html body .fx-f{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; min-width:0; }
+html body .fx-f:last-child{ margin-bottom:0; }
+html body .fx-f > label{ font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); font-weight:600; }
+html body .fx-f input, html body .fx-f textarea, html body .fx-f select{
+  background:var(--panel-alt) !important; border:1.5px solid var(--line-strong) !important; border-radius:0 !important; color:var(--text) !important;
+  font-size:17px !important; padding:0 14px !important; min-height:54px; width:100%; font-family:'Inter',sans-serif;
+}
+html body .fx-f textarea{ padding:12px 14px !important; min-height:96px; line-height:1.45; resize:none; }
+html body .fx-f input.mono{ font-family:'JetBrains Mono',monospace; letter-spacing:.04em; }
+html body .fx-f input:focus, html body .fx-f textarea:focus{ outline:none; border-color:var(--cyan) !important; }
+html body .fx-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+html body .fx-2 .fx-f{ margin-bottom:0; }
+html body .fx-2 + .fx-f, html body .fx-f + .fx-2, html body .fx-2 + .fx-2{ margin-top:14px; }
+
+/* hora con botón «Ahora» */
+html body .fx-hora{ display:flex; gap:8px; }
+html body .fx-hora input{ flex:1; min-width:0; }
+html body .fx-ahora{ flex:none; min-height:54px; padding:0 16px; border:1.5px solid var(--cyan) !important; background:transparent !important; color:var(--cyan) !important; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:14px; letter-spacing:.1em; text-transform:uppercase; border-radius:0 !important; cursor:pointer; }
+html body .fx-ahora:active{ background:rgba(45,211,219,.15) !important; }
+
+/* kilómetros recorridos */
+html body .fx-recorrido{ margin-top:12px; padding:10px 14px; background:rgba(45,211,219,.08); border-left:4px solid var(--cyan); font-size:14px; color:var(--text-muted); }
+html body .fx-recorrido b{ color:var(--text); font-size:16px; }
+
+/* botones de toque */
+html body .fx-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+html body .fx-chip{
+  display:flex; align-items:center; gap:8px; min-height:50px; padding:0 18px; border:1.5px solid var(--line-strong); background:var(--panel-alt);
+  color:var(--text-muted); font-size:14.5px; font-weight:600; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
+}
+html body .fx-chip b{ font-family:'Rajdhani',sans-serif; font-size:17px; letter-spacing:.04em; color:var(--text); }
+html body .fx-chip.on{ border-color:var(--servicio); background:rgba(60,242,154,.14); color:var(--text); }
+html body .fx-chip.on b{ color:var(--servicio); }
+html body .fx-chip:active{ background:var(--panel); }
+
+/* Sí / No */
+html body .radio-row{ gap:10px; }
+html body .radio-opt{ min-height:56px; display:flex; align-items:center; justify-content:center; border-radius:0 !important; font-size:16px !important; font-weight:700 !important; border-width:1.5px !important; background:var(--panel-alt); }
+html body .radio-opt.on.safe{ background:rgba(60,242,154,.16) !important; border-color:var(--servicio) !important; color:var(--servicio) !important; }
+html body .radio-opt.on:not(.safe){ background:rgba(241,55,70,.18) !important; border-color:var(--emergencia) !important; color:#ff8a94 !important; }
+
+/* tipo de afectado */
+html body .afectado-tipo{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+html body .afectado-tipo button{ flex:none !important; min-height:50px; padding:0 22px !important; border-radius:0 !important; font-size:14.5px !important; border:1.5px solid var(--line-strong) !important; background:var(--panel-alt) !important; color:var(--text-muted) !important; }
+html body .afectado-tipo button.on{ border-color:var(--servicio) !important; background:rgba(60,242,154,.14) !important; color:var(--text) !important; }
+html body .afectado-campos{ display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; }
+html body .afectado-campos .fx-f{ margin-bottom:0; }
+html body .afectado-campos .full{ grid-column:1 / -1; }
+html body .afectado-nada{ padding:14px 16px; border:1.5px dashed var(--line-strong); color:var(--text-dim); font-size:14px; }
+
+/* vínculo con el despacho */
+html body #parteVinculo{ margin:0 0 14px !important; }
+
+/* guardar */
+html body .fx-guardar{ margin-top:16px; }
+html body .fx-guardar .btn-guardar{ width:100%; min-height:62px; font-size:19px !important; letter-spacing:.08em !important; margin-top:0 !important; }
+
+@media (max-width:820px){
+  html body .fx-grid, html body .afectado-campos{ grid-template-columns:1fr; }
+}
+@media print{
+  html body .fx-ahora, html body .fx-guardar, html body .fx-chips.solo-pantalla{ display:none !important; }
+}
+
+/* ===== v2: todo alineado en columnas iguales, un bloque debajo del otro ===== */
+html body .fx-info{ grid-template-columns:repeat(var(--cols,3),1fr) !important; gap:12px; margin-bottom:14px; }
+html body .fx-tile.tocar::after{ content:'Tocar para cambiar'; }
+html body .fx-stack{ display:flex; flex-direction:column; gap:14px; }
+html body .fx-stack .fx-card{ padding:18px 22px 22px; }
+html body .fx-tit{ margin-bottom:16px; }
+html body .fx-tit .n{ display:none; }
+html body .fx-cols{ display:grid; grid-template-columns:repeat(var(--cols,3),1fr); gap:14px; align-items:end; }
+html body .fx-cols .fx-f{ margin-bottom:0; }
+html body .fx-f{ margin-bottom:0; }
+html body .fx-card > .fx-f, html body .fx-card > .fx-chips + .fx-f{ margin-top:0; }
+/* botones de toque: celdas iguales */
+html body .fx-chips{ display:grid; grid-template-columns:repeat(var(--cols,4),1fr); gap:10px; margin-bottom:14px; }
+html body .fx-chip{ justify-content:center; text-align:center; min-height:56px; padding:6px 10px; flex-direction:column; gap:1px; }
+html body .fx-chip b{ font-size:19px; }
+html body .fx-chip span{ font-size:13px; line-height:1.15; }
+/* hora con «Ahora» dentro del campo */
+html body .fx-hora{ position:relative; display:block; }
+html body .fx-hora input{ padding-right:84px !important; }
+html body .fx-ahora{ position:absolute; right:6px; top:6px; bottom:6px; min-height:0 !important; padding:0 12px; font-size:13px; }
+/* recorrido: mismo alto que un campo */
+html body .fx-calc{ min-height:54px; display:flex; align-items:center; padding:0 14px; border:1.5px dashed var(--line-strong); font-size:17px; color:var(--text-muted); }
+html body .fx-calc b{ color:var(--text); font-family:'JetBrains Mono',monospace; }
+html body .fx-calc.mal{ color:var(--emergencia); font-size:13px; }
+/* Sí / No y tipo de afectado: celdas iguales */
+html body .radio-row{ display:grid !important; grid-template-columns:1fr 1fr; gap:10px; }
+html body .afectado-tipo{ display:grid !important; grid-template-columns:repeat(var(--cols,4),1fr); gap:10px; margin-bottom:14px; }
+html body .afectado-tipo button{ width:100%; padding:0 !important; }
+html body #afectadoCampos .fx-cols + .fx-cols{ margin-top:14px; }
+@media (max-width:820px){
+  html body .fx-info, html body .fx-cols{ grid-template-columns:1fr 1fr !important; }
+  html body .fx-chips{ grid-template-columns:repeat(2,1fr); }
+}
+
+html body .fx-f input{ height:54px !important; box-sizing:border-box !important; }
+html body .fx-calc{ height:54px; box-sizing:border-box; min-height:0; }
+html body .fx-hora input{ height:54px !important; }
+
+html body .fx-info{ align-items:stretch !important; }
+
+/* botón «Ver Historial» de las cabeceras */
+html body .btn-ver-historial{ margin-left:auto; background:transparent; border:1.5px solid var(--line-strong); color:var(--text); font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:13px; padding:10px 18px; border-radius:0; cursor:pointer; }
+html body .btn-ver-historial:hover{ border-color:var(--cyan); color:var(--cyan); }

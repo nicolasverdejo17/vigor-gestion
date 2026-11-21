@@ -26,10 +26,10 @@
   var PANTALLAS = {
     consola_despacho:'spartan', visual_companias:'spartan', historial_despacho:'spartan',
     monitoreo_mapa:'sentinel', mapa_celular:'sentinel', tablet_mapa:'sentinel', clima:'sentinel', terminal_coordenadas:'sentinel', coordenadas_celular:'sentinel',
-    tablet_parte:'vanguard',
+    tablet_parte:'vanguard', tablet_parte_historial:'vanguard',
     modo_crisis:'titan', puestos_mando_activos:'titan',
     inventario:'forge', ingreso_item:'forge', historial_movimientos:'forge', dar_de_baja:'forge',
-    flota_comandancia:'maintainer', tablet_checklist:'maintainer', tablet_checklist_historial:'maintainer', tablet_bitacora:'maintainer',
+    flota_comandancia:'maintainer', tablet_checklist:'maintainer', tablet_checklist_historial:'maintainer', tablet_bitacora:'maintainer', tablet_bitacora_historial:'maintainer',
     distribucion_material:'maintainer', tesoreria:'scribe',
     estadisticas:'intel',
     secretaria:'scribe', archivo_institucional_celular:'scribe'

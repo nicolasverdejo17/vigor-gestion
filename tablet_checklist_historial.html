@@ -181,28 +181,34 @@
   .hist-resumen-item b{ font-family:'JetBrains Mono',monospace; font-size:22px; color:var(--cyan);}
   .hist-resumen-item span{ font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em;}
 
-  .hist-card{ background:var(--panel-alt); border:1px solid var(--line-strong); border-radius:8px; margin-bottom:10px; overflow:hidden;}
+  .hist-card{ display:flex; align-items:center; gap:16px; background:var(--panel-alt); border:1px solid var(--line-strong); margin-bottom:10px; padding:16px 20px; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;}
+  .hist-card:active{ background:var(--panel);}
   .hist-card.con-falla{ border-color:var(--emergencia);}
-  .hist-card-head{ display:flex; align-items:center; gap:14px; padding:13px 16px; cursor:pointer;}
-  .hist-fecha{ font-size:13.5px; font-weight:700;}
-  .hist-resp{ font-size:11px; color:var(--text-muted); margin-top:2px;}
-  .hist-badge{
-    margin-left:auto; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
-    padding:5px 11px; border-radius:10px; color:#fff;
-  }
-  .hist-badge.ok{ background:var(--servicio);}
-  .hist-badge.falla{ background:var(--emergencia);}
-  .hist-arrow{ font-size:10px; color:var(--text-dim);}
-  .hist-detalle{ padding:0 16px 14px; border-top:1px solid var(--line);}
-  .hist-item-row{ display:flex; align-items:center; gap:10px; padding:7px 0; flex-wrap:wrap;}
-  .hist-item-nombre{ font-size:12.5px; flex:1;}
-  .hist-item-estado{ font-size:10px; font-weight:700; text-transform:uppercase; padding:3px 9px; border-radius:8px; color:#fff;}
-  .hist-item-estado.ok{ background:var(--servicio);}
-  .hist-item-estado.falla{ background:var(--emergencia);}
-  .hist-item-estado.na{ background:var(--nodisp);}
-  .hist-item-comentario{ width:100%; font-size:11.5px; color:var(--text-muted); font-style:italic; padding-left:2px;}
-
-  @media print{
+  .hist-fecha{ font-size:16px; font-weight:700;}
+  .hist-resp{ font-size:12.5px; color:var(--text-muted); margin-top:3px;}
+  .hist-badge{ margin-left:auto; font-family:'Rajdhani'; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:6px 14px; color:#04121C; background:var(--servicio);}
+  .hist-badge.falla{ background:var(--emergencia); color:#fff;}
+  .hist-flecha{ font-size:22px; color:var(--text-dim); line-height:1;}
+  .hist-vacio{ text-align:center; color:var(--text-dim); padding:40px 0; font-size:14px;}
+  /* detalle de una revisión */
+  .hv-bar{ display:flex; align-items:center; gap:16px; margin-bottom:16px; flex-wrap:wrap;}
+  .hv-bar h3{ font-size:20px;}
+  .hv-bar .btn-exportar-hist{ margin-left:auto; font-size:13px; padding:11px 20px;}
+  .hv-datos{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px;}
+  .hv-dato{ background:var(--panel-alt); border:1px solid var(--line-strong); padding:12px 16px;}
+  .hv-dato span{ display:block; font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.1em; margin-bottom:5px;}
+  .hv-dato b{ font-size:16px; font-weight:700;} .hv-dato b.ko{ color:var(--emergencia);} .hv-dato b.ok{ color:var(--servicio);}
+  .hv-tit{ font-family:'Rajdhani'; font-weight:700; font-size:14px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-muted); margin:18px 0 10px;}
+  .hv-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:10px; grid-auto-flow:dense;}
+  .hv-chip{ display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 14px; border:1.5px solid; font-size:14px; font-weight:600;}
+  .hv-chip i{ width:28px; height:28px; border-radius:50%; display:grid; place-items:center; flex:none; font-style:normal; font-weight:800; font-size:15px; color:#04121C;}
+  .hv-chip.ok{ border-color:#1B7A52; background:rgba(60,242,154,.08);} .hv-chip.ok i{ background:var(--servicio);}
+  .hv-chip.falla{ border-color:var(--emergencia); background:rgba(241,55,70,.14); grid-column:span 2;} .hv-chip.falla i{ background:var(--emergencia); color:#fff;}
+  .hv-chip.na{ border-color:#34515f; background:rgba(108,143,163,.08); color:var(--text-muted);} .hv-chip.na i{ background:var(--text-dim);}
+  .hv-chip .cm{ display:block; font-size:12.5px; font-weight:500; color:#ffb3ba; margin-top:2px;}
+  .hv-obs{ background:var(--panel-alt); border:1px solid var(--line-strong); padding:14px 16px; font-size:14px; line-height:1.55; white-space:pre-wrap;}
+  .hv-nota{ font-size:12px; color:var(--text-dim); margin-top:14px;}
+@media print{
     body{ background:#fff !important; color:#111 !important; height:auto !important; overflow:visible !important;}
     .nameplate, .dotacion-strip, .back-btn, .btn-exportar-hist, .demo-tag, .toast, .hist-arrow{ display:none !important;}
     .form-wrap{ padding:10px !important;}
@@ -279,9 +285,8 @@
 
   <div class="form-wrap">
     <div class="form-head">
-      <button class="back-btn" onclick="window.location.href='tablet_checklist.html'">← Volver</button>
+      <button class="back-btn" onclick="volverHist()">← Volver</button>
       <h2>Historial de Checklist</h2>
-      <button class="btn-exportar-hist" onclick="exportarPDF()">⬇ Exportar PDF</button>
     </div>
 
     <div class="form-body" id="printArea">
@@ -342,60 +347,69 @@ async function cargarDatos(){
 }
 
 const ESTADO_LABEL = { ok:'OK', falla:'Falla', na:'No Aplica' };
-let expandido = {};
+const ICONO = { ok:'✓', falla:'✕', na:'—' };
+const escH = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+let detalleIdx = null;
 
+const fmtFecha = f => f.toLocaleDateString('es-CL') + ' — ' + f.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false });
+const contarFallas = rev => (rev.items || []).filter(it => it.estado === 'falla').length;
+
+// Lista: todas las revisiones, una fila por cada una. Al tocarla se abre lo que se guardó.
 function renderHistorial(){
+  const resumen = document.querySelector('.hist-resumen');
+  const caja = document.getElementById('historialLista');
+  if(detalleIdx !== null && HISTORIAL[detalleIdx]){ if(resumen) resumen.style.display = 'none'; caja.innerHTML = vistaDetalle(HISTORIAL[detalleIdx], detalleIdx); return; }
+  detalleIdx = null;
+  if(resumen) resumen.style.display = '';
   let totalFallas = 0;
-  document.getElementById('historialLista').innerHTML = HISTORIAL.map((rev, i) => {
-    const fallas = (rev.items || []).filter(it => it.estado==='falla');
-    totalFallas += fallas.length;
-    const abierto = !!expandido[i];
-    const f = new Date(rev.fecha_hora);
-    return `
-      <div class="hist-card ${fallas.length>0?'con-falla':''}">
-        <div class="hist-card-head" onclick="toggleExpandir(${i})">
-          <div>
-            <div class="hist-fecha">${f.toLocaleDateString('es-CL')} — ${f.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
-            <div class="hist-resp">${rev.responsable || 'Sin responsable'} · <span class="mono">${rev.kilometraje} km</span></div>
-          </div>
-          <div class="hist-badge ${fallas.length>0?'falla':'ok'}">${fallas.length>0 ? fallas.length+' falla(s)' : 'Todo OK'}</div>
-          <span class="hist-arrow">${abierto?'▲':'▼'}</span>
-        </div>
-        ${abierto ? `
-          <div class="hist-detalle">
-            ${(rev.items || []).map(it => `
-              <div class="hist-item-row">
-                <span class="hist-item-nombre">${it.nombre}</span>
-                <span class="hist-item-estado ${it.estado}">${ESTADO_LABEL[it.estado]}</span>
-                ${it.comentario ? `<div class="hist-item-comentario">${it.comentario}</div>` : ''}
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-      </div>
-    `;
-  }).join('');
+  caja.innerHTML = HISTORIAL.length ? HISTORIAL.map((rev, i) => {
+    const n = contarFallas(rev); totalFallas += n;
+    return `<div class="hist-card ${n ? 'con-falla' : ''}" role="button" onclick="abrirRevision(${i})">
+      <div><div class="hist-fecha">${fmtFecha(new Date(rev.fecha_hora))}</div>
+      <div class="hist-resp">${escH(rev.responsable || 'Sin responsable')} · <span class="mono">${escH(rev.kilometraje)} km</span></div></div>
+      <div class="hist-badge ${n ? 'falla' : ''}">${n ? n + (n === 1 ? ' falla' : ' fallas') : 'Todo OK'}</div>
+      <span class="hist-flecha">›</span></div>`;
+  }).join('') : '<div class="hist-vacio">Todavía no hay revisiones guardadas.</div>';
   document.getElementById('totalRevisiones').textContent = HISTORIAL.length;
   document.getElementById('totalFallasHist').textContent = totalFallas;
 }
 
-function toggleExpandir(i){
-  expandido[i] = !expandido[i];
-  renderHistorial();
+// Detalle: lo que quedó guardado en esa revisión, con su propio botón de exportar
+function vistaDetalle(rev, i){
+  const n = contarFallas(rev), f = new Date(rev.fecha_hora), items = rev.items || [];
+  const chips = items.map(it => `<div class="hv-chip ${it.estado}"><i>${ICONO[it.estado] || '—'}</i><div>${escH(it.nombre)}${it.comentario ? `<span class="cm">${escH(it.comentario)}</span>` : ''}</div></div>`).join('');
+  return `<div class="hv-bar"><h3>Revisión del ${fmtFecha(f)}</h3><button class="btn-exportar-hist" onclick="exportarRevision(${i})">⬇ Exportar PDF</button></div>
+    <div class="hv-datos">
+      <div class="hv-dato"><span>Responsable</span><b>${escH(rev.responsable || 'Sin responsable')}</b></div>
+      <div class="hv-dato"><span>Kilometraje</span><b class="mono">${escH(rev.kilometraje)} km</b></div>
+      <div class="hv-dato"><span>Puntos revisados</span><b>${items.length}</b></div>
+      <div class="hv-dato"><span>Resultado</span><b class="${n ? 'ko' : 'ok'}">${n ? n + (n === 1 ? ' falla' : ' fallas') : 'Todo OK'}</b></div>
+    </div>
+    <div class="hv-tit">Puntos de revisión</div><div class="hv-grid">${chips || '<div class="hist-vacio">Sin puntos de revisión.</div>'}</div>
+    <div class="hv-tit">Observaciones</div><div class="hv-obs">${rev.observaciones && String(rev.observaciones).trim() ? escH(rev.observaciones) : '<span style="color:var(--text-dim)">Sin observaciones.</span>'}</div>`;
 }
 
-function exportarPDF(){
+function abrirRevision(i){ detalleIdx = i; renderHistorial(); const b = document.querySelector('.form-body'); if(b) b.scrollTop = 0; }
+// «Volver»: dentro de una revisión vuelve a la lista; en la lista vuelve al checklist
+function volverHist(){
+  if(detalleIdx !== null){ detalleIdx = null; renderHistorial(); const b = document.querySelector('.form-body'); if(b) b.scrollTop = 0; return; }
+  window.location.href = 'tablet_checklist.html';
+}
+
+// Exporta SOLO la revisión que se está viendo
+function exportarRevision(i){
+  const rev = HISTORIAL[i]; if(!rev) return;
   const ETQ = { ok:'verde', falla:'rojo', na:'gris' };
   const t = id => (document.getElementById(id) || {}).textContent || '';
-  const fallasTot = HISTORIAL.reduce((n, r) => n + (r.items || []).filter(i => i.estado === 'falla').length, 0);
-  const secciones = [{ titulo:'Resumen', kpis:[['Revisiones', HISTORIAL.length], ['Fallas encontradas', fallasTot], ['Revisiones sin fallas', HISTORIAL.filter(r => !(r.items || []).some(i => i.estado === 'falla')).length]] }];
-  HISTORIAL.forEach(rev => {
-    const f = new Date(rev.fecha_hora), fallas = (rev.items || []).filter(i => i.estado === 'falla').length;
-    secciones.push({ titulo:f.toLocaleDateString('es-CL') + ' ' + f.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false }) + ' · ' + (rev.responsable || 'Sin responsable') + ' · ' + rev.kilometraje + ' km · ' + (fallas ? fallas + (fallas === 1 ? ' falla' : ' fallas') : 'Todo OK'),
-      tabla:{ columnas:[{ t:'Punto de revisión' }, { t:'Estado', w:'14%' }, { t:'Observación', w:'34%' }], filas:(rev.items || []).map(i => [i.nombre, { t:ESTADO_LABEL[i.estado] || i.estado, tag:ETQ[i.estado] || 'gris' }, i.comentario || '']) }, vacio:'Sin puntos de revisión.' });
-  });
+  const f = new Date(rev.fecha_hora), n = contarFallas(rev), items = rev.items || [];
+  const secciones = [
+    { titulo:'Datos de la revisión', datos:[['Fecha y hora', fmtFecha(f)], ['Responsable', rev.responsable || 'Sin responsable'], ['Kilometraje', rev.kilometraje + ' km'], ['Resultado', n ? n + (n === 1 ? ' falla' : ' fallas') : 'Todo OK']], columnas:2 },
+    { titulo:'Puntos de revisión', tabla:{ columnas:[{ t:'Punto de revisión' }, { t:'Estado', w:'14%' }, { t:'Observación', w:'34%' }], filas:items.map(it => [it.nombre, { t:ESTADO_LABEL[it.estado] || it.estado, tag:ETQ[it.estado] || 'gris' }, it.comentario || '']) }, vacio:'Sin puntos de revisión.' }
+  ];
+  if(rev.observaciones && String(rev.observaciones).trim()) secciones.push({ titulo:'Observaciones', texto:rev.observaciones });
   secciones.push({ firmas:['Maquinista que revisó', 'Capitán'] });
-  VigorInforme.generar({ sb, titulo:'Historial de Checklist', subtitulo:t('carroTitulo'), archivo:'checklist_' + t('carroSigla'),
+  const dia = f.toISOString().slice(0, 10);
+  VigorInforme.generar({ sb, titulo:'Checklist del Carro', subtitulo:t('carroTitulo') + ' · ' + fmtFecha(f), archivo:'checklist_' + t('carroSigla') + '_' + dia,
     datos:[['Carro', t('carroTitulo')], ['Conductor', t('dotConductor')], ['Oficial a cargo', t('dotOficial')]], secciones });
 }
 

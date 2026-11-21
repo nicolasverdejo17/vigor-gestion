@@ -184,6 +184,7 @@
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
 <link rel="stylesheet" href="vigor-ui.css">
+<link rel="stylesheet" href="vigor-tablet-form.css">
 <script src="vigor-errores.js"></script>
 <script src="vigor-licencia.js"></script>
 <script src="vigor-tema.js" defer></script>
@@ -216,67 +217,57 @@
     <div class="form-head">
       <button class="back-btn" onclick="window.location.href='tablet_carro.html'">← Volver</button>
       <h2>Bitácora — Registro de Salida</h2>
+      <button class="btn-ver-historial" onclick="window.location.href='tablet_bitacora_historial.html'">Ver Historial</button>
     </div>
 
     <div class="form-body">
-      <div class="form-row">
-        <div class="form-field">
-          <label>Fecha y hora<span class="auto-tag">✎ auto-completado</span></label>
-          <div class="auto-field-wrap">
-            <input class="auto-field" type="text" id="fechaHora" value="—" readonly>
-            <span class="auto-field-icon">✎</span>
+      <div class="fx-info" style="--cols:3">
+        <div class="fx-tile"><span class="fx-k">Fecha y hora</span><div class="auto-field-wrap"><input class="auto-field" type="text" id="fechaHora" value="—" readonly></div></div>
+        <div class="fx-tile"><span class="fx-k">N° de bitácora</span><div class="auto-field-wrap"><input class="auto-field mono" type="text" id="numeroBitacoraField" value="Se asigna al guardar" readonly></div></div>
+        <div class="fx-tile tocar" id="conductorWrapTile" onclick="abrirSelectorConductor()"><span class="fx-k">Conductor (maquinista)</span>
+          <div class="auto-field-wrap" id="conductorWrap" style="cursor:pointer;"><input class="auto-field" type="text" id="conductorField" value="Sin asignar" readonly style="cursor:pointer;"></div>
+          <div class="lista-conductor" id="listaConductor" onclick="event.stopPropagation()"></div>
+        </div>
+      </div>
+
+      <div class="fx-stack">
+        <div class="fx-card">
+          <div class="fx-tit">La salida</div>
+          <div class="fx-cols" style="--cols:4">
+            <div class="fx-f"><label>Hora de llegada</label><div class="fx-hora"><input type="text" class="mono" id="horaLlegadaField" placeholder="23:38" inputmode="numeric"><button type="button" class="fx-ahora" onclick="ponerAhora('horaLlegadaField')">Ahora</button></div></div>
+            <div class="fx-f"><label>Kilometraje inicial</label><input type="text" class="mono" id="kmInicial" placeholder="48210" inputmode="numeric" oninput="calcularRecorrido()"></div>
+            <div class="fx-f"><label>Kilometraje final</label><input type="text" class="mono" id="kmFinal" placeholder="48235" inputmode="numeric" oninput="calcularRecorrido()"></div>
+            <div class="fx-f"><label>Recorrido</label><div class="fx-calc" id="kmRecorrido"><b>—</b></div></div>
           </div>
         </div>
-        <div class="form-field">
-          <label>N° de Bitácora<span class="auto-tag">se asigna al guardar</span></label>
-          <div class="auto-field-wrap">
-            <input class="auto-field mono" type="text" id="numeroBitacoraField" value="—" readonly>
-            <span class="auto-field-icon">✎</span>
+
+        <div class="fx-card">
+          <div class="fx-tit">Motivo de la salida</div>
+          <div class="fx-chips" id="motivoChips" style="--cols:6">
+            <div class="fx-chip" onclick="elegirMotivo(this)">Emergencia</div>
+            <div class="fx-chip" onclick="elegirMotivo(this)">Ejercicio</div>
+            <div class="fx-chip" onclick="elegirMotivo(this)">Traslado</div>
+            <div class="fx-chip" onclick="elegirMotivo(this)">Combustible</div>
+            <div class="fx-chip" onclick="elegirMotivo(this)">Mantención</div>
+            <div class="fx-chip" onclick="elegirMotivo(this)">Otro</div>
           </div>
+          <div class="fx-f"><label>Detalle</label><input type="text" id="motivoSalida" placeholder="Ej. Despacho 10-3 — Camino Los Aromos km 4"></div>
         </div>
-      </div>
 
-      <div class="form-row">
-        <div class="form-field">
-          <label>Hora de llegada de la unidad</label>
-          <input type="text" class="mono" id="horaLlegadaField" placeholder="Ej. 23:38">
-        </div>
-        <div class="form-field">
-          <label>Conductor (Maquinista)<span class="auto-tag">✎ tocar para asignar</span></label>
-          <div class="auto-field-wrap" id="conductorWrap" onclick="abrirSelectorConductor()" style="cursor:pointer;">
-            <input class="auto-field" type="text" id="conductorField" value="Sin asignar" readonly style="cursor:pointer;">
-            <span class="auto-field-icon">✎</span>
+        <div class="fx-card">
+          <div class="fx-tit">Novedades</div>
+          <div class="fx-chips" style="--cols:5">
+            <div class="fx-chip" onclick="agregarNovedad('Sin novedades.', true)">Sin novedades</div>
+            <div class="fx-chip" onclick="agregarNovedad('Ruido o falla mecánica: ')">Ruido o falla</div>
+            <div class="fx-chip" onclick="agregarNovedad('Golpe o daño en el carro: ')">Golpe o daño</div>
+            <div class="fx-chip" onclick="agregarNovedad('Falta combustible o agua: ')">Falta combustible</div>
+            <div class="fx-chip" onclick="agregarNovedad('Material faltante o dañado: ')">Material faltante</div>
           </div>
-          <div class="lista-conductor" id="listaConductor"></div>
+          <div class="fx-f"><label>Detalle</label><textarea id="novedades" placeholder="Ej. Sin novedades. / Se detecta ruido en freno trasero derecho, avisar a Insp. de Máquinas."></textarea></div>
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-field">
-          <label>Kilometraje inicial</label>
-          <input type="text" class="mono" id="kmInicial" placeholder="Ej. 48210" inputmode="numeric">
-        </div>
-        <div class="form-field">
-          <label>Kilometraje final</label>
-          <input type="text" class="mono" id="kmFinal" placeholder="Ej. 48235" inputmode="numeric">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-field full">
-          <label>Motivo de la salida</label>
-          <input type="text" id="motivoSalida" placeholder="Ej. Despacho 10-3 — Camino Los Aromos km 4">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-field full">
-          <label>Novedades</label>
-          <textarea id="novedades" placeholder="Ej. Sin novedades. / Se detecta ruido en freno trasero derecho, avisar a Insp. de Máquinas."></textarea>
-        </div>
-      </div>
-
-      <button class="btn-guardar" onclick="guardarBitacora()">Guardar Bitácora</button>
+      <div class="fx-guardar"><button class="btn-guardar" onclick="guardarBitacora()">Guardar Bitácora</button></div>
     </div>
   </div>
 
@@ -412,6 +403,32 @@ function toast(msg){
 }
 
 cargarDatos();
+
+/* ---- ayudas de toque del formulario ---- */
+function ponerAhora(id){ const n = new Date(); document.getElementById(id).value = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); }
+function calcularRecorrido(){
+  const a = parseInt(document.getElementById('kmInicial').value.replace(/\D/g, ''), 10), b = parseInt(document.getElementById('kmFinal').value.replace(/\D/g, ''), 10);
+  const el = document.getElementById('kmRecorrido');
+  el.classList.remove('mal');
+  if(isNaN(a) || isNaN(b)){ el.innerHTML = '<b>—</b>'; return; }
+  if(b >= a) el.innerHTML = '<b>' + (b - a) + ' km</b>';
+  else { el.classList.add('mal'); el.textContent = 'El final es menor que el inicial'; }
+}
+const MOTIVOS = ['Emergencia', 'Ejercicio', 'Traslado', 'Combustible', 'Mantención', 'Otro'];
+function elegirMotivo(chip){
+  document.querySelectorAll('#motivoChips .fx-chip').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+  const inp = document.getElementById('motivoSalida');
+  let resto = inp.value.trim();
+  MOTIVOS.forEach(m => { if(resto.toLowerCase().startsWith(m.toLowerCase())) resto = resto.slice(m.length).replace(/^[\s:—-]+/, ''); });
+  inp.value = chip.textContent.trim() + (resto ? ' — ' + resto : ': ');
+  inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
+}
+function agregarNovedad(txt, reemplazar){
+  const t = document.getElementById('novedades');
+  t.value = (reemplazar || !t.value.trim()) ? txt : t.value.replace(/\s+$/, '') + '\n' + txt;
+  t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+}
 </script>
 </body>
 </html>

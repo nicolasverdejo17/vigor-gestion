@@ -276,6 +276,7 @@
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
 <link rel="stylesheet" href="vigor-tema.css">
 <link rel="stylesheet" href="vigor-ui.css">
+<link rel="stylesheet" href="vigor-tablet-form.css">
 <script src="vigor-errores.js"></script>
 <script src="vigor-licencia.js"></script>
 <script src="vigor-tema.js" defer></script>
@@ -308,143 +309,76 @@
     <div class="form-head">
       <button class="back-btn" onclick="window.location.href='tablet_carro.html'">← Volver</button>
       <h2>Parte de Emergencia</h2>
-      <button class="btn-exportar-form" onclick="exportarParte()">⬇ Exportar PDF</button>
+      <button class="btn-ver-historial" onclick="window.location.href='tablet_parte_historial.html'">Ver Historial</button>
+      <button class="btn-exportar-form" style="margin-left:0" onclick="exportarParte()">⬇ Exportar PDF</button>
     </div>
 
     <div class="form-body" id="printArea">
+      <div id="parteVinculo" style="display:none; padding:11px 14px; border:1px solid var(--cyan); border-left:4px solid var(--cyan); background:rgba(45,211,219,.08); font-size:13.5px; color:var(--text);"></div>
 
-      <div class="section-title"><span class="n">1</span>Datos Generales (auto-completado, editable)</div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Carro<span class="auto-tag">✎ auto-completado</span></label>
-          <div class="auto-field-wrap">
-            <input class="auto-field" type="text" id="carroField" value="—" readonly>
-            <span class="auto-field-icon">✎</span>
-          </div>
-        </div>
-        <div class="form-field">
-          <label>Compañía<span class="auto-tag">✎ auto-completado</span></label>
-          <div class="auto-field-wrap">
-            <input class="auto-field" type="text" id="companiaField" value="—" readonly>
-            <span class="auto-field-icon">✎</span>
-          </div>
-        </div>
+      <div class="fx-info" style="--cols:4">
+        <div class="fx-tile"><span class="fx-k">Carro</span><div class="auto-field-wrap"><input class="auto-field" type="text" id="carroField" value="—" readonly></div></div>
+        <div class="fx-tile"><span class="fx-k">Compañía</span><div class="auto-field-wrap"><input class="auto-field" type="text" id="companiaField" value="—" readonly></div></div>
+        <div class="fx-tile"><span class="fx-k">Fecha y hora de despacho</span><div class="auto-field-wrap"><input class="auto-field" type="text" id="fechaHora" value="—" readonly></div></div>
+        <div class="fx-tile"><span class="fx-k">N° de parte</span><div class="auto-field-wrap"><input class="auto-field mono" type="text" id="numeroParteField" value="—" readonly></div>
+          <a class="fx-link" href="javascript:void(0)" onclick="window.location.href='tablet_parte_historial.html'">Ver Historial de Partes →</a></div>
       </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Dotación de esta salida<span class="auto-tag">✎ tocar para asignar</span></label>
-          <div class="auto-field-wrap" onclick="abrirModalDotacion()" style="cursor:pointer;">
-            <input class="auto-field" type="text" id="dotacionResumen" style="font-family:'Inter'; font-size:13.5px; cursor:pointer;" value="Sin dotación asignada" readonly>
-            <span class="auto-field-icon">✎</span>
-          </div>
-        </div>
-        <div class="form-field">
-          <label>N° de Parte<span class="auto-tag">se asigna al guardar</span></label>
-          <div class="auto-field-wrap">
-            <input class="auto-field mono" type="text" id="numeroParteField" value="—" readonly>
-            <span class="auto-field-icon">✎</span>
-          </div>
-          <div style="margin-top:6px; text-align:right;"><a href="javascript:void(0)" onclick="abrirRegistroPartes()" style="font-size:11px; color:var(--cyan); text-decoration:none;">Ver Registro de Partes →</a></div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field full">
-          <label>Fecha y hora de despacho<span class="auto-tag">✎ auto-completado</span></label>
-          <div class="auto-field-wrap">
-            <input class="auto-field" type="text" id="fechaHora" value="—" readonly>
-            <span class="auto-field-icon">✎</span>
-          </div>
-        </div>
-      </div>
-      <div id="parteVinculo" style="display:none; margin:-6px 0 14px; padding:9px 12px; border:1px solid var(--cyan); border-left:4px solid var(--cyan); background:rgba(45,211,219,.08); font-size:12.5px; color:var(--text);"></div>
 
-      <div class="section-title"><span class="n">2</span>Detalle de la Emergencia</div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Tipo de emergencia</label>
-          <select id="tipoEmergencia"></select>
+      <div class="fx-stack">
+        <div class="fx-card">
+          <div class="fx-tit">Dotación de esta salida</div>
+          <div class="fx-tile tocar" onclick="abrirModalDotacion()" style="margin:0"><span class="fx-k">Quiénes salieron</span><div class="auto-field-wrap"><input class="auto-field" type="text" id="dotacionResumen" value="Sin dotación asignada" readonly style="cursor:pointer;"></div></div>
         </div>
-        <div class="form-field">
-          <label>Dirección / lugar</label>
-          <input type="text" id="direccionEmergencia" placeholder="Ej. Camino Los Aromos, km 4">
+
+        <div class="fx-card">
+          <div class="fx-tit">Qué pasó</div>
+          <div class="fx-chips" id="tipoChips" style="--cols:4"></div>
+          <select id="tipoEmergencia" style="display:none"></select>
+          <div class="fx-cols" style="--cols:3">
+            <div class="fx-f"><label>Dirección / lugar</label><input type="text" id="direccionEmergencia" placeholder="Ej. Camino Los Aromos, km 4"></div>
+            <div class="fx-f"><label>Hora de llegada</label><div class="fx-hora"><input type="text" class="mono" id="horaLlegada" placeholder="23:20" inputmode="numeric"><button type="button" class="fx-ahora" onclick="ponerAhora('horaLlegada')">Ahora</button></div></div>
+            <div class="fx-f"><label>Hora de regreso</label><div class="fx-hora"><input type="text" class="mono" id="horaRegreso" placeholder="23:58" inputmode="numeric"><button type="button" class="fx-ahora" onclick="ponerAhora('horaRegreso')">Ahora</button></div></div>
+          </div>
+          <div class="fx-f" style="margin-top:14px"><label>Descripción de la actuación</label><textarea id="descripcionActuacion" placeholder="Ej. Se procede a estabilizar y trasladar a paciente hasta ambulancia SAMU en el lugar."></textarea></div>
         </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Hora de llegada</label>
-          <input type="text" class="mono" id="horaLlegada" placeholder="Ej. 23:20">
-        </div>
-        <div class="form-field">
-          <label>Hora de regreso</label>
-          <input type="text" class="mono" id="horaRegreso" placeholder="Ej. 23:58">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field full">
-          <label>Descripción de la actuación</label>
-          <textarea id="descripcionActuacion" placeholder="Ej. Se procede a estabilizar y trasladar a paciente hasta ambulancia SAMU en el lugar."></textarea>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>¿Hubo lesionados?</label>
-          <div class="radio-row">
-            <div class="radio-opt safe on" onclick="setLesionados(this,false)">No</div>
-            <div class="radio-opt" onclick="setLesionados(this,true)">Sí</div>
+
+        <div class="fx-card">
+          <div class="fx-tit">Resultado</div>
+          <div class="fx-cols" style="--cols:2">
+            <div class="fx-f"><label>¿Hubo lesionados?</label><div class="radio-row"><div class="radio-opt safe on" onclick="setLesionados(this,false)">No</div><div class="radio-opt" onclick="setLesionados(this,true)">Sí</div></div></div>
+            <div class="fx-f"><label>¿Se usó material del carro?</label><div class="radio-row"><div class="radio-opt safe on" onclick="setMaterial(this,false)">No</div><div class="radio-opt" onclick="setMaterial(this,true)">Sí</div></div></div>
           </div>
         </div>
-        <div class="form-field">
-          <label>¿Se usó material del carro?</label>
-          <div class="radio-row">
-            <div class="radio-opt safe on" onclick="setMaterial(this,false)">No</div>
-            <div class="radio-opt" onclick="setMaterial(this,true)">Sí</div>
+
+        <div class="fx-card">
+          <div class="fx-tit">Datos del afectado</div>
+          <div class="afectado-tipo" id="afectadoTipoRow" style="--cols:4">
+            <button class="on" onclick="setTipoAfectado(this)">Paciente</button>
+            <button onclick="setTipoAfectado(this)">Víctima</button>
+            <button onclick="setTipoAfectado(this)">Propietario</button>
+            <button onclick="setTipoAfectado(this)">No aplica</button>
           </div>
+          <div class="afectado-nada" id="afectadoNada" style="display:none">No hay afectado que registrar en esta emergencia.</div>
+          <div id="afectadoCampos">
+            <div class="fx-cols" style="--cols:3">
+              <div class="fx-f"><label>Nombre completo</label><input type="text" id="nombreAfectado" placeholder="Ej. Marcela Ibáñez Soto"></div>
+              <div class="fx-f"><label>RUT</label><input type="text" class="mono" id="rutAfectado" placeholder="12.345.678-9"></div>
+              <div class="fx-f"><label>Edad</label><input type="text" class="mono" id="edadAfectado" placeholder="34" inputmode="numeric"></div>
+            </div>
+            <div class="fx-cols" style="--cols:3; margin-top:14px">
+              <div class="fx-f"><label>Teléfono de contacto</label><input type="text" class="mono" id="telefonoAfectado" placeholder="+56 9 8123 4567" inputmode="tel"></div>
+              <div class="fx-f" style="grid-column:span 2"><label>Dirección del afectado</label><input type="text" id="direccionAfectado" placeholder="Ej. Camino Los Aromos, km 4"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fx-card">
+          <div class="fx-tit">Observaciones</div>
+          <div class="fx-f"><label>Novedades adicionales</label><textarea id="novedadesAdicionales" placeholder="Ej. Se coordina con Carabineros, patrulla N° 214."></textarea></div>
         </div>
       </div>
 
-      <div class="section-title"><span class="n">3</span>Datos del Afectado</div>
-      <div class="afectado-tipo" id="afectadoTipoRow">
-        <button class="on" onclick="setTipoAfectado(this)">Paciente</button>
-        <button onclick="setTipoAfectado(this)">Víctima</button>
-        <button onclick="setTipoAfectado(this)">Propietario</button>
-        <button onclick="setTipoAfectado(this)">No aplica</button>
-      </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Nombre completo</label>
-          <input type="text" id="nombreAfectado" placeholder="Ej. Marcela Ibáñez Soto">
-        </div>
-        <div class="form-field">
-          <label>RUT</label>
-          <input type="text" class="mono" id="rutAfectado" placeholder="Ej. 12.345.678-9">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label>Edad</label>
-          <input type="text" class="mono" id="edadAfectado" placeholder="Ej. 34">
-        </div>
-        <div class="form-field">
-          <label>Teléfono de contacto</label>
-          <input type="text" class="mono" id="telefonoAfectado" placeholder="Ej. +56 9 8123 4567">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field full">
-          <label>Dirección del afectado</label>
-          <input type="text" id="direccionAfectado" placeholder="Ej. Camino Los Aromos, km 4">
-        </div>
-      </div>
-
-      <div class="section-title"><span class="n">4</span>Observaciones</div>
-      <div class="form-row">
-        <div class="form-field full">
-          <label>Novedades adicionales</label>
-          <textarea id="novedadesAdicionales" placeholder="Ej. Se coordina con Carabineros, patrulla N° 214."></textarea>
-        </div>
-      </div>
-
-      <button class="btn-guardar" onclick="guardarParte()">Guardar Parte de Emergencia</button>
+      <div class="fx-guardar"><button class="btn-guardar" onclick="guardarParte()">Guardar Parte de Emergencia</button></div>
     </div>
   </div>
 
@@ -543,6 +477,7 @@ async function cargarDatos(){
   const { data: claves } = await sb.rpc('tablet_obtener_claves_emergencia');
   CLAVES = claves || [];
   document.getElementById('tipoEmergencia').innerHTML = CLAVES.map(k => `<option value="${k.id}">${k.codigo} — ${k.nombre}</option>`).join('');
+  syncTipoChips();
 
   await vincularConDespacho();
   await refrescarNumeroParte();
@@ -557,7 +492,7 @@ async function vincularConDespacho(){
     const caja = document.getElementById('parteVinculo');
     if(!d){ caja.style.display = 'none'; return; }
     const dir = document.getElementById('direccionEmergencia'); if(!dir.value.trim()) dir.value = d.d_direccion || '';
-    if(d.d_tipo_id && CLAVES.some(k => k.id === d.d_tipo_id)) document.getElementById('tipoEmergencia').value = d.d_tipo_id;
+    if(d.d_tipo_id && CLAVES.some(k => k.id === d.d_tipo_id)) document.getElementById('tipoEmergencia').value = d.d_tipo_id; syncTipoChips();
     const hora = new Date(d.d_fecha).toLocaleString('es-CL', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false});
     caja.innerHTML = '<b>Emergencia vinculada:</b> ' + (d.d_tipo_codigo ? d.d_tipo_codigo + ' · ' : '') + String(d.d_direccion || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + ' · despachada ' + hora;
     caja.style.display = 'block';
@@ -658,7 +593,22 @@ function setMaterial(el, val){
 function setTipoAfectado(el){
   el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
+  const nada = el.textContent.trim() === 'No aplica';   // sin afectado: se esconden los campos
+  document.getElementById('afectadoCampos').style.display = nada ? 'none' : '';
+  document.getElementById('afectadoNada').style.display = nada ? '' : 'none';
 }
+
+/* ---- ayudas de toque del formulario ---- */
+function ponerAhora(id){ const n = new Date(); document.getElementById(id).value = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); }
+function syncTipoChips(){
+  const sel = document.getElementById('tipoEmergencia'), caja = document.getElementById('tipoChips');
+  if(!sel || !caja) return;
+  caja.innerHTML = Array.from(sel.options).map(o => {
+    const [cod, ...resto] = o.text.split(' — ');
+    return `<div class="fx-chip ${o.value === sel.value ? 'on' : ''}" onclick="elegirTipo('${o.value}')"><b>${cod}</b>${resto.length ? '<span>' + resto.join(' — ') + '</span>' : ''}</div>`;
+  }).join('') || '<div class="afectado-nada">Sin claves de emergencia cargadas.</div>';
+}
+function elegirTipo(id){ document.getElementById('tipoEmergencia').value = id; syncTipoChips(); }
 
 // Bug corregido: "Guardar Parte de Emergencia" no leía ni validaba ningún
 // campo — se podía "guardar" un parte completamente vacío. Los datos del
