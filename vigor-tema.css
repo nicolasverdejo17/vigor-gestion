@@ -173,3 +173,6 @@ html body .central-tabs .tab-badge{ margin-left:8px; }
 
 /* Tablet del Carro: el estado va en el banner, con esquinas rectas */
 html body #vigor-banner .vg-tablet-der .estado-pill{ border-radius:0 !important; padding:8px 16px; }
+
+/* Tablet: «Volver» va después del reloj (el espacio libre lo toma el bloque de estado, fecha y reloj) */
+#vigor-banner .vg-tablet-der ~ .vg-volver{ margin-left:18px !important; }

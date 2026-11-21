@@ -33,6 +33,7 @@ body.embed #ban,body.embed #ctabs{display:none}
 #ban .t{font-size:16px;font-weight:700;white-space:nowrap}
 #ban .volver{margin-left:6px;text-decoration:none;border:1px solid var(--l2);background:var(--p);color:var(--tx);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;white-space:nowrap}
 #ban .volver:hover{border-color:var(--cy)}
+#ban.tab .volver{order:9;margin-left:18px}   /* tablet: Volver al extremo derecho, después del estado, la fecha y el reloj */
 #ban .reloj{margin-left:auto;display:flex;align-items:center;gap:14px;flex-shrink:0;color:var(--mu);font-size:13px;line-height:1;text-align:right}
 #ban .reloj span{white-space:nowrap}
 #ban .reloj strong{display:block;font-size:22px;margin:0;letter-spacing:.02em;font-weight:700;color:var(--cy);font-family:'DSEG7',monospace;text-shadow:0 0 12px rgba(45,211,219,.35)}
@@ -235,6 +236,7 @@ details .in{padding:2px 10px 10px;font-size:12px}
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-pill-carro.js"></script>
 <script src="vigor-config.js"></script>
 <script src="vigor-mapa.js"></script>
 <script>
@@ -259,6 +261,7 @@ function armarPestanas(){
   } else if(!EMBED){
     // desde el PC de cuartel u otra pantalla: botón para volver a donde se estaba
     let v = PARAMS.get('volver'); if(!/^[a-z0-9_]+\.html$/.test(v || '')){ try{ const r = new URL(document.referrer); if(r.origin === location.origin) v = r.pathname.split('/').pop(); }catch(e){} }
+    if(v === 'tablet_carro.html' && window.VigorPillCarro) VigorPillCarro.enClima(sb);
     const a = $('volver'); a.href = /^[a-z0-9_]+\.html$/.test(v || '') && v !== 'clima.html' ? v : 'index.html'; a.hidden = false;
   }
   setTimeout(() => mapa && mapa.resize(), 50);

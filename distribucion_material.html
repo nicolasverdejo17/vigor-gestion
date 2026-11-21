@@ -73,6 +73,12 @@
   .fila:nth-child(even){ background:rgba(255,255,255,.02); }
   .fila .cod{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted); min-width:74px; }
   .fila .nom{ flex:1; font-size:14px; font-weight:600; min-width:0; overflow-wrap:anywhere; }
+  /* en el celular el nombre pasa a su propia línea (antes quedaba apretado entre el estado y el botón) */
+  @media (max-width:560px){
+    .fila{ flex-wrap:wrap; row-gap:6px; }
+    .fila .cod{ order:1; } .fila .est{ order:2; margin-left:auto; } .fila .btn-sacar{ order:3; }
+    .fila .nom{ order:4; flex:1 1 100%; }
+  }
   .est{ font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:3px 9px; border-radius:10px; background:var(--nodisp); color:#fff; white-space:nowrap; }
   .est.bueno{ background:var(--servicio); color:#04121C; } .est.regular{ background:var(--alerta); color:#04121C; } .est.malo{ background:var(--burdeo); color:#fff; }
   .vacio{ padding:26px 14px; text-align:center; color:var(--text-muted); font-size:13.5px; border:1px dashed var(--line-strong); }
@@ -149,6 +155,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-pill-carro.js"></script>
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -197,6 +204,7 @@ async function iniciar(){
   const fila = Array.isArray(tc) ? tc[0] : tc;
   if(fila && fila.t_id){
     esTablet = true;
+    if(window.VigorPillCarro) VigorPillCarro.enBanner(sb);   // en la tablet, el estado del carro, la fecha y el reloj van arriba, en el banner
     const { data: cr } = await sb.from('carros').select('compania_id').eq('id', fila.t_id).maybeSingle();
     carros = [{ id:fila.t_id, nomenclatura:fila.t_nomenclatura, tipo_descripcion:fila.t_tipo_descripcion, compania_id:cr ? cr.compania_id : null }];
     $('carroFijo').style.display = ''; $('carroFijo').textContent = 'Carro ' + fila.t_nomenclatura + ' — ' + (fila.t_tipo_descripcion || '');

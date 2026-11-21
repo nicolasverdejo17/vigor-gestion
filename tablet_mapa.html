@@ -7,7 +7,7 @@
 <title>VIGOR - Gestiona tu compañía de forma eficiente</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="manifest" href="manifest-tablet.json">
@@ -33,8 +33,22 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;font-family:'Montserrat','Segoe UI',sans-serif}
+body{display:flex;flex-direction:column}
 button{font-family:inherit;color:inherit}
-#stage{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+#stage{position:relative;width:100%;flex:1 1 auto;min-height:0;overflow:hidden;background:var(--bg)}
+
+/* ---- banner estándar de la tablet: nombre de la pantalla, estado del carro, fecha, reloj y Volver ---- */
+#tb{flex:none;height:62px;display:flex;align-items:center;gap:14px;padding:0 28px;background:linear-gradient(180deg,#07192A,#030B13);border-bottom:1px solid var(--l);position:relative;z-index:1100}
+#tb img{height:42px;width:auto;display:block;flex:none}
+#tb .sep{width:1.5px;height:24px;background:var(--l2);flex:none}
+#tb .tt{font:700 22px 'Rajdhani','Montserrat',sans-serif;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+#tb .td{margin-left:auto;display:flex;align-items:center;gap:18px;flex:none}
+#tb .tclk{display:flex;align-items:center;gap:14px;color:var(--mu);font-size:13px;line-height:1;text-align:right}
+#tb .tclk b{font-size:22px;color:var(--cy);text-shadow:0 0 12px rgba(45,211,219,.35)}
+#tb .tv{margin-left:18px;text-decoration:none;text-transform:uppercase;letter-spacing:.04em;font-family:'Rajdhani','Montserrat',sans-serif;border:1px solid var(--l2);background:rgba(45,211,219,.08);color:var(--tx);font-weight:700;font-size:13px;padding:8px 16px;white-space:nowrap}
+#tb .tv:hover{border-color:var(--cy)}
+@media (max-aspect-ratio:1/1){#tb{height:54px;padding:0 14px}#tb img{height:32px}#tb .tclk span{display:none}#tb .td{gap:10px}}
+@media (min-aspect-ratio:1/1) and (max-height:520px){#tb{height:50px;padding:0 14px}#tb img{height:30px}}
 #map{position:absolute;inset:0}
 .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
 #fade{position:absolute;left:0;right:0;top:0;height:40%;background:linear-gradient(to bottom,var(--bg) 8%,rgba(3,11,19,0));pointer-events:none;z-index:850}
@@ -126,6 +140,9 @@ body.desp #btns{bottom:24px}
 <script src="vigor-licencia.js"></script>
 </head>
 <body>
+<header id="tb"><img src="img/logo.png" alt="Vigor"><span class="sep"></span><span class="tt">Mapa</span>
+  <div class="td"><div class="tclk"><span id="tbFecha"></span><b class="dseg" id="tbHora">--:--:--</b></div></div>
+  <a class="tv" href="tablet_carro.html">← Volver</a></header>
 <div id="stage">
   <div id="map"></div>
   <div id="fade"></div>
@@ -151,6 +168,7 @@ body.desp #btns{bottom:24px}
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vigor-sesion.js"></script>
+<script src="vigor-pill-carro.js"></script>
 <script src="vigor-despacho-tablet.js" data-auto></script>
 <script src="vigor-gps-tablet.js" data-auto></script>
 <script src="vigor-atribucion.js"></script>
@@ -165,6 +183,14 @@ window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth
 const sb = window.sb;
 
 const $ = id => document.getElementById(id);
+
+/* banner: estado del carro, fecha y reloj */
+(function(){
+  const td = document.querySelector('#tb .td');
+  if(window.VigorPillCarro) td.insertBefore(VigorPillCarro.crear(sb), td.firstChild);
+  const tic = () => { const n = new Date(); $('tbHora').textContent = n.toLocaleTimeString('es-CL', { hour12:false }); $('tbFecha').textContent = n.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' }); };
+  tic(); setInterval(tic, 1000);
+})();
 const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const FAM = {
   agua:['Agua','#34B8FF'], salud:['Salud','#3CF29A'], auto:['Autoridades y emergencia','#DCE8F5'], sensible:['Lugares sensibles','#B58CFF'],

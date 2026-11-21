@@ -47,7 +47,7 @@
     'alta_personal_rentado','configuracion_sistema','crear_actividad_celular','crear_compania','dar_de_baja','dar_de_baja_reactivar_personal','flota_comandancia','historial_movimientos','ingreso_item','pasar_asistencia','registro_auditoria','restablecer_passwords_global','secretaria',
     'acerca_de','distribucion_material','tesoreria','tablet_bitacora','tablet_checklist','tablet_checklist_historial','tablet_dotacion','tablet_parte','tablet_mapa'];
   // En las tablets la franja de arriba muestra el carro, su estado y la hora: se queda; solo el «Volver» sube al banner
-  var CONSERVAN_FRANJA = ['tablet_bitacora','tablet_checklist','tablet_checklist_historial','tablet_dotacion','tablet_parte'];
+  var CONSERVAN_FRANJA = [];   // ya ninguna tablet conserva la franja: su estado, fecha y reloj suben al banner (ver adaptarTablet)
   function moverVolver(banner){
     var archivo = (location.pathname.split('/').pop() || '').toLowerCase().replace(/\.html$/, '');
     if(PANTALLAS_VOLVER.indexOf(archivo) < 0) return;
@@ -85,10 +85,12 @@
     banner.classList.add('vg-pc');
   }
 
-  // Tablet del Carro: el estado del carro, la fecha y el reloj suben al banner (como en el PC del Cuartel); la franja de abajo se quita
+  // Tablet del Carro: el estado del carro, la fecha y el reloj suben al banner (como en el PC del Cuartel); la franja de abajo se quita.
+  // Lo mismo en las pantallas que se abren desde su menú (parte, bitácora, dotación y checklist).
+  var TABLET_PANTALLAS = ['tablet_parte','tablet_bitacora','tablet_dotacion','tablet_checklist','tablet_checklist_historial'];
   function adaptarTablet(banner){
     var archivo = (location.pathname.split('/').pop() || '').toLowerCase();
-    if(archivo !== 'tablet_carro.html') return;
+    if(archivo !== 'tablet_carro.html' && TABLET_PANTALLAS.indexOf(archivo.replace(/\.html$/, '')) < 0) return;
     var franja = d.querySelector('.nameplate'); if(!franja) return;
     var pill = franja.querySelector('#estadoPill'), sel = franja.querySelector('#selEstadoCarro'), reloj = franja.querySelector('.clock');
     var der = d.createElement('div'); der.className = 'vg-central-der vg-tablet-der';
@@ -96,6 +98,7 @@
     if(sel) der.appendChild(sel);
     if(reloj) der.appendChild(reloj);
     banner.appendChild(der);
+    var v = banner.querySelector('.vg-volver'); if(v) banner.appendChild(v);   // «Volver» queda al extremo derecho, después del reloj
     franja.classList.add('vg-franja-oculta');
   }
 
