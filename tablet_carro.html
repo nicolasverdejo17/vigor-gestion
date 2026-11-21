@@ -123,6 +123,10 @@
   .ops-btn.salir .ops-icon{ border-color:var(--burdeo);}
   .ops-btn.salir:hover{ border-color:var(--burdeo);}
   .ops-btn.salir h2{ color:#F13746;}
+  /* las 8 tarjetas idénticas: esquinas rectas y el ícono y el título siempre a la misma altura (aunque la descripción tenga 2 o 3 líneas) */
+  html body .ops-btn, html body .ops-btn::before{ border-radius:0 !important; }
+  html body .ops-btn{ justify-content:flex-start !important; padding-top:46px !important; }
+  html body .ops-btn p{ min-height:calc(3 * 1.4 * 12.5px); }
   #salirOv{ position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:rgba(3,11,19,.82); padding:24px; }
   #salirOv.on{ display:flex; }
   #salirOv .caja{ width:min(460px,100%); background:#061520; border:1px solid #153A52; border-top:3px solid #F13746; padding:28px 28px 22px; text-align:center; }
