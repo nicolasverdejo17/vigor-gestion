@@ -529,9 +529,9 @@ function destinoPropio(perfil){
 }
 
 // Un solo login para todo — persona, Carro, PC del Cuartel o Central de
-// Alarmas. Se prueban en orden (persona primero, es el caso más común y no
-// necesita Código de Cuerpo porque el N° de Registro ya es único en todo
-// Vigor) y el que resuelva gana. Carro, PC del Cuartel y Central necesitan
+// Alarmas. Se prueban en orden (persona primero, es el caso más común; solo
+// necesita Código de Cuerpo si su N° de Registro se repite en otro Cuerpo) y
+// el que resuelva gana. Carro, PC del Cuartel y Central necesitan
 // el Código de Cuerpo porque su identificador (Nomenclatura / N° de
 // Compañía / la palabra "CENTRAL") solo es único DENTRO de un Cuerpo, no
 // en todo Vigor.
@@ -548,9 +548,17 @@ async function intentarLogin(){
 
   // 1) Persona (bombero, oficial, Comandancia, Administración General...)
   if(!isNaN(numeroInt)){
-    const { data: existe } = await sb.rpc('personal_existe', { p_numero_registro: numeroInt });
-    if(existe){
-      const email = 'p' + numeroInt + '@vigor.local';
+    // El N° de Registro es único dentro de cada Cuerpo (no en todo Vigor): se pide el correo de acceso al servidor.
+    // Si ese N° existe en más de un Cuerpo, hace falta el Código de Cuerpo para saber cuál es.
+    const filaLogin = async (codigo) => { const { data } = await sb.rpc('resolver_personal_login', { p_codigo_cuerpo: codigo, p_numero: numeroInt }); return Array.isArray(data) ? data[0] : data; };
+    let fila = await filaLogin(codigoCuerpo);
+    if(codigoCuerpo && (!fila || !fila.coincidencias)) fila = await filaLogin('');   // un código que no corresponde a esa persona no la deja fuera
+    if(fila && fila.coincidencias > 1 && !fila.email){
+      toast('Ese N° de Registro existe en más de un Cuerpo — escribe tu Código de Cuerpo');
+      return;
+    }
+    if(fila && fila.email){
+      const email = fila.email;
       const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password });
       if(authError){
         toast('Usuario o contraseña incorrectos');
