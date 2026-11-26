@@ -197,7 +197,7 @@ function render(){
       <div class="emerg-item">
         <span class="tag">${e.tipo_emergencia_texto || 'Emergencia'}</span>
         <p>${e.compania_texto || ''} ${e.direccion_referencia ? '— ' + e.direccion_referencia : ''}</p>
-        <div class="meta">${e.estado} · ${fmtHora(e.actualizado_en)}</div>
+        <div class="meta">${({ disponible:'Disponible', en_emergencia:'En emergencia', fuera_de_servicio:'Fuera de servicio' }[e.estado] || e.estado || '')} · ${fmtHora(e.actualizado_en)}</div>
       </div>
     `).join('');
   }

@@ -596,6 +596,7 @@ function suscribirAlertaEspecial(perfil){
     .subscribe();
 }
 
+const fechaCorta = (f) => f ? String(f).slice(0, 10).split('-').reverse().join('-') : '—';
 function tiempoRelativo(fechaIso){
   const ms = Date.now() - new Date(fechaIso).getTime();
   const min = Math.floor(ms / 60000);
@@ -629,7 +630,7 @@ async function renderNotificaciones(perfil){
   ]);
 
   const items = [];
-  if(actividad && actividad[0]) items.push({ ico:'<svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5" y="4.5" width="14" height="16.5" rx="1.5"/><path d="M9 4.5V3h6v1.5M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>', tit:`Nueva actividad: ${actividad[0].nombre}`, sub:`${actividad[0].fecha} ${(actividad[0].hora||'').slice(0,5)} — ${tiempoRelativo(actividad[0].creado_en)}`, ts:actividad[0].creado_en });
+  if(actividad && actividad[0]) items.push({ ico:'<svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5" y="4.5" width="14" height="16.5" rx="1.5"/><path d="M9 4.5V3h6v1.5M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>', tit:`Nueva actividad: ${actividad[0].nombre}`, sub:`${fechaCorta(actividad[0].fecha)} ${(actividad[0].hora||'').slice(0,5)} — ${tiempoRelativo(actividad[0].creado_en)}`, ts:actividad[0].creado_en });
   if(curso && curso[0]) items.push({ ico:'<svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M2 9.5 12 5l10 4.500-10 4.500-10-4.500z"/><path d="M6 11.500V16c0 1.400 2.700 2.500 6 2.500s6-1.100 6-2.500v-4.500M20 10v5"/></svg>', tit:`Curso registrado: ${curso[0].nombre_curso}`, sub:`${curso[0].nivel||'Sin nivel'} — ${tiempoRelativo(curso[0].creado_en)}`, ts:curso[0].creado_en });
   (avisos || []).forEach(a => {
     const texto = (a.contenido || '').length > 70 ? a.contenido.slice(0, 70) + '…' : a.contenido;
@@ -641,8 +642,8 @@ async function renderNotificaciones(perfil){
       ts: a.creado_en
     });
   });
-  (sesiones || []).forEach(s => items.push({ ico:'<svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="4" y="5" width="16" height="15" rx="1.500"/><path d="M4 9.500h16M8.500 3.500v3M15.500 3.500v3"/></svg>', tit:`Sesión programada: ${s.titulo}`, sub:`${s.fecha} ${(s.hora||'').slice(0,5)} · ${s.lugar||'—'} — ${tiempoRelativo(s.creado_en)}`, ts:s.creado_en }));
-  (citaciones || []).forEach(c => items.push({ ico:'<svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M20.500 4 3.500 11l6.500 2.500L12.500 20l8-16z"/><path d="M10 13.500 20.500 4"/></svg>', tit:`Citación: ${c.motivo}`, sub:`Fecha límite de envío: ${c.fecha_limite_envio} — ${tiempoRelativo(c.creado_en)}`, ts:c.creado_en }));
+  (sesiones || []).forEach(s => items.push({ ico:'<svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="4" y="5" width="16" height="15" rx="1.500"/><path d="M4 9.500h16M8.500 3.500v3M15.500 3.500v3"/></svg>', tit:`Sesión programada: ${s.titulo}`, sub:`${fechaCorta(s.fecha)} ${(s.hora||'').slice(0,5)} · ${s.lugar||'—'} — ${tiempoRelativo(s.creado_en)}`, ts:s.creado_en }));
+  (citaciones || []).forEach(c => items.push({ ico:'<svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M20.500 4 3.500 11l6.500 2.500L12.500 20l8-16z"/><path d="M10 13.500 20.500 4"/></svg>', tit:`Citación: ${c.motivo}`, sub:`Fecha límite de envío: ${fechaCorta(c.fecha_limite_envio)} — ${tiempoRelativo(c.creado_en)}`, ts:c.creado_en }));
 
   items.sort((a,b) => new Date(b.ts) - new Date(a.ts));
 

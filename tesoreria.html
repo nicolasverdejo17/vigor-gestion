@@ -106,6 +106,27 @@
     .leyenda{ font-size:11px; gap:6px 12px; } .leyenda i{ width:10px; height:10px; margin-right:4px; }
     html body .tabs{ flex-wrap:nowrap; width:100%; } html body .tabs .cat-tab{ flex:1; min-height:38px; padding:0 4px; font-size:11px; letter-spacing:.03em; }
   }
+  /* Celular: cada fila es una tarjeta; nada se sale del ancho */
+  @media (max-width:640px){
+    table.l.deu, table.l.deu tbody, table.l.his, table.l.his tbody{ display:block; width:100%;}
+    table.l.deu thead, table.l.his thead{ display:none;}
+    table.l.deu tr, table.l.his tr{ display:grid; gap:6px 10px; padding:12px 2px; border-bottom:1px solid var(--line); align-items:start;}
+    table.l.deu td, table.l.his td{ padding:0; border:0 !important; box-shadow:none !important; background:none !important; text-align:left; min-width:0;}
+    table.l.deu tr{ grid-template-columns:34px minmax(0,1fr) auto;}
+    table.l.deu td:nth-child(1){ grid-area:1 / 1;}
+    table.l.deu td:nth-child(2){ grid-area:1 / 2;}
+    table.l.deu td:nth-child(4){ grid-area:1 / 3; text-align:right;}
+    table.l.deu td:nth-child(3){ grid-area:2 / 2 / 3 / 4;}
+    table.l.deu td:nth-child(3)::before{ content:'Meses: '; color:var(--text-dim);}
+    table.l.deu td:nth-child(5){ grid-area:3 / 2; align-self:center;}
+    table.l.deu td:nth-child(6){ grid-area:3 / 3; text-align:right;}
+    table.l.his tr{ grid-template-columns:minmax(0,1fr) auto;}
+    table.l.his td:nth-child(1){ grid-area:1 / 1;}
+    table.l.his td:nth-child(2){ grid-area:1 / 2; text-align:right;}
+    table.l.his td:nth-child(3){ grid-area:2 / 1 / 3 / 3;}
+    table.l.his td:nth-child(4){ grid-area:3 / 1; font-weight:700;}
+    table.l.his td:nth-child(5){ grid-area:3 / 2; text-align:right; color:var(--text-muted);}
+  }
 </style>
 <link rel="manifest" href="manifest-tablet.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -260,7 +281,7 @@ function vistaDeudores(){
   const ds = (est.miembros || []).filter(m => (m.adeudados || []).length).sort((a, b) => totalAdeudado(b) - totalAdeudado(a));
   if(!ds.length) return '<div class="caja"><div class="vacio">Nadie tiene cuotas atrasadas.</div></div>';
   const sinAviso = ds.filter(m => !m.aviso_activo).length;
-  let h = `<div class="caja"><table class="l"><thead><tr><th>N°</th><th>Bombero</th><th>Meses atrasados</th><th class="der">Total</th><th>Aviso</th><th></th></tr></thead><tbody>`;
+  let h = `<div class="caja"><table class="l deu"><thead><tr><th>N°</th><th>Bombero</th><th>Meses atrasados</th><th class="der">Total</th><th>Aviso</th><th></th></tr></thead><tbody>`;
   ds.forEach(m => {
     const n = m.adeudados.length;
     h += `<tr><td class="mono">${m.numero}</td><td><b style="font-weight:600">${esc(m.nombre)}</b><div style="font-size:11px;color:var(--text-dim)">${esc(m.cargo)}</div></td>
@@ -306,7 +327,7 @@ function vistaHistorial(){
   if(!historial.length) return '<div class="caja"><div class="vacio">Todavía no hay movimientos.</div></div>';
   const nom = id => { const m = (est.miembros || []).find(x => x.id === id); return m ? m.nombre : ''; };
   const T = { pago:['Pago', 'ok'], anulacion:['Anulación', 'mal'], config:['Cuota', ''], excepcion:['Cuota especial', 'am'], aviso:['Aviso', 'am'] };
-  return `<div class="caja"><table class="l"><thead><tr><th>Fecha</th><th>Movimiento</th><th>Detalle</th><th class="der">Monto</th><th>Por</th></tr></thead><tbody>${historial.map(x => {
+  return `<div class="caja"><table class="l his"><thead><tr><th>Fecha</th><th>Movimiento</th><th>Detalle</th><th class="der">Monto</th><th>Por</th></tr></thead><tbody>${historial.map(x => {
     const t = T[x.accion] || [x.accion, ''];
     return `<tr><td class="mono" style="white-space:nowrap">${new Date(x.creado_en).toLocaleString('es-CL', { dateStyle:'short', timeStyle:'short' })}</td><td><span class="pill ${t[1]}">${t[0]}</span></td>
       <td>${esc(x.detalle || '')}${x.periodo && x.accion !== 'config' ? `<div style="font-size:11.5px;color:var(--text-dim)">${mesTxt(x.periodo)}</div>` : ''}</td><td class="der">${x.monto != null ? clp(x.monto) : ''}</td><td>${esc(x.por || '')}</td></tr>`; }).join('')}</tbody></table></div>`;

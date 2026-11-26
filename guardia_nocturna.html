@@ -249,6 +249,13 @@
   .tabbar-real a .ic{ line-height:1; display:flex;}
   .tabbar-real a .ic svg{ width:22px; height:22px;}
   .tabbar-real a.active{ color:var(--cyan);}
+  /* Celular: en la vista de oficial los controles bajan para que el nombre se lea entero */
+  @media (max-width:520px){
+    .insc.ofi{ flex-wrap:wrap; row-gap:6px;}
+    .insc.ofi .info{ flex:1 1 calc(100% - 44px);}
+    .insc.ofi .nom{ white-space:normal;}
+    .insc.ofi > select.sel{ flex:1 1 130px !important; margin-left:43px;}
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">
@@ -746,7 +753,7 @@ function renderDiaLista(){
       : `<span class="moon ${i.pernocta ? 'on' : ''}" title="${i.pernocta ? 'Pernocta' : ''}">${i.pernocta ? ico('moon') : ''}</span>`;
     const ea = estadoAsist(i.id);
     const asistHtml = `<div class="asist-det"><span class="asist ${ea}">${ASIST_LABEL[ea]}</span>${ea === 'pendiente' ? '' : ' ' + esc(detalleAsist(ASIST[i.id]))}</div>`;
-    return `<div class="insc">${avatar({ nombre_completo: v.nombre_completo, foto_url: v.foto_url })}
+    return `<div class="insc${oficial ? ' ofi' : ''}">${avatar({ nombre_completo: v.nombre_completo, foto_url: v.foto_url })}
       <div class="info"><div class="nom">${esc(nombreCorto(v.nombre_completo))}${i.voluntario_id === PERFIL.id ? ' <span style="color:var(--cyan); font-size:10px;">(tú)</span>' : ''}</div><div class="reg">N° ${esc(v.numero_registro)}</div>${asistHtml}</div>
       ${funcHtml}${luna}
       ${oficial ? `<button class="mini-x" title="Quitar de la guardia" onclick="quitarInscripcion('${i.id}')">✕</button>` : ''}

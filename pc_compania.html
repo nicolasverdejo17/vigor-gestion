@@ -1456,7 +1456,7 @@
       <div class="emerg-item">
         <span class="tag">${e.tipo_emergencia_texto || 'Emergencia'}</span>
         <p>${e.compania_texto || ''} ${e.direccion_referencia ? '— ' + e.direccion_referencia : ''}</p>
-        <div class="meta">${e.estado} · ${new Date(e.actualizado_en).toLocaleString('es-CL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="meta">${({ disponible:'Disponible', en_emergencia:'En emergencia', fuera_de_servicio:'Fuera de servicio' }[e.estado] || e.estado || '')} · ${new Date(e.actualizado_en).toLocaleString('es-CL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
       </div>
     `).join('') : '<div class="emerg-item"><p style="color:var(--text-dim); font-style:italic;">Sin emergencias registradas para el Cuerpo.</p></div>';
   }

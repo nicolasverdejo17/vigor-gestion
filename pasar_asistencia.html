@@ -98,6 +98,19 @@
     transition:all .25s; z-index:50;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0);}
+  /* Celular: el nombre usa todo el ancho y los tres botones van debajo */
+  @media (max-width:640px){
+    .content-wrap{ padding:12px 12px 14px;}
+    .act-info{ padding:10px 14px; row-gap:8px;}
+    .act-item{ padding:0 12px;}
+    .toolbar-row{ flex-wrap:wrap; gap:8px;}
+    .btn-marcar-todos{ flex:1 1 100%;}
+    .lista-wrap::before{ display:none;}
+    .asist-row{ flex-wrap:wrap; padding:11px 12px; gap:9px 12px;}
+    .asist-info{ flex:1 1 calc(100% - 52px);}
+    .asist-toggles{ flex:1 1 100%;}
+    .asist-toggles .asist-btn{ flex:1 1 0; min-width:0; padding-left:3px; padding-right:3px;}
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/favicon-32.png?v=2" sizes="32x32" type="image/png">

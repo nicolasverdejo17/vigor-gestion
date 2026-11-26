@@ -270,6 +270,7 @@ let RESUELTAS = [];
 // Ahora se evalúa contra el cargo real de la sesión, no un selector demo.
 const ROLES_CON_ACCESO = ['Director','Secretario/a'];
 
+const fechaCorta = (f) => f ? String(f).slice(0, 10).split('-').reverse().join('-') : '—';
 function fmtFecha(iso){
   return new Date(iso).toLocaleString('es-CL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
@@ -319,10 +320,10 @@ function render(){
       </div>
       <div class="sol-datos">
         <div><div class="sol-dato-label">RUT</div><div class="sol-dato-val mono">${s.rut}</div></div>
-        <div><div class="sol-dato-label">Fecha nac.</div><div class="sol-dato-val">${s.fecha_nacimiento}</div></div>
+        <div><div class="sol-dato-label">Fecha nac.</div><div class="sol-dato-val">${fechaCorta(s.fecha_nacimiento)}</div></div>
         <div><div class="sol-dato-label">Teléfono</div><div class="sol-dato-val mono">${s.telefono}</div></div>
         <div><div class="sol-dato-label">Compañía solicitada</div><div class="sol-dato-val">${s.companias ? s.companias.nombre : '—'}</div></div>
-        <div><div class="sol-dato-label">Fecha de ingreso</div><div class="sol-dato-val">${s.fecha_ingreso || '—'}</div></div>
+        <div><div class="sol-dato-label">Fecha de ingreso</div><div class="sol-dato-val">${fechaCorta(s.fecha_ingreso)}</div></div>
       </div>
       <div class="sol-actions">
         <button class="btn-aprobar" onclick="aprobar('${s.id}')">✓ Aprobar</button>
