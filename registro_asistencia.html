@@ -319,7 +319,7 @@ function mostrarLista(){
   document.getElementById('vista').innerHTML = `
     <div class="solo-print"><h2>Registro de Asistencia</h2><div class="sub" id="printSub"></div></div>
     <div class="panel">
-      <h3>Actividades con asistencia <button class="btn-sec no-print" onclick="exportar()">⬇ Exportar PDF</button></h3>
+      <h3>Actividades con asistencia <button class="btn-sec no-print" onclick="exportar()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button></h3>
       <div class="filtros no-print">
         <div><label class="t">Desde</label><input class="inp mono" id="fDesde" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="this.value = formatearFecha(this.value); renderLista()"></div>
         <div><label class="t">Hasta</label><input class="inp mono" id="fHasta" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" oninput="this.value = formatearFecha(this.value); renderLista()"></div>
@@ -378,7 +378,7 @@ async function abrirDetalle(id){
       <div class="cabecera">
         <div class="grow"><div class="act-tipo">${esc(a.tipo)}</div><h2>${esc(a.nombre)}</h2>
           <div class="nota" style="margin-top:4px;">${esc(fechaLarga(a.fecha))}${horaLugar(a) ? ' · ' + esc(horaLugar(a)) : ''}</div></div>
-        <span class="no-print" style="display:flex; gap:8px;"><button class="btn-sec" onclick="mostrarLista()">Todas las actividades</button><button class="btn-sec" onclick="exportar()">⬇ Exportar PDF</button></span>
+        <span class="no-print" style="display:flex; gap:8px;"><button class="btn-sec" onclick="mostrarLista()">Todas las actividades</button><button class="btn-sec" onclick="exportar()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button></span>
       </div>
     </div>
     <div class="panel">

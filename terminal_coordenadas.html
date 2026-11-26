@@ -264,11 +264,11 @@ function renderFeed(){
           </div>
           <div class="feed-hora">${r.creado.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit', hour12:false})}</div>
         </div>
-        <div class="feed-coords">📍 ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div>
+        <div class="feed-coords"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 21s-6.500-5.700-6.500-11a6.500 6.500 0 0 1 13 0c0 5.300-6.500 11-6.500 11z"/><circle cx="12" cy="10" r="2.400"/></svg> ${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}</div>
         <div class="feed-actions">
-          <button class="feed-btn" onclick="window.location.href='consola_despacho.html?lat=${r.lat}&lng=${r.lng}&origen=terminal'">🚒 Despachar aquí</button>
-          <button class="feed-btn" onclick="verEnMapa(${r.lat}, ${r.lng})">🗺️ Ver en Mapa</button>
-          <button class="feed-btn" onclick="copiarCoords(${r.lat}, ${r.lng})">📋 Copiar</button>
+          <button class="feed-btn" onclick="window.location.href='consola_despacho.html?lat=${r.lat}&lng=${r.lng}&origen=terminal'"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M3 15.500V9.700a1 1 0 0 1 1-1h6l3 3h5a1 1 0 0 1 1 1v2.8M3 15.500h15.500"/><circle cx="7" cy="16.700" r="1.600"/><circle cx="15.500" cy="16.700" r="1.600"/><path d="M19.300 4v4M17.300 6h4"/></svg> Despachar aquí</button>
+          <button class="feed-btn" onclick="verEnMapa(${r.lat}, ${r.lng})"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M3.500 6.500 9 4.500l6 2 5.500-2v13L15 19.500l-6-2-5.500 2v-13z"/><path d="M9 4.500v13M15 6.500v13"/></svg> Ver en Mapa</button>
+          <button class="feed-btn" onclick="copiarCoords(${r.lat}, ${r.lng})"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5" y="4.5" width="14" height="16.5" rx="1.5"/><path d="M9 4.5V3h6v1.5M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg> Copiar</button>
           ${!r.leido ? `<button class="feed-btn" onclick="marcarLeido('${r.id}')">✓ Marcar como leído</button>` : ''}
         </div>
       </div>

@@ -85,7 +85,7 @@
   </div>
 
   <div id="sinPermiso" style="display:none; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">
-    🔒 Esta pantalla es exclusiva de Superintendente, Vicesuperintendente, Secretario General o Tesorero General.
+    <svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5.5" y="10.5" width="13" height="9.5" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg> Esta pantalla es exclusiva de Superintendente, Vicesuperintendente, Secretario General o Tesorero General.
   </div>
 
   <div class="content-wrap" id="contentWrap">
@@ -125,7 +125,7 @@
       <h3>Central de Alarmas</h3>
       <div class="setting-row">
         <div class="setting-info"><b>Credencial institucional</b><span>Cuenta propia de la Central — se ingresa desde la pantalla de inicio de sesión escribiendo "CENTRAL" en Usuario e indicando el Código de Cuerpo</span></div>
-        <button onclick="regenerarCredencialCentral()" style="background:var(--panel-alt); border:1.5px solid var(--master); color:var(--master); font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:8px 14px; border-radius:5px; cursor:pointer; flex-shrink:0; margin-left:16px;">🔑 Generar / Regenerar</button>
+        <button onclick="regenerarCredencialCentral()" style="background:var(--panel-alt); border:1.5px solid var(--master); color:var(--master); font-family:'Rajdhani'; font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:8px 14px; border-radius:5px; cursor:pointer; flex-shrink:0; margin-left:16px;"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><circle cx="8" cy="14" r="4"/><path d="M11 11l8-8M16 6l2.5 2.5M13.5 8.5 16 11"/></svg> Generar / Regenerar</button>
       </div>
     </div>
 
@@ -213,7 +213,7 @@ function mostrarCredencialCentral(nombreCuerpo, codigoCuerpo, passwordTemporal){
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,15,.75);z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;';
   modal.innerHTML = `
     <div style="background:var(--panel);border:1.5px solid var(--master-dim);border-radius:12px;padding:26px 24px;max-width:380px;width:100%;">
-      <h3 style="font-size:16px;margin-bottom:12px;">📻 Central de Alarmas — ${nombreCuerpo}</h3>
+      <h3 style="font-size:16px;margin-bottom:12px;"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="3.5" y="9" width="17" height="11" rx="1.5"/><path d="M6 9l11-5.5"/><circle cx="8.5" cy="14.5" r="2.500"/><path d="M14 13h4M14 16h4"/></svg> Central de Alarmas — ${nombreCuerpo}</h3>
       <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">
         En el PC de la Central, ve a la pantalla de <b>inicio de sesión</b>, escribe <b>CENTRAL</b> en Usuario, completa el Código de Cuerpo (<b>${codigoCuerpo || '—'}</b>) y esta contraseña. Guárdala ahora, no se vuelve a mostrar.
       </p>

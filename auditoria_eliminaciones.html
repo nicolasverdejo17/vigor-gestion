@@ -132,7 +132,7 @@ async function cargarDatos(){
   if(!session){ toast('Debes iniciar sesión primero'); return; }
   const { data: perfil } = await sb.from('personal').select('cargo').eq('auth_user_id', session.user.id).maybeSingle();
   if(!perfil || !ROLES_CON_ACCESO.includes(perfil.cargo)){
-    document.getElementById('tablaBody').innerHTML = `<tr><td colspan="4" class="empty-state">🔒 Esta pantalla es exclusiva del Superintendente (Cuerpo General) y el Director de cada Compañía.</td></tr>`;
+    document.getElementById('tablaBody').innerHTML = `<tr><td colspan="4" class="empty-state"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5.5" y="10.5" width="13" height="9.5" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg> Esta pantalla es exclusiva del Superintendente (Cuerpo General) y el Director de cada Compañía.</td></tr>`;
     return;
   }
   document.getElementById('roleTag').textContent = perfil.cargo;

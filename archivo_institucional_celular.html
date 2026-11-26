@@ -193,7 +193,7 @@ function renderLista(){
         ${d.descripcion ? `<div class="doc-desc">${d.descripcion}</div>` : ''}
         <div class="doc-fecha">${d.fecha_documento ? fmtFecha(d.fecha_documento) : ''}</div>
       </div>
-      ${d.archivo_url ? `<a class="doc-descarga" href="${d.archivo_url}" target="_blank" rel="noopener" download title="Descargar">⬇</a>` : ''}
+      ${d.archivo_url ? `<a class="doc-descarga" href="${d.archivo_url}" target="_blank" rel="noopener" download title="Descargar"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg></a>` : ''}
     </div>
   `).join('');
 }

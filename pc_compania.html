@@ -1444,11 +1444,11 @@
     document.getElementById('obsList').innerHTML = (obs && obs.length) ? obs.map(o => `
       <div class="obs-item ${o.es_general ? 'general' : ''}">
         <div class="obs-body">
-          ${o.es_general ? `<span class="obs-tag">📢 Comandancia${o.compania_id ? '' : ' — Todas las Compañías'}</span>` : ''}
+          ${o.es_general ? `<span class="obs-tag"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M4 10v4a1 1 0 0 0 1 1h2.5L17 19V5L7.5 9H5a1 1 0 0 0-1 1z"/><path d="M8 15v4.5h2.5V16M20 9.5v5"/></svg> Comandancia${o.compania_id ? '' : ' — Todas las Compañías'}</span>` : ''}
           <time>${new Date(o.creado_en).toLocaleString('es-CL', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time>
           <p>${o.contenido}</p>
         </div>
-        ${!o.es_general ? `<button class="obs-del" onclick="borrarObservacion('${o.id}')" title="Borrar">🗑</button>` : ''}
+        ${!o.es_general ? `<button class="obs-del" onclick="borrarObservacion('${o.id}')" title="Borrar"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M4.5 7h15M10 7V4.5h4V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg></button>` : ''}
       </div>
     `).join('') : '<div class="obs-item"><p style="color:var(--text-dim); font-style:italic;">Sin observaciones todavía.</p></div>';
 

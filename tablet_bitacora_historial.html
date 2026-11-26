@@ -378,7 +378,7 @@ function resumenLista(){
 }
 function vistaDetalle(r, i){
   const f = new Date(r.fecha_hora), km = recorrido(r);
-  return `<div class="hv-bar"><h3>Bitácora N° ${escH(r.numero_bitacora)} — ${fmtFecha(f)}</h3><button class="btn-exportar-hist" onclick="exportarRevision(${i})">⬇ Exportar PDF</button></div>
+  return `<div class="hv-bar"><h3>Bitácora N° ${escH(r.numero_bitacora)} — ${fmtFecha(f)}</h3><button class="btn-exportar-hist" onclick="exportarRevision(${i})"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button></div>
     <div class="hv-datos">${dato('Conductor', r.conductor)}${dato('Hora de llegada', r.hora_llegada_unidad)}${dato('Kilometraje inicial', r.kilometraje_inicial == null ? '—' : r.kilometraje_inicial + ' km')}${dato('Kilometraje final', r.kilometraje_final == null ? '—' : r.kilometraje_final + ' km')}</div>
     <div class="hv-datos">${dato('Recorrido', km == null ? '—' : km + ' km', 'ok')}</div>
     ${bloque('Motivo de la salida', r.motivo_salida)}${bloque('Novedades', r.novedades)}`;

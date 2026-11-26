@@ -162,7 +162,7 @@
   </div>
 
   <div id="sinPermiso" style="display:none; padding:40px; text-align:center; color:var(--text-dim); font-size:13px;">
-    🔒 Esta pantalla es exclusiva de Superintendente, Vicesuperintendente, Secretario General o Tesorero General.
+    <svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5.5" y="10.5" width="13" height="9.5" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg> Esta pantalla es exclusiva de Superintendente, Vicesuperintendente, Secretario General o Tesorero General.
   </div>
 
   <div class="form-wrap" id="formWrap">
@@ -210,7 +210,7 @@
 
       <div class="section-title">Escudo / Insignia (opcional)</div>
       <div class="foto-upload" onclick="document.getElementById('fotoInput').click()">
-        <div class="circle" id="fotoCircle">🛡️</div>
+        <div class="circle" id="fotoCircle"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 3.500 5 6v5.500c0 4.500 3 7.500 7 9 4-1.500 7-4.500 7-9V6l-7-2.500z"/></svg></div>
         <span id="fotoLabel">Subir escudo de la Compañía</span>
       </div>
       <input type="file" id="fotoInput" accept="image/*" style="display:none;" onchange="previsualizarFoto(this)">
@@ -341,14 +341,14 @@ function mostrarCredencialesNuevaCompania(nombreCompania, numeroCompania, direct
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(5,10,15,.75);z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;';
   modal.innerHTML = `
     <div style="background:var(--panel);border:1.5px solid var(--brass-dim);border-radius:12px;padding:26px 24px;max-width:420px;width:100%;">
-      <h3 style="font-size:16px;margin-bottom:12px;">✅ ${nombreCompania} creada</h3>
+      <h3 style="font-size:16px;margin-bottom:12px;"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.5 2.5 4.9-5"/></svg> ${nombreCompania} creada</h3>
       <p style="font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Guarda estas dos contraseñas ahora — no se vuelven a mostrar.</p>
 
-      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">👤 Director — ${directorNombre} (N° ${directorNumero})</div>
+      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><circle cx="12" cy="8" r="3.600"/><path d="M5 20c0-4 3.100-7 7-7s7 3 7 7"/></svg> Director — ${directorNombre} (N° ${directorNumero})</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:18px;text-align:center;color:var(--cyan);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin-bottom:14px;">${passwordDirector}</div>
       <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Ingresa desde la pantalla de inicio de sesión con Usuario N° ${directorNumero} — no hace falta el Código de Cuerpo. Se la cambia él mismo al entrar.</p>
 
-      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">🖥️ PC del Cuartel — N° de Compañía ${numeroCompania}</div>
+      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M8.5 20h7M12 16.500V20"/></svg> PC del Cuartel — N° de Compañía ${numeroCompania}</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:18px;text-align:center;color:var(--brass-bright);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:8px;padding:10px;margin-bottom:16px;">${passwordPc}</div>
       <p style="font-size:11px;color:var(--text-dim);margin:-8px 0 16px;">Ingresa desde la pantalla de inicio de sesión con Usuario ${numeroCompania} (el N° de Compañía) + el Código de Cuerpo.</p>
 

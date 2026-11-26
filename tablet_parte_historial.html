@@ -378,7 +378,7 @@ function resumenLista(){
 }
 function vistaDetalle(r, i){
   const f = new Date(r.fecha_hora_despacho), af = r.tipo_afectado && r.tipo_afectado !== 'No aplica';
-  return `<div class="hv-bar"><h3>Parte N° ${escH(r.numero_parte)} — ${fmtFecha(f)}</h3><button class="btn-exportar-hist" onclick="exportarRevision(${i})">⬇ Exportar PDF</button></div>
+  return `<div class="hv-bar"><h3>Parte N° ${escH(r.numero_parte)} — ${fmtFecha(f)}</h3><button class="btn-exportar-hist" onclick="exportarRevision(${i})"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button></div>
     <div class="hv-datos">${dato('Tipo de emergencia', tipoTxt(r))}${dato('Hora de llegada', r.hora_llegada)}${dato('Hora de regreso', r.hora_regreso)}${dato('Lesionados', sino(r.hubo_lesionados), r.hubo_lesionados ? 'ko' : 'ok')}</div>
     <div class="hv-datos">${dato('Oficial a cargo', r.oficial)}${dato('Maquinista', r.maquinista)}${dato('Material del carro', sino(r.uso_material_carro))}${dato('Asistentes', (r.asistentes || []).length ? (r.asistentes || []).join(', ') : '—')}</div>
     ${bloque('Dirección / lugar', r.direccion)}${bloque('Descripción de la actuación', r.descripcion_actuacion)}

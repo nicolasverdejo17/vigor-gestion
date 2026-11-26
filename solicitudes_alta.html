@@ -205,13 +205,13 @@
 
       <div class="head-row" style="margin-top:28px;">
         <h2>Historial de resueltas</h2>
-        <button class="btn-exportar-sol" onclick="exportarPDF()">⬇ Exportar PDF</button>
+        <button class="btn-exportar-sol" onclick="exportarPDF()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button>
       </div>
       <div id="historialResueltas"></div>
     </div>
 
     <div id="accesoDenegado" style="display:none;">
-      <div class="locked-note">🔒 Tu sesión actual no tiene acceso a Solicitudes de Alta. Esta pantalla es exclusiva del Director y Secretario/a de la Compañía.</div>
+      <div class="locked-note"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5.5" y="10.5" width="13" height="9.5" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg> Tu sesión actual no tiene acceso a Solicitudes de Alta. Esta pantalla es exclusiva del Director y Secretario/a de la Compañía.</div>
     </div>
   </div>
 
@@ -390,7 +390,7 @@ async function cargarDatos(){
     document.getElementById('roleTag').textContent = 'Sin sesión';
     document.getElementById('accesoOk').style.display = 'none';
     document.getElementById('accesoDenegado').style.display = 'block';
-    document.getElementById('accesoDenegado').querySelector('.locked-note').textContent = '🔒 Debes iniciar sesión primero (login_registro.html).';
+    document.getElementById('accesoDenegado').querySelector('.locked-note').textContent = 'Debes iniciar sesión primero (login_registro.html).';
     return;
   }
 

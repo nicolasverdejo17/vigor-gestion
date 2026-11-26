@@ -280,7 +280,7 @@
 
   <div class="toolbar" id="toolbarLista" style="display:none;">
     <input type="text" class="search-input" id="buscador" placeholder="Buscar por nombre o N° de Registro…" oninput="renderTabla()">
-    <button class="btn-exportar" onclick="exportarPDF()">⬇ Exportar PDF</button>
+    <button class="btn-exportar" onclick="exportarPDF()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button>
   </div>
 
   <div class="content-wrap">
@@ -474,7 +474,7 @@ function renderDetalle(){
         </div>
       </div>
       <div class="detalle-actions">
-        <button class="btn-exportar" onclick="exportarPDF()">⬇ Exportar PDF</button>
+        <button class="btn-exportar" onclick="exportarPDF()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button>
         ${puedoEditar ? `<button class="btn-agregar" onclick="abrirModal()">+ Agregar Curso</button>` : ''}
       </div>
     </div>

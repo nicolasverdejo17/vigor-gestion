@@ -274,7 +274,7 @@
 
   <div class="modal-overlay" id="recoveryModal">
     <div class="modal-box">
-      <div class="modal-icon">🔑</div>
+      <div class="modal-icon"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><circle cx="8" cy="14" r="4"/><path d="M11 11l8-8M16 6l2.5 2.5M13.5 8.5 16 11"/></svg></div>
       <h3>Recuperación manual</h3>
       <p>Vigor no envía correos ni SMS de recuperación. El restablecimiento de contraseñas es exclusivo del <b>soporte técnico de Vigor</b> — contáctalos directamente para que te generen una nueva contraseña temporal.</p>
       <button class="modal-close" onclick="hideRecoveryInfo()">Entendido</button>
@@ -283,7 +283,7 @@
 
   <div class="modal-overlay" id="instalarModal">
     <div class="modal-box">
-      <div class="modal-icon">⬇</div>
+      <div class="modal-icon"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg></div>
       <h3>Descargar app</h3>
       <div id="instalarTexto"></div>
       <button class="modal-close" id="btnAcceso" style="display:none;margin-bottom:10px;background:transparent;border:1.5px solid var(--line-strong);" onclick="descargarAcceso()">Descargar acceso directo</button>
@@ -452,7 +452,7 @@ function screens(){
 
       ${cuerpoActivo ? `
       <div class="photo-upload" onclick="document.getElementById('fotoInput').click()">
-        <div class="circle" id="fotoCircle">📷</div>
+        <div class="circle" id="fotoCircle"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M4 8h3.5L9 5.5h6L16.5 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
         <span id="fotoLabel">Subir foto de perfil</span>
       </div>
       <input type="file" id="fotoInput" accept="image/*" style="display:none;" onchange="previsualizarFoto(this)">

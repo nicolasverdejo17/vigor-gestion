@@ -498,7 +498,7 @@
     <a href="terminal_coordenadas.html" class="central-tab">Terminal de Coordenadas<span class="tab-badge" id="tabBadgeCoords" style="display:none;">0</span></a>
     <a href="puestos_mando_activos.html" class="central-tab">Modo Crisis Compañías</a>
     <a href="historial_despacho.html" class="central-tab">Historial de Despacho</a>
-    <button type="button" class="btn-config-claves btn-sonidos" onclick="abrirSonidos()">⚙ Sonidos</button>
+    <button type="button" class="btn-config-claves btn-sonidos" onclick="abrirSonidos()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.500V21M3 12h2.500M18.500 12H21M5.600 5.600l1.800 1.800M16.600 16.600l1.800 1.800M18.400 5.600l-1.800 1.800M7.400 16.600l-1.800 1.800"/><circle cx="12" cy="12" r="6.500"/></svg> Sonidos</button>
   </div>
 
   <div class="wrap">
@@ -536,7 +536,7 @@
         <div class="field">
           <label style="display:flex; align-items:center; justify-content:space-between;">
             2. Tipo de emergencia
-            <button class="btn-config-claves" onclick="abrirConfigClaves()">⚙ Configurar Claves</button>
+            <button class="btn-config-claves" onclick="abrirConfigClaves()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.500V21M3 12h2.500M18.500 12H21M5.600 5.600l1.800 1.800M16.600 16.600l1.800 1.800M18.400 5.600l-1.800 1.800M7.400 16.600l-1.800 1.800"/><circle cx="12" cy="12" r="6.500"/></svg> Configurar Claves</button>
           </label>
           <div class="emergencia-grid" id="emergenciaGrid"></div>
           <div class="subclave-row" id="subclaveRow" style="display:none;"></div>
@@ -550,7 +550,7 @@
     <div class="frame">
       <div class="frame-head"><h2>Alertas Especiales</h2></div>
       <div class="frame-body">
-        <div class="offline-nota">📡 La Consola funciona sin conexión a internet — lanza los tonos por la base de radio Motorola conectada al PC. Solo se pierden las notificaciones automáticas a Celulares y PC de Compañía mientras no haya conexión.</div>
+        <div class="offline-nota"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><circle cx="12" cy="10" r="1.8"/><path d="M8.5 13.5a5 5 0 0 1 0-7M15.5 6.5a5 5 0 0 1 0 7M5.8 16a8.5 8.5 0 0 1 0-12M18.2 4a8.5 8.5 0 0 1 0 12M12 11.8V21"/></svg> La Consola funciona sin conexión a internet — lanza los tonos por la base de radio Motorola conectada al PC. Solo se pierden las notificaciones automáticas a Celulares y PC de Compañía mientras no haya conexión.</div>
         <div class="alertas-grid" id="alertasGrid"></div>
       </div>
     </div>
@@ -801,7 +801,7 @@ function actualizarIndicadorConexion(){
   const enLinea = navigator.onLine;
   ind.classList.toggle('offline', !enLinea);
   txt.textContent = enLinea ? 'En línea' : 'Sin conexión';
-  if(!enLinea) toast('⚠ Se perdió la conexión a internet — los tonos por radio siguen funcionando, las notificaciones a Celulares y PC de Compañía no');
+  if(!enLinea) toast('Se perdió la conexión a internet — los tonos por radio siguen funcionando, las notificaciones a Celulares y PC de Compañía no');
 }
 window.addEventListener('online', actualizarIndicadorConexion);
 window.addEventListener('offline', actualizarIndicadorConexion);
@@ -1048,7 +1048,7 @@ function filaSonido(evento, titulo, ev, sub){
   const r = VigorSonidos.resolver(ev), propio = r.propio && r.evento === evento;
   const detalle = propio ? 'Tono del Cuerpo: ' + escS(r.nombre) : (evento === 'emergencia' || evento === 'otras' ? escS(r.nombre) : 'Usa el predeterminado (' + (r.evento === 'emergencia' ? 'emergencias' : 'avisos') + (r.propio ? ' del Cuerpo' : ' de Vigor') + ')');
   return `<div class="son-fila${sub ? ' sub' : ''}"><div class="nom"><b>${titulo}</b><span class="${propio ? 'propio' : ''}">${detalle}</span></div>
-    <button type="button" onclick="probarSonido('${evento}')">▶ Probar</button>
+    <button type="button" onclick="probarSonido('${evento}')"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M8 5.500v13l10-6.500-10-6.500z"/></svg> Probar</button>
     <button type="button" onclick="elegirSonido('${evento}')">Subir tono</button>
     ${propio ? `<button type="button" class="del" onclick="quitarSonido('${evento}')">Quitar</button>` : ''}</div>`;
 }

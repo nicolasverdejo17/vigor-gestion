@@ -370,7 +370,8 @@ label {
     </div>
 
     <div class="warn-box">
-      ⚠ Esta acción no se puede deshacer directamente. Para restituir a la persona más adelante, deberá usarse <strong>Reactivar</strong> — pero conservará el mismo N° de Registro y volverá sin Cargo ni Roles Funcionales.
+      <svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4 3 19.5h18L12 4z"/><path d="M12 10v4M12 16.800v.100"/></svg>
+      <span>Esta acción no se puede deshacer directamente. Para restituir a la persona más adelante, deberá usarse <strong>Reactivar</strong> — pero conservará el mismo N° de Registro y volverá sin Cargo ni Roles Funcionales.</span>
     </div>
 
     <div class="resumen-baja" id="resumenBaja">
@@ -381,7 +382,7 @@ label {
       <div class="resumen-baja-row"><span>Fecha de la baja</span><b id="resumenFecha">—</b></div>
       <div class="resumen-baja-row"><span>Motivo</span><b id="resumenMotivo">—</b></div>
       <div class="resumen-baja-row"><span>Autorizado por</span><b id="resumenAutorizado">—</b></div>
-      <button class="btn-exportar-baja" onclick="exportarPDF()">⬇ Exportar PDF</button>
+      <button class="btn-exportar-baja" onclick="exportarPDF()"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button>
     </div>
 
     <div class="actions">
@@ -404,7 +405,8 @@ label {
         <textarea id="motivoSuspension" placeholder="Describe el motivo…"></textarea>
       </div>
       <div class="warn-box" style="background: rgba(255,201,77,0.08); border-color: rgba(255,201,77,0.35); color: var(--alerta);">
-        ⚠ A diferencia de la baja, la suspensión es reversible en cualquier momento desde esta misma pantalla — no hace falta reasignar Compañía ni Cargo al levantarla.
+        <svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4 3 19.5h18L12 4z"/><path d="M12 10v4M12 16.800v.100"/></svg>
+      <span>A diferencia de la baja, la suspensión es reversible en cualquier momento desde esta misma pantalla — no hace falta reasignar Compañía ni Cargo al levantarla.</span>
       </div>
       <div class="actions">
         <button class="btn btn-ghost" id="btnCancelSuspender">Cancelar</button>
@@ -440,7 +442,8 @@ label {
     </div>
 
     <div class="warn-box" style="background: rgba(255,201,77,0.08); border-color: rgba(255,201,77,0.35); color: var(--alerta);">
-      ⚠ La Compañía original de esta persona puede haber sido eliminada. No se asume que sigue existiendo — elige la Compañía activa donde se reincorpora.
+      <svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4 3 19.5h18L12 4z"/><path d="M12 10v4M12 16.800v.100"/></svg>
+      <span>La Compañía original de esta persona puede haber sido eliminada. No se asume que sigue existiendo — elige la Compañía activa donde se reincorpora.</span>
     </div>
 
     <div class="actions">
@@ -505,7 +508,7 @@ async function cargarDatos(){
 
   const puedeOperar = ['Director','Secretario/a'].includes(miCargo);
   if(!puedeOperar){
-    document.querySelector('.wrap').innerHTML = '<div class="panel panel-body" style="text-align:center; color:var(--text-muted);">🔒 Esta pantalla es exclusiva de Director y Secretario/a.</div>';
+    document.querySelector('.wrap').innerHTML = '<div class="panel panel-body" style="text-align:center; color:var(--text-muted);"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5.5" y="10.5" width="13" height="9.5" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg> Esta pantalla es exclusiva de Director y Secretario/a.</div>';
     return;
   }
 

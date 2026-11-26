@@ -169,7 +169,7 @@
       <div class="field">
         <label>Fotos del ítem<span class="req">*</span></label>
         <div class="foto-upload" onclick="document.getElementById('fotoInput').click()">
-          <div class="circle">📷</div>
+          <div class="circle"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M4 8h3.5L9 5.5h6L16.5 8H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
           <div class="txt"><b>Adjuntar fotos — puedes elegir varias a la vez</b><span>Evidencia del estado que justifica la baja</span></div>
         </div>
         <input type="file" id="fotoInput" accept="image/*" multiple style="display:none;" onchange="agregarFotos(this)">
@@ -217,7 +217,7 @@ async function cargarDatos(){
   const rolesFuncionalesActivos = new Set((perfil.personal_roles_funcionales || []).map(r => r.rol_funcional));
   const puedeModificar = MODIFY_CARGOS.includes(perfil.cargo) || MODIFY_ROLES_FUNCIONALES.some(r => rolesFuncionalesActivos.has(r));
   if(!puedeModificar){
-    document.querySelector('.form-body').innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--text-dim); font-size:13px;">🔒 Dar de baja un ítem es exclusivo de Director, Tesorero/a, o del Depto. de Material Menor/Mayor.</div>`;
+    document.querySelector('.form-body').innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--text-dim); font-size:13px;"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><rect x="5.5" y="10.5" width="13" height="9.5" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg> Dar de baja un ítem es exclusivo de Director, Tesorero/a, o del Depto. de Material Menor/Mayor.</div>`;
     return;
   }
 

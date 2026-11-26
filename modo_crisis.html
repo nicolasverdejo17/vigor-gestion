@@ -657,7 +657,7 @@ function renderTarjetas(){
   document.getElementById('resumenCrisis').textContent = batallones.length
     ? `${batallones.length} ${batallones.length === 1 ? 'batallón' : 'batallones'} · ${nC} carro${nC === 1 ? '' : 's'} · ${nB} bombero${nB === 1 ? '' : 's'}` : '';
   if(batallones.length === 0){
-    el.innerHTML = `<div class="vacio-crisis"><div class="vc-ico">⚑</div><b>Todavía no hay batallones</b>Toca «+ Crear Batallón» para empezar a organizar los carros y el personal del evento.</div>`;
+    el.innerHTML = `<div class="vacio-crisis"><div class="vc-ico"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M5 21V4M5 4.500h12l-2.500 4 2.500 4H5"/></svg></div><b>Todavía no hay batallones</b>Toca «+ Crear Batallón» para empezar a organizar los carros y el personal del evento.</div>`;
     return;
   }
   el.innerHTML = batallones.map(b => `

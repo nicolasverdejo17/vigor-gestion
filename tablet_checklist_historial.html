@@ -378,7 +378,7 @@ function renderHistorial(){
 function vistaDetalle(rev, i){
   const n = contarFallas(rev), f = new Date(rev.fecha_hora), items = rev.items || [];
   const chips = items.map(it => `<div class="hv-chip ${it.estado}"><i>${ICONO[it.estado] || '—'}</i><div>${escH(it.nombre)}${it.comentario ? `<span class="cm">${escH(it.comentario)}</span>` : ''}</div></div>`).join('');
-  return `<div class="hv-bar"><h3>Revisión del ${fmtFecha(f)}</h3><button class="btn-exportar-hist" onclick="exportarRevision(${i})">⬇ Exportar PDF</button></div>
+  return `<div class="hv-bar"><h3>Revisión del ${fmtFecha(f)}</h3><button class="btn-exportar-hist" onclick="exportarRevision(${i})"><svg class="vgi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em;height:1.15em;vertical-align:-.22em;display:inline-block;flex-shrink:0"><path d="M12 4v11M7.500 11l4.500 4.500 4.500-4.500M5 20h14"/></svg> Exportar PDF</button></div>
     <div class="hv-datos">
       <div class="hv-dato"><span>Responsable</span><b>${escH(rev.responsable || 'Sin responsable')}</b></div>
       <div class="hv-dato"><span>Kilometraje</span><b class="mono">${escH(rev.kilometraje)} km</b></div>
