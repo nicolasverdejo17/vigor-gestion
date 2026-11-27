@@ -120,10 +120,16 @@
   .ubic-sug button.propio{ border-left:3px solid var(--k, var(--cyan));}
   .ubic-sug button.propio b i{ color:var(--k); margin-right:7px;}
   .ubic-sug button.propio em{ font-style:normal; float:right; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--k);}
-  .ubic-punto{ width:24px; height:24px; border-radius:50% !important; background:#061520; border:2px solid var(--k); color:var(--k); display:grid; place-items:center; font-size:13px; cursor:pointer;}
-  .ubic-punto:hover{ background:var(--k); color:#030B13; z-index:3;}
-  .ubic-punto span{ display:none; position:absolute; left:50%; top:100%; transform:translateX(-50%); margin-top:3px; white-space:nowrap; padding:1px 7px; background:rgba(3,11,19,.92); border:1px solid var(--line-strong); color:#EAF6FB; font-size:11px; pointer-events:none;}
-  .ubic-punto:hover span, .ubic-cerca .ubic-punto span{ display:block;}
+  .ubic-punto{ width:34px; height:34px; pointer-events:none;}
+  .ubic-punto .g{ position:absolute; inset:0; transform:scale(var(--esc, 1)); transform-origin:50% 100%;}
+  .ubic-punto .g b{ position:absolute; left:3px; top:0; width:28px; height:28px; background:var(--k); border-radius:50% 50% 50% 0 !important; transform:rotate(-45deg); border:2px solid #030B13; display:grid; place-items:center; pointer-events:auto; cursor:pointer;}
+  .ubic-punto .g b i{ transform:rotate(45deg); font-size:15px; color:#030B13; line-height:1;}
+  .ubic-punto .ptm{ display:none; position:absolute; left:50%; bottom:-5px; width:10px; height:10px; margin-left:-5px; border-radius:50% !important; background:var(--k); border:1.5px solid #030B13; pointer-events:auto; cursor:pointer;}
+  .ubic-punto .ptm::after{ content:''; position:absolute; inset:-7px;}
+  .ubic-punto .lb{ display:none; position:absolute; left:50%; top:38px; transform:translateX(-50%); font:600 10px 'Montserrat',sans-serif; color:#EAF6FB; background:rgba(3,11,19,.88); border:1px solid var(--line-strong); padding:1px 7px; white-space:nowrap;}
+  .ubic-cerca .ubic-punto .lb{ display:block;}
+  .ubic-lejos .ubic-punto .g, .ubic-lejos .ubic-punto .lb{ display:none;}
+  .ubic-lejos .ubic-punto .ptm{ display:block;}
   .ubic-estado{ display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--text-muted);}
   .ubic-estado.on{ display:flex;}
   .ubic-estado .pin-dot{ width:10px; height:10px; border-radius:50%; background:var(--emergencia, #F13746); flex:none;}
@@ -1299,8 +1305,7 @@ async function ubicInit(){
     }
     ubicDesdeUrl();
     ubicPintarPuntos();
-    const cerca = () => $u('ubicMap').classList.toggle('ubic-cerca', UBIC.mapa.getZoom() >= 13.5);
-    UBIC.mapa.on('zoom', cerca); cerca();
+    UBIC.mapa.on('zoom', ubicEscalaPuntos); ubicEscalaPuntos();
   });
 }
 function ubicDesdeUrl(){
@@ -1328,15 +1333,22 @@ async function ubicCargarPuntos(){
     UBIC.propios = r.data || []; ubicPintarPuntos();
   }catch(e){}
 }
+// Igual que en el Mapa Comunal: de lejos un puntito de color, al acercar la gota con su ícono y muy cerca el nombre
+function ubicEscalaPuntos(){
+  const z = UBIC.mapa.getZoom(), c = $u('ubicMap');
+  c.style.setProperty('--esc', (z >= 15.5 ? 1 : (z <= 12.5 ? .6 : .6 + (z - 12.5) / 3 * .4)).toFixed(3));
+  c.classList.toggle('ubic-lejos', z < 12.5);
+  c.classList.toggle('ubic-cerca', z >= 15);
+}
 function ubicPintarPuntos(){
   UBIC.marcas.forEach(m => m.remove()); UBIC.marcas = [];
   if(!UBIC.mapa || !window.VigorPuntos) return;
   UBIC.propios.forEach(p => {
     const t = VigorPuntos.estilo(p), el = document.createElement('div');
     el.className = 'ubic-punto'; el.style.setProperty('--k', t.color); el.title = p.nombre + (p.nota ? ' — ' + p.nota : '');
-    el.innerHTML = `<i class="ti ti-${ubicEsc(t.icono)}"></i><span>${ubicEsc(p.nombre)}</span>`;
+    el.innerHTML = `<div class="g"><b><i class="ti ti-${ubicEsc(t.icono)}"></i></b></div><div class="ptm"></div><div class="lb">${ubicEsc(p.nombre)}</div>`;
     el.addEventListener('click', ev => { ev.stopPropagation(); ubicCerrarSug(); ubicPoner(p.lat, p.lng, 'mapa', { punto:p }); });
-    UBIC.marcas.push(new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat([p.lng, p.lat]).addTo(UBIC.mapa));
+    UBIC.marcas.push(new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat([p.lng, p.lat]).addTo(UBIC.mapa));
   });
 }
 const ubicLlano = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
