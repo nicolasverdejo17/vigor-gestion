@@ -116,6 +116,14 @@
   .ubic-sug button:last-child{ border-bottom:none;}
   .ubic-sug button:hover, .ubic-sug button.sel{ background:var(--panel-alt);}
   .ubic-sug small{ display:block; color:var(--text-dim); font-size:12px; margin-top:2px;}
+  /* Puntos del Cuerpo: primero en la búsqueda y marcados en el mapa chico */
+  .ubic-sug button.propio{ border-left:3px solid var(--k, var(--cyan));}
+  .ubic-sug button.propio b i{ color:var(--k); margin-right:7px;}
+  .ubic-sug button.propio em{ font-style:normal; float:right; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--k);}
+  .ubic-punto{ width:24px; height:24px; border-radius:50% !important; background:#061520; border:2px solid var(--k); color:var(--k); display:grid; place-items:center; font-size:13px; cursor:pointer;}
+  .ubic-punto:hover{ background:var(--k); color:#030B13; z-index:3;}
+  .ubic-punto span{ display:none; position:absolute; left:50%; top:100%; transform:translateX(-50%); margin-top:3px; white-space:nowrap; padding:1px 7px; background:rgba(3,11,19,.92); border:1px solid var(--line-strong); color:#EAF6FB; font-size:11px; pointer-events:none;}
+  .ubic-punto:hover span, .ubic-cerca .ubic-punto span{ display:block;}
   .ubic-estado{ display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--text-muted);}
   .ubic-estado.on{ display:flex;}
   .ubic-estado .pin-dot{ width:10px; height:10px; border-radius:50%; background:var(--emergencia, #F13746); flex:none;}
@@ -611,6 +619,8 @@
 <script src="vigor-atribucion.js"></script>
 <script src="vigor-config.js"></script>
 <script src="vigor-mapa.js"></script>
+<script src="vigor-puntos.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script>
 const SUPABASE_URL = 'https://mcfcfbtiruewlcejionr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jZmNmYnRpcnVld2xjZWppb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzODExNzgsImV4cCI6MjEwMzk1NzE3OH0.9b_t63ah25RIGNn3pzZU3L553YUrrn7IXWW3MEjXuXU';
@@ -1236,7 +1246,7 @@ async function confirmarAlerta(id){
    Tres formas de ubicar el lugar, todas opcionales (si no hay internet, se despacha escribiendo la dirección como siempre):
    1) tocar el mapa (el pin se puede arrastrar)  2) buscar una calle, referencia o lugar  3) pegar coordenadas.
    Si hay pin, el despacho guarda las coordenadas y las ven las tablets y el Mapa Comunal. */
-const UBIC = { pin:null, origen:null, referencia:'', auto:false, mapa:null, marker:null, centro:null, timer:null, sug:[], seq:0 };
+const UBIC = { pin:null, origen:null, referencia:'', auto:false, mapa:null, marker:null, centro:null, timer:null, sug:[], seq:0, punto:false, propios:[], marcas:[] };
 const ORIGEN_TXT = { mapa:'Mapa', busqueda:'Búsqueda', coordenadas:'Coordenadas', terminal:'Terminal de coordenadas' };
 const $u = id => document.getElementById(id);
 const ubicMapaOk = () => typeof maplibregl !== 'undefined' && typeof vigorEstiloMapa === 'function';
@@ -1258,6 +1268,8 @@ async function ubicInit(){
   });
   document.addEventListener('click', ev => { if(!ev.target.closest('.ubic-pos')) ubicCerrarSug(); });
   $u('ubicBuscar').onclick = () => ubicBuscar();
+  ubicCargarPuntos();
+  try{ let deb = null; sb.channel('consola-puntos').on('postgres_changes', { event:'*', schema:'public', table:'puntos_cuerpo', filter:'cuerpo_id=eq.' + miCuerpoId }, () => { clearTimeout(deb); deb = setTimeout(ubicCargarPuntos, 400); }).subscribe(); }catch(e){}
   $u('ubicMapa').onclick = () => { const w = $u('ubicMapWrap'); w.classList.toggle('off'); $u('ubicMapa').classList.toggle('on', !w.classList.contains('off')); if(UBIC.mapa) setTimeout(() => UBIC.mapa.resize(), 30); };
   if(!ubicMapaOk()){ $u('ubicMapWrap').classList.add('off'); $u('ubicMapa').style.display = 'none'; return; }   // sin internet o sin librería: solo texto
   // centro y contorno de la comuna elegida al crear el Cuerpo
@@ -1286,6 +1298,9 @@ async function ubicInit(){
       UBIC.mapa.addLayer({ id:'lim-linea', type:'line', source:'lim', filter:['==', ['geometry-type'], 'Polygon'], paint:{ 'line-color':'#49E9FF', 'line-width':2, 'line-opacity':.85 } });
     }
     ubicDesdeUrl();
+    ubicPintarPuntos();
+    const cerca = () => $u('ubicMap').classList.toggle('ubic-cerca', UBIC.mapa.getZoom() >= 13.5);
+    UBIC.mapa.on('zoom', cerca); cerca();
   });
 }
 function ubicDesdeUrl(){
@@ -1304,26 +1319,76 @@ function ubicAlEscribir(){
     if(c){ ubicCerrarSug(); ubicPoner(c.lat, c.lng, 'coordenadas'); } else ubicBuscar();
   }, 650);
 }
-async function ubicBuscar(){
-  const t = $u('direccion').value.trim(); if(t.length < 2 || !window.vigorBuscarLugar) return;
-  const n = ++UBIC.seq;
-  const res = await vigorBuscarLugar(t, UBIC.centro);
-  if(n !== UBIC.seq) return;                                              // llegó una búsqueda más nueva
-  UBIC.sug = res.slice(0, 6);
+/* ---- Puntos del Cuerpo (los que marcan la Central y el PC del Cuartel en el Mapa Comunal) ---- */
+async function ubicCargarPuntos(){
+  if(!miCuerpoId) return;
+  try{
+    const r = await sb.from('puntos_cuerpo').select('id,tipo,nombre,nota,lat,lng,icono,color').eq('cuerpo_id', miCuerpoId).order('nombre');
+    if(r.error) return;
+    UBIC.propios = r.data || []; ubicPintarPuntos();
+  }catch(e){}
+}
+function ubicPintarPuntos(){
+  UBIC.marcas.forEach(m => m.remove()); UBIC.marcas = [];
+  if(!UBIC.mapa || !window.VigorPuntos) return;
+  UBIC.propios.forEach(p => {
+    const t = VigorPuntos.estilo(p), el = document.createElement('div');
+    el.className = 'ubic-punto'; el.style.setProperty('--k', t.color); el.title = p.nombre + (p.nota ? ' — ' + p.nota : '');
+    el.innerHTML = `<i class="ti ti-${ubicEsc(t.icono)}"></i><span>${ubicEsc(p.nombre)}</span>`;
+    el.addEventListener('click', ev => { ev.stopPropagation(); ubicCerrarSug(); ubicPoner(p.lat, p.lng, 'mapa', { punto:p }); });
+    UBIC.marcas.push(new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat([p.lng, p.lat]).addTo(UBIC.mapa));
+  });
+}
+const ubicLlano = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function ubicPropios(texto){
+  const palabras = ubicLlano(texto).split(/\s+/).filter(Boolean);
+  if(!palabras.length || !window.VigorPuntos) return [];
+  return UBIC.propios.map(p => {
+    const t = VigorPuntos.estilo(p), nombre = ubicLlano(p.nombre), todo = nombre + ' ' + ubicLlano(t.nombre + ' ' + (p.nota || ''));
+    if(!palabras.every(w => todo.includes(w))) return null;
+    return { propio:p, estilo:t, orden: palabras.every(w => nombre.includes(w)) ? 0 : 1 };
+  }).filter(Boolean).sort((a, b) => a.orden - b.orden).slice(0, 5);
+}
+function ubicPintarSug(){
   const cont = $u('ubicSug');
-  if(!UBIC.sug.length){ cont.classList.remove('on'); return; }
-  cont.innerHTML = UBIC.sug.map((x, i) => `<button type="button" data-i="${i}"><b>${ubicEsc(x.principal)}</b>${x.lugar ? '<small>' + ubicEsc(x.lugar) + '</small>' : ''}</button>`).join('');
+  if(!UBIC.sug.length){ cont.classList.remove('on'); cont.innerHTML = ''; return; }
+  cont.innerHTML = UBIC.sug.map((x, i) => x.propio
+    ? `<button type="button" class="propio" style="--k:${x.estilo.color}" data-i="${i}"><em>Punto del Cuerpo</em><b><i class="ti ti-${ubicEsc(x.estilo.icono)}"></i>${ubicEsc(x.propio.nombre)}</b><small>${ubicEsc(x.estilo.nombre + (x.propio.nota ? ' · ' + x.propio.nota : ''))}</small></button>`
+    : `<button type="button" data-i="${i}"><b>${ubicEsc(x.principal)}</b>${x.lugar ? '<small>' + ubicEsc(x.lugar) + '</small>' : ''}</button>`).join('');
   cont.querySelectorAll('button').forEach(b => b.onclick = () => ubicElegir(+b.dataset.i));
   cont.classList.add('on');
 }
+async function ubicBuscar(){
+  const t = $u('direccion').value.trim(); if(t.length < 2) return;
+  const n = ++UBIC.seq;
+  const propios = ubicPropios(t);
+  UBIC.sug = propios; ubicPintarSug();                                    // los puntos propios salen al tiro, aun sin internet
+  if(!window.vigorBuscarLugar) return;
+  let res = []; try{ res = await vigorBuscarLugar(t, UBIC.centro); }catch(e){}
+  if(n !== UBIC.seq) return;                                              // llegó una búsqueda más nueva
+  UBIC.sug = propios.concat(res.slice(0, 6)); ubicPintarSug();
+}
 function ubicEsc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
-function ubicElegir(i){ const x = UBIC.sug[i]; if(!x) return; ubicCerrarSug(); ubicPoner(x.lat, x.lng, 'busqueda', { texto:x.texto, referencia:x.referencia }); }
+function ubicElegir(i){
+  const x = UBIC.sug[i]; if(!x) return; ubicCerrarSug();
+  if(x.propio) ubicPoner(x.propio.lat, x.propio.lng, 'busqueda', { punto:x.propio, reemplazar:true });
+  else ubicPoner(x.lat, x.lng, 'busqueda', { texto:x.texto, referencia:x.referencia });
+}
 
 /* Coloca (o mueve) el pin. Si el texto está vacío o lo escribió el propio sistema, lo completa con la dirección más cercana. */
 async function ubicPoner(lat, lng, origen, op){
-  op = op || {}; UBIC.pin = { lat, lng }; UBIC.origen = origen; if(op.referencia != null) UBIC.referencia = op.referencia;
-  ubicPintarPin(); ubicPintarEstado();
+  op = op || {}; UBIC.pin = { lat, lng }; UBIC.origen = origen; UBIC.punto = !!op.punto;
+  UBIC.referencia = op.referencia != null ? op.referencia : '';             // la referencia del lugar anterior no se arrastra
   const inp = $u('direccion');
+  if(op.punto){
+    // Punto del Cuerpo: su nombre es la dirección y su nota viaja como referencia. Si la Central ya había escrito algo, se respeta.
+    ++UBIC.seq;
+    const p = op.punto;
+    if(op.reemplazar || !inp.value.trim() || UBIC.auto){ inp.value = p.nombre; UBIC.auto = true; UBIC.referencia = p.nota || ''; }
+    else UBIC.referencia = [p.nombre, p.nota].filter(Boolean).join(' · ');
+    ubicPintarPin(); ubicPintarEstado(); return;
+  }
+  ubicPintarPin(); ubicPintarEstado();
   if(op.texto){ inp.value = op.texto; UBIC.auto = true; }
   else {
     const puedeLlenar = !inp.value.trim() || UBIC.auto || (origen === 'coordenadas' && vigorParseCoord(inp.value));
@@ -1351,11 +1416,11 @@ function ubicPintarEstado(){
   const e = $u('ubicEstado');
   if(!UBIC.pin){ e.classList.remove('on'); e.innerHTML = ''; return; }
   e.classList.add('on');
-  e.innerHTML = `<span class="pin-dot"></span><span class="mono">${fmtC(UBIC.pin.lat, UBIC.pin.lng)}</span><span class="chip">${ORIGEN_TXT[UBIC.origen] || ''}</span>${UBIC.referencia ? '<span>' + ubicEsc(UBIC.referencia) + '</span>' : ''}<button type="button" id="ubicQuitar">Quitar pin</button>`;
+  e.innerHTML = `<span class="pin-dot"></span><span class="mono">${fmtC(UBIC.pin.lat, UBIC.pin.lng)}</span><span class="chip">${UBIC.punto ? 'Punto del Cuerpo' : (ORIGEN_TXT[UBIC.origen] || '')}</span>${UBIC.referencia ? '<span>' + ubicEsc(UBIC.referencia) + '</span>' : ''}<button type="button" id="ubicQuitar">Quitar pin</button>`;
   $u('ubicQuitar').onclick = () => ubicQuitar();
 }
 function ubicQuitar(){
-  UBIC.pin = null; UBIC.origen = null; UBIC.referencia = ''; UBIC.auto = false;
+  UBIC.pin = null; UBIC.origen = null; UBIC.referencia = ''; UBIC.auto = false; UBIC.punto = false;
   if(UBIC.marker){ UBIC.marker.remove(); UBIC.marker = null; }
   ubicPintarEstado();
 }
