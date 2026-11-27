@@ -313,7 +313,7 @@ const TIPOS = {};
  ['escuela','sensible','school','Escuela'],['jardin','sensible','baby-carriage','Jardín infantil'],['universidad','sensible','books','Universidad'],['hogar_ancianos','sensible','wheelchair','Hogar de ancianos'],['iglesia','sensible','building-church','Iglesia'],['estadio','sensible','ball-football','Estadio o gimnasio'],['carcel','sensible','lock','Cárcel'],['hotel','sensible','bed','Hotel o residencial'],
  ['bodega_riesgo','riesgo','building-warehouse','Bodega de riesgo'],['bencinera','riesgo','gas-station','Bencinera'],['gas','riesgo','flame','Gas'],['industria','riesgo','building-factory-2','Industria'],['aserradero','riesgo','trees','Aserradero'],['polvorin','riesgo','bomb','Polvorín'],['alta_tension','riesgo','bolt','Alta tensión'],['agroquimicos','riesgo','flask','Agroquímicos'],
  ['puente','vial','building-bridge-2','Puente con límite de peso'],['tunel','vial','arrows-vertical','Túnel o paso bajo'],['paso_nivel','vial','train','Paso a nivel'],['vado','vial','wave-sine','Vado'],['calle_angosta','vial','arrows-horizontal','Calle angosta'],['cuesta','vial','trending-up','Cuesta fuerte'],['porton','vial','lock-access','Portón o barrera'],
- ['poblado','terr','building-cottage','Poblado'],['fundo','terr','plant-2','Fundo o sector rural'],['condominio','terr','building-skyscraper','Condominio'],['sin_cobertura','terr','antenna-bars-off','Sin cobertura'],['cerro','terr','mountain','Cerro o mirador'],['punto_encuentro','terr','users-group','Punto de encuentro'],
+ ['casa','terr','home','Casa'],['parcela','terr','fence','Parcela'],['poblado','terr','building-cottage','Poblado'],['fundo','terr','plant-2','Fundo o sector rural'],['condominio','terr','building-skyscraper','Condominio'],['sin_cobertura','terr','antenna-bars-off','Sin cobertura'],['cerro','terr','mountain','Cerro o mirador'],['punto_encuentro','terr','users-group','Punto de encuentro'],
  ['negocio','com','building-store','Negocio'],['supermercado','com','shopping-cart','Supermercado'],['ferreteria','com','tool','Ferretería'],['restaurante','com','tools-kitchen-2','Restaurante'],['banco','com','coin','Banco'],['antena','com','antenna','Antena'],
  ['siniestro','desp','flame','Siniestro'],['unidad','desp','truck','Unidad en ruta'],['zona_trabajo','desp','barrier-block','Zona de trabajo'],['personalizado','pers','map-pin-plus','Punto personalizado']
 ].forEach(a=>{ TIPOS[a[0]]={ fam:a[1], icono:a[2], nombre:a[3], color:FAM[a[1]] }; });
@@ -569,10 +569,10 @@ iniciarMapa(); requestAnimationFrame(cuadro);
 document.addEventListener('vigor-mapa-listo', ()=>{ iniciarReal(); });
 
 /* =====================  Puntos del Cuerpo (se marcan en el mapa)  =====================
-   La Central marca puntos propios (grifos, puentes, escuelas, riesgos, personalizados…) con los 56 tipos de Vigor. Se guardan en la
-   tabla puntos_cuerpo; todo el personal del Cuerpo los ve en el Mapa Comunal y se actualizan en vivo. */
+   La Central y el PC del Cuartel marcan puntos propios (grifos, puentes, escuelas, riesgos, personalizados…) con los 56 tipos de Vigor.
+   Se guardan en la tabla puntos_cuerpo; todo el personal del Cuerpo los ve en el Mapa Comunal y se actualizan en vivo. */
 const PT_FAMS = [['agua','Agua'],['salud','Salud'],['auto','Autoridades'],['sensible','Lugares sensibles'],['riesgo','Riesgo'],['vial','Vialidad'],['terr','Territorio'],['com','Comercio y servicios'],['desp','Zona de trabajo'],['pers','Personalizado']];
-const PT_ICONOS = ['map-pin','flag','star','home','building','tent','campfire','trees','car','truck','alert-triangle','first-aid-kit','droplet','bolt','antenna','eye'];
+const PT_ICONOS = ['map-pin','flag','star','home','fence','building','tent','campfire','trees','car','truck','alert-triangle','first-aid-kit','droplet','bolt','antenna','eye'];
 const PT_COLORES = ['#FF6FB5','#34B8FF','#3CF29A','#FFC247','#FF8A3D','#B58CFF','#3DEBC0','#DCE8F5'];
 const PT_OCULTOS = new Set(['siniestro','unidad']);          // los genera el despacho solo
 const Pt = { sb:null, cuerpoId:null, central:false, filas:[], abierto:false, fila:null, fam:'agua', tipo:null, ll:null, mk:null, icono:'map-pin', color:'#FF6FB5', tEl:null };
@@ -686,7 +686,9 @@ async function iniciarReal(){
   if(!cuerpoId){ avisar('Tu cuenta no está asociada a un Cuerpo activo',0); return; }
   let central=false; try{ const r=await sb.rpc('central_obtener_cuerpo'); central=Array.isArray(r.data)?r.data.length>0:!!r.data; }catch(e){}
   armarPestanas(central);
-  iniciarPuntosPropios(sb, cuerpoId, central);
+  // el PC del Cuartel (cuenta de la Compañía) también carga puntos
+  let pcCuartel=false; if(!central){ try{ const r=await sb.from('companias').select('id').eq('auth_user_id', session.user.id).limit(1); pcCuartel=!!(r.data && r.data.length); }catch(e){} }
+  iniciarPuntosPropios(sb, cuerpoId, central || pcCuartel);
   if(central){ try{ const rc2=await sb.from('reportes_coordenadas').select('id',{count:'exact',head:true}).eq('cuerpo_id',cuerpoId).eq('leido',false);
     if(rc2.count>0){ const a=document.querySelector('#ctabs a[href="terminal_coordenadas.html"]'); if(a) a.insertAdjacentHTML('beforeend','<span class="badge">'+rc2.count+'</span>'); } }catch(e){} }
   // límite de la comuna del Cuerpo (archivo limites/<comuna>.geojson, si existe) y centro del mapa
